@@ -27,6 +27,9 @@ Allowed types (pick the best one):
 - ci: CI configuration/scripts
 - chore: maintenance tasks (config, tooling, housekeeping)
 
+Dependency-related commits (add/remove/upgrade/downgrade a package) MUST use `build`,
+never `chore`.
+
 Required gitmojis (pick ONE that best matches the main intent of the change):
 
 - :mute: Remove logs.
