@@ -30,6 +30,10 @@ Allowed types (pick the best one):
 Dependency-related commits (add/remove/upgrade/downgrade a package) MUST use `build`,
 never `chore`.
 
+Documentation commits (adding/updating markdown files, JSDoc, or inline comments) MUST
+use `docs` paired with `:memo:`. This applies regardless of what file the comments live
+in (source code, config, tests, etc.).
+
 Required gitmojis (pick ONE that best matches the main intent of the change):
 
 - :mute: Remove logs.
