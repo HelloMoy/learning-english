@@ -34,6 +34,11 @@ Documentation commits (adding/updating markdown files, JSDoc, or inline comments
 use `docs` paired with `:memo:`. This applies regardless of what file the comments live
 in (source code, config, tests, etc.).
 
+Test commits (adding, updating, or modifying any test file — unit, integration, or
+E2E) MUST use `test` paired with `:white_check_mark:`. Test config files
+(`vitest.config.ts`, `playwright.config.ts`, etc.) are NOT considered test files and
+follow the normal convention (typically `chore` with `:wrench:`).
+
 Required gitmojis (pick ONE that best matches the main intent of the change):
 
 - :mute: Remove logs.
