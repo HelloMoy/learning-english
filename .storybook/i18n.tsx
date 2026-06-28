@@ -2,9 +2,12 @@ import type { Decorator } from "@storybook/nextjs-vite";
 import { NextIntlClientProvider } from "next-intl";
 
 import { routing } from "../src/i18n/routing";
-import en from "./messages/en.json";
-import es from "./messages/es.json";
-import pt from "./messages/pt.json";
+import enApp from "../src/messages/en.json";
+import esApp from "../src/messages/es.json";
+import ptApp from "../src/messages/pt.json";
+import enStory from "./messages/en.json";
+import esStory from "./messages/es.json";
+import ptStory from "./messages/pt.json";
 
 /**
  * All locales the Storybook preview supports.
@@ -16,14 +19,26 @@ import pt from "./messages/pt.json";
 export type SupportedLocale = (typeof routing.locales)[number];
 
 /**
- * Story translations per locale. Stories call `useTranslations` against
- * these — they live in `.storybook/messages/<locale>.json` under the
- * `Stories.*` namespace and never reach the production bundle.
+ * Merged messages per locale, combining:
+ *
+ *   - `src/messages/<locale>.json` — production UI strings that real
+ *     components render (`HomePage.*`, `Components.ThemeToggle.*`, etc.).
+ *     Stories that demonstrate real components need access to these so the
+ *     rendered output matches what end users see.
+ *
+ *   - `.storybook/messages/<locale>.json` — demo copy that lives ONLY in
+ *     stories under the `Stories.*` namespace ("Click me", "Delete", etc.).
+ *     Never reaches the production bundle.
+ *
+ * The merge is safe: namespaces are disjoint (`Stories.*` vs `Components.*`
+ * vs `HomePage.*`), so no key collision is possible. Story messages win
+ * on conflict if a duplicate key ever sneaks in (e.g. accidentally
+ * shadowing a real UI string with demo copy).
  */
-export const STORY_MESSAGES_BY_LOCALE: Record<SupportedLocale, Record<string, unknown>> = {
-  en,
-  es,
-  pt,
+export const MESSAGES_BY_LOCALE: Record<SupportedLocale, Record<string, unknown>> = {
+  en: { ...enApp, ...enStory },
+  es: { ...esApp, ...esStory },
+  pt: { ...ptApp, ...ptStory },
 } as Record<SupportedLocale, Record<string, unknown>>;
 
 /**
@@ -60,8 +75,7 @@ export const withNextIntl: Decorator = (Story, context) => {
     (context.globals.locale as SupportedLocale | undefined) ??
     routing.defaultLocale;
 
-  const messages =
-    STORY_MESSAGES_BY_LOCALE[locale] ?? STORY_MESSAGES_BY_LOCALE[routing.defaultLocale];
+  const messages = MESSAGES_BY_LOCALE[locale] ?? MESSAGES_BY_LOCALE[routing.defaultLocale];
 
   return (
     <NextIntlClientProvider
