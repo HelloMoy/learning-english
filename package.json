@@ -20,7 +20,10 @@
     "test:e2e:codegen": "playwright codegen",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test-storybook": "echo \"Storybook Vitest integration requires vitest project setup\""
+    "test-storybook": "echo \"Storybook Vitest integration requires vitest project setup\"",
+    "docs": "typedoc",
+    "docs:watch": "typedoc --watch",
+    "docs:serve": "npx http-server docs -p 8080"
   },
   "dependencies": {
     "@ebay/nice-modal-react": "^1.2.13",
@@ -73,6 +76,7 @@
     "prettier-plugin-tailwindcss": "^0.8.0",
     "storybook": "^10.4.6",
     "tailwindcss": "^4",
+    "typedoc": "^0.28.19",
     "typescript": "^5",
     "vitest": "^4.1.9"
   }
