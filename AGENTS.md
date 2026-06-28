@@ -109,7 +109,7 @@ import { useQueryState, parseAsString } from "nuqs";
 const [search, setSearch] = useQueryState("q", parseAsString.withDefault(""));
 ```
 
-The `<NuqsAdapter>` is already mounted in `src/components/providers.tsx`. Declare parsers
+The `<NuqsAdapter>` is already mounted in `src/components/global-providers.tsx`. Declare parsers
 once at module scope (e.g. `parseAsInteger`, `parseAsStringEnum`) — never inline in
 components.
 
@@ -233,7 +233,7 @@ import NiceModal from "@ebay/nice-modal-react";
 const confirmed = await NiceModal.show(ConfirmModal);
 ```
 
-The `<NiceModal.Provider>` is already mounted in `src/components/providers.tsx`. One
+The `<NiceModal.Provider>` is already mounted in `src/components/global-providers.tsx`. One
 modal component per file under `src/components/modals/`, named `<Something>Modal`.
 
 ## Commit conventions
@@ -248,10 +248,34 @@ See [`COMMIT_CONVENTIONS.md`](./COMMIT_CONVENTIONS.md) for the commit format
 
 ## Before finishing
 
-Run before considering a task done:
+A task is **not done** until all checks pass. Run them and fix any failures before
+declaring the task complete.
 
 ```bash
-pnpm format:check
-pnpm lint
-pnpm test:run
+pnpm typecheck      # TypeScript types
+pnpm format:check   # Prettier formatting
+pnpm lint           # ESLint rules
+pnpm test:run       # Vitest unit + component
 ```
+
+**Shortcut**: `pnpm verify` runs all four in sequence and stops on the first failure.
+
+### If a check fails
+
+1. **Read the error message** — never ignore or dismiss a check failure.
+2. **Identify the root cause** — don't paper over with `@ts-ignore`, `eslint-disable`, or
+   `prettier --write` without understanding why.
+3. **Fix the underlying issue** — change the code, the config, or the data; never the
+   check itself unless the check is genuinely wrong.
+4. **Re-run all checks** — a fix in one area can surface issues in another.
+5. **Only then declare the task done**.
+
+### What "failing" looks like
+
+- `typecheck` → TypeScript reports an error → fix the type or the code, not the tsconfig
+- `format:check` → Prettier says which files differ → run `pnpm format` to apply, then
+  re-verify (do NOT commit `.prettierrc` changes that loosen the rules just to pass)
+- `lint` → ESLint reports a rule violation → fix the code; if a rule is genuinely wrong,
+  discuss before disabling it project-wide
+- `test:run` → a test fails → either fix the code (if the test caught a real bug) or
+  fix the test (if the test was wrong); never delete a failing test to make it pass
