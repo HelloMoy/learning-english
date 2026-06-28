@@ -113,9 +113,9 @@ import { useRouter } from "next/navigation";
 **Server Components** use `useTranslations` after calling `setRequestLocale(locale)` from `next-intl/server`. Use `React.use(params)` to unwrap the locale — never `await params` inside the component body, otherwise the `react-hooks/rules-of-hooks` ESLint rule fires when calling `useTranslations`:
 
 ```tsx
-import { use } from "react";
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
+import { use } from "react";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -147,8 +147,9 @@ The client gets typed input, typed validation errors, and typed return values.
 // src/lib/actions/users.ts
 "use server";
 
-import { z } from "zod";
 import { actionClient } from "@/lib/safe-action";
+
+import { z } from "zod";
 
 const schema = z.object({
   name: z.string().min(1),
@@ -171,7 +172,8 @@ shareable, back-button-friendly, and survives reloads.
 
 ```tsx
 "use client";
-import { useQueryState, parseAsString } from "nuqs";
+
+import { parseAsString, useQueryState } from "nuqs";
 
 const [search, setSearch] = useQueryState("q", parseAsString.withDefault(""));
 ```
@@ -198,6 +200,7 @@ Use `use-debounce` for **delaying a value or callback** (search inputs, autosave
 
 ```tsx
 "use client";
+
 import { useDebouncedValue } from "use-debounce";
 
 const [query, setQuery] = useState("");
@@ -234,6 +237,7 @@ or a data fetcher for that.
 ```ts
 // src/stores/use-ui-store.ts
 "use client";
+
 import { create } from "zustand";
 
 type UIState = {
@@ -256,7 +260,8 @@ Use `@tanstack/react-table` for **any tabular data**. It's headless — you brin
 
 ```tsx
 "use client";
-import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table";
+
+import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 
 const table = useReactTable({
   data,
@@ -276,8 +281,12 @@ Use `@ebay/nice-modal-react` for **imperative modal triggers** from anywhere in 
 ```tsx
 // src/components/modals/confirm-modal.tsx
 "use client";
-import NiceModal, { useModal } from "@ebay/nice-modal-react";
+
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+// Trigger from anywhere:
+import NiceModal from "@ebay/nice-modal-react";
 
 export const ConfirmModal = NiceModal.create(() => {
   const modal = useModal();
@@ -295,8 +304,6 @@ export const ConfirmModal = NiceModal.create(() => {
   );
 });
 
-// Trigger from anywhere:
-import NiceModal from "@ebay/nice-modal-react";
 const confirmed = await NiceModal.show(ConfirmModal);
 ```
 
