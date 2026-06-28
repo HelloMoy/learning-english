@@ -1,4 +1,4 @@
-import { LocaleSwitcher } from "@/components/locale-switcher";
+import { LocaleSwitcher } from "@/components/locale-switcher/locale-switcher";
 
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
