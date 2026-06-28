@@ -1,20 +1,23 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+# Full project conventions (stack, i18n, testing, workflow, commits, a11y, style)
+# live in AGENTS.md and COMMIT_CONVENTIONS.md — both are auto-loaded. This file
+# only adds what OpenSpec needs to know about HOW to write artifacts for this
+# project; anything duplicated here would just drift.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - Always include a `## Non-goals` section listing what is OUT of scope.
+
+  design:
+    - A "Testing strategy" section is REQUIRED. State which layer (Vitest
+      unit, Vitest component + RTL, Playwright e2e) covers which behavior,
+      and which existing test files / patterns will be mirrored.
+
+  tasks:
+    - Each task MUST mark its TDD ordering explicitly, e.g.
+      `(TDD: test → impl)` — failing test first, then minimal impl.
+    - Order tasks so dependencies come first: schema/types → pure logic
+      (unit) → component (RTL) → e2e (last).
+    - End the task list with a verification task: run `pnpm test:run` and
+      (if applicable) `pnpm test:e2e` for the touched area.
