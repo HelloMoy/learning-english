@@ -3,6 +3,36 @@
 Instructions for AI coding assistants (Claude Code, Codex CLI, OpenCode, etc.) working
 on this project.
 
+## Feature Workflow — OpenSpec + TDD (non-negotiable)
+
+Every **new feature** or **behavior change** MUST follow this sequence. Do not skip steps
+or reorder them.
+
+1. **Spec first.** Before any production code, create a change proposal in
+   `openspec/changes/<name>/` with the artifacts OpenSpec requires (`proposal.md`,
+   `tasks.md`, `design.md`, delta specs — whatever applies). Use the OpenSpec skills:
+   `openspec-propose` (full proposal), `openspec-new-change` (step-by-step), or the
+   slash form `/opsx:propose "<idea>"`. The proposal says **what** changes and **why**,
+   not the how. **Explore first** with `openspec-explore` if the problem is fuzzy.
+2. **Apply.** Once the user approves the proposal, run `openspec-apply-change` (or
+   `/opsx:apply`) to work through the tasks one by one.
+3. **TDD on every task.** Before writing any production code, invoke the
+   `test-driven-development` skill (at `.agents/skills/test-driven-development/`).
+   Iron law: **NO production code without a failing test first.** If you wrote code
+   first, delete it and start over — no "adapting", no "reference". Red → Green →
+   Refactor. Use the project's testing stack table below.
+4. **Verify and archive.** When tasks are done, run `openspec-verify-change`
+   (`/opsx:verify`) to confirm implementation matches the change, then
+   `openspec-archive-change` (`/opsx:archive`) to fold deltas into `openspec/specs/`
+   and clean up `openspec/changes/`.
+
+**Exceptions** (ask the human partner before skipping the flow): throwaway prototypes,
+generated code, pure config files, and cosmetic-only fixes (typos, formatting).
+
+When the user asks for a "feature", "new thing", or behavior change, default to this
+flow even if they don't mention OpenSpec explicitly. Suggest `/opsx:propose` as the
+first response.
+
 ## Project
 
 - **Stack**: Next.js 16 (App Router) · React 19 · TypeScript · Tailwind 4 · shadcn/ui
