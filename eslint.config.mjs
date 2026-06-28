@@ -25,6 +25,11 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // skills.sh — installed skills are managed by the CLI, not the repo
     ".agents/skills/**",
+    // agent/tooling config dirs — not part of the app source
+    ".claude/**",
+    ".opencode/**",
+    ".codex/**",
+    "openspec/**",
     // typedoc — generated static site, never linted
     "docs/**",
   ]),

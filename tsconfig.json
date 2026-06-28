@@ -30,5 +30,12 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", ".agents/skills/**"]
+  "exclude": [
+    "node_modules",
+    ".agents/skills/**",
+    ".claude/**",
+    ".opencode/**",
+    ".codex/**",
+    "openspec/**"
+  ]
 }
