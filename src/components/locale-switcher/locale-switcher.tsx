@@ -6,12 +6,33 @@ import { routing } from "@/i18n/routing";
 import { useLocale, useTranslations } from "next-intl";
 import { useTransition } from "react";
 
+/**
+ * Map from each supported locale to the translation key used in the
+ * `<option>` label. Driven by `routing.locales` so adding a new locale
+ * forces a TypeScript error here until the corresponding label key is added
+ * to every locale's message file under `LocaleSwitcher.<key>`.
+ */
 const LOCALE_LABEL_KEY = {
   en: "english",
   es: "spanish",
   pt: "portuguese",
-} as const;
+} as const satisfies Record<(typeof routing.locales)[number], string>;
 
+/**
+ * Language selector that updates the active locale via `next-intl`'s
+ * locale-aware navigation.
+ *
+ * Renders a native `<select>` populated with every locale defined in
+ * `routing.locales`. When the user picks a different option, the router
+ * navigates to the same path under the new locale (`/en/about` → `/es/about`)
+ * using `router.replace` so the back button still works. The transition is
+ * wrapped in `useTransition` so React can keep the previous UI responsive
+ * while the navigation is in flight.
+ *
+ * Uses `@/i18n/navigation` (not `next/navigation`) so the locale prefix
+ * is preserved automatically. The active locale comes from
+ * `useLocale()` — never read it from the URL directly.
+ */
 export function LocaleSwitcher() {
   const t = useTranslations("LocaleSwitcher");
   const currentLocale = useLocale();
