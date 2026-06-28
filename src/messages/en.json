@@ -9,5 +9,11 @@
     "english": "English",
     "spanish": "Spanish",
     "portuguese": "Portuguese"
+  },
+  "ThemeToggle": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   }
 }
