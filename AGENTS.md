@@ -362,9 +362,9 @@ export const InSpanish: Story = {
 - Don't mock next/link or next/navigation — the `nextjs-vite` framework provides working mocks automatically.
 - Accessibility violations appear in the addon panel — switch the `a11y.test` parameter from `"todo"` to `"error"` in CI if you want hard enforcement.
 
-### Adding shadcn/ui components
+### Adding reusable components
 
-When adding a new shadcn/ui component (via `pnpm dlx shadcn@latest add <name>` or manually), the work is **not done** until all four of these are true:
+When adding **any reusable component** — shadcn/ui primitives (via `pnpm dlx shadcn@latest add <name>`), project-specific components (`<ThemeToggle>`, `<LocaleSwitcher>`), or feature widgets — the work is **not done** until all four of these are true:
 
 1. **Storybook stories colocated** — create `<Component>.stories.tsx` next to the file. Follow the `storybook-story-writing` skill.
 
@@ -376,16 +376,80 @@ When adding a new shadcn/ui component (via `pnpm dlx shadcn@latest add <name>` o
 
 If the component is purely presentational and stateless (icons, dividers, skeleton loaders with no text and no interaction), rules 2 and 3 may collapse to "skip" — but rules 1 (stories) and 4 (JSDoc) still apply.
 
-**Example** — adding `shadcn add calendar`:
+#### Folder structure — file name matches folder name
+
+Every reusable component lives in its own folder, and the file is named after that folder:
+
+```
+src/components/ui/<component>/<component>.tsx        # shadcn components
+src/components/<component>/<component>.tsx          # project-specific components
+src/components/<component>/<component>.stories.tsx
+src/components/<component>/<component>.test.tsx
+```
+
+The folder name matches the component name in PascalCase (e.g. `Button` → `button`). This keeps `src/components/ui/` clean (one folder per component, no scattered loose files) and makes the relationship between component file, stories, and tests obvious in any IDE tree view.
+
+#### For shadcn/ui components specifically
+
+- **The folder-per-component rule applies to every shadcn component** — whether it lands via `pnpm dlx shadcn@latest add <name>`, gets copied from another project, or is written by hand. End state is always `src/components/ui/<component>/<component>.tsx` (+ `.stories.tsx` + `.test.tsx`).
+- The shadcn CLI is the canonical source, but it writes flat (`<aliases.ui>/<component>.tsx`). The `mv` post-add is the workaround until/unless shadcn adds folder-per-component support natively.
+- The translation namespace is always `Components.<ComponentName>` (e.g. `Components.Button`, `Components.Calendar`)
+- shadcn components often render aria-labels, tooltips, or copy that needs translation — audit carefully
+
+**Example A** — adding via the shadcn CLI:
 
 ```bash
-pnpm dlx shadcn@latest add calendar
-# → src/components/ui/calendar.tsx created
+pnpm dlx shadcn@latest add button
+# → src/components/ui/button.tsx created (flat, by default)
 
-# 1. Stories → src/components/ui/calendar.stories.tsx (per storybook-story-writing)
-# 2. i18n audit → src/messages/{en,es,pt}.json under Components.Calendar.*
-# 3. Tests → src/components/ui/calendar.test.tsx (per testing-conventions)
-# 4. JSDoc → JSDoc blocks on Calendar, its props, and exported variants
+# Move into the folder-per-component layout
+mkdir -p src/components/ui/button
+mv src/components/ui/button.tsx src/components/ui/button/button.tsx
+
+# 1. Stories → src/components/ui/button/button.stories.tsx (per storybook-story-writing)
+# 2. i18n audit → src/messages/{en,es,pt}.json under Components.Button.*
+# 3. Tests → src/components/ui/button/button.test.tsx (per testing-conventions)
+# 4. JSDoc → JSDoc blocks on Button, its props, and exported variants
+```
+
+**Example B** — adding by hand (no CLI):
+
+```bash
+mkdir -p src/components/ui/calendar
+
+# Create the three files directly inside the folder:
+#   src/components/ui/calendar/calendar.tsx           # the component
+#   src/components/ui/calendar/calendar.stories.tsx   # per storybook-story-writing
+#   src/components/ui/calendar/calendar.test.tsx      # per testing-conventions
+# + JSDoc on Calendar, its props, and exported variants
+
+# i18n audit → src/messages/{en,es,pt}.json under Components.Calendar.*
+```
+
+The final structure for `Button`:
+
+```
+src/components/ui/button/
+├── button.tsx
+├── button.stories.tsx
+└── button.test.tsx
+```
+
+#### For project-specific reusable components (e.g. `<ThemeToggle>`, `<LocaleSwitcher>`)
+
+- Place under `src/components/<component-name>/<component-name>.tsx` — same folder convention as shadcn components, file name matches the folder.
+- The same four rules apply — colocated stories, i18n, tests, JSDoc
+- Translation namespace follows the same `Components.<ComponentName>` convention
+
+**Example** — adding a new project-specific component:
+
+```bash
+# → src/components/my-widget/my-widget.tsx
+
+# 1. Stories → src/components/my-widget/my-widget.stories.tsx
+# 2. i18n     → add namespace to src/messages/{en,es,pt}.json under Components.MyWidget.*
+# 3. Tests    → src/components/my-widget/my-widget.test.tsx
+# 4. JSDoc    → JSDoc blocks on MyWidget, its props, and exported helpers
 ```
 
 A component merge without its stories is incomplete. A component with hardcoded strings is a regression. A component without tests is unverified. A component without JSDoc is undocumented.
