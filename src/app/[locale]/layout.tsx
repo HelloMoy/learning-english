@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
+import { Geist, Geist_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
+
 import "../globals.css";
+
 import { GlobalProviders } from "@/components/global-providers";
 import { routing } from "@/i18n/routing";
 
@@ -44,7 +46,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col">
         <NextIntlClientProvider>
           <GlobalProviders>{children}</GlobalProviders>
         </NextIntlClientProvider>

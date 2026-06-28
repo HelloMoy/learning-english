@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, test } from "vitest";
+
 import { cn } from "./utils";
 
 describe("cn", () => {

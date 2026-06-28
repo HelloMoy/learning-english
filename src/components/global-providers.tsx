@@ -1,7 +1,7 @@
 "use client";
 
-import { NuqsAdapter } from "nuqs/adapters/next/app";
 import NiceModal from "@ebay/nice-modal-react";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 /**
  * Client-side providers that wrap the entire app.

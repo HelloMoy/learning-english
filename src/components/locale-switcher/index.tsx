@@ -1,9 +1,10 @@
 "use client";
 
+import { usePathname, useRouter } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
+
 import { useLocale, useTranslations } from "next-intl";
 import { useTransition } from "react";
-import { useRouter, usePathname } from "@/i18n/navigation";
-import { routing } from "@/i18n/routing";
 
 const LOCALE_LABEL_KEY = {
   en: "english",
