@@ -1,0 +1,13 @@
+{
+  "HomePage": {
+    "title": "Learn English",
+    "subtitle": "A simple, focused space to build vocabulary and practice every day.",
+    "cta": "Get started"
+  },
+  "LocaleSwitcher": {
+    "label": "Language",
+    "english": "English",
+    "spanish": "Spanish",
+    "portuguese": "Portuguese"
+  }
+}

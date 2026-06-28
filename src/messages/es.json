@@ -1,0 +1,13 @@
+{
+  "HomePage": {
+    "title": "Aprende inglés",
+    "subtitle": "Un espacio simple y enfocado para construir vocabulario y practicar cada día.",
+    "cta": "Empezar"
+  },
+  "LocaleSwitcher": {
+    "label": "Idioma",
+    "english": "Inglés",
+    "spanish": "Español",
+    "portuguese": "Portugués"
+  }
+}
