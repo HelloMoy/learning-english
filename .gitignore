@@ -43,3 +43,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# skills.sh — installed skills are managed by `npx skills install`, not git
+# Local skills live in `.agents/local-skills/` and ARE tracked.
+.agents/skills/
