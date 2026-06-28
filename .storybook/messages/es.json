@@ -1,0 +1,13 @@
+{
+  "Stories": {
+    "Button": {
+      "clickMe": "Haz clic",
+      "delete": "Eliminar",
+      "learnMore": "Más información",
+      "sizeExtraSmall": "Muy pequeño",
+      "sizeSmall": "Pequeño",
+      "sizeDefault": "Predeterminado",
+      "sizeLarge": "Grande"
+    }
+  }
+}
