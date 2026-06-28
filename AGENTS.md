@@ -310,6 +310,124 @@ const confirmed = await NiceModal.show(ConfirmModal);
 The `<NiceModal.Provider>` is already mounted in `src/components/global-providers.tsx`. One
 modal component per file under `src/components/modals/`, named `<Something>Modal`.
 
+### Component development — Storybook
+
+Use **Storybook** for isolated component development, visual review, and accessibility checks. The dev server runs at `http://localhost:6006`.
+
+**Story files live next to their component**, named `<Component>.stories.tsx` (e.g. `Button.tsx` → `Button.stories.tsx`). Never put stories in a separate `stories/` folder.
+
+**Framework:** `@storybook/nextjs-vite` — Vite-based, recommended over the webpack-based `@storybook/nextjs` for all Next.js projects (faster, better testing integration). The `addons` enabled are `@storybook/addon-docs`, `@storybook/addon-a11y`, `@storybook/addon-themes`, and `@storybook/addon-vitest`.
+
+**CSF3 format with `Meta` + `StoryObj`**, types imported from `@storybook/nextjs-vite` (NOT `@storybook/react` — that's not installed):
+
+```tsx
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+
+import { Button } from "./button";
+
+const meta = {
+  title: "UI/Button",
+  component: Button,
+  argTypes: {
+    variant: { control: { type: "select" }, options: ["default", "outline", "destructive"] },
+  },
+  args: { children: "Click me" },
+} satisfies Meta<typeof Button>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {};
+export const Destructive: Story = { args: { variant: "destructive" } };
+```
+
+**Translations in stories:** the preview wraps every story with `NextIntlClientProvider` (see `.storybook/preview.tsx`). To render a story in a specific locale, set `parameters.locale`:
+
+```tsx
+export const InSpanish: Story = {
+  parameters: { locale: "es" },
+  args: { children: "Haz clic" },
+};
+```
+
+**Scripts:**
+
+- `pnpm storybook` — dev server on port 6006
+- `pnpm build-storybook` — produce a static build (for Chromatic / docs hosting)
+
+**Rules:**
+
+- One `*.stories.tsx` per component, colocated.
+- Every story must have a `title` so it shows up in the sidebar (use the `UI/<Component>` convention).
+- Don't mock next/link or next/navigation — the `nextjs-vite` framework provides working mocks automatically.
+- Accessibility violations appear in the addon panel — switch the `a11y.test` parameter from `"todo"` to `"error"` in CI if you want hard enforcement.
+
+### Adding shadcn/ui components
+
+When adding a new shadcn/ui component (via `pnpm dlx shadcn@latest add <name>` or manually), the work is **not done** until all four of these are true:
+
+1. **Storybook stories colocated** — create `<Component>.stories.tsx` next to the file. Follow the `storybook-story-writing` skill.
+
+2. **i18n-compatible** — if the component renders any user-facing string, follow the conventions in the `Internationalization — next-intl` section above. Add the new keys to **every** locale's message file under a `Components.<ComponentName>` namespace. Verify the story renders correctly in `en`, `es`, and `pt` using the toolbar locale switcher.
+
+3. **Tests colocados** — create `<Component>.test.tsx` next to the file. Follow the `testing-conventions` skill.
+
+4. **JSDoc documentation** — document the component, its props, and any exported variants/types using the `jsdoc-typescript-docs` skill.
+
+If the component is purely presentational and stateless (icons, dividers, skeleton loaders with no text and no interaction), rules 2 and 3 may collapse to "skip" — but rules 1 (stories) and 4 (JSDoc) still apply.
+
+**Example** — adding `shadcn add calendar`:
+
+```bash
+pnpm dlx shadcn@latest add calendar
+# → src/components/ui/calendar.tsx created
+
+# 1. Stories → src/components/ui/calendar.stories.tsx (per storybook-story-writing)
+# 2. i18n audit → src/messages/{en,es,pt}.json under Components.Calendar.*
+# 3. Tests → src/components/ui/calendar.test.tsx (per testing-conventions)
+# 4. JSDoc → JSDoc blocks on Calendar, its props, and exported variants
+```
+
+A component merge without its stories is incomplete. A component with hardcoded strings is a regression. A component without tests is unverified. A component without JSDoc is undocumented.
+
+#### Translations vs Faker in stories
+
+Story copy has **two distinct categories** with different sources. Conflating them bloats production bundles, breaks determinism, or defeats i18n — pick the right source for each case.
+
+**Translations** (DEFAULT for any string the reviewer reads):
+
+- Lives in `.storybook/messages/<locale>.json` under the `Stories.*` namespace
+- NEVER in `src/messages/<locale>.json` — that namespace is for production strings only
+- Translators can ignore the entire `Stories.*` namespace; it never reaches end users
+- Always translated for every locale
+- Always deterministic — the reviewer must know exactly what to expect when reading a story
+
+**Faker** (EXCEPTION for generated sample data, only when determinism doesn't matter):
+
+- Use when a story needs a long list of fake users, mock transactions, generated dates, etc. — and the exact values don't matter
+- MUST be internationalized — import the helper from `.storybook/utils/getFakerIntl.ts` and pass it the locale from the Storybook toolbar (`context.globals.locale`). **Never** default to the English `faker` instance when the toolbar shows `es` or `pt`; that produces Spanish UI labels with English fake names, which defeats the i18n switcher
+
+```ts
+import { getFakerIntl } from "../../../.storybook/utils/getFakerIntl";
+
+function UserProfileStory(
+  _: unknown,
+  context: { globals: { locale: "en" | "es" | "pt" } },
+) {
+  const fakerIntl = getFakerIntl(context.globals.locale);
+  return (
+    <UserProfile
+      name={fakerIntl.person.fullName()}
+      email={fakerIntl.internet.email()}
+    />
+  );
+}
+```
+
+The import path has three levels (`../../../`) because stories live at `src/**/*.stories.tsx` and `.storybook/` sits outside `src/` — the project's `@/` alias doesn't cover it.
+
+**Decision rule**: if removing determinism would make the story confusing or unreviewable (e.g. "I told the reviewer to click 'Delete' but the button shows 'Excluir'"), use **translations**. If the exact value is incidental (e.g. "this table has 50 rows of fake users"), use **faker**.
+
 ## Commit conventions
 
 See [`COMMIT_CONVENTIONS.md`](./COMMIT_CONVENTIONS.md) for the commit format
