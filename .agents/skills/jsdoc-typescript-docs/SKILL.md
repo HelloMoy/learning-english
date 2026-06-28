@@ -20,7 +20,7 @@ Create comprehensive inline documentation for TypeScript codebases.
 
 ### Basic Function
 
-```typescript
+````typescript
 /**
  * Calculates the total price including tax.
  *
@@ -37,11 +37,11 @@ Create comprehensive inline documentation for TypeScript codebases.
 export function calculateTotal(price: number, taxRate: number): number {
   return price * (1 + taxRate);
 }
-```
+````
 
 ### Async Function
 
-```typescript
+````typescript
 /**
  * Fetches user data from the API.
  *
@@ -64,10 +64,7 @@ export function calculateTotal(price: number, taxRate: number): number {
  * }
  * ```
  */
-export async function fetchUser(
-  userId: string,
-  options?: FetchOptions
-): Promise<User> {
+export async function fetchUser(userId: string, options?: FetchOptions): Promise<User> {
   const response = await fetch(`/api/users/${userId}`, options);
 
   if (response.status === 404) {
@@ -75,16 +72,16 @@ export async function fetchUser(
   }
 
   if (!response.ok) {
-    throw new NetworkError('Failed to fetch user');
+    throw new NetworkError("Failed to fetch user");
   }
 
   return response.json();
 }
-```
+````
 
 ### Generic Function
 
-```typescript
+````typescript
 /**
  * Filters an array based on a predicate function.
  *
@@ -100,13 +97,10 @@ export async function fetchUser(
  * // evens: [2, 4]
  * ```
  */
-export function filterArray<T>(
-  array: T[],
-  predicate: (item: T, index: number) => boolean
-): T[] {
+export function filterArray<T>(array: T[], predicate: (item: T, index: number) => boolean): T[] {
   return array.filter(predicate);
 }
-```
+````
 
 ### Overloaded Function
 
@@ -130,10 +124,10 @@ export function format(value: number, formatStr: string): string;
  * @internal
  */
 export function format(value: number, formatStr?: string): string {
-  if (formatStr === 'currency') {
+  if (formatStr === "currency") {
     return `$${value.toFixed(2)}`;
   }
-  if (formatStr === 'percent') {
+  if (formatStr === "percent") {
     return `${(value * 100).toFixed(1)}%`;
   }
   return value.toString();
@@ -142,7 +136,7 @@ export function format(value: number, formatStr?: string): string {
 
 ## Interface Documentation
 
-```typescript
+````typescript
 /**
  * Represents a user in the system.
  *
@@ -180,7 +174,7 @@ export interface User {
    * The user's role in the system.
    * @default 'user'
    */
-  role: 'admin' | 'user' | 'guest';
+  role: "admin" | "user" | "guest";
 
   /**
    * When the user account was created.
@@ -216,15 +210,15 @@ export interface UserProfile {
   /** User notification preferences */
   notifications: NotificationSettings;
 }
-```
+````
 
 ## Type Documentation
 
-```typescript
+````typescript
 /**
  * HTTP methods supported by the API.
  */
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 /**
  * Configuration options for API requests.
@@ -264,14 +258,12 @@ export type RequestConfig<TBody = unknown> = {
  * }
  * ```
  */
-export type Result<T, E = Error> =
-  | { success: true; data: T }
-  | { success: false; error: E };
-```
+export type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E };
+````
 
 ## Class Documentation
 
-```typescript
+````typescript
 /**
  * A client for interacting with the API.
  *
@@ -336,7 +328,7 @@ export class ApiClient {
    * ```
    */
   async get<T>(endpoint: string, options?: RequestOptions): Promise<T> {
-    return this.request<T>('GET', endpoint, options);
+    return this.request<T>("GET", endpoint, options);
   }
 
   /**
@@ -352,9 +344,9 @@ export class ApiClient {
   async post<T, TBody = unknown>(
     endpoint: string,
     body: TBody,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<T> {
-    return this.request<T>('POST', endpoint, { ...options, body });
+    return this.request<T>("POST", endpoint, { ...options, body });
   }
 
   /**
@@ -363,12 +355,12 @@ export class ApiClient {
   private async request<T>(
     method: HttpMethod,
     endpoint: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<T> {
     // Implementation
   }
 }
-```
+````
 
 ## Enum Documentation
 
@@ -382,28 +374,28 @@ export class ApiClient {
  */
 export enum OrderStatus {
   /** Order has been created but not yet processed */
-  Pending = 'pending',
+  Pending = "pending",
 
   /** Payment has been received and order is being prepared */
-  Processing = 'processing',
+  Processing = "processing",
 
   /** Order has been shipped to the customer */
-  Shipped = 'shipped',
+  Shipped = "shipped",
 
   /** Order has been delivered to the customer */
-  Delivered = 'delivered',
+  Delivered = "delivered",
 
   /** Order has been cancelled */
-  Cancelled = 'cancelled',
+  Cancelled = "cancelled",
 
   /** Order has been returned by the customer */
-  Returned = 'returned',
+  Returned = "returned",
 }
 ```
 
 ## React Component Documentation
 
-```typescript
+````typescript
 /**
  * A customizable button component.
  *
@@ -425,19 +417,18 @@ export enum OrderStatus {
  * <Button loading>Submitting...</Button>
  * ```
  */
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /**
    * The visual style variant.
    * @default 'primary'
    */
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: "primary" | "secondary" | "outline" | "ghost";
 
   /**
    * The size of the button.
    * @default 'md'
    */
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
 
   /**
    * Whether the button is in a loading state.
@@ -466,13 +457,13 @@ export interface ButtonProps
  * @see {@link ButtonProps} for available props
  */
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = 'primary', size = 'md', loading, children, ...props }, ref) => {
+  ({ variant = "primary", size = "md", loading, children, ...props }, ref) => {
     // Implementation
-  }
+  },
 );
 
-Button.displayName = 'Button';
-```
+Button.displayName = "Button";
+````
 
 ## TypeDoc Configuration
 
@@ -483,10 +474,7 @@ Button.displayName = 'Button';
   "out": "./docs",
   "name": "My Library",
   "readme": "./README.md",
-  "plugin": [
-    "typedoc-plugin-markdown",
-    "typedoc-plugin-mdn-links"
-  ],
+  "plugin": ["typedoc-plugin-markdown", "typedoc-plugin-mdn-links"],
   "excludePrivate": true,
   "excludeProtected": true,
   "excludeInternal": true,
@@ -522,7 +510,7 @@ Button.displayName = 'Button';
 
 ## JSDoc Tags Reference
 
-```typescript
+````typescript
 /**
  * Summary description.
  *
@@ -559,7 +547,7 @@ Button.displayName = 'Button';
  * @defaultValue default value
  * @eventProperty - For event properties
  */
-```
+````
 
 ## Best Practices
 
