@@ -115,6 +115,10 @@ Use **gitmoji codes only** (`:sparkles:`), never emoji characters (`✨`).
 - **Test commits** MUST pair `test` with `:white_check_mark:`.
 - **Dependency commits** MUST pair `build` with `:heavy_plus_sign:` (add),
   `:heavy_minus_sign:` (remove), `:arrow_up:` (upgrade), or `:arrow_down:` (downgrade).
+- **Renames and moves** (a file is renamed or relocated without other changes) MUST use
+  `refactor(<scope>): :truck: <short summary>` where the summary explicitly states the
+  change, e.g. `rename foo.ts to bar.ts` or `move utils.ts to lib/helpers/`. Use
+  `<scope>` to indicate the area (e.g. `utils`, `components`).
 
 ### Summary
 
@@ -184,6 +188,8 @@ feat(user-profile): :sparkles: add avatar upload
 fix(auth-token): :bug: handle expired refresh tokens
 docs(readme): :memo: document local setup
 refactor(parser): :recycle: simplify tokenization
+refactor(utils): :truck: rename cn.ts to classnames.ts
+refactor(components): :truck: move counter.tsx to src/components/ui/
 test(utils): :white_check_mark: add cn coverage
 build(deps): :arrow_up: bump axios to 1.7.x
 chore(vscode-settings): :wrench: align workspace config
