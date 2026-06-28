@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
+import { ThemeProvider } from "next-themes";
 import { Geist, Geist_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 
@@ -42,13 +43,24 @@ export default async function LocaleLayout({ children, params }: Props) {
   setRequestLocale(locale);
 
   return (
+    // `suppressHydrationWarning` is required on <html> when using next-themes:
+    // the provider injects a script that sets `class="dark"` on <html> before
+    // React hydrates, which would otherwise trigger a hydration mismatch warning.
     <html
       lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col">
         <NextIntlClientProvider>
-          <GlobalProviders>{children}</GlobalProviders>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <GlobalProviders>{children}</GlobalProviders>
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>
