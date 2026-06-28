@@ -4,7 +4,27 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
 import * as React from "react";
 
-const buttonVariants = cva(
+/**
+ * Class-name generator for the `Button` primitive.
+ *
+ * Built with `class-variance-authority` so each combination of `variant`
+ * and `size` produces a fully-typed Tailwind class string. Exported so
+ * callers (e.g. `<Link asChild>` wrappers, custom triggers) can reuse the
+ * exact same styling without re-declaring it.
+ *
+ * Variants:
+ *   - `default`     — solid filled button, primary brand color
+ *   - `outline`     — bordered, transparent background
+ *   - `secondary`   — softer secondary background
+ *   - `ghost`      — no background until hover/focus
+ *   - `destructive` — red-tinted, reserved for irreversible actions
+ *   - `link`        — renders as a plain text link
+ *
+ * Sizes:
+ *   - `xs` / `sm` / `default` / `lg` — content-bearing sizes (icon or label)
+ *   - `icon` / `icon-xs` / `icon-sm` / `icon-lg` — square icon-only buttons
+ */
+export const buttonVariants = cva(
   "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
@@ -41,16 +61,64 @@ const buttonVariants = cva(
   },
 );
 
-function Button({
+/**
+ * Props accepted by the {@link Button} component.
+ *
+ * Extends the native `<button>` props with two additions:
+ *   - `variant`  — see {@link buttonVariants} for the full list
+ *   - `size`     — see {@link buttonVariants} for the full list
+ *   - `asChild`  — when `true`, renders a Radix `Slot` so the button's
+ *                  styles are forwarded to the single child element
+ *                  (e.g. wrapping `<Link>` so an anchor looks like a button).
+ */
+export type ButtonProps = React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    /**
+     * Render as a Radix `Slot`, merging the button's className/attributes
+     * into the immediate child. Useful when the child must be a different
+     * element (e.g. `<Link>` for client-side navigation, `<a>` for external).
+     * @default false
+     */
+    asChild?: boolean;
+  };
+
+/**
+ * shadcn/ui `Button` primitive.
+ *
+ * Renders an accessible `<button>` by default, or a Radix `Slot` when
+ * `asChild` is `true` (to compose with other clickable elements like
+ * `<Link>` from `next/link` or `@/i18n/navigation`).
+ *
+ * The element exposes `data-slot`, `data-variant`, and `data-size`
+ * attributes so parent components can style descendants (e.g. a
+ * `<ButtonGroup>` adjusting the radius of its children).
+ *
+ * @example Default usage
+ * ```tsx
+ * <Button>Save</Button>
+ * ```
+ *
+ * @example Destructive action
+ * ```tsx
+ * <Button variant="destructive" onClick={onDelete}>Delete</Button>
+ * ```
+ *
+ * @example Composing with Link (client-side navigation)
+ * ```tsx
+ * import { Link } from "@/i18n/navigation";
+ *
+ * <Button asChild>
+ *   <Link href="/dashboard">Go to dashboard</Link>
+ * </Button>
+ * ```
+ */
+export function Button({
   className,
   variant = "default",
   size = "default",
   asChild = false,
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
+}: ButtonProps) {
   const Comp = asChild ? Slot.Root : "button";
 
   return (
@@ -63,5 +131,3 @@ function Button({
     />
   );
 }
-
-export { Button, buttonVariants };
