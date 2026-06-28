@@ -71,6 +71,73 @@ import { Check, ChevronRight } from "lucide-react";
 </Button>;
 ```
 
+### Internationalization — `next-intl`
+
+**This is non-negotiable: every locale-sensitive value must go through `next-intl`.** Never hardcode UI text, dates, times, numbers, currencies, relative times, lists, plurals, ordinals, or navigation calls. Never call `next/link` or `next/navigation` directly. Never render English-only text assuming it will be translated later.
+
+If a string appears in the UI, it belongs in `src/messages/<locale>.json` and is fetched via `useTranslations` / `getTranslations`. If you need a new translation key, add it to **every** locale's message file — never leave a key untranslated for a locale.
+
+**The complete surface that must go through `next-intl`:**
+
+| What you need            | Use this from `next-intl`                                                                                  |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| UI string / label        | `useTranslations("Namespace").("key")` (or `t.rich` / `t.markup` for embedded React elements / HTML)       |
+| Plural-aware copy        | `t.plural(count, { one: "...", other: "# ..." })` — ICU plural rules, never hand-roll `"count + ' items'"` |
+| Enum-based copy          | `t.select(value, { male: "...", female: "...", other: "..." })` — ICU select                               |
+| Ordinal copy (1st, 2nd)  | `t.ordinal(n)`                                                                                             |
+| Date / time              | `format.dateTime(date, { year, month, day, hour, minute, ... })` — locale-correct order and separators     |
+| Relative time ("2h ago") | `format.relativeTime(date, { style: "long" })` — not `moment`, not `date-fns`, not hand-rolled math        |
+| Number                   | `format.number(1234.5, { style: "decimal" })` — locale-correct grouping/decimal separators                 |
+| Currency                 | `format.number(amount, { style: "currency", currency: "USD" })` — symbol, position, separators per locale  |
+| Unit (km, °C, kg, …)     | `format.number(value, { style: "unit", unit: "kilometer" })`                                               |
+| List / "A, B, and C"     | `format.list(items, { type: "conjunction" \| "disjunction" })` — no manual `.join(", ")`                   |
+| `Link` / `useRouter`     | Import from `@/i18n/navigation`, never `next/link` / `next/navigation`                                     |
+| Current time (server)    | `getNow()` from `next-intl/server` — never `new Date()` in Server Components (breaks static rendering)     |
+| Time zone (server)       | `getTimeZone()` from `next-intl/server` — never `Intl.DateTimeFormat().resolvedOptions().timeZone`         |
+
+Use `next-intl` for all UI strings, dates, numbers, currencies, and locale-aware navigation. Locales live in `src/i18n/routing.ts` (currently `en`, `es`, `pt` with `en` as default and `localePrefix: 'always'` — so URLs always include the locale, e.g. `/en/about`).
+
+**Always import navigation APIs from `@/i18n/navigation`, never from `next/link` or `next/navigation`.** The wrappers there (`Link`, `redirect`, `usePathname`, `useRouter`) preserve the active locale automatically.
+
+**This is non-negotiable.** Importing `Link` from `next/link` or `useRouter` / `redirect` from `next/navigation` bypasses the locale prefix: the user ends up on `/about` instead of `/en/about`, the middleware redirects them, and the locale context is lost. Always use the wrappers from `@/i18n/navigation`. ESLint will not catch this — it's a runtime bug.
+
+```tsx
+// ✅ Locale-aware — preserves `/en` in the URL
+import { Link, useRouter } from "@/i18n/navigation";
+
+// ❌ NEVER do this — bypasses the locale prefix and drops the locale context
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+```
+
+**Server Components** use `useTranslations` after calling `setRequestLocale(locale)` from `next-intl/server`. Use `React.use(params)` to unwrap the locale — never `await params` inside the component body, otherwise the `react-hooks/rules-of-hooks` ESLint rule fires when calling `useTranslations`:
+
+```tsx
+import { use } from "react";
+import { useTranslations } from "next-intl";
+import { setRequestLocale } from "next-intl/server";
+
+type Props = { params: Promise<{ locale: string }> };
+
+export default function Home({ params }: Props) {
+  const { locale } = use(params);
+  setRequestLocale(locale);
+
+  const t = useTranslations("HomePage");
+  return <h1>{t("title")}</h1>;
+}
+```
+
+Layouts and pages that don't call hooks (e.g. `setRequestLocale` only) can stay `async` and use `await params`.
+
+**Adding a new locale:**
+
+1. Add the code to `locales` in `src/i18n/routing.ts`.
+2. Create `src/messages/<locale>.json` with the same keys as the others (use `en.json` as the source of truth).
+3. Add a label entry in every locale's `LocaleSwitcher` block.
+
+**Message files** live in `src/messages/<locale>.json` and use nested namespaces (e.g. `HomePage.title`, `LocaleSwitcher.label`). Group related strings under a namespace; never flatten everything to the top level.
+
 ### Server Actions — `next-safe-action`
 
 Use `next-safe-action` for **any Server Action that takes input from the client**.
