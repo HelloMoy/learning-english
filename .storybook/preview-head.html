@@ -1,0 +1,27 @@
+<!--
+  Loaded into <head> of the Storybook preview iframe.
+
+  `next/font/google` (used in the app's layout) injects fonts via the Next.js
+  build pipeline, which Storybook doesn't run. We load Geist + Geist Mono
+  from Google Fonts CDN directly and define the CSS variables that the app's
+  `globals.css` references via `--font-sans: var(--font-geist-sans)`.
+-->
+<link
+  rel="preconnect"
+  href="https://fonts.googleapis.com"
+/>
+<link
+  rel="preconnect"
+  href="https://fonts.gstatic.com"
+  crossorigin
+/>
+<link
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --font-geist-sans: "Geist", system-ui, sans-serif;
+    --font-geist-mono: "Geist Mono", ui-monospace, monospace;
+  }
+</style>
