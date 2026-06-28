@@ -1,0 +1,48 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["./src"],
+  "entryPointStrategy": "expand",
+
+  "tsconfig": "./tsconfig.json",
+
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.stories.tsx",
+    "**/*.spec.ts",
+    "**/test-setup/**",
+    "**/.next/**",
+    "**/app/**/favicon.ico"
+  ],
+
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "excludeExternals": true,
+  "excludeNotDocumented": true,
+
+  "out": "docs",
+
+  "readme": "none",
+
+  "navigation": {
+    "includeCategories": true,
+    "includeGroups": false,
+    "includeFolders": true,
+    "compactFolders": false
+  },
+  "categorizeByGroup": false,
+  "sort": ["source-order"],
+
+  "validation": {
+    "notExported": false,
+    "invalidLink": true,
+    "notDocumented": false
+  },
+
+  "treatWarningsAsErrors": false,
+  "skipErrorChecking": true,
+
+  "excludeTags": ["@internal"],
+
+  "useTsLinkResolution": true
+}
