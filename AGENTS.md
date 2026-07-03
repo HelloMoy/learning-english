@@ -684,3 +684,5 @@ This codebase uses Alistair Cockburn's hexagonal architecture (Ports & Adapters)
 **Authoritative spec:** `openspec/specs/architecture-boundaries/spec.md` (boundary rules) and `openspec/specs/course-platform-domain/spec.md` (domain rules). Updates to the allowlist or forbidden-syntax list go through an OpenSpec change.
 
 **i18n for components in the hexágono** — every component lives under `Components.<ComponentName>` in `src/messages/<locale>.json` (see § Internationalization above). The component's `useTranslations("Components.<ComponentName>")` resolves the namespace. Outside the hexágono, pages use namespaces like `HomePage.*` for their own copy.
+
+**Commit message format is enforced mechanically** — `commitlint` runs via `.husky/commit-msg` and validates every commit against the rules in `commitlint.config.cjs` (which mirror `COMMIT_CONVENTIONS.md`). Bad messages are blocked; do not bypass with `--no-verify` for normal commits.
