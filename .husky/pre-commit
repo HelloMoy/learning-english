@@ -1,0 +1,39 @@
+#!/usr/bin/env sh
+# Pre-commit hook: runs `prettier --check` on staged files only.
+#
+# Why staged-only: avoids touching the entire repo on every commit (fast feedback)
+# and respects the local working copy (no auto-fix). Husky's git context gives us
+# the staged list via `git diff --cached`.
+
+set -e
+
+# Files staged for commit. --diff-filter=ACMR keeps Added/Copied/Modified/Renamed
+# and drops Deleted (prettier cannot read them).
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
+
+# Filter to extensions prettier handles in this project. Anything not matched
+# (e.g. binaries, scripts, .gitignore-like files) is skipped without error.
+FORMATABLE=$(printf "%s\n" "$STAGED" | grep -E '\.(ts|tsx|js|jsx|mjs|cjs|json|md|mdx|css|yml|yaml)$' || true)
+
+if [ -z "$FORMATABLE" ]; then
+  exit 0
+fi
+
+# Defensive: drop files that no longer exist on disk; word-split so each
+# filename becomes a separate arg to prettier below.
+EXISTING=""
+for f in $FORMATABLE; do
+  if [ -f "$f" ]; then
+    EXISTING="$EXISTING $f"
+  fi
+done
+
+if [ -z "$EXISTING" ]; then
+  exit 0
+fi
+
+echo "prettier --check (staged only):"
+for f in $EXISTING; do echo "  $f"; done
+
+# shellcheck disable=SC2086
+pnpm exec prettier --check $EXISTING
