@@ -4,7 +4,7 @@ import { createSafeActionClient } from "next-safe-action";
  * Base safe-action client. Use this for any Server Action that needs validation.
  *
  * Example:
- *   import { actionClient } from "@/lib/safe-action";
+ *   import { actionClient } from "@/lib/safe-action/safe-action";
  *   import { z } from "zod";
  *
  *   export const createUserAction = actionClient
