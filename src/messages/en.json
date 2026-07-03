@@ -15,5 +15,14 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+  "Components": {
+    "CourseNavigator": {
+      "loading": "Loading next lesson…",
+      "nextLabel": "Next lesson",
+      "nextLesson": "Next: {title}",
+      "courseCompleted": "You've reached the end of the course.",
+      "error": "We couldn't load the next lesson right now."
+    }
   }
 }
