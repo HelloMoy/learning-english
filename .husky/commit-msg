@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+# commit-msg hook: validate the staged commit message against
+# commitlint.config.cjs (which mechanically enforces COMMIT_CONVENTIONS.md).
+#
+# Runs `commitlint --edit` on the path of the message file passed by git.
+
+pnpm exec commitlint --edit "$1"
