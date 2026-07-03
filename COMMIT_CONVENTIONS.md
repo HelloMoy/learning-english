@@ -37,7 +37,7 @@ footer is used for and the structure it must have.
 ```
 
 The `<type>`, `<scope>`, `<gitmoji>`, and `<summary>` fields are mandatory. Keep the
-entire header ≤ 72 chars.
+entire header ≤ 90 chars.
 
 ### Type
 
