@@ -73,6 +73,41 @@ pnpm test:e2e:codegen  # Playwright record-and-generate
   hardcode values when the test verifies behavior tied to the exact form of the input
   (e.g. Tailwind class prefixes, specific falsy values).
 
+### Folder structure — file name matches folder name (across hexagonal layers)
+
+Every module that owns a named, reusable concept lives in its own folder, and the entry
+file carries that folder's name. This keeps each directory self-contained and the
+relationship between file, tests, and (where applicable) stories obvious in any IDE tree
+view.
+
+The rule applies across all layers of the hexagon:
+
+| Layer                        | Path                                      |
+| ---------------------------- | ----------------------------------------- |
+| Reusable component (shadcn)  | `src/components/ui/<name>/<name>.tsx`     |
+| Reusable component (project) | `src/components/<name>/<name>.tsx`        |
+| Domain port                  | `src/domain/ports/<name>/<name>.ts`       |
+| Domain entity                | `src/domain/entities/<name>/<name>.ts`    |
+| Domain use case              | `src/domain/use-cases/<name>/<name>.ts`   |
+| Driven adapter               | `src/adapters/<storage>/<name>/<name>.ts` |
+| Custom hook                  | `src/hooks/<name>/<name>.ts`              |
+| Lib utility                  | `src/lib/<name>/<name>.ts`                |
+
+Folder and file names use kebab-case (`course-repository`, not `CourseRepository` or
+`courseRepository`). The only exception is the `components/` layer: components stay in
+PascalCase (`Button` → `button/button.tsx`) so the import name matches the folder. Tests
+(`<name>.test.ts[x]`) and stories (`<name>.stories.tsx`) sit next to the entry file.
+
+Plain helpers used in exactly one place do not need a folder — keep them in their
+caller's file. The rule kicks in the moment something is exported and meaningful on its
+own.
+
+**Enforcement:** the custom ESLint rule
+`local-structure/folder-per-entity` (in `eslint.config.mjs`) flags any `.ts`/`.tsx` file
+that lives directly under a watched hexagonal root (`src/domain/**`, `src/lib/**`,
+`src/hooks/**`, `src/adapters/persistence/in-memory/**`). It runs as part of `pnpm lint`,
+which `pnpm verify` already invokes — new violations fail CI without manual review.
+
 ## Existing mocks (vitest.setup.ts)
 
 Already configured globally — do not re-mock in individual tests:
@@ -388,7 +423,7 @@ export const InSpanish: Story = {
 **Rules:**
 
 - One `*.stories.tsx` per component, colocated.
-- Every story must have a `title` so it shows up in the sidebar (use the `UI/<Component>` convention).
+- Every story must have a `title` so it shows up in the sidebar (use the `Components/<ComponentName>` convention — e.g. `Components/ThemeToggle`).
 - Don't mock next/link or next/navigation — the `nextjs-vite` framework provides working mocks automatically.
 - Accessibility violations appear in the addon panel — switch the `a11y.test` parameter from `"todo"` to `"error"` in CI if you want hard enforcement.
 
@@ -406,18 +441,9 @@ When adding **any reusable component** — shadcn/ui primitives (via `pnpm dlx s
 
 If the component is purely presentational and stateless (icons, dividers, skeleton loaders with no text and no interaction), rules 2 and 3 may collapse to "skip" — but rules 1 (stories) and 4 (JSDoc) still apply.
 
-#### Folder structure — file name matches folder name
-
-Every reusable component lives in its own folder, and the file is named after that folder:
-
-```
-src/components/ui/<component>/<component>.tsx        # shadcn components
-src/components/<component>/<component>.tsx          # project-specific components
-src/components/<component>/<component>.stories.tsx
-src/components/<component>/<component>.test.tsx
-```
-
-The folder name matches the component name in PascalCase (e.g. `Button` → `button`). This keeps `src/components/ui/` clean (one folder per component, no scattered loose files) and makes the relationship between component file, stories, and tests obvious in any IDE tree view.
+> The folder-per-component layout below follows the general **Folder structure** rule
+> in the [Conventions](#conventions) section — see that section for the full table of
+> layer paths.
 
 #### For shadcn/ui components specifically
 
@@ -640,3 +666,21 @@ pnpm test:run       # Vitest unit + component
   discuss before disabling it project-wide
 - `test:run` → a test fails → either fix the code (if the test caught a real bug) or
   fix the test (if the test was wrong); never delete a failing test to make it pass
+
+## Architecture — Hexagonal (Cockburn)
+
+This codebase uses Alistair Cockburn's hexagonal architecture (Ports & Adapters). The application intent ("deliver courses to a student") lives in `src/domain/**` and is unconcerned with how it is invoked. Boundary rules are enforced by ESLint — `pnpm lint:domain` shows them.
+
+**One-line rule:** `src/domain/**` may import only `zod`, `neverthrow`, and `ts-pattern`. Anything else goes through a port.
+
+**Ports** are interfaces in `src/domain/ports/**` (`CourseRepository`, `LessonRepository`, `Clock`, `IdGenerator`). **Use cases** in `src/domain/use-cases/**` are factories that take ports and return `ResultAsync<T, DomainError>` via `neverthrow`. **Driven adapters** live under `src/adapters/**`. **Driving adapters** (UI, tests) live wherever they belong outside the domain.
+
+**Quick checks before touching domain code:**
+
+- Domain code does not import `next`, `next-intl`, `next-safe-action`, `next-themes`, `zustand`, `nuqs`, `server-only`, `@/i18n`, `@/adapters`, `@/components`, or `@/app`. ESLint enforces this — add exceptions to the rule before using a new package here.
+- Domain code does not call `new Date()`, `Date.now()`, `Date.UTC()`, `Math.random()`, or `crypto.*`. Use ports (`Clock`, `IdGenerator`) instead. ESLint enforces this.
+- Use cases do not throw. They return `Result<T, DomainError>`. Adapters translate `Err` to delivery-specific shapes.
+
+**Authoritative spec:** `openspec/specs/architecture-boundaries/spec.md` (boundary rules) and `openspec/specs/course-platform-domain/spec.md` (domain rules). Updates to the allowlist or forbidden-syntax list go through an OpenSpec change.
+
+**i18n for components in the hexágono** — every component lives under `Components.<ComponentName>` in `src/messages/<locale>.json` (see § Internationalization above). The component's `useTranslations("Components.<ComponentName>")` resolves the namespace. Outside the hexágono, pages use namespaces like `HomePage.*` for their own copy.
