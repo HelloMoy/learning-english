@@ -15,5 +15,14 @@
     "light": "Claro",
     "dark": "Escuro",
     "system": "Sistema"
+  },
+  "Components": {
+    "CourseNavigator": {
+      "loading": "Carregando a próxima lição…",
+      "nextLabel": "Próxima lição",
+      "nextLesson": "Próxima: {title}",
+      "courseCompleted": "Você chegou ao final do curso.",
+      "error": "Não conseguimos carregar a próxima lição agora."
+    }
   }
 }
