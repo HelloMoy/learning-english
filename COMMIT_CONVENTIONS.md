@@ -116,6 +116,34 @@ Use **gitmoji codes only** (`:sparkles:`), never emoji characters (`✨`).
 - **Dependency commits** MUST pair `build` with `:heavy_plus_sign:` (add),
   `:heavy_minus_sign:` (remove), `:arrow_up:` (upgrade), or `:arrow_down:` (downgrade).
 
+#### Test commit discipline
+
+**Any commit that touches a test file MUST be a `test` commit.** No matter what the
+commit also does — even if it implements a feature, fixes a bug, or refactors — if
+the diff includes `*.test.ts`, `*.test.tsx`, `*.spec.ts`, or `*.spec.tsx`, the
+header is:
+
+```
+test(<scope>): :white_check_mark: <short summary>
+```
+
+This applies to every commit in a TDD sequence: the red commit that adds the failing
+test, the green commit that adds the implementation that passes it, and the refactor
+commit that cleans up both. Each is a `test` commit because each diff includes a test
+file.
+
+The intuition is the inverse of the impl commit: an impl-only commit (`feat`, `fix`,
+`refactor`, ...) is `feat`/`fix`/`refactor` even if the work was driven by a test
+already on disk. A test-touching commit is `test` even if the commit also ships the
+code under test.
+
+Examples that follow this rule:
+
+- `test(slug): :white_check_mark: cover slug parsing` — test file added in isolation.
+- `test(slug): :white_check_mark: cover slug parsing and add Zod schema` — red+green in
+  one commit, both files touched, still `test` because the test file is in the diff.
+- `test(utils): :white_check_mark: add cn coverage` — covering an existing impl.
+
 ### Summary
 
 Use the summary field to provide a succinct description of the change:
