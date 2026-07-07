@@ -33,6 +33,71 @@ When the user asks for a "feature", "new thing", or behavior change, default to 
 flow even if they don't mention OpenSpec explicitly. Suggest `/opsx:propose` as the
 first response.
 
+## Code Quality — Clean Code (non-negotiable)
+
+Every new code that is written MUST follow the `clean-code` skill (at
+`.agents/skills/clean-code/SKILL.md` and `.claude/skills/clean-code/`). The skill
+distills the principles from "Clean Code" by Robert C. Martin (Uncle Bob): "code that
+works" → "code that is clean." Read the skill once and apply it on every change —
+features, fixes, refactors, tests, stories, scripts.
+
+**Apply it before, during, and after writing code:**
+
+- **Before** — let the rules shape the design: meaningful names, single-responsibility
+  functions, one level of abstraction per function, no hidden side effects.
+- **During** — keep functions short (≪ 20 lines), prefer 0–2 arguments, express
+  yourself in code rather than comments, surface errors as typed values (the skill's
+  "don't return null" lines up with the codebase's `Result<T, DomainError>` use-case
+  pattern).
+- **After** — walk the implementation checklist (function size, single thing,
+  intention-revealing names, comments replaced by clearer code, argument count,
+  failing test for the change) before declaring the task done.
+
+**Non-negotiables**, lifted straight from the skill in priority order:
+
+1. **Meaningful names** — `elapsedTimeInDays`, not `d`; nouns for classes, verbs for
+   methods; avoid `Manager`/`Data` weasel words.
+2. **Functions do one thing** — small, single level of abstraction, no side effects.
+3. **Comments explain why, not what** — if the code needs a comment, rewrite the code.
+4. **Argument count** — 0 ideal, 1–2 fine, 3+ demands a strong justification.
+5. **Error handling** — never silent returns, never pass or return `null`; surface
+   errors as typed values (the codebase uses `ResultAsync` from `neverthrow` in the
+   domain and `error boundaries` in React).
+6. **The Three Laws of TDD** — section 7 of the skill; production code appears only
+   after a failing test (see [Feature Workflow](#feature-workflow--openspec--tdd-non-negotiable)
+   above) and the tests follow F.I.R.S.T. (Fast, Independent, Repeatable,
+   Self-Validating, Timely).
+
+**Scope:** every change under `src/` and `e2e/` falls under this rule. Pure config
+edits, throwaway scripts, and unmodified output from tooling like `pnpm dlx shadcn@latest
+add` are exempt — reformat by feel, do not fight the skill while scaffolding. Any
+hand-edit to generated code is **not** exempt; the next line you write must obey the
+principles.
+
+**Where the skill defers to the project — read these before refactoring existing code:**
+
+- **JSDoc vs "don't comment."** The skill says most comments are bad. The project still
+  requires JSDoc on exported contracts (see [API documentation — TypeDoc](#api-documentation--typedoc)).
+  The principle holds: **inline** comments explain the _why_ (regex intent, a non-obvious
+  business rule, a workaround), never the _what_. JSDoc is a different layer — it
+  documents an exported contract for external callers. Do not delete JSDoc to satisfy the
+  skill.
+- **Exceptions vs `Result<T, DomainError>`.** The skill's "Use Exceptions instead of
+  Return Codes" is from a 2008 era and gets superseded by modern typed error returns.
+  This project uses `ResultAsync` from `neverthrow` in the domain and `next-safe-action`
+  at delivery boundaries — that _is_ the project's "surface errors as typed values"
+  rule, just expressed idiomatically. Do not refactor use cases to throw.
+- **JSX verbosity vs "functions under 20 lines."** A component whose JSX legitimately
+  grows past the limit (form, table row, layout block) is fine _if_ it has a single
+  responsibility. If the JSX mixes concerns (header + body + sidebar logic in one body),
+  split via compound components. Resist the urge to extract purely structural sub-components
+  that exist only to satisfy the line count — that fragments the tree without adding
+  clarity.
+- **Hexagonal jargon (`Repository`, `UseCase`, `DrivenAdapter`, `CourseRepository`).**
+  These are domain terms the team shares, not the "Manager" / "Data" weasel words the
+  skill warns against. Keep them — they map to specific architectural roles enforced by
+  ESLint. Same for shadcn/ui primitives.
+
 ## Project
 
 - **Stack**: Next.js 16 (App Router) · React 19 · TypeScript · Tailwind 4 · shadcn/ui
