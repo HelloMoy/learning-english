@@ -736,7 +736,7 @@ pnpm test:run       # Vitest unit + component
 
 This codebase uses Alistair Cockburn's hexagonal architecture (Ports & Adapters). The application intent ("deliver courses to a student") lives in `src/domain/**` and is unconcerned with how it is invoked. Boundary rules are enforced by ESLint — `pnpm lint:domain` shows them.
 
-**One-line rule:** `src/domain/**` may import only `zod`, `neverthrow`, and `ts-pattern`. Anything else goes through a port.
+**One-line rule:** `src/domain/**` may import only `zod` and `neverthrow`. Anything else goes through a port.
 
 **Ports** are interfaces in `src/domain/ports/**` (`CourseRepository`, `LessonRepository`, `Clock`, `IdGenerator`). **Use cases** in `src/domain/use-cases/**` are factories that take ports and return `ResultAsync<T, DomainError>` via `neverthrow`. **Driven adapters** live under `src/adapters/**`. **Driving adapters** (UI, tests) live wherever they belong outside the domain.
 
