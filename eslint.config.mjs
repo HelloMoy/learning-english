@@ -21,7 +21,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
  */
 const boundaryMessage =
   "src/domain/** does not depend on delivery mechanisms. " +
-  "Imports are limited to zod, neverthrow, and ts-pattern. " +
+  "Imports are limited to zod and neverthrow. " +
   "Update openspec/specs/architecture-boundaries/spec.md before extending.";
 
 const forbiddenImports = [
@@ -134,25 +134,27 @@ const eslintConfig = defineConfig([
       "no-restricted-imports": [
         "error",
         {
-          paths: [
-            ...forbiddenImports.map((name) => ({
-              name,
-              message: boundaryMessage,
-            })),
-            ...forbiddenImports
-              .filter((name) => !name.endsWith("/*"))
-              .map((name) => ({
-                name: `${name}/*`,
-                message: boundaryMessage,
-              })),
-          ],
+          // `paths` matches module specifiers by exact string only — no
+          // glob support. `patterns` (gitignore-style globs) is what
+          // actually catches sub-path imports like `next/navigation`,
+          // `@/adapters/persistence/...`, etc. Both are required: `paths`
+          // for the bare specifier and `patterns` for every nested path.
+          paths: forbiddenImports.map((name) => ({
+            name,
+            message: boundaryMessage,
+          })),
+          patterns: forbiddenImports.map((name) => ({
+            group: [`${name}/*`, `${name}/**`],
+            message: boundaryMessage,
+          })),
         },
       ],
       "no-restricted-syntax": [
         "error",
         {
-          selector: "NewExpression[callee.name='Date'][arguments.length=0]",
-          message: "Use the Clock port (deps.clock.now()) instead of new Date() in domain code.",
+          selector: "NewExpression[callee.name='Date']",
+          message:
+            "Use the Clock port (deps.clock.now()) instead of `new Date(...)` in domain code.",
         },
         {
           selector: "CallExpression[callee.object.name='Date'][callee.property.name='now']",
@@ -171,6 +173,14 @@ const eslintConfig = defineConfig([
           selector: "CallExpression[callee.object.name='crypto'][callee.property.name]",
           message:
             "Use an IdGenerator port (deps.ids.next()) or a domain-meaningful Hasher port instead of crypto.* in domain code.",
+        },
+        {
+          // Catch `globalThis.crypto.randomUUID()` and similar — `crypto`
+          // is a MemberExpression of `globalThis`, not a bare identifier.
+          selector:
+            "CallExpression[callee.object.object.name='globalThis'][callee.object.property.name='crypto'][callee.property.name]",
+          message:
+            "Use an IdGenerator port (deps.ids.next()) or a domain-meaningful Hasher port instead of globalThis.crypto.* in domain code.",
         },
       ],
     },
