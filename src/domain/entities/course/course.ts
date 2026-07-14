@@ -17,6 +17,7 @@ export const Course = z.object({
     .length(2)
     .regex(/^[a-z]{2}$/, "ISO 639-1 lower-case"),
   lessonCount: z.number().int().nonnegative(),
+  moduleCount: z.number().int().nonnegative(),
 });
 
 export type Course = z.infer<typeof Course>;
