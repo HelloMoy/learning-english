@@ -23,6 +23,43 @@
       "nextLesson": "Next: {title}",
       "courseCompleted": "You've reached the end of the course.",
       "error": "We couldn't load the next lesson right now."
+    },
+    "ResourceItem": {
+      "pdf": "PDF",
+      "slides": "Slides",
+      "code": "Code",
+      "other": "File"
+    },
+    "ResourceList": {
+      "title": "Resources",
+      "empty": "No resources for this lesson."
+    },
+    "LessonBreadcrumb": {
+      "ariaLabel": "Breadcrumb"
+    },
+    "UpNextCard": {
+      "title": "Up next",
+      "courseCompleted": "You've reached the end of the course."
+    },
+    "MarkAsCompleteButton": {
+      "markComplete": "Mark as complete",
+      "markedComplete": "Marked complete"
+    },
+    "LessonList": {
+      "currentLessonAria": "Current lesson"
+    },
+    "Outline": {
+      "title": "Course outline"
+    },
+    "NativeVideoPlayer": {
+      "playbackRate": "Playback speed",
+      "videoPlayerLabel": "Lecture video player"
+    },
+    "LessonPage": {
+      "errorCourseNotFound": "We couldn't find this course.",
+      "errorModuleNotInCourse": "We couldn't find this module in the course.",
+      "errorLessonNotInModule": "We couldn't find this lesson in the module.",
+      "goHome": "Go to the course list"
     }
   }
 }
