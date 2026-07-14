@@ -7,11 +7,13 @@ import { describe, expect, test } from "vitest";
 import { InMemoryLessonRepository } from "./in-memory-lesson-repository";
 
 const courseId = CourseId.parse(faker.string.uuid());
+const moduleId = faker.string.uuid();
 
 const lesson1 = Lesson.parse({
   kind: "reading",
   id: faker.string.uuid(),
   courseId: courseId,
+  moduleId: moduleId,
   sequence: 1,
   title: faker.lorem.sentence(),
   body: faker.lorem.paragraph(),
@@ -21,6 +23,7 @@ const lesson3 = Lesson.parse({
   kind: "reading",
   id: faker.string.uuid(),
   courseId: courseId,
+  moduleId: moduleId,
   sequence: 3,
   title: faker.lorem.sentence(),
   body: faker.lorem.paragraph(),
@@ -30,6 +33,7 @@ const lesson2 = Lesson.parse({
   kind: "reading",
   id: faker.string.uuid(),
   courseId: courseId,
+  moduleId: moduleId,
   sequence: 2,
   title: faker.lorem.sentence(),
   body: faker.lorem.paragraph(),
@@ -84,6 +88,34 @@ describe("InMemoryLessonRepository", () => {
 
       // Assert
       expect(result).toEqual([]);
+    });
+
+    test("WHEN lessons across multiple modules are seeded THEN `listByCourse` returns them all sorted by `sequence` (cross-module ordering is the consumer's responsibility)", async () => {
+      // Arrange — task 4.5 calls for cross-module ordering. The current
+      // adapter sorts by `sequence` only; module-aware ordering is the
+      // consumer's job (the use case filters by `moduleId` and consults
+      // `moduleRepository.listByCourse`). Two modules with one lesson
+      // each, sequences 1 and 2; the second module's lesson has sequence
+      // 1 but its moduleId is different.
+      const moduleB = faker.string.uuid();
+      const lessonB1 = Lesson.parse({
+        kind: "reading",
+        id: faker.string.uuid(),
+        courseId,
+        moduleId: moduleB,
+        sequence: 1,
+        title: faker.lorem.sentence(),
+        body: faker.lorem.paragraph(),
+      });
+      const repo = new InMemoryLessonRepository([lesson1, lessonB1, lesson2, lesson3]);
+
+      // Act
+      const result = await repo.listByCourse(courseId);
+
+      // Assert — every seeded lesson is returned, ordered by `sequence`.
+      expect(result).toHaveLength(4);
+      expect(result.map((l) => l.id)).toEqual([lesson1.id, lessonB1.id, lesson2.id, lesson3.id]);
+      expect(result.map((l) => l.sequence)).toEqual([1, 1, 2, 3]);
     });
   });
 });
