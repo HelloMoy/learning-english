@@ -9,7 +9,8 @@
  */
 import { InMemoryCourseRepository } from "@/adapters/persistence/in-memory/in-memory-course-repository/in-memory-course-repository";
 import { InMemoryLessonRepository } from "@/adapters/persistence/in-memory/in-memory-lesson-repository/in-memory-lesson-repository";
-import { seedCourse, seedLessons } from "@/adapters/persistence/in-memory/seed/seed";
+import { InMemoryModuleRepository } from "@/adapters/persistence/in-memory/in-memory-module-repository/in-memory-module-repository";
+import { seedCourse, seedLessons, seedModules } from "@/adapters/persistence/in-memory/seed/seed";
 import { CourseId, LessonId } from "@/domain/entities/ids/ids";
 import { makeFindNextLesson } from "@/domain/use-cases/find-next-lesson/find-next-lesson";
 
@@ -26,6 +27,7 @@ function makeFindNextLessonFromSeed() {
   return makeFindNextLesson({
     courses: new InMemoryCourseRepository([seedCourse]),
     lessons: new InMemoryLessonRepository(seedLessons),
+    modules: new InMemoryModuleRepository(seedModules),
   });
 }
 
