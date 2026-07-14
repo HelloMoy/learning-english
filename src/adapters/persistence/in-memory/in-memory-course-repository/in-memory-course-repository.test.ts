@@ -17,6 +17,7 @@ const seed = Course.parse({
   description: faker.lorem.paragraph(),
   language: "en",
   lessonCount: 3,
+  moduleCount: 1,
 });
 
 describe("InMemoryCourseRepository", () => {
@@ -77,6 +78,51 @@ describe("InMemoryCourseRepository", () => {
       // Assert
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual(seed);
+    });
+
+    test("WHEN `byId` returns the course THEN `moduleCount` is preserved as seeded", async () => {
+      // Arrange — task 4.4 mandates that the adapter preserves the seed's
+      // moduleCount so the page can render it without re-deriving it.
+      const repo = new InMemoryCourseRepository([seed]);
+
+      // Act
+      const result = await repo.byId(seed.id);
+
+      // Assert
+      expect(result?.moduleCount).toBe(seed.moduleCount);
+    });
+
+    test("WHEN `bySlug` returns the course THEN `moduleCount` is preserved as seeded", async () => {
+      // Arrange
+      const repo = new InMemoryCourseRepository([seed]);
+
+      // Act
+      const result = await repo.bySlug(seed.slug);
+
+      // Assert
+      expect(result?.moduleCount).toBe(seed.moduleCount);
+    });
+
+    test("WHEN two courses with different moduleCounts are seeded THEN both are returned with their own counts", async () => {
+      // Arrange
+      const other = Course.parse({
+        id: faker.string.uuid(),
+        slug: faker.lorem.slug(),
+        title: faker.commerce.productName(),
+        description: faker.lorem.paragraph(),
+        language: "en",
+        lessonCount: 0,
+        moduleCount: 4,
+      });
+      const repo = new InMemoryCourseRepository([seed, other]);
+
+      // Act
+      const list = await repo.listAvailable();
+
+      // Assert
+      expect(list).toHaveLength(2);
+      const found = list.find((c) => c.id === other.id);
+      expect(found?.moduleCount).toBe(4);
     });
   });
 });
