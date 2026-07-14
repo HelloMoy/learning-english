@@ -22,6 +22,7 @@ const nextLessonStub: Lesson = {
   kind: "reading",
   id: "22222222-2222-4222-8222-222222222222" as LessonId,
   courseId,
+  moduleId: "33333333-3333-4333-8333-333333333333" as Lesson["moduleId"],
   sequence: 2,
   title: "Consonant clusters in English",
   body: "Body",
