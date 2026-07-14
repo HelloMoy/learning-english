@@ -18,11 +18,48 @@
   },
   "Components": {
     "CourseNavigator": {
-      "loading": "Carregando a próxima lição…",
-      "nextLabel": "Próxima lição",
+      "loading": "Carregando próxima aula…",
+      "nextLabel": "Próxima aula",
       "nextLesson": "Próxima: {title}",
-      "courseCompleted": "Você chegou ao final do curso.",
-      "error": "Não conseguimos carregar a próxima lição agora."
+      "courseCompleted": "Você chegou ao fim do curso.",
+      "error": "Não foi possível carregar a próxima aula agora."
+    },
+    "ResourceItem": {
+      "pdf": "PDF",
+      "slides": "Slides",
+      "code": "Código",
+      "other": "Arquivo"
+    },
+    "ResourceList": {
+      "title": "Materiais",
+      "empty": "Esta aula não tem materiais."
+    },
+    "LessonBreadcrumb": {
+      "ariaLabel": "Trilha de navegação"
+    },
+    "UpNextCard": {
+      "title": "A seguir",
+      "courseCompleted": "Você chegou ao fim do curso."
+    },
+    "MarkAsCompleteButton": {
+      "markComplete": "Marcar como concluída",
+      "markedComplete": "Concluída"
+    },
+    "LessonList": {
+      "currentLessonAria": "Aula atual"
+    },
+    "Outline": {
+      "title": "Conteúdo do curso"
+    },
+    "NativeVideoPlayer": {
+      "playbackRate": "Velocidade de reprodução",
+      "videoPlayerLabel": "Reprodutor de vídeo da aula"
+    },
+    "LessonPage": {
+      "errorCourseNotFound": "Não encontramos este curso.",
+      "errorModuleNotInCourse": "Não encontramos este módulo no curso.",
+      "errorLessonNotInModule": "Não encontramos esta aula no módulo.",
+      "goHome": "Ir para a lista de cursos"
     }
   }
 }
