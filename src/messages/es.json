@@ -1,8 +1,8 @@
 {
   "HomePage": {
     "title": "Aprende inglés",
-    "subtitle": "Un espacio simple y enfocado para construir vocabulario y practicar cada día.",
-    "cta": "Empezar"
+    "subtitle": "Un espacio simple y enfocado para construir vocabulario y practicar todos los días.",
+    "cta": "Comenzar"
   },
   "LocaleSwitcher": {
     "label": "Idioma",
@@ -18,11 +18,48 @@
   },
   "Components": {
     "CourseNavigator": {
-      "loading": "Cargando la siguiente lección…",
+      "loading": "Cargando siguiente lección…",
       "nextLabel": "Siguiente lección",
       "nextLesson": "Siguiente: {title}",
       "courseCompleted": "Has llegado al final del curso.",
-      "error": "No pudimos cargar la siguiente lección en este momento."
+      "error": "No pudimos cargar la siguiente lección ahora."
+    },
+    "ResourceItem": {
+      "pdf": "PDF",
+      "slides": "Diapositivas",
+      "code": "Código",
+      "other": "Archivo"
+    },
+    "ResourceList": {
+      "title": "Materiales",
+      "empty": "Esta lección no tiene materiales."
+    },
+    "LessonBreadcrumb": {
+      "ariaLabel": "Ruta de navegación"
+    },
+    "UpNextCard": {
+      "title": "A continuación",
+      "courseCompleted": "Has llegado al final del curso."
+    },
+    "MarkAsCompleteButton": {
+      "markComplete": "Marcar como completada",
+      "markedComplete": "Completada"
+    },
+    "LessonList": {
+      "currentLessonAria": "Lección actual"
+    },
+    "Outline": {
+      "title": "Contenido del curso"
+    },
+    "NativeVideoPlayer": {
+      "playbackRate": "Velocidad de reproducción",
+      "videoPlayerLabel": "Reproductor de video de la lección"
+    },
+    "LessonPage": {
+      "errorCourseNotFound": "No encontramos este curso.",
+      "errorModuleNotInCourse": "No encontramos este módulo en el curso.",
+      "errorLessonNotInModule": "No encontramos esta lección en el módulo.",
+      "goHome": "Ir a la lista de cursos"
     }
   }
 }
