@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, test } from "vitest";
 
-import { CourseId, LessonId, StudentId } from "./ids";
+import { CourseId, LessonId, ModuleId, ResourceId, StudentId } from "./ids";
 
 describe("branded id schemas", () => {
   describe("GIVEN a valid UUID string", () => {
@@ -37,6 +37,28 @@ describe("branded id schemas", () => {
       // Assert
       expect(result).toBe(uuid);
     });
+
+    test("WHEN parsed as ModuleId THEN it returns the branded value", () => {
+      // Arrange
+      const uuid = faker.string.uuid();
+
+      // Act
+      const result = ModuleId.parse(uuid);
+
+      // Assert
+      expect(result).toBe(uuid);
+    });
+
+    test("WHEN parsed as ResourceId THEN it returns the branded value", () => {
+      // Arrange
+      const uuid = faker.string.uuid();
+
+      // Act
+      const result = ResourceId.parse(uuid);
+
+      // Assert
+      expect(result).toBe(uuid);
+    });
   });
 
   describe("GIVEN a non-UUID string", () => {
@@ -45,6 +67,8 @@ describe("branded id schemas", () => {
       expect(() => CourseId.parse("not-a-uuid")).toThrow();
       expect(() => LessonId.parse("not-a-uuid")).toThrow();
       expect(() => StudentId.parse("not-a-uuid")).toThrow();
+      expect(() => ModuleId.parse("not-a-uuid")).toThrow();
+      expect(() => ResourceId.parse("not-a-uuid")).toThrow();
     });
   });
 });
