@@ -8,8 +8,12 @@ import { z } from "zod";
  */
 export const CourseId = z.string().uuid().brand<"CourseId">();
 export const LessonId = z.string().uuid().brand<"LessonId">();
+export const ModuleId = z.string().uuid().brand<"ModuleId">();
+export const ResourceId = z.string().uuid().brand<"ResourceId">();
 export const StudentId = z.string().uuid().brand<"StudentId">();
 
 export type CourseId = z.infer<typeof CourseId>;
 export type LessonId = z.infer<typeof LessonId>;
+export type ModuleId = z.infer<typeof ModuleId>;
+export type ResourceId = z.infer<typeof ResourceId>;
 export type StudentId = z.infer<typeof StudentId>;
