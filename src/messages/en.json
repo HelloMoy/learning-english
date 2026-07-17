@@ -2,7 +2,8 @@
   "HomePage": {
     "title": "Learn English",
     "subtitle": "A simple, focused space to build vocabulary and practice every day.",
-    "cta": "Get started"
+    "cta": "Get started",
+    "notFound": "Not found"
   },
   "LocaleSwitcher": {
     "label": "Language",
@@ -59,7 +60,12 @@
       "errorCourseNotFound": "We couldn't find this course.",
       "errorModuleNotInCourse": "We couldn't find this module in the course.",
       "errorLessonNotInModule": "We couldn't find this lesson in the module.",
-      "goHome": "Go to the course list"
+      "goHome": "Go to home"
     }
+  },
+  "LocaleNotFound": {
+    "heading": "Locale not supported",
+    "description": "We don't ship translations for this language yet.",
+    "goHome": "Go to home"
   }
 }
