@@ -60,7 +60,7 @@ const readingLesson = Lesson.parse({
 const resource = Resource.parse({
   id: faker.string.uuid(),
   lessonId: videoLesson.id,
-  title: "Vowel chart (PDF)",
+  title: "Vowel chart",
   url: faker.internet.url(),
   kind: "pdf",
 });
