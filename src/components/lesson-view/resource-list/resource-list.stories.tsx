@@ -27,7 +27,7 @@ export const WithResources: Story = {
       Resource.parse({
         id: faker.string.uuid(),
         lessonId: faker.string.uuid(),
-        title: "Vowel chart (PDF)",
+        title: "Vowel chart",
         url: faker.internet.url(),
         kind: "pdf",
       }),
