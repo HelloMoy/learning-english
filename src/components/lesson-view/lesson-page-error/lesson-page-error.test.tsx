@@ -17,23 +17,33 @@ describe("LessonPageError", () => {
     mockUseTranslations.mockReturnValue(((key: string) => key) as never);
   });
 
-  test("WHEN rendered for module-not-in-course THEN it shows the module-specific message", () => {
+  test("WHEN rendered for module-not-in-course THEN it shows the module-specific message and a home link", () => {
     render(<LessonPageError kind="module-not-in-course" />);
 
     expect(screen.getByRole("alert")).toBeInTheDocument();
     expect(screen.getByText("errorModuleNotInCourse")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "goHome" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "goHome" })).toHaveAttribute("href", "/");
   });
 
   test("WHEN rendered for lesson-not-in-module THEN it shows the lesson-specific message", () => {
     render(<LessonPageError kind="lesson-not-in-module" />);
 
     expect(screen.getByText("errorLessonNotInModule")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "goHome" })).toHaveAttribute("href", "/");
   });
 
   test("WHEN rendered for invalid-params THEN it shows the lesson-not-in-module message (fallback)", () => {
     render(<LessonPageError kind="invalid-params" />);
 
     expect(screen.getByText("errorLessonNotInModule")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "goHome" })).toHaveAttribute("href", "/");
+  });
+
+  test("WHEN rendered for course-not-found THEN it shows the course-specific message and a home link", () => {
+    render(<LessonPageError kind="course-not-found" />);
+
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(screen.getByText("errorCourseNotFound")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "goHome" })).toHaveAttribute("href", "/");
   });
 });
