@@ -2,7 +2,8 @@
   "HomePage": {
     "title": "Aprende inglés",
     "subtitle": "Un espacio simple y enfocado para construir vocabulario y practicar todos los días.",
-    "cta": "Comenzar"
+    "cta": "Comenzar",
+    "notFound": "No encontrado"
   },
   "LocaleSwitcher": {
     "label": "Idioma",
@@ -59,7 +60,12 @@
       "errorCourseNotFound": "No encontramos este curso.",
       "errorModuleNotInCourse": "No encontramos este módulo en el curso.",
       "errorLessonNotInModule": "No encontramos esta lección en el módulo.",
-      "goHome": "Ir a la lista de cursos"
+      "goHome": "Ir al inicio"
     }
+  },
+  "LocaleNotFound": {
+    "heading": "Idioma no soportado",
+    "description": "Todavía no enviamos traducciones para este idioma.",
+    "goHome": "Ir al inicio"
   }
 }
