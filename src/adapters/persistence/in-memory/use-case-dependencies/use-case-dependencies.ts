@@ -9,6 +9,16 @@ import {
   seedModules,
   seedResources,
 } from "@/adapters/persistence/in-memory/seed/seed";
+import {
+  seedContentCourse,
+  seedContentLessons,
+  seedContentModules,
+  seedContentResources,
+} from "@/adapters/persistence/in-memory/seed/seed-content";
+import type { Course } from "@/domain/entities/course/course";
+import type { Lesson } from "@/domain/entities/lesson/lesson";
+import type { Module } from "@/domain/entities/module/module";
+import type { Resource } from "@/domain/entities/resource/resource";
 import type { CourseRepository } from "@/domain/ports/course-repository/course-repository";
 import type { LessonRepository } from "@/domain/ports/lesson-repository/lesson-repository";
 import type { ModuleRepository } from "@/domain/ports/module-repository/module-repository";
@@ -37,33 +47,73 @@ export type CoursePlatformDeps = {
 };
 
 /**
+ * Reads the `USE_COURSE_CONTENT_SEED` environment variable at module load
+ * time. When set to `"1"`, `getCoursePlatformDeps` builds the dependency
+ * graph from `seed-content.ts` (the generator's output for the
+ * filesystem-backed course). Otherwise the A1 hardcoded seed is used.
+ *
+ * Default is the A1 seed — existing tests, Storybook, and local dev boot
+ * continue to work without any env-var change. Set the variable to opt
+ * into the new content once the seed generator has run.
+ */
+export const isCourseContentSeedEnabled = (): boolean =>
+  process.env.USE_COURSE_CONTENT_SEED === "1";
+
+/**
  * Build a `CoursePlatformDeps` backed by the production in-memory seed.
  * The page calls this; Storybook can call it too. When persistence arrives,
  * this factory is replaced by a request-scoped one (e.g. a hook named
  * `useCoursePlatformDeps`); the seed itself stays.
+ *
+ * Seed source is chosen at call time from `USE_COURSE_CONTENT_SEED` so the
+ * env var can be flipped in dev without restarting the Node process.
  */
 export function getCoursePlatformDeps(): CoursePlatformDeps {
-  const courses = new InMemoryCourseRepository([seedCourse]);
-  const modules = new InMemoryModuleRepository(seedModules);
-  const lessons = new InMemoryLessonRepository(seedLessons);
-  const resources = new InMemoryResourceRepository(seedResources);
+  if (isCourseContentSeedEnabled()) {
+    return buildDeps(
+      [seedContentCourse],
+      seedContentModules,
+      seedContentLessons,
+      seedContentResources,
+    );
+  }
+  return buildDeps([seedCourse], seedModules, seedLessons, seedResources);
+}
+
+function buildDeps(
+  courses: ReadonlyArray<Course>,
+  modules: ReadonlyArray<Module>,
+  lessons: ReadonlyArray<Lesson>,
+  resources: ReadonlyArray<Resource>,
+): CoursePlatformDeps {
+  const coursesRepo = new InMemoryCourseRepository(courses);
+  const modulesRepo = new InMemoryModuleRepository(modules);
+  const lessonsRepo = new InMemoryLessonRepository(lessons);
+  const resourcesRepo = new InMemoryResourceRepository(resources);
   const progress = new InMemoryProgressTracker();
 
-  const findNextLesson = makeFindNextLesson({ courses, lessons, modules });
+  const findNextLesson = makeFindNextLesson({
+    courses: coursesRepo,
+    lessons: lessonsRepo,
+    modules: modulesRepo,
+  });
   const findLessonForView = makeFindLessonForView({
-    courses,
-    modules,
-    lessons,
-    resources,
+    courses: coursesRepo,
+    modules: modulesRepo,
+    lessons: lessonsRepo,
+    resources: resourcesRepo,
     findNextLesson,
   });
-  const markLessonComplete = makeMarkLessonComplete({ lessons, progress });
+  const markLessonComplete = makeMarkLessonComplete({
+    lessons: lessonsRepo,
+    progress,
+  });
 
   return {
-    courses,
-    lessons,
-    modules,
-    resources,
+    courses: coursesRepo,
+    lessons: lessonsRepo,
+    modules: modulesRepo,
+    resources: resourcesRepo,
     progress,
     useCases: {
       findNextLesson,
