@@ -1,0 +1,142 @@
+# Capability: course-content-storage
+
+## Purpose
+
+Define how course content (videos, PDFs, thumbnails, supplementary markdown) is resolved to URLs at runtime, and how the seed data that drives the lesson/resource repositories is generated from a content source. The `BlobStore` abstraction decouples lesson/resource adapters from the underlying storage backend so the application can target a local filesystem in development and an S3-compatible bucket in production without changes to the domain or to the lesson/resource adapters.
+
+This spec captures WHAT the storage layer must do. The domain entities and ports (`LessonRepository`, `ResourceRepository`, `BlobStore`) are defined in `openspec/specs/course-platform-domain/spec.md`; this spec is the storage-adapter counterpart.
+
+## Requirements
+
+### Requirement: BlobStore is the single point of URL resolution for course content
+
+The system SHALL define a `BlobStore` interface under `src/adapters/persistence/blob-store/blob-store.ts` with two methods:
+
+- `url(key: string): string` — returns the public URL for the given content key.
+- `exists(key: string): Promise<boolean>` — returns whether a blob for the given key exists in the underlying store.
+
+A "content key" is an opaque, store-agnostic identifier such as `advanced-intermediate-course/5-sound-natural-intonation/03-falling-intonation.mp4`. The key MUST be URL-safe (kebab-case ASCII, no spaces, no `&`/`#`/`:`).
+
+The `BlobStore` interface is a driven-adapter primitive. It MUST NOT live under `src/domain/ports/` and MUST NOT be imported by anything under `src/domain/**` (the `architecture-boundaries` spec continues to hold).
+
+#### Scenario: A lesson adapter resolves a video URL via BlobStore
+
+- **WHEN** `LocalFilesystemLessonRepository` builds a `VideoLesson.source` for a lesson whose video key is `advanced-intermediate-course/5-sound-natural-intonation/03-falling-intonation.mp4`
+- **THEN** the resulting `source` value is exactly what `blobStore.url(key)` returns — no path concatenation in the adapter itself
+
+#### Scenario: A resource adapter resolves a PDF URL via BlobStore
+
+- **WHEN** `LocalFilesystemResourceRepository` builds a `Resource.url` for a PDF whose key is `advanced-intermediate-course/5-sound-natural-intonation/03-falling-intonation.pdf`
+- **THEN** the resulting `url` value is exactly what `blobStore.url(key)` returns
+
+### Requirement: LocalFilesystemBlobStore resolves keys to Next.js-served paths
+
+The system SHALL provide a `LocalFilesystemBlobStore` under `src/adapters/persistence/blob-store/local-filesystem-blob-store/` that:
+
+- Accepts a single constructor argument `baseUrl: string` representing the public URL prefix under which the local filesystem content is served (e.g., `"/local-filesystem-lesson"`).
+- Implements `url(key)` as `` `${baseUrl}/${key}` `` — no leading slash duplication, no trailing slash on `baseUrl`.
+- Implements `exists(key)` by calling `fs.access` against the absolute path resolved from the local content directory + key. The absolute path of the local content directory is passed via a second constructor argument `localRoot: string` (an absolute filesystem path, NOT a URL).
+
+The `baseUrl` and `localRoot` MUST be passed separately to prevent the footgun of treating a filesystem path as a URL prefix or vice versa. The two arguments MUST NOT be derived from each other inside the constructor.
+
+#### Scenario: LocalFilesystemBlobStore resolves a URL for a known content key
+
+- **WHEN** constructed with `baseUrl = "/local-filesystem-lesson"` and `localRoot = "/abs/path/to/public/local-filesystem-lesson"`, and called with `url("course/lesson.mp4")`
+- **THEN** the result is `"/local-filesystem-lesson/course/lesson.mp4"`
+
+#### Scenario: LocalFilesystemBlobStore reports existence via filesystem check
+
+- **WHEN** the file at `localRoot/key` exists
+- **THEN** `await exists(key)` returns `true`
+
+- **WHEN** the file at `localRoot/key` does not exist
+- **THEN** `await exists(key)` returns `false`
+
+### Requirement: Content seed is generated at build time, not at runtime
+
+The system SHALL provide a build-time script `scripts/generate-course-content-seed.ts` that:
+
+- Walks `public/local-filesystem-lesson/<course-slug>/` recursively.
+- Emits `src/adapters/persistence/in-memory/seed/seed-content.ts` containing a `seedContentCourse`, `seedContentModules`, `seedContentLessons`, and `seedContentResources` array, each parseable by the existing domain schemas.
+- Computes slugs for every folder using (a) the override map in `scripts/slug-overrides.ts` if present, otherwise (b) automatic kebab-case ASCII normalization.
+- Extracts `durationSeconds` for each `.mp4` via `ffprobe`. If `ffprobe` is not on `PATH`, the script exits with a non-zero status and a message instructing the developer to install it.
+- Resolves every `VideoLesson.source` and `Resource.url` via a `LocalFilesystemBlobStore` instance, so the generated seed is portable to other BlobStore drivers in the future.
+
+The generated file MUST be committed to git. The script MAY be re-run by hand (`pnpm generate:content-seed`) when content is added or removed; CI does not run it.
+
+#### Scenario: A new lesson is added by dropping files in the content folder
+
+- **WHEN** a developer adds a new folder under `public/local-filesystem-lesson/<course>/<new-lesson>/` containing `lesson.mp4` and `notes.pdf`
+- **THEN** after running `pnpm generate:content-seed`, `seed-content.ts` contains a new `VideoLesson` entry with a stable slug and a new `Resource` entry for the PDF, both visible in the git diff
+
+#### Scenario: A folder name with special characters gets a clean slug
+
+- **WHEN** the script encounters folder `"5 Sound Natural: American Intonation Essentials"`
+- **THEN** the generated module slug is `"5-sound-natural-intonation-essentials"` (automatic normalization) UNLESS an entry in `slug-overrides.ts` maps the raw name to a different slug
+
+#### Scenario: A duplicate `.mp4` filename inside the same section still produces unique URLs
+
+- **WHEN** two lesson folders in the same section each contain a file named `Aprende Inglés Americano con Fluidez desde Cero.mp4`
+- **THEN** the generated URLs are different because each lesson key includes the lesson slug, not the bare filename
+
+#### Scenario: Missing ffprobe fails loudly
+
+- **WHEN** the developer runs `pnpm generate:content-seed` and `ffprobe` is not on `PATH`
+- **THEN** the script exits non-zero with stderr "ffprobe not found; install ffmpeg or set FFPROBE_PATH" and does not write a partial `seed-content.ts`
+
+### Requirement: Lesson-vs-Resource discrimination uses file presence, not folder name
+
+The script SHALL classify each lesson folder as follows:
+
+- If the folder contains an `.mp4` file, the lesson is `kind: "video"` with `source` set to the video's URL.
+- If the folder contains a `readme.md` AND no `.mp4`, the lesson is `kind: "reading"` with `body` set to the file's contents.
+- If the folder contains BOTH an `.mp4` and a `readme.md`, the lesson is `kind: "video"` and the `readme.md` is emitted as a `Resource { kind: "other", title: "<lesson-title> notes", url: <readme-url> }`.
+- Any other file (PDF, DOCX, image) in a lesson folder becomes a `Resource` whose `kind` is derived from the file extension: `.pdf` → `"pdf"`, `.pptx`/`.key` → `"slides"`, anything else → `"other"`.
+- The first `.jpeg`/`.jpg`/`.png` in a video lesson folder becomes `VideoLesson.poster`. Subsequent images are ignored for poster purposes (they are not surfaced in v1).
+
+#### Scenario: A video lesson with a PDF and a thumbnail
+
+- **WHEN** a lesson folder contains `video.mp4`, `thumbnail.jpeg`, and `handout.pdf`
+- **THEN** the generator emits a `VideoLesson` with `source` set to the video URL and `poster` set to the thumbnail URL, AND a `Resource { kind: "pdf", title: "handout", url: <pdf-url> }`
+
+#### Scenario: A reading-only lesson with a readme and a docx
+
+- **WHEN** a lesson folder contains `notes.md` (no video) and `exercise.docx`
+- **THEN** the generator emits a `ReadingLesson` with `body` set to the markdown contents, AND a `Resource { kind: "other", title: "exercise", url: <docx-url> }`
+
+#### Scenario: A bimodal lesson (video + readme) collapses the readme into a resource
+
+- **WHEN** a lesson folder contains both `lesson.mp4` and `notes.md`
+- **THEN** the generator emits a `VideoLesson` (NOT a new bimodal kind) AND a `Resource { kind: "other", title: "<lesson-title> notes", url: <notes-url> }`
+
+### Requirement: The content seed is opt-in via env var
+
+`src/adapters/persistence/in-memory/use-case-dependencies/use-case-dependencies.ts` SHALL construct dependencies from `seed-content.ts` only when the environment variable `USE_COURSE_CONTENT_SEED` is set to `"1"`. When unset or set to any other value, the existing A1 hardcoded seed (`seed.ts`) continues to be used.
+
+The default behaviour (A1 seed) MUST NOT change as a side effect of this change landing — only an explicit opt-in flips the source.
+
+#### Scenario: Default dev boot still uses the A1 seed
+
+- **WHEN** a developer runs `pnpm dev` without setting `USE_COURSE_CONTENT_SEED`
+- **THEN** `getCoursePlatformDeps()` returns adapters constructed from `seed.ts`, identical to pre-change behaviour
+
+#### Scenario: Opt-in boot uses the content seed
+
+- **WHEN** a developer runs `USE_COURSE_CONTENT_SEED=1 pnpm dev`
+- **THEN** `getCoursePlatformDeps()` returns adapters constructed from `seed-content.ts`, and the application surfaces the "Advanced Intermediate Pronunciation" course
+
+### Requirement: Slug overrides are explicit and per-folder
+
+`scripts/slug-overrides.ts` SHALL export a `Record<string, string>` keyed by the raw folder name (exactly as it appears on disk, including spaces and special characters), with values being the desired slug. The script SHALL apply the override BEFORE automatic normalization and SHALL fall back to automatic normalization when no entry is present.
+
+The override file SHALL be reviewed in code review whenever content is added; an absent entry is a deliberate choice to accept the automatic slug.
+
+#### Scenario: An override forces a specific slug
+
+- **WHEN** `slug-overrides.ts` contains `{"1 Day#1": "1-day-01"}` and the folder name is `"1 Day#1"`
+- **THEN** the generated lesson slug is `"1-day-01"`, NOT the automatic `"1-day-1"`
+
+#### Scenario: An absent override falls back to automatic normalization
+
+- **WHEN** `slug-overrides.ts` does not contain an entry for folder `"Intro"` and the folder name is `"Intro"`
+- **THEN** the generated slug is `"intro"` (automatic normalization, no change)
