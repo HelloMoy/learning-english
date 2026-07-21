@@ -51,14 +51,17 @@ const TRANSLITERATIONS: Record<string, string> = {
  * Returns a URL-safe kebab-case slug derived from `rawName`.
  *
  * Behaviour:
- * 1. Lowercase.
- * 2. Replace accented characters via `TRANSLITERATIONS`.
- * 3. Replace any run of non-alphanumeric characters with a single `-`.
- * 4. Collapse consecutive `-` and trim leading/trailing `-`.
- * 5. If the result is empty, return `"untitled"`.
+ * 1. Decompose to Unicode NFD and strip combining marks (removes accents
+ *    generically — macOS stores filenames decomposed, e.g. "é" = "e" + ´).
+ * 2. Lowercase.
+ * 3. Replace any residual mapped characters via `TRANSLITERATIONS`.
+ * 4. Replace any run of non-alphanumeric characters with a single `-`.
+ * 5. Collapse consecutive `-` and trim leading/trailing `-`.
+ * 6. If the result is empty, return `"untitled"`.
  */
 export function slugify(rawName: string): string {
-  const lower = rawName.toLowerCase();
+  const deaccented = rawName.normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const lower = deaccented.toLowerCase();
   const transliterated = [...lower].map((ch) => TRANSLITERATIONS[ch] ?? ch).join("");
   const dashed = transliterated.replace(/[^a-z0-9]+/g, "-");
   const collapsed = dashed.replace(/-+/g, "-").replace(/^-+|-+$/g, "");
