@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 import { LocalFilesystemBlobStore } from "../src/adapters/persistence/blob-store/local-filesystem-blob-store/local-filesystem-blob-store.ts";
@@ -17,8 +17,7 @@ import {
   resourceTitleFromFile,
 } from "./discriminate-lesson.ts";
 import { probeDurationSeconds } from "./ffprobe.ts";
-import { SLUG_OVERRIDES } from "./slug-overrides.ts";
-import { slugify } from "./slug.ts";
+import { resolveSlug, toPosix } from "./resolve-slug.ts";
 import { uuidv5 } from "./uuid.ts";
 
 /**
@@ -75,7 +74,31 @@ export async function runGenerator(args: { sourceDir: string; outFile: string })
   }
 
   const seed = await buildSeed(args.sourceDir);
-  const output = renderSeedFile(seed.course, seed.modules, seed.lessons, seed.resources);
+
+  // Fail loudly if any emitted key does not resolve on disk — this is the
+  // guard that prevents slug↔disk drift (kebab-case URLs pointing at raw
+  // folders) from ever shipping silently again.
+  const blobStore = new LocalFilesystemBlobStore({
+    baseUrl: "/local-filesystem-lesson",
+    localRoot: path.resolve(args.sourceDir),
+  });
+  const missing: string[] = [];
+  for (const key of seed.keys) {
+    if (!(await blobStore.exists(key))) missing.push(key);
+  }
+  if (missing.length > 0) {
+    throw new Error(
+      `${missing.length} content key(s) do not resolve on disk (run \`tsx scripts/normalize-content-disk.ts --apply\` first?):\n  ${missing.join("\n  ")}`,
+    );
+  }
+
+  const output = renderSeedFile(
+    seed.course,
+    seed.modules,
+    seed.lessons,
+    seed.resources,
+    seed.sourceNames,
+  );
   writeFileSync(args.outFile, output, "utf8");
   console.log(
     `[seed-gen] Wrote ${seed.modules.length} modules, ${seed.lessons.length} lessons, ${seed.resources.length} resources → ${args.outFile}`,
@@ -87,7 +110,47 @@ export type BuiltSeed = {
   modules: Module[];
   lessons: Lesson[];
   resources: Resource[];
+  /**
+   * Entity id → original raw name (as it appeared on disk before the
+   * normalization rename). Sourced from `rename-manifest.json`; falls back
+   * to the current on-disk name when no manifest entry exists.
+   */
+  sourceNames: Record<string, string>;
+  /**
+   * Every content key emitted (video sources, posters, resources), relative
+   * to the content root. `runGenerator` validates each via `BlobStore.exists`.
+   */
+  keys: string[];
 };
+
+/** Shape of the manifest written by `scripts/normalize-content-disk.ts`. */
+type RenameManifest = {
+  version: number;
+  entries: Array<{ from: string; to: string }>;
+};
+
+/**
+ * Loads `rename-manifest.json` from the content root and returns a reverse
+ * map: slug relative path → original leaf name (the pre-rename folder/file
+ * name). Missing or malformed manifest → empty map (callers fall back to the
+ * current on-disk name).
+ */
+function loadOriginalNameMap(sourceDir: string): Map<string, string> {
+  const map = new Map<string, string>();
+  const manifestPath = path.join(sourceDir, "rename-manifest.json");
+  if (!existsSync(manifestPath)) return map;
+  try {
+    const parsed = JSON.parse(readFileSync(manifestPath, "utf8")) as RenameManifest;
+    for (const entry of parsed.entries ?? []) {
+      if (entry && typeof entry.from === "string" && typeof entry.to === "string") {
+        map.set(toPosix(entry.to), path.basename(entry.from));
+      }
+    }
+  } catch {
+    // Malformed manifest → behave as if absent.
+  }
+  return map;
+}
 
 /**
  * Pure builder: walks the source directory and returns the parsed seed
@@ -99,6 +162,13 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
     baseUrl: "/local-filesystem-lesson",
     localRoot: path.resolve(sourceDir),
   });
+
+  const originalNames = loadOriginalNameMap(sourceDir);
+  const sourceNames: Record<string, string> = {};
+  const keys: string[] = [];
+  const recordSourceName = (id: string, slugRelPath: string, fallbackLeaf: string): void => {
+    sourceNames[id] = originalNames.get(slugRelPath) ?? fallbackLeaf;
+  };
 
   const courseFolders = listSubdirectories(sourceDir);
   if (courseFolders.length === 0) {
@@ -112,6 +182,7 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
   const courseFolder = courseFolders[0] as string;
   const courseSlug = resolveSlug(courseFolder);
   const courseId = uuidv5(`course:${courseSlug}`);
+  recordSourceName(courseId, courseSlug, courseFolder);
 
   const modules: Module[] = [];
   const lessons: Lesson[] = [];
@@ -123,6 +194,7 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
     const moduleSlug = resolveSlug(moduleFolder);
     const moduleId = uuidv5(`module:${courseSlug}/${moduleSlug}`);
     const moduleSequence = parseSequence(moduleSlug);
+    recordSourceName(moduleId, `${courseSlug}/${moduleSlug}`, moduleFolder);
 
     modules.push(
       Module.parse({
@@ -140,6 +212,7 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
       const lessonSlug = resolveSlug(lessonFolder);
       const lessonId = uuidv5(`lesson:${courseSlug}/${moduleSlug}/${lessonSlug}`);
       const lessonSequence = parseSequence(lessonSlug);
+      recordSourceName(lessonId, `${courseSlug}/${moduleSlug}/${lessonSlug}`, lessonFolder);
 
       const classified = classifyLessonFolder(
         path.join(sourceDir, courseFolder, moduleFolder, lessonFolder),
@@ -152,7 +225,7 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
           courseFolder,
           moduleFolder,
           lessonFolder,
-          path.basename(classified.videoKey),
+          classified.videoFileName,
         );
         const durationSeconds = await probeDurationSeconds(videoPath);
 
@@ -163,6 +236,8 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
         const posterFullKey = classified.posterKey
           ? `${courseSlug}/${moduleSlug}/${classified.posterKey}`
           : null;
+        keys.push(videoFullKey);
+        if (posterFullKey) keys.push(posterFullKey);
 
         const lesson = Lesson.parse({
           kind: "video",
@@ -178,9 +253,17 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
         });
         lessons.push(lesson);
 
-        for (const resourceKey of classified.resourceKeys) {
+        for (let i = 0; i < classified.resourceKeys.length; i++) {
+          const resourceKey = classified.resourceKeys[i] as string;
+          const rawName = classified.resourceRawNames[i] as string;
           const fullKey = `${courseSlug}/${moduleSlug}/${resourceKey}`;
-          resources.push(buildResource(lessonId, fullKey, blobStore, classified.title));
+          const resource = buildResource(lessonId, fullKey, blobStore, classified.title);
+          resources.push(resource);
+          // Priority for sourceNames: raw on-disk filename (always available
+          // because classifyLessonFolder reads the folder at walk time) >
+          // manifest entry (legacy path) > current slugified basename.
+          recordSourceName(resource.id, fullKey, rawName);
+          keys.push(fullKey);
         }
       } else {
         const lesson = Lesson.parse({
@@ -194,9 +277,17 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
         });
         lessons.push(lesson);
 
-        for (const resourceKey of classified.resourceKeys) {
+        for (let i = 0; i < classified.resourceKeys.length; i++) {
+          const resourceKey = classified.resourceKeys[i] as string;
+          const rawName = classified.resourceRawNames[i] as string;
           const fullKey = `${courseSlug}/${moduleSlug}/${resourceKey}`;
-          resources.push(buildResource(lessonId, fullKey, blobStore, classified.title));
+          const resource = buildResource(lessonId, fullKey, blobStore, classified.title);
+          resources.push(resource);
+          // Priority for sourceNames: raw on-disk filename (always available
+          // because classifyLessonFolder reads the folder at walk time) >
+          // manifest entry (legacy path) > current slugified basename.
+          recordSourceName(resource.id, fullKey, rawName);
+          keys.push(fullKey);
         }
       }
     }
@@ -223,14 +314,7 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
     moduleCount: modules.length,
   });
 
-  return { course, modules, lessons, resources };
-}
-
-function resolveSlug(rawName: string): string {
-  if (Object.prototype.hasOwnProperty.call(SLUG_OVERRIDES, rawName)) {
-    return SLUG_OVERRIDES[rawName] as string;
-  }
-  return slugify(rawName);
+  return { course, modules, lessons, resources, sourceNames, keys };
 }
 
 function buildResource(
@@ -255,6 +339,7 @@ function renderSeedFile(
   modules: Module[],
   lessons: Lesson[],
   resources: Resource[],
+  sourceNames: Record<string, string>,
 ): string {
   // Per-line JSON for each entity keeps prettier happy and the diff
   // readable when content changes.
@@ -299,6 +384,10 @@ const _seedContentResourceRaw = [
 export const seedContentResources: ReadonlyArray<Resource> = _seedContentResourceRaw.map((r) =>
   Resource.parse(r),
 );
+
+// Entity id → original raw on-disk name (pre-normalization). See
+// scripts/normalize-content-disk.ts and rename-manifest.json.
+export const seedContentSourceNames: Record<string, string> = ${JSON.stringify(sourceNames, null, 2)};
 `;
 }
 
