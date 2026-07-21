@@ -11,6 +11,7 @@ import {
   parseSequence,
   resourceTitleFromFile,
 } from "./discriminate-lesson";
+import { normalizeFileName } from "./resolve-slug";
 
 describe("classifyLessonFolder", () => {
   let dir: string;
@@ -107,6 +108,74 @@ describe("classifyLessonFolder", () => {
     expect(result.kind).toBe("reading");
     if (result.kind === "reading") {
       expect(result.resourceKeys).toEqual(["lesson-slug/exercise.docx"]);
+    }
+  });
+
+  test("WHEN the video/poster basenames have spaces and accents THEN the keys are slugified", () => {
+    // Arrange
+    mkdirSync(path.join(dir, "lesson-slug"));
+    writeFileSync(
+      path.join(dir, "lesson-slug", "Aprende Inglés Americano con Fluidez desde Cero.mp4"),
+      "fake",
+    );
+    writeFileSync(
+      path.join(dir, "lesson-slug", "Common English Expressions #32 Snapshot.jpeg"),
+      "fake",
+    );
+
+    // Act
+    const result = classifyLessonFolder(path.join(dir, "lesson-slug"), "lesson-slug");
+
+    // Assert
+    expect(result.kind).toBe("video");
+    if (result.kind === "video") {
+      expect(result.videoKey).toBe(
+        "lesson-slug/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
+      );
+      expect(result.posterKey).toBe("lesson-slug/common-english-expressions-32-snapshot.jpeg");
+    }
+  });
+
+  test("WHEN resources have raw filenames THEN resourceRawNames preserves them 1:1 with keys", () => {
+    // Arrange
+    mkdirSync(path.join(dir, "lesson-slug"));
+    writeFileSync(path.join(dir, "lesson-slug", "lesson.mp4"), "fake");
+    writeFileSync(path.join(dir, "lesson-slug", "Vowel Chart (v2).pdf"), "fake");
+    writeFileSync(path.join(dir, "lesson-slug", "Drills 2024.PDF"), "fake");
+
+    // Act
+    const result = classifyLessonFolder(path.join(dir, "lesson-slug"), "lesson-slug");
+
+    // Assert
+    expect(result.kind).toBe("video");
+    if (result.kind === "video") {
+      expect(result.resourceKeys.length).toBe(result.resourceRawNames.length);
+      // Order matches: each raw name's normalized form equals the key basename.
+      for (let i = 0; i < result.resourceKeys.length; i++) {
+        const rawAt = result.resourceRawNames[i] as string;
+        const keyBase = path.basename(result.resourceKeys[i] as string);
+        expect(keyBase).toBe(normalizeFileName(rawAt));
+      }
+      // The raw names are the literal filenames (with spaces, case).
+      const raws = result.resourceRawNames;
+      expect(raws).toContain("Vowel Chart (v2).pdf");
+      expect(raws).toContain("Drills 2024.PDF");
+    }
+  });
+
+  test("WHEN a resource basename has special characters THEN its key is slugified", () => {
+    // Arrange
+    mkdirSync(path.join(dir, "lesson-slug"));
+    writeFileSync(path.join(dir, "lesson-slug", "lesson.mp4"), "fake");
+    writeFileSync(path.join(dir, "lesson-slug", "Vowel Chart (v2).pdf"), "fake");
+
+    // Act
+    const result = classifyLessonFolder(path.join(dir, "lesson-slug"), "lesson-slug");
+
+    // Assert
+    expect(result.kind).toBe("video");
+    if (result.kind === "video") {
+      expect(result.resourceKeys).toContain("lesson-slug/vowel-chart-v2.pdf");
     }
   });
 
