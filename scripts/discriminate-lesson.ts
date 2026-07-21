@@ -1,6 +1,8 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
+import { normalizeFileName } from "./resolve-slug";
+
 /**
  * Classification of a lesson folder's contents into a structured shape the
  * seed generator can consume.
@@ -21,15 +23,30 @@ export type ClassifiedLesson =
       title: string;
       description: string;
       videoKey: string;
+      /**
+       * The video's actual on-disk basename (raw, pre-normalization). The
+       * generator reads bytes via this — NOT via `videoKey`, whose basename
+       * is slugified for the URL and may differ from disk until normalized.
+       */
+      videoFileName: string;
       posterKey: string | null;
+      /**
+       * Raw on-disk filenames paired 1:1 with `resourceKeys` by index. Lets
+       * the generator preserve the original name even when no
+       * `rename-manifest.json` entry matches (e.g. re-generating on a tree
+       * whose manifest was lost or never written).
+       */
+      resourceRawNames: string[];
       resourceKeys: string[];
       readmeKey: string | null;
+      readmeRawName: string | null;
     }
   | {
       kind: "reading";
       title: string;
       body: string;
       resourceKeys: string[];
+      resourceRawNames: string[];
     };
 
 const VIDEO_EXTENSIONS = new Set([".mp4", ".mov", ".webm", ".mkv"]);
@@ -49,25 +66,33 @@ export function classifyLessonFolder(folderPath: string, lessonSlug: string): Cl
     const title = humanize(lessonSlug);
     const description =
       "Video lesson. The full description lives in the linked notes (Resource below).";
-    const videoKey = `${lessonSlug}/${videoFile}`;
-    const posterKey = imageFile ? `${lessonSlug}/${imageFile}` : null;
-    const readmeKey = readmeFile ? `${lessonSlug}/${readmeFile}` : null;
+    const videoKey = `${lessonSlug}/${normalizeFileName(videoFile)}`;
+    const posterKey = imageFile ? `${lessonSlug}/${normalizeFileName(imageFile)}` : null;
+    const readmeKey = readmeFile ? `${lessonSlug}/${normalizeFileName(readmeFile)}` : null;
     const resourceKeys: string[] = [];
-    if (readmeKey) resourceKeys.push(readmeKey);
+    const resourceRawNames: string[] = [];
+    if (readmeKey && readmeFile) {
+      resourceKeys.push(readmeKey);
+      resourceRawNames.push(readmeFile);
+    }
     for (const f of files) {
       if (f === videoFile) continue;
       if (f === imageFile) continue;
       if (f === readmeFile) continue;
-      resourceKeys.push(`${lessonSlug}/${f}`);
+      resourceKeys.push(`${lessonSlug}/${normalizeFileName(f)}`);
+      resourceRawNames.push(f);
     }
     return {
       kind: "video",
       title,
       description,
       videoKey,
+      videoFileName: videoFile,
       posterKey,
       resourceKeys,
+      resourceRawNames,
       readmeKey,
+      readmeRawName: readmeFile ?? null,
     };
   }
 
@@ -75,12 +100,14 @@ export function classifyLessonFolder(folderPath: string, lessonSlug: string): Cl
     const body = readFileSync(path.join(folderPath, readmeFile), "utf8");
     const title = humanize(lessonSlug);
     const resourceKeys: string[] = [];
+    const resourceRawNames: string[] = [];
     for (const f of files) {
       if (f === readmeFile) continue;
       if (IMAGE_EXTENSIONS.has(path.extname(f).toLowerCase())) continue;
-      resourceKeys.push(`${lessonSlug}/${f}`);
+      resourceKeys.push(`${lessonSlug}/${normalizeFileName(f)}`);
+      resourceRawNames.push(f);
     }
-    return { kind: "reading", title, body, resourceKeys };
+    return { kind: "reading", title, body, resourceKeys, resourceRawNames };
   }
 
   throw new Error(
