@@ -108,10 +108,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 32",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/1-common-english-expressions-32/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/1-common-english-expressions-32/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 344,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/1-common-english-expressions-32/d4f813e-37a2-7017-d07-15b4830b8b3_Snapshot_2104770.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/1-common-english-expressions-32/d4f813e-37a2-7017-d07-15b4830b8b3-snapshot-2104770.jpeg",
   },
   {
     kind: "video",
@@ -122,10 +122,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 33",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/2-common-english-expressions-33/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/2-common-english-expressions-33/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 364,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/2-common-english-expressions-33/acc2f4e-111e-65f-7113-8336a34c210_Snapshot_2104771.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/2-common-english-expressions-33/acc2f4e-111e-65f-7113-8336a34c210-snapshot-2104771.jpeg",
   },
   {
     kind: "video",
@@ -136,10 +136,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 34",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/3-common-english-expressions-34/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/3-common-english-expressions-34/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 398,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/3-common-english-expressions-34/57830-c24e-baeb-46bc-e773e6a24b7_Snapshot_2104772.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/3-common-english-expressions-34/57830-c24e-baeb-46bc-e773e6a24b7-snapshot-2104772.jpeg",
   },
   {
     kind: "video",
@@ -150,10 +150,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 35",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/4-common-english-expressions-35/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/4-common-english-expressions-35/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 312,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/4-common-english-expressions-35/258ef2-13a2-dbf8-806a-ea3166737_Snapshot_2104773.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/4-common-english-expressions-35/258ef2-13a2-dbf8-806a-ea3166737-snapshot-2104773.jpeg",
   },
   {
     kind: "video",
@@ -164,10 +164,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 36",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/5-common-english-expressions-36/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/5-common-english-expressions-36/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 342,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/5-common-english-expressions-36/d2fb21f-31f-0cd3-7c1d-d1787bbe152_Snapshot_2104774.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/5-common-english-expressions-36/d2fb21f-31f-0cd3-7c1d-d1787bbe152-snapshot-2104774.jpeg",
   },
   {
     kind: "video",
@@ -178,10 +178,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 37",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/6-common-english-expressions-37/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/6-common-english-expressions-37/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 337,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/6-common-english-expressions-37/35e670-0e61-ce16-cdc-86c8fc824fe_Snapshot_2104775.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/6-common-english-expressions-37/35e670-0e61-ce16-cdc-86c8fc824fe-snapshot-2104775.jpeg",
   },
   {
     kind: "video",
@@ -192,10 +192,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 38",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/7-common-english-expressions-38/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/7-common-english-expressions-38/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 298,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/7-common-english-expressions-38/50760e0-fb87-bd2a-37b4-731b5d47240_Snapshot_2104776.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/7-common-english-expressions-38/50760e0-fb87-bd2a-37b4-731b5d47240-snapshot-2104776.jpeg",
   },
   {
     kind: "video",
@@ -206,10 +206,10 @@ const _seedContentLessonRaw = [
     title: "Intro",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/1-intro/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/1-intro/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 178,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/1-intro/aa1d1d-52c-7a8f-715-e355ce6847f5_Snapshot_554507762.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/1-intro/aa1d1d-52c-7a8f-715-e355ce6847f5-snapshot-554507762.jpeg",
   },
   {
     kind: "video",
@@ -220,10 +220,10 @@ const _seedContentLessonRaw = [
     title: "Gliding Vs Stepping",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/2-gliding-vs-stepping/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/2-gliding-vs-stepping/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 357,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/2-gliding-vs-stepping/22a35c-1d87-812-166d-bcdeae7d0b1e_Snapshot_554507768.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/2-gliding-vs-stepping/22a35c-1d87-812-166d-bcdeae7d0b1e-snapshot-554507768.jpeg",
   },
   {
     kind: "video",
@@ -234,10 +234,10 @@ const _seedContentLessonRaw = [
     title: "Falling Intonation",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/3-falling-intonation/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/3-falling-intonation/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 1880,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/3-falling-intonation/2243618-1b0b-1c48-53a2-77a0fafbe402_Snapshot_554507842.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/3-falling-intonation/2243618-1b0b-1c48-53a2-77a0fafbe402-snapshot-554507842.jpeg",
   },
   {
     kind: "video",
@@ -248,10 +248,10 @@ const _seedContentLessonRaw = [
     title: "Rising Intonation",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/4-rising-intonation/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/4-rising-intonation/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 532,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/4-rising-intonation/2efa8a-23ca-b4e3-44bb-3dfb42f026ee_Snapshot_554507852.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/4-rising-intonation/2efa8a-23ca-b4e3-44bb-3dfb42f026ee-snapshot-554507852.jpeg",
   },
   {
     kind: "video",
@@ -262,10 +262,10 @@ const _seedContentLessonRaw = [
     title: "Fall Rise Intonation",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/5-fall-rise-intonation/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/5-fall-rise-intonation/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 444,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/5-fall-rise-intonation/437d0f8-3608-6bbe-abbf-28c4ff0c6ae_Snapshot_554507855.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/5-fall-rise-intonation/437d0f8-3608-6bbe-abbf-28c4ff0c6ae-snapshot-554507855.jpeg",
   },
   {
     kind: "video",
@@ -276,10 +276,10 @@ const _seedContentLessonRaw = [
     title: "Rise Fall Intonation",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/6-rise-fall-intonation/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/6-rise-fall-intonation/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 545,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/6-rise-fall-intonation/80da1ed-e65f-cc8b-2c7-c8e3ba5eaa0_Snapshot_554507857.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/6-rise-fall-intonation/80da1ed-e65f-cc8b-2c7-c8e3ba5eaa0-snapshot-554507857.jpeg",
   },
   {
     kind: "video",
@@ -290,10 +290,10 @@ const _seedContentLessonRaw = [
     title: "Welcome",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/1-advanced-pronunciation-course/1-welcome/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/1-advanced-pronunciation-course/1-welcome/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 195,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/1-advanced-pronunciation-course/1-welcome/02c51c4-2ab8-b82-fa2c-d2cd54856b0a_Snapshot_210449.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/1-advanced-pronunciation-course/1-welcome/02c51c4-2ab8-b82-fa2c-d2cd54856b0a-snapshot-210449.jpeg",
   },
   {
     kind: "video",
@@ -304,10 +304,10 @@ const _seedContentLessonRaw = [
     title: "Lo Que Necesitas",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/1-advanced-pronunciation-course/2-lo-que-necesitas/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/1-advanced-pronunciation-course/2-lo-que-necesitas/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 491,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/1-advanced-pronunciation-course/2-lo-que-necesitas/a17b24f-7ddd-b2cf-6ac3-64d758a325e_Snapshot_554507582.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/1-advanced-pronunciation-course/2-lo-que-necesitas/a17b24f-7ddd-b2cf-6ac3-64d758a325e-snapshot-554507582.jpeg",
   },
   {
     kind: "video",
@@ -318,10 +318,10 @@ const _seedContentLessonRaw = [
     title: "Intro",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/1-advanced-pronunciation-course/3-intro/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/1-advanced-pronunciation-course/3-intro/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 52,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/1-advanced-pronunciation-course/3-intro/6c5b5d-60e-3488-7d60-42f65a5c04_Snapshot_554400.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/1-advanced-pronunciation-course/3-intro/6c5b5d-60e-3488-7d60-42f65a5c04-snapshot-554400.jpeg",
   },
   {
     kind: "video",
@@ -332,10 +332,10 @@ const _seedContentLessonRaw = [
     title: "Articulatory Settings",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/1-advanced-pronunciation-course/4-articulatory-settings/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/1-advanced-pronunciation-course/4-articulatory-settings/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 946,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/1-advanced-pronunciation-course/4-articulatory-settings/bb57fbb-b55f-7d1b-1802-bdb25f4a1d76_thumb3.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/1-advanced-pronunciation-course/4-articulatory-settings/bb57fbb-b55f-7d1b-1802-bdb25f4a1d76-thumb3.jpeg",
   },
   {
     kind: "video",
@@ -346,10 +346,10 @@ const _seedContentLessonRaw = [
     title: "Exercise 1 Pronunciation Step By Step Lesson",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/1-exercise-1-pronunciation-step-by-step-lesson/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/1-exercise-1-pronunciation-step-by-step-lesson/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 854,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/1-exercise-1-pronunciation-step-by-step-lesson/60d712a-a3c8-06d2-de70-c2f4eeb11d42_Snapshot_554507678.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/1-exercise-1-pronunciation-step-by-step-lesson/60d712a-a3c8-06d2-de70-c2f4eeb11d42-snapshot-554507678.jpeg",
   },
   {
     kind: "video",
@@ -360,10 +360,10 @@ const _seedContentLessonRaw = [
     title: "Exercise 2 Pronunciation Step By Step Lesson",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/2-exercise-2-pronunciation-step-by-step-lesson/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/2-exercise-2-pronunciation-step-by-step-lesson/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 1605,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/2-exercise-2-pronunciation-step-by-step-lesson/78dcdc3-6cc5-a3d-f18e-7acdb06853b_Snapshot_554507680.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/2-exercise-2-pronunciation-step-by-step-lesson/78dcdc3-6cc5-a3d-f18e-7acdb06853b-snapshot-554507680.jpeg",
   },
   {
     kind: "video",
@@ -374,10 +374,10 @@ const _seedContentLessonRaw = [
     title: "Exercise 3 Pronunciation Step By Step Lesson",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/3-exercise-3-pronunciation-step-by-step-lesson/Exercise 3 Pronunciation Step-by-Step Lesson.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/3-exercise-3-pronunciation-step-by-step-lesson/exercise-3-pronunciation-step-by-step-lesson.mp4",
     durationSeconds: 2155,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/3-exercise-3-pronunciation-step-by-step-lesson/ede16d6-8d4c-4340-8668-40dcbd080bdb_Snapshot_554507683.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/3-exercise-3-pronunciation-step-by-step-lesson/ede16d6-8d4c-4340-8668-40dcbd080bdb-snapshot-554507683.jpeg",
   },
   {
     kind: "video",
@@ -388,10 +388,10 @@ const _seedContentLessonRaw = [
     title: "Exercise 4 Pronunciation Step By Step Lesson",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/4-exercise-4-pronunciation-step-by-step-lesson/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/4-exercise-4-pronunciation-step-by-step-lesson/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 2007,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/4-exercise-4-pronunciation-step-by-step-lesson/bdd48ea-01ea-e2db-53c-35474bc05bfb_Snapshot_554507685.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/4-exercise-4-pronunciation-step-by-step-lesson/bdd48ea-01ea-e2db-53c-35474bc05bfb-snapshot-554507685.jpeg",
   },
   {
     kind: "video",
@@ -402,10 +402,10 @@ const _seedContentLessonRaw = [
     title: "Exercise 5 Pronunciation Step By Step Lesson",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/5-exercise-5-pronunciation-step-by-step-lesson/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/5-exercise-5-pronunciation-step-by-step-lesson/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 4252,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/5-exercise-5-pronunciation-step-by-step-lesson/6c1bcd0-1b5-2d4-82f-a7bf2f66fe8c_Snapshot_554507695.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/5-exercise-5-pronunciation-step-by-step-lesson/6c1bcd0-1b5-2d4-82f-a7bf2f66fe8c-snapshot-554507695.jpeg",
   },
   {
     kind: "video",
@@ -416,10 +416,10 @@ const _seedContentLessonRaw = [
     title: "Exercise 6 Pronunciation Step By Step Lesson",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/6-exercise-6-pronunciation-step-by-step-lesson/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/6-exercise-6-pronunciation-step-by-step-lesson/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 2327,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/6-exercise-6-pronunciation-step-by-step-lesson/b7d5bb-3406-b4f5-be8-0647bb254a13_Snapshot_554507694.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/6-exercise-6-pronunciation-step-by-step-lesson/b7d5bb-3406-b4f5-be8-0647bb254a13-snapshot-554507694.jpeg",
   },
   {
     kind: "video",
@@ -430,10 +430,10 @@ const _seedContentLessonRaw = [
     title: "Exercise 7 Pronunciation Step By Step Lesson",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/7-exercise-7-pronunciation-step-by-step-lesson/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/7-exercise-7-pronunciation-step-by-step-lesson/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 823,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/7-exercise-7-pronunciation-step-by-step-lesson/a3fd32-0fbc-54b1-5b4a-6c73a14cd12_Snapshot_554507693.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/7-exercise-7-pronunciation-step-by-step-lesson/a3fd32-0fbc-54b1-5b4a-6c73a14cd12-snapshot-554507693.jpeg",
   },
   {
     kind: "video",
@@ -444,10 +444,10 @@ const _seedContentLessonRaw = [
     title: "Exercise 8 Pronunciation Step By Step Lesson",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/8-exercise-8-pronunciation-step-by-step-lesson/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/8-exercise-8-pronunciation-step-by-step-lesson/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 1832,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/8-exercise-8-pronunciation-step-by-step-lesson/5d7720f-2321-dc4-3cf5-10fd24f3286_Snapshot_554507697.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/8-exercise-8-pronunciation-step-by-step-lesson/5d7720f-2321-dc4-3cf5-10fd24f3286-snapshot-554507697.jpeg",
   },
   {
     kind: "video",
@@ -458,10 +458,10 @@ const _seedContentLessonRaw = [
     title: "Exercise 9 Pronunciation Step By Step Lesson",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/9-exercise-9-pronunciation-step-by-step-lesson/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/9-exercise-9-pronunciation-step-by-step-lesson/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 2667,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/9-exercise-9-pronunciation-step-by-step-lesson/8407bb4-ed4-b632-e5f-5160e3cadf_Snapshot_554507700.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/9-exercise-9-pronunciation-step-by-step-lesson/8407bb4-ed4-b632-e5f-5160e3cadf-snapshot-554507700.jpeg",
   },
   {
     kind: "video",
@@ -472,10 +472,10 @@ const _seedContentLessonRaw = [
     title: "Exercise 10 Pronunciation Step By Step Lesson",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/10-exercise-10-pronunciation-step-by-step-lesson/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/10-exercise-10-pronunciation-step-by-step-lesson/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 2577,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/10-exercise-10-pronunciation-step-by-step-lesson/accd187-ae60-5e0c-a0b-8b8eb84a667_Snapshot_554507702.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/10-exercise-10-pronunciation-step-by-step-lesson/accd187-ae60-5e0c-a0b-8b8eb84a667-snapshot-554507702.jpeg",
   },
   {
     kind: "video",
@@ -486,10 +486,10 @@ const _seedContentLessonRaw = [
     title: "Exercise 11 Pronunciation Step By Step Lesson",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/11-exercise-11-pronunciation-step-by-step-lesson/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/11-exercise-11-pronunciation-step-by-step-lesson/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 2781,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/11-exercise-11-pronunciation-step-by-step-lesson/18e0a7b-6a24-0db6-47b0-7a448a7aebaf_Snapshot_554507705.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/11-exercise-11-pronunciation-step-by-step-lesson/18e0a7b-6a24-0db6-47b0-7a448a7aebaf-snapshot-554507705.jpeg",
   },
   {
     kind: "video",
@@ -500,10 +500,10 @@ const _seedContentLessonRaw = [
     title: "Exercise 12 Pronunciation Step By Step Lesson",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/12-exercise-12-pronunciation-step-by-step-lesson/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/12-exercise-12-pronunciation-step-by-step-lesson/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 2305,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/12-exercise-12-pronunciation-step-by-step-lesson/60d05-3d0b-324-0e8-83a4ca56bda_Snapshot_554507706.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/12-exercise-12-pronunciation-step-by-step-lesson/60d05-3d0b-324-0e8-83a4ca56bda-snapshot-554507706.jpeg",
   },
   {
     kind: "video",
@@ -514,10 +514,10 @@ const _seedContentLessonRaw = [
     title: "Exercise 13 Pronunciation Step By Step Lesson",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/13-exercise-13-pronunciation-step-by-step-lesson/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/13-exercise-13-pronunciation-step-by-step-lesson/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 1140,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/13-exercise-13-pronunciation-step-by-step-lesson/e108fb-6b11-1061-1727-ab7175ab7fd_Snapshot_554507707.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/13-exercise-13-pronunciation-step-by-step-lesson/e108fb-6b11-1061-1727-ab7175ab7fd-snapshot-554507707.jpeg",
   },
   {
     kind: "video",
@@ -528,10 +528,10 @@ const _seedContentLessonRaw = [
     title: "Exercise 14 Pronunciation Step By Step Lesson",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/14-exercise-14-pronunciation-step-by-step-lesson/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/14-exercise-14-pronunciation-step-by-step-lesson/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 613,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/14-exercise-14-pronunciation-step-by-step-lesson/4250bf-83da-ef61-255-6f81edc0da6_Snapshot_554507708.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/14-exercise-14-pronunciation-step-by-step-lesson/4250bf-83da-ef61-255-6f81edc0da6-snapshot-554507708.jpeg",
   },
   {
     kind: "video",
@@ -542,10 +542,10 @@ const _seedContentLessonRaw = [
     title: "Exercise 15 Pronunciation Step By Step Lesson",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/15-exercise-15-pronunciation-step-by-step-lesson/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/15-exercise-15-pronunciation-step-by-step-lesson/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 3563,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/15-exercise-15-pronunciation-step-by-step-lesson/2a8e8db-252b-31a6-0803-361b318c1fd_thumb1.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/15-exercise-15-pronunciation-step-by-step-lesson/2a8e8db-252b-31a6-0803-361b318c1fd-thumb1.jpeg",
   },
   {
     kind: "video",
@@ -556,10 +556,10 @@ const _seedContentLessonRaw = [
     title: "Exercise 16 Pronunciation Step By Step Lesson",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/16-exercise-16-pronunciation-step-by-step-lesson/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/16-exercise-16-pronunciation-step-by-step-lesson/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 6625,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/16-exercise-16-pronunciation-step-by-step-lesson/7663a-ffec-ef40-6e43-30735817bba_aa3d8f43-e429-4bda-9d4a-a1fe37ceb83b.png",
+      "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/16-exercise-16-pronunciation-step-by-step-lesson/7663a-ffec-ef40-6e43-30735817bba-aa3d8f43-e429-4bda-9d4a-a1fe37ceb83b.png",
   },
   {
     kind: "video",
@@ -570,10 +570,10 @@ const _seedContentLessonRaw = [
     title: "Intro",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/1-intro/Aprende Inglés Americano con Fluidez desde Cero (1).mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/1-intro/aprende-ingles-americano-con-fluidez-desde-cero-1.mp4",
     durationSeconds: 374,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/1-intro/e81a56-f54-0fed-6ac5-cf5e713ee3_Snapshot_554507634.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/1-intro/e81a56-f54-0fed-6ac5-cf5e713ee3-snapshot-554507634.jpeg",
   },
   {
     kind: "video",
@@ -584,10 +584,10 @@ const _seedContentLessonRaw = [
     title: "Fast I",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/2-fast-i/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/2-fast-i/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 131,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/2-fast-i/dfc6404-21d1-28ca-822-b805c0de2703_Snapshot_554507652.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/2-fast-i/dfc6404-21d1-28ca-822-b805c0de2703-snapshot-554507652.jpeg",
   },
   {
     kind: "video",
@@ -598,10 +598,10 @@ const _seedContentLessonRaw = [
     title: "Fast U",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/3-fast-u/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/3-fast-u/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 124,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/3-fast-u/285866-615-a143-beac-ca777c6e7b6_Snapshot_554507654.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/3-fast-u/285866-615-a143-beac-ca777c6e7b6-snapshot-554507654.jpeg",
   },
   {
     kind: "video",
@@ -612,10 +612,10 @@ const _seedContentLessonRaw = [
     title: "Fast",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/4-fast/Aprende Inglés Americano con Fluidez desde Cero (1).mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/4-fast/aprende-ingles-americano-con-fluidez-desde-cero-1.mp4",
     durationSeconds: 110,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/4-fast/0b5c6ba-34c7-b188-3d8-5f66310b067e_Snapshot_554507649.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/4-fast/0b5c6ba-34c7-b188-3d8-5f66310b067e-snapshot-554507649.jpeg",
   },
   {
     kind: "video",
@@ -626,10 +626,10 @@ const _seedContentLessonRaw = [
     title: "Fast",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/5-fast/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/5-fast/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 92,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/5-fast/edab402-af4a-706-b322-ab17b3b4ba54_Snapshot_554507648.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/5-fast/edab402-af4a-706-b322-ab17b3b4ba54-snapshot-554507648.jpeg",
   },
   {
     kind: "video",
@@ -640,10 +640,10 @@ const _seedContentLessonRaw = [
     title: "Fast",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/6-fast/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/6-fast/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 94,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/6-fast/ed03214-5f16-888b-3ec8-2abe3a0041d_Snapshot_554507655.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/6-fast/ed03214-5f16-888b-3ec8-2abe3a0041d-snapshot-554507655.jpeg",
   },
   {
     kind: "video",
@@ -654,10 +654,10 @@ const _seedContentLessonRaw = [
     title: "Fast",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/7-fast/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/7-fast/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 104,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/7-fast/c43fcd-5167-dfc1-a7bd-1833f0865d43_Snapshot_554507656.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/7-fast/c43fcd-5167-dfc1-a7bd-1833f0865d43-snapshot-554507656.jpeg",
   },
   {
     kind: "video",
@@ -668,10 +668,10 @@ const _seedContentLessonRaw = [
     title: "Fast Cot Caught Merger",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/8-fast-cot-caught-merger/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/8-fast-cot-caught-merger/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 116,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/8-fast-cot-caught-merger/d35aed-6bb8-fe66-d514-d30570662371_Snapshot_554507647.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/8-fast-cot-caught-merger/d35aed-6bb8-fe66-d514-d30570662371-snapshot-554507647.jpeg",
   },
   {
     kind: "video",
@@ -682,10 +682,10 @@ const _seedContentLessonRaw = [
     title: "Fast A",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/9-fast-a/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/9-fast-a/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 101,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/9-fast-a/d2466b-5bd8-115-6047-ddc52451e5d_Snapshot_554507654.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/9-fast-a/d2466b-5bd8-115-6047-ddc52451e5d-snapshot-554507654.jpeg",
   },
   {
     kind: "video",
@@ -696,10 +696,10 @@ const _seedContentLessonRaw = [
     title: "Fast",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/10-fast/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/10-fast/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 70,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/10-fast/2d3e035-e821-ca7a-2f51-1fb8fdcce6_Snapshot_554507655.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/10-fast/2d3e035-e821-ca7a-2f51-1fb8fdcce6-snapshot-554507655.jpeg",
   },
   {
     kind: "video",
@@ -710,10 +710,10 @@ const _seedContentLessonRaw = [
     title: "Fast",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/11-fast/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/11-fast/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 105,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/11-fast/4ddb6fb-04cb-b53-2ab0-7728b0f36c_Snapshot_554507645.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/11-fast/4ddb6fb-04cb-b53-2ab0-7728b0f36c-snapshot-554507645.jpeg",
   },
   {
     kind: "video",
@@ -724,10 +724,10 @@ const _seedContentLessonRaw = [
     title: "Fast",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/12-fast/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/12-fast/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 140,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/12-fast/f7b1487-333d-1e61-7216-22cc4d84be3_Snapshot_554507643.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/12-fast/f7b1487-333d-1e61-7216-22cc4d84be3-snapshot-554507643.jpeg",
   },
   {
     kind: "video",
@@ -738,10 +738,10 @@ const _seedContentLessonRaw = [
     title: "Fast",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/13-fast/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/13-fast/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 91,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/13-fast/62033ac-af21-21d7-ddae-c2ab545212cc_Snapshot_554507644.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/13-fast/62033ac-af21-21d7-ddae-c2ab545212cc-snapshot-554507644.jpeg",
   },
   {
     kind: "video",
@@ -752,10 +752,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 1",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/1-common-english-expressions-1/Aprende Inglés Americano con Fluidez desde Cero (1).mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/1-common-english-expressions-1/aprende-ingles-americano-con-fluidez-desde-cero-1.mp4",
     durationSeconds: 289,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/1-common-english-expressions-1/4df7d41-fda0-b5cb-b4e0-07cf8477a4f2_Snapshot_2104713.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/1-common-english-expressions-1/4df7d41-fda0-b5cb-b4e0-07cf8477a4f2-snapshot-2104713.jpeg",
   },
   {
     kind: "video",
@@ -766,10 +766,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 2",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/2-common-english-expressions-2/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/2-common-english-expressions-2/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 254,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/2-common-english-expressions-2/d80c825-485b-fbce-670-1ef5e72377c4_Snapshot_2104714.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/2-common-english-expressions-2/d80c825-485b-fbce-670-1ef5e72377c4-snapshot-2104714.jpeg",
   },
   {
     kind: "video",
@@ -780,10 +780,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 3",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/3-common-english-expressions-3/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/3-common-english-expressions-3/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 265,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/3-common-english-expressions-3/df41de0-453-d6d7-c32f-2ce4a83182e7_Snapshot_2104715.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/3-common-english-expressions-3/df41de0-453-d6d7-c32f-2ce4a83182e7-snapshot-2104715.jpeg",
   },
   {
     kind: "video",
@@ -794,10 +794,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 4",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/4-common-english-expressions-4/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/4-common-english-expressions-4/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 280,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/4-common-english-expressions-4/c2eef65-3d75-e6fe-c243-65646c47ce84_Snapshot_2104716.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/4-common-english-expressions-4/c2eef65-3d75-e6fe-c243-65646c47ce84-snapshot-2104716.jpeg",
   },
   {
     kind: "video",
@@ -808,10 +808,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 5",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/5-common-english-expressions-5/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/5-common-english-expressions-5/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 291,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/5-common-english-expressions-5/1f04f47-5673-5abf-a74-d5a2d61da1fc_Snapshot_2104717.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/5-common-english-expressions-5/1f04f47-5673-5abf-a74-d5a2d61da1fc-snapshot-2104717.jpeg",
   },
   {
     kind: "video",
@@ -822,10 +822,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 6",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/6-common-english-expressions-6/Aprende Inglés Americano con Fluidez desde Cero (1).mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/6-common-english-expressions-6/aprende-ingles-americano-con-fluidez-desde-cero-1.mp4",
     durationSeconds: 186,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/6-common-english-expressions-6/27df75f-8cd0-6b48-bccd-aebd0f53fda0_Snapshot_2104718.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/6-common-english-expressions-6/27df75f-8cd0-6b48-bccd-aebd0f53fda0-snapshot-2104718.jpeg",
   },
   {
     kind: "video",
@@ -836,10 +836,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 7",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/7-common-english-expressions-7/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/7-common-english-expressions-7/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 209,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/7-common-english-expressions-7/70c53b-cb7d-4458-f87e-d2bd03c2dd4_Snapshot_2104719.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/7-common-english-expressions-7/70c53b-cb7d-4458-f87e-d2bd03c2dd4-snapshot-2104719.jpeg",
   },
   {
     kind: "video",
@@ -850,10 +850,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 8",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/8-common-english-expressions-8/Aprende Inglés Americano con Fluidez desde Cero (1).mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/8-common-english-expressions-8/aprende-ingles-americano-con-fluidez-desde-cero-1.mp4",
     durationSeconds: 199,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/8-common-english-expressions-8/1007-3a1a-8a58-5f3a-b0e14b02feb_Snapshot_2104720.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/8-common-english-expressions-8/1007-3a1a-8a58-5f3a-b0e14b02feb-snapshot-2104720.jpeg",
   },
   {
     kind: "video",
@@ -864,10 +864,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 9",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/9-common-english-expressions-9/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/9-common-english-expressions-9/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 191,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/9-common-english-expressions-9/8f7f2b0-cebc-b701-12f5-53cec58fc81_Snapshot_2104721.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/9-common-english-expressions-9/8f7f2b0-cebc-b701-12f5-53cec58fc81-snapshot-2104721.jpeg",
   },
   {
     kind: "video",
@@ -878,10 +878,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 10",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/10-common-english-expressions-10/Aprende Inglés Americano con Fluidez desde Cero (1).mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/10-common-english-expressions-10/aprende-ingles-americano-con-fluidez-desde-cero-1.mp4",
     durationSeconds: 275,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/10-common-english-expressions-10/f1d4ca7-3e-4c0-bbea-a1106335df0_Snapshot_2104722.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/10-common-english-expressions-10/f1d4ca7-3e-4c0-bbea-a1106335df0-snapshot-2104722.jpeg",
   },
   {
     kind: "video",
@@ -892,10 +892,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 11",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/11-common-english-expressions-11/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/11-common-english-expressions-11/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 318,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/11-common-english-expressions-11/8ba022c-5df6-678f-155e-7edd7cdca41b_Snapshot_2104723.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/11-common-english-expressions-11/8ba022c-5df6-678f-155e-7edd7cdca41b-snapshot-2104723.jpeg",
   },
   {
     kind: "video",
@@ -906,10 +906,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 12",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/12-common-english-expressions-12/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/12-common-english-expressions-12/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 306,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/12-common-english-expressions-12/f80cb2d-643b-3d84-b17-4cc512667d1_Snapshot_2104724.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/12-common-english-expressions-12/f80cb2d-643b-3d84-b17-4cc512667d1-snapshot-2104724.jpeg",
   },
   {
     kind: "video",
@@ -920,10 +920,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 13",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/13-common-english-expressions-13/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/13-common-english-expressions-13/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 310,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/13-common-english-expressions-13/fce3f5d-d774-cb-7e8a-322b41a7fcbc_Snapshot_2104725.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/13-common-english-expressions-13/fce3f5d-d774-cb-7e8a-322b41a7fcbc-snapshot-2104725.jpeg",
   },
   {
     kind: "video",
@@ -934,10 +934,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 14",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/14-common-english-expressions-14/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/14-common-english-expressions-14/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 310,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/14-common-english-expressions-14/674d545-07fb-622c-7bd4-41cc5edd68b2_Snapshot_2104726.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/14-common-english-expressions-14/674d545-07fb-622c-7bd4-41cc5edd68b2-snapshot-2104726.jpeg",
   },
   {
     kind: "video",
@@ -948,10 +948,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 15",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/15-common-english-expressions-15/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/15-common-english-expressions-15/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 260,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/15-common-english-expressions-15/da7ea26-a8cb-e51c-d7ba-bb5d6a884fa4_Snapshot_2104727.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/15-common-english-expressions-15/da7ea26-a8cb-e51c-d7ba-bb5d6a884fa4-snapshot-2104727.jpeg",
   },
   {
     kind: "video",
@@ -962,10 +962,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 16",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/16-common-english-expressions-16/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/16-common-english-expressions-16/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 330,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/16-common-english-expressions-16/d5f0fe3-d1bb-e6d8-6b6-653a1105571_Snapshot_2104728.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/16-common-english-expressions-16/d5f0fe3-d1bb-e6d8-6b6-653a1105571-snapshot-2104728.jpeg",
   },
   {
     kind: "video",
@@ -976,10 +976,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 17",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/17-common-english-expressions-17/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/17-common-english-expressions-17/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 279,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/17-common-english-expressions-17/bc20e15-23ef-7171-0ee-118e486e5103_Snapshot_2104729.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/17-common-english-expressions-17/bc20e15-23ef-7171-0ee-118e486e5103-snapshot-2104729.jpeg",
   },
   {
     kind: "video",
@@ -990,10 +990,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 18",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/18-common-english-expressions-18/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/18-common-english-expressions-18/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 388,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/18-common-english-expressions-18/27f24a5-7d5a-e318-47c2-5d7c0b6f43bd_Snapshot_2104730.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/18-common-english-expressions-18/27f24a5-7d5a-e318-47c2-5d7c0b6f43bd-snapshot-2104730.jpeg",
   },
   {
     kind: "video",
@@ -1004,10 +1004,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 19",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/19-common-english-expressions-19/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/19-common-english-expressions-19/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 358,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/19-common-english-expressions-19/8bf670b-856d-d336-5fb-51c3c3d6ffee_Snapshot_2104731.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/19-common-english-expressions-19/8bf670b-856d-d336-5fb-51c3c3d6ffee-snapshot-2104731.jpeg",
   },
   {
     kind: "video",
@@ -1018,10 +1018,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 20",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/20-common-english-expressions-20/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/20-common-english-expressions-20/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 308,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/20-common-english-expressions-20/15be53-bf44-40dd-d6ea-0d85e61614aa_Snapshot_2104732.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/20-common-english-expressions-20/15be53-bf44-40dd-d6ea-0d85e61614aa-snapshot-2104732.jpeg",
   },
   {
     kind: "video",
@@ -1032,10 +1032,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 21",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/21-common-english-expressions-21/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/21-common-english-expressions-21/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 332,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/21-common-english-expressions-21/3e70e2-1bd8-16af-eee6-67ca0260f1b_Snapshot_2104738.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/21-common-english-expressions-21/3e70e2-1bd8-16af-eee6-67ca0260f1b-snapshot-2104738.jpeg",
   },
   {
     kind: "video",
@@ -1046,10 +1046,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 22",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/22-common-english-expressions-22/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/22-common-english-expressions-22/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 296,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/22-common-english-expressions-22/80be00-545c-87df-52ec-c40fa4b7e2_Snapshot_2104739.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/22-common-english-expressions-22/80be00-545c-87df-52ec-c40fa4b7e2-snapshot-2104739.jpeg",
   },
   {
     kind: "video",
@@ -1060,10 +1060,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 23",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/23-common-english-expressions-23/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/23-common-english-expressions-23/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 283,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/23-common-english-expressions-23/bf50fb-b4b-fd4-df45-010f5e265c_Snapshot_2104740.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/23-common-english-expressions-23/bf50fb-b4b-fd4-df45-010f5e265c-snapshot-2104740.jpeg",
   },
   {
     kind: "video",
@@ -1074,10 +1074,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 24",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/24-common-english-expressions-24/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/24-common-english-expressions-24/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 349,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/24-common-english-expressions-24/b382414-b0ca-8ab4-167c-e7ec28ec35e_Snapshot_2104741.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/24-common-english-expressions-24/b382414-b0ca-8ab4-167c-e7ec28ec35e-snapshot-2104741.jpeg",
   },
   {
     kind: "video",
@@ -1088,10 +1088,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 25",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/25-common-english-expressions-25/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/25-common-english-expressions-25/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 415,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/25-common-english-expressions-25/18128b0-f11-e7fd-2cf-baae7de5a122_Snapshot_2104742.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/25-common-english-expressions-25/18128b0-f11-e7fd-2cf-baae7de5a122-snapshot-2104742.jpeg",
   },
   {
     kind: "video",
@@ -1102,10 +1102,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 26",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/26-common-english-expressions-26/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/26-common-english-expressions-26/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 344,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/26-common-english-expressions-26/4fecdd7-e242-0fc-d00d-622855e2f432_Snapshot_2104743.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/26-common-english-expressions-26/4fecdd7-e242-0fc-d00d-622855e2f432-snapshot-2104743.jpeg",
   },
   {
     kind: "video",
@@ -1116,10 +1116,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 27",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/27-common-english-expressions-27/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/27-common-english-expressions-27/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 421,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/27-common-english-expressions-27/c5158c8-fa7f-d35a-21c4-c6d6680b4ba_Snapshot_2104744.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/27-common-english-expressions-27/c5158c8-fa7f-d35a-21c4-c6d6680b4ba-snapshot-2104744.jpeg",
   },
   {
     kind: "video",
@@ -1130,10 +1130,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 28",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/28-common-english-expressions-28/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/28-common-english-expressions-28/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 466,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/28-common-english-expressions-28/7af1c20-63bb-ae35-2db3-432fdc6e58ff_Snapshot_2104745.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/28-common-english-expressions-28/7af1c20-63bb-ae35-2db3-432fdc6e58ff-snapshot-2104745.jpeg",
   },
   {
     kind: "video",
@@ -1144,10 +1144,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 29",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/29-common-english-expressions-29/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/29-common-english-expressions-29/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 413,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/29-common-english-expressions-29/ec7387-2385-a5b3-c4d-0bf8208ac8_Snapshot_2104746.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/29-common-english-expressions-29/ec7387-2385-a5b3-c4d-0bf8208ac8-snapshot-2104746.jpeg",
   },
   {
     kind: "video",
@@ -1158,10 +1158,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 30",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/30-common-english-expressions-30/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/30-common-english-expressions-30/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 358,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/30-common-english-expressions-30/b0a2364-ed3-2562-68b-51c0e8fa234d_Snapshot_2104747.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/30-common-english-expressions-30/b0a2364-ed3-2562-68b-51c0e8fa234d-snapshot-2104747.jpeg",
   },
   {
     kind: "video",
@@ -1172,10 +1172,10 @@ const _seedContentLessonRaw = [
     title: "Common English Expressions 31",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/31-common-english-expressions-31/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/31-common-english-expressions-31/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 350,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/31-common-english-expressions-31/ea6c0ad-efe8-36c8-400d-2545c1fde5ef_Snapshot_2104760.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/7-everyday-english-phrases-part-1-master-them/31-common-english-expressions-31/ea6c0ad-efe8-36c8-400d-2545c1fde5ef-snapshot-2104760.jpeg",
   },
   {
     kind: "video",
@@ -1186,10 +1186,10 @@ const _seedContentLessonRaw = [
     title: "Rule 1 Conectando 2 Consonantes Plosivas",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/1-rule-1-conectando-2-consonantes-plosivas/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/1-rule-1-conectando-2-consonantes-plosivas/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 908,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/1-rule-1-conectando-2-consonantes-plosivas/f82371-deba-fbfb-15c3-de04ef85d6c0_thumbnail.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/1-rule-1-conectando-2-consonantes-plosivas/f82371-deba-fbfb-15c3-de04ef85d6c0-thumbnail.jpeg",
   },
   {
     kind: "video",
@@ -1200,10 +1200,10 @@ const _seedContentLessonRaw = [
     title: "Rule 2 Conectando 2 Consonantes Continuas",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/2-rule-2-conectando-2-consonantes-continuas/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/2-rule-2-conectando-2-consonantes-continuas/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 780,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/2-rule-2-conectando-2-consonantes-continuas/ab8b88e-b34f-686c-ed6-b8c0dd7d1106_Snapshot_362.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/2-rule-2-conectando-2-consonantes-continuas/ab8b88e-b34f-686c-ed6-b8c0dd7d1106-snapshot-362.jpeg",
   },
   {
     kind: "video",
@@ -1214,10 +1214,10 @@ const _seedContentLessonRaw = [
     title: "Rule 3 D Y D",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/3-rule-3-d-y-d/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/3-rule-3-d-y-d/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 848,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/3-rule-3-d-y-d/84633bf-32ca-8ee7-4473-2fc71b0377_Snapshot_399.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/3-rule-3-d-y-d/84633bf-32ca-8ee7-4473-2fc71b0377-snapshot-399.jpeg",
   },
   {
     kind: "video",
@@ -1228,10 +1228,10 @@ const _seedContentLessonRaw = [
     title: "Rule 4 La Regla De Las 3 Consonantes",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/4-rule-4-la-regla-de-las-3-consonantes/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/4-rule-4-la-regla-de-las-3-consonantes/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 2416,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/4-rule-4-la-regla-de-las-3-consonantes/074cf1-bc57-b1ad-ee8-667ae4bde1_Snapshot_5944.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/4-rule-4-la-regla-de-las-3-consonantes/074cf1-bc57-b1ad-ee8-667ae4bde1-snapshot-5944.jpeg",
   },
   {
     kind: "video",
@@ -1242,10 +1242,10 @@ const _seedContentLessonRaw = [
     title: "Rule 5 T Y Ch",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/5-rule-5-t-y-ch/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/5-rule-5-t-y-ch/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 862,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/5-rule-5-t-y-ch/84e2ae5-3fa1-4be-7a7d-835ff021a87_Snapshot_6014.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/5-rule-5-t-y-ch/84e2ae5-3fa1-4be-7a7d-835ff021a87-snapshot-6014.jpeg",
   },
   {
     kind: "video",
@@ -1256,10 +1256,10 @@ const _seedContentLessonRaw = [
     title: "Rule 6 S Y Sh",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/6-rule-6-s-y-sh/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/6-rule-6-s-y-sh/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 378,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/6-rule-6-s-y-sh/f20432-437-818c-d1ba-016ea2ee4a7_Snapshot_6013.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/6-rule-6-s-y-sh/f20432-437-818c-d1ba-016ea2ee4a7-snapshot-6013.jpeg",
   },
   {
     kind: "video",
@@ -1270,10 +1270,10 @@ const _seedContentLessonRaw = [
     title: "Rule 7 Ts Y Ch",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/7-rule-7-ts-y-ch/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/7-rule-7-ts-y-ch/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 514,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/7-rule-7-ts-y-ch/e515461-8761-145-bfc-d822b8bbc_thumbnail.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/7-rule-7-ts-y-ch/e515461-8761-145-bfc-d822b8bbc-thumbnail.jpeg",
   },
   {
     kind: "video",
@@ -1284,10 +1284,10 @@ const _seedContentLessonRaw = [
     title: "Rule 8 Unvoiced Z",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/8-rule-8-unvoiced-z/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/8-rule-8-unvoiced-z/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 945,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/8-rule-8-unvoiced-z/13a08f-d886-885d-b83e-fe8a8b73b52_Snapshot_554507675.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/8-rule-8-unvoiced-z/13a08f-d886-885d-b83e-fe8a8b73b52-snapshot-554507675.jpeg",
   },
   {
     kind: "video",
@@ -1298,10 +1298,10 @@ const _seedContentLessonRaw = [
     title: "Rule 9 N T Vocal N Vocal",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/9-rule-9-n-t-vocal-n-vocal/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/9-rule-9-n-t-vocal-n-vocal/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 649,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/9-rule-9-n-t-vocal-n-vocal/f3d3611-f5a5-eed2-e3e6-2f7ec07c4f7_Snapshot_224.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/9-rule-9-n-t-vocal-n-vocal/f3d3611-f5a5-eed2-e3e6-2f7ec07c4f7-snapshot-224.jpeg",
   },
   {
     kind: "video",
@@ -1312,10 +1312,10 @@ const _seedContentLessonRaw = [
     title: "Rule 10 N T Vocal N",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/10-rule-10-n-t-vocal-n/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/10-rule-10-n-t-vocal-n/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 682,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/10-rule-10-n-t-vocal-n/4a6d6e5-a2a0-cfa-008-b8842555257d_Snapshot_2104892.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/6-rules-for-speaking-fast-natural-in-english/10-rule-10-n-t-vocal-n/4a6d6e5-a2a0-cfa-008-b8842555257d-snapshot-2104892.jpeg",
   },
   {
     kind: "video",
@@ -1326,10 +1326,10 @@ const _seedContentLessonRaw = [
     title: "Day 1",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/1-day-1/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/1-day-1/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 725,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/1-day-1/148caaa-0ae2-fd8-f66f-1daeed24284f_2_THUMBNAIL.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/1-day-1/148caaa-0ae2-fd8-f66f-1daeed24284f-2-thumbnail.jpeg",
   },
   {
     kind: "video",
@@ -1340,10 +1340,10 @@ const _seedContentLessonRaw = [
     title: "Day 2",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/2-day-2/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/2-day-2/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 533,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/2-day-2/20ee5-2ced-b0ce-642d-b0d2e13a7a_Snapshot_93.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/2-day-2/20ee5-2ced-b0ce-642d-b0d2e13a7a-snapshot-93.jpeg",
   },
   {
     kind: "video",
@@ -1354,10 +1354,10 @@ const _seedContentLessonRaw = [
     title: "Day 3",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/3-day-3/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/3-day-3/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 501,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/3-day-3/3c263d5-7e65-64e-e028-6ee76bfae765_thumbnail.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/3-day-3/3c263d5-7e65-64e-e028-6ee76bfae765-thumbnail.jpeg",
   },
   {
     kind: "video",
@@ -1368,10 +1368,10 @@ const _seedContentLessonRaw = [
     title: "Day 4",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/4-day-4/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/4-day-4/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 922,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/4-day-4/fef5d8-2d12-1e08-5ee-b5e1332e685_Snapshot_153.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/4-day-4/fef5d8-2d12-1e08-5ee-b5e1332e685-snapshot-153.jpeg",
   },
   {
     kind: "video",
@@ -1382,10 +1382,10 @@ const _seedContentLessonRaw = [
     title: "Day 5",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/5-day-5/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/5-day-5/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 716,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/5-day-5/d3bc80a-ea24-a674-6147-c626c86cf8da_Snapshot_154.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/5-day-5/d3bc80a-ea24-a674-6147-c626c86cf8da-snapshot-154.jpeg",
   },
   {
     kind: "video",
@@ -1396,10 +1396,10 @@ const _seedContentLessonRaw = [
     title: "Day 6",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/6-day-6/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/6-day-6/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 826,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/6-day-6/4dc14-4c8e-3c6a-b383-450202e14b6_Snapshot_155.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/6-day-6/4dc14-4c8e-3c6a-b383-450202e14b6-snapshot-155.jpeg",
   },
   {
     kind: "video",
@@ -1410,10 +1410,10 @@ const _seedContentLessonRaw = [
     title: "Day 7",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/7-day-7/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/7-day-7/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 1061,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/7-day-7/23d4afd-0238-3504-4136-c8818e55b5d2_Snapshot_157.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/7-day-7/23d4afd-0238-3504-4136-c8818e55b5d2-snapshot-157.jpeg",
   },
   {
     kind: "video",
@@ -1424,10 +1424,10 @@ const _seedContentLessonRaw = [
     title: "Day 8",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/8-day-8/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/8-day-8/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 887,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/8-day-8/277cc1d-0a17-ee1-a64d-1d58f17236c_Snapshot_170.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/8-day-8/277cc1d-0a17-ee1-a64d-1d58f17236c-snapshot-170.jpeg",
   },
   {
     kind: "video",
@@ -1438,10 +1438,10 @@ const _seedContentLessonRaw = [
     title: "Day 9",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/9-day-9/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/9-day-9/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 689,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/9-day-9/f141576-5868-28fc-4bba-50cb18167d16_Snapshot_171.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/9-day-9/f141576-5868-28fc-4bba-50cb18167d16-snapshot-171.jpeg",
   },
   {
     kind: "video",
@@ -1452,10 +1452,10 @@ const _seedContentLessonRaw = [
     title: "Day 10",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/10-day-10/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/10-day-10/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 746,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/10-day-10/5223ea7-b36a-f0d5-ded-404e616a6f1_thumbnail.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/10-day-10/5223ea7-b36a-f0d5-ded-404e616a6f1-thumbnail.jpeg",
   },
   {
     kind: "video",
@@ -1466,10 +1466,10 @@ const _seedContentLessonRaw = [
     title: "Day 11",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/11-day-11/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/11-day-11/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 741,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/11-day-11/1a2765e-b11f-bb2c-7b6d-76de84653d0f_Snapshot_21033.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/11-day-11/1a2765e-b11f-bb2c-7b6d-76de84653d0f-snapshot-21033.jpeg",
   },
   {
     kind: "video",
@@ -1480,10 +1480,10 @@ const _seedContentLessonRaw = [
     title: "Day 12",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/12-day-12/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/12-day-12/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 843,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/12-day-12/ced7f3-4c63-671-dfb6-3ba78c1432da_Snapshot_2104710.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/12-day-12/ced7f3-4c63-671-dfb6-3ba78c1432da-snapshot-2104710.jpeg",
   },
   {
     kind: "video",
@@ -1494,10 +1494,10 @@ const _seedContentLessonRaw = [
     title: "Day 13",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/13-day-13/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/13-day-13/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 935,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/13-day-13/3585f7e-eebe-8443-815-c46ec304e6_e5e50f7c-88e0-4ab8-816b-79d6822348d2.png",
+      "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/13-day-13/3585f7e-eebe-8443-815-c46ec304e6-e5e50f7c-88e0-4ab8-816b-79d6822348d2.png",
   },
   {
     kind: "video",
@@ -1508,10 +1508,10 @@ const _seedContentLessonRaw = [
     title: "Weak Strong Forms",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/4-key-sound-patterns-and-features/1-weak-strong-forms/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/4-key-sound-patterns-and-features/1-weak-strong-forms/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 2143,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/4-key-sound-patterns-and-features/1-weak-strong-forms/be75637-2221-f8e6-5134-3ba84b571eb_Snapshot_554507754.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/4-key-sound-patterns-and-features/1-weak-strong-forms/be75637-2221-f8e6-5134-3ba84b571eb-snapshot-554507754.jpeg",
   },
   {
     kind: "video",
@@ -1522,10 +1522,10 @@ const _seedContentLessonRaw = [
     title: "Intro",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/1-intro/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/1-intro/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 62,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/1-intro/04ecdb-ec4d-8fea-d3f-dc020da6ec80_Snapshot_554507553.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/1-intro/04ecdb-ec4d-8fea-d3f-dc020da6ec80-snapshot-554507553.jpeg",
   },
   {
     kind: "video",
@@ -1536,10 +1536,10 @@ const _seedContentLessonRaw = [
     title: "Why Contractions Reductions Are Important",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/2-why-contractions-reductions-are-important/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/2-why-contractions-reductions-are-important/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 666,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/2-why-contractions-reductions-are-important/c8c56c4-2856-b77f-c377-dd676611f6_Snapshot_554507603.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/2-why-contractions-reductions-are-important/c8c56c4-2856-b77f-c377-dd676611f6-snapshot-554507603.jpeg",
   },
   {
     kind: "video",
@@ -1550,10 +1550,10 @@ const _seedContentLessonRaw = [
     title: "I M You Re He S She S It S We Re They Re",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/3-i-m-you-re-he-s-she-s-it-s-we-re-they-re/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/3-i-m-you-re-he-s-she-s-it-s-we-re-they-re/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 752,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/3-i-m-you-re-he-s-she-s-it-s-we-re-they-re/e770a1e-6f71-ad77-7d17-fca708ba6532_Snapshot_554507557.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/3-i-m-you-re-he-s-she-s-it-s-we-re-they-re/e770a1e-6f71-ad77-7d17-fca708ba6532-snapshot-554507557.jpeg",
   },
   {
     kind: "video",
@@ -1564,10 +1564,10 @@ const _seedContentLessonRaw = [
     title: "I Ll You Ll He Ll She Ll It Ll We Ll They Ll",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/4-i-ll-you-ll-he-ll-she-ll-it-ll-we-ll-they-ll/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/4-i-ll-you-ll-he-ll-she-ll-it-ll-we-ll-they-ll/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 493,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/4-i-ll-you-ll-he-ll-she-ll-it-ll-we-ll-they-ll/68e2a6d-60bf-fb1-8060-c5dee60cd6d_Snapshot_554507716.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/4-i-ll-you-ll-he-ll-she-ll-it-ll-we-ll-they-ll/68e2a6d-60bf-fb1-8060-c5dee60cd6d-snapshot-554507716.jpeg",
   },
   {
     kind: "video",
@@ -1578,10 +1578,10 @@ const _seedContentLessonRaw = [
     title: "I Ve You Ve We Ve They Ve He S She S It S",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/5-i-ve-you-ve-we-ve-they-ve-he-s-she-s-it-s/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/5-i-ve-you-ve-we-ve-they-ve-he-s-she-s-it-s/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 642,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/5-i-ve-you-ve-we-ve-they-ve-he-s-she-s-it-s/63ce46f-4f7c-171-2f12-82dcb75e3ca5_Snapshot_554507730.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/5-i-ve-you-ve-we-ve-they-ve-he-s-she-s-it-s/63ce46f-4f7c-171-2f12-82dcb75e3ca5-snapshot-554507730.jpeg",
   },
   {
     kind: "video",
@@ -1592,10 +1592,10 @@ const _seedContentLessonRaw = [
     title: "I D You D We D All The Would Contractions",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
-      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/6-i-d-you-d-we-d-all-the-would-contractions/Aprende Inglés Americano con Fluidez desde Cero.mp4",
+      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/6-i-d-you-d-we-d-all-the-would-contractions/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
     durationSeconds: 971,
     poster:
-      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/6-i-d-you-d-we-d-all-the-would-contractions/fda7534-56a0-3bd8-5c74-eb2334b12602_Snapshot_554507747.jpeg",
+      "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/6-i-d-you-d-we-d-all-the-would-contractions/fda7534-56a0-3bd8-5c74-eb2334b12602-snapshot-554507747.jpeg",
   },
 ];
 
@@ -1633,18 +1633,18 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
+    id: "985b6ca5-4bd3-5e30-9195-69aa99cea538",
+    lessonId: "062fbf5e-3c3c-5104-8ca2-b450b3f76c7f",
+    title: "Day 7 My Phone",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/7-day-7/day-7-my-phone.pdf",
+    kind: "pdf",
+  },
+  {
     id: "7b1ba73c-bb4b-5c8f-850d-61b1b799a9ab",
     lessonId: "062fbf5e-3c3c-5104-8ca2-b450b3f76c7f",
     title: "Day 7 Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/7-day-7/readme.md",
     kind: "other",
-  },
-  {
-    id: "42ad16ae-21be-545a-bb3b-4a9a330e402e",
-    lessonId: "062fbf5e-3c3c-5104-8ca2-b450b3f76c7f",
-    title: "Day_7_My_Phone",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/7-day-7/Day_7_My_Phone.pdf",
-    kind: "pdf",
   },
   {
     id: "de6ceb48-6074-5699-b7bc-b4d6f8408877",
@@ -1668,10 +1668,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "a586c4ad-9472-5cb6-bc9a-3d75ab2fcfbe",
+    id: "cd9b01d8-b664-59ac-8e83-24df9969e35c",
     lessonId: "0beab928-1bcf-5e2e-bac5-e6608a5a41fa",
-    title: "Fast_U_Sound_Pronunciation_Practice",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/3-fast-u/Fast_U_Sound_Pronunciation_Practice.pdf",
+    title: "Fast U Sound Pronunciation Practice",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/3-fast-u/fast-u-sound-pronunciation-practice.pdf",
     kind: "pdf",
   },
   {
@@ -1682,10 +1682,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "aef33a7d-a3d1-544c-bd3f-8276628fcec2",
+    id: "02afe2d6-9e14-5743-90f7-6f67e7544866",
     lessonId: "10226103-da3c-5e94-86f4-927f07a82bb0",
-    title: "Day_9_Practice_My_Best_Friend",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/9-day-9/Day_9_Practice_My_Best_Friend.pdf",
+    title: "Day 9 Practice My Best Friend",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/9-day-9/day-9-practice-my-best-friend.pdf",
     kind: "pdf",
   },
   {
@@ -1703,10 +1703,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "b1495047-02ff-5627-aaeb-605d6b3797cb",
+    id: "d91d0b70-342b-5587-85f0-29fbe8b7f893",
     lessonId: "17fce34e-ed96-55ec-bd26-353ce6dc6c3a",
-    title: "Ingles_discursos_publicos",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/13-day-13/ingles_discursos_publicos.pdf",
+    title: "Ingles Discursos Publicos",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/13-day-13/ingles-discursos-publicos.pdf",
     kind: "pdf",
   },
   {
@@ -1724,10 +1724,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "07d26df1-e0ef-55b5-8488-a49b944511d0",
+    id: "69e96d97-7e05-55cf-b6a2-d380dd941b7c",
     lessonId: "1b7391bd-a066-5c42-806b-d320db0f63a0",
-    title: "FAST_Sound_Practice_Bilingual_UPDATED_FINAL",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/6-fast/FAST_Sound_Practice_Bilingual_UPDATED_FINAL.pdf",
+    title: "Fast Sound Practice Bilingual Updated Final",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/6-fast/fast-sound-practice-bilingual-updated-final.pdf",
     kind: "pdf",
   },
   {
@@ -1745,10 +1745,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "913ce09c-3825-5abf-a4bc-be6281ec9d40",
+    id: "e1a51e48-6769-5d55-b42c-72ceffc96823",
     lessonId: "2654437e-047a-528d-a0c2-f8ebd825d924",
-    title: "Falling_Intonation_with_Translations",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/3-falling-intonation/Falling_Intonation_with_Translations.pdf",
+    title: "Falling Intonation With Translations",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/3-falling-intonation/falling-intonation-with-translations.pdf",
     kind: "pdf",
   },
   {
@@ -1759,10 +1759,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "91166e4e-b8a9-5d55-9f8d-e605e70c1e79",
+    id: "be020ca6-f218-5504-ab30-1f1678a3a2a8",
     lessonId: "28869f4e-cdba-55c6-8730-a20f736b6be2",
-    title: "FAST_Schwa_Pronunciation_Practice",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/11-fast/FAST_Schwa_Pronunciation_Practice.pdf",
+    title: "Fast Schwa Pronunciation Practice",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/11-fast/fast-schwa-pronunciation-practice.pdf",
     kind: "pdf",
   },
   {
@@ -1773,10 +1773,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "7fd9bc0b-37bd-5d10-a11f-bc6713e68731",
+    id: "e9028052-c5fa-546f-a5ec-a3bcae03060e",
     lessonId: "292ac925-92d2-5040-b127-81406b0e1f11",
-    title: "Day_6_Practice",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/6-day-6/Day_6_Practice.pdf",
+    title: "Day 6 Practice",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/6-day-6/day-6-practice.pdf",
     kind: "pdf",
   },
   {
@@ -1794,10 +1794,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "ca64f8e0-9998-51fc-86a6-dd87ba1a746e",
+    id: "6e0af909-ab42-5d30-ad18-a4033a2ba20d",
     lessonId: "2e07262d-e6b0-5d0d-bb47-28bf7a368182",
-    title: "Day_8_Practice_My_School",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/8-day-8/Day_8_Practice_My_School.pdf",
+    title: "Day 8 Practice My School",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/8-day-8/day-8-practice-my-school.pdf",
     kind: "pdf",
   },
   {
@@ -1808,10 +1808,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "1fa2ea49-9ad4-5ae8-8770-895cbdecf700",
+    id: "281169f1-f157-537a-b84b-56ed7c2a9c69",
     lessonId: "2f9defa0-5f6e-579a-9e5a-53df1624402f",
-    title: "Short_Vowel_Pronunciation_Practice_Put_Sound",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/13-fast/Short_Vowel_Pronunciation_Practice_Put_Sound.pdf",
+    title: "Short Vowel Pronunciation Practice Put Sound",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/13-fast/short-vowel-pronunciation-practice-put-sound.pdf",
     kind: "pdf",
   },
   {
@@ -1836,10 +1836,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "972e2138-44a2-5354-ad1c-785149575328",
+    id: "39deb794-f6cb-5aef-9726-04f90905b3b4",
     lessonId: "384a9dcf-99b0-5a6f-a91d-b00c1c36ecbe",
-    title: "My_typical_day_Practice",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/4-day-4/My_typical_day_Practice.pdf",
+    title: "My Typical Day Practice",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/4-day-4/my-typical-day-practice.pdf",
     kind: "pdf",
   },
   {
@@ -1878,10 +1878,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "fb355c62-1833-5723-be92-245376639ae1",
+    id: "b0a24474-8962-5861-9043-a994cd3a0029",
     lessonId: "4b90f68d-98a7-5280-a946-19f2c5a21e76",
-    title: "Short_I_Vowel_Pronunciation_Practice_Pin_Sound_Updated",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/12-fast/Short_I_Vowel_Pronunciation_Practice_Pin_Sound_Updated.pdf",
+    title: "Short I Vowel Pronunciation Practice Pin Sound Updated",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/12-fast/short-i-vowel-pronunciation-practice-pin-sound-updated.pdf",
     kind: "pdf",
   },
   {
@@ -1892,6 +1892,13 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
+    id: "ca4dadb8-d7f0-5fca-903c-54693422272c",
+    lessonId: "4fc5717f-c3c1-51a1-9f11-b5220ecb7738",
+    title: "Rising Intonation Examples",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/4-rising-intonation/rising-intonation-examples.pdf",
+    kind: "pdf",
+  },
+  {
     id: "e2714a2f-e4dd-5314-89f4-780e93687e53",
     lessonId: "4fc5717f-c3c1-51a1-9f11-b5220ecb7738",
     title: "Rising Intonation Notes",
@@ -1899,24 +1906,17 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "88796a5d-95fb-54eb-b430-eb57f3ce8faa",
-    lessonId: "4fc5717f-c3c1-51a1-9f11-b5220ecb7738",
-    title: "Rising_Intonation_Examples",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/4-rising-intonation/Rising_Intonation_Examples.pdf",
+    id: "aecbf74c-198a-5bd9-ba79-894e7d968e92",
+    lessonId: "528b93b0-9e74-5342-a278-9a30267d20d7",
+    title: "Beat It Fillintheblanks",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/15-exercise-15-pronunciation-step-by-step-lesson/beat-it-fillintheblanks.pdf",
     kind: "pdf",
   },
   {
-    id: "88b0a381-9072-5cd5-b379-1994b19410f3",
+    id: "55745d75-124d-553c-8d9f-752f47da08e9",
     lessonId: "528b93b0-9e74-5342-a278-9a30267d20d7",
-    title: "Beat_it_FillInTheBlanks",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/15-exercise-15-pronunciation-step-by-step-lesson/Beat_it_FillInTheBlanks.pdf",
-    kind: "pdf",
-  },
-  {
-    id: "b5ba11c5-4bba-522f-a838-e426a6f60e5b",
-    lessonId: "528b93b0-9e74-5342-a278-9a30267d20d7",
-    title: "Beat_it_full_example",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/15-exercise-15-pronunciation-step-by-step-lesson/beat_it_full_example.pptx",
+    title: "Beat It Full Example",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/15-exercise-15-pronunciation-step-by-step-lesson/beat-it-full-example.pptx",
     kind: "slides",
   },
   {
@@ -1941,10 +1941,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "85e90ad2-b739-59cb-8495-934eed5c9414",
+    id: "123e5159-8da8-5fc0-9196-0138e71a9c41",
     lessonId: "5c5c7576-fff8-5ad7-93a0-0baefd6f55cd",
-    title: "Fast_Sound_Practice_1_",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/7-fast/Fast_Sound_Practice_1_.pdf",
+    title: "Fast Sound Practice 1",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/7-fast/fast-sound-practice-1.pdf",
     kind: "pdf",
   },
   {
@@ -2018,10 +2018,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "dba86cba-854c-58fb-911f-2a2e0b25884a",
+    id: "6315f87c-8026-551c-b7bb-4b2b36596f39",
     lessonId: "837ec33e-e909-58a4-bc93-3b5ae0fcb494",
     title: "Day",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/1-day-1/Day.docx",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/1-day-1/day.docx",
     kind: "other",
   },
   {
@@ -2039,18 +2039,18 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
+    id: "2ca65845-bbdf-51fb-a2cc-b1ede1f2bc4e",
+    lessonId: "85f463ad-a7da-577b-9bf2-aac87859f272",
+    title: "Day 2 Milk",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/2-day-2/day-2-milk.pdf",
+    kind: "pdf",
+  },
+  {
     id: "1de05270-5328-5d24-903c-9e8f12f794bc",
     lessonId: "85f463ad-a7da-577b-9bf2-aac87859f272",
     title: "Day 2 Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/2-day-2/readme.md",
     kind: "other",
-  },
-  {
-    id: "99065573-e43f-5133-a4f4-2008064f3a9c",
-    lessonId: "85f463ad-a7da-577b-9bf2-aac87859f272",
-    title: "Day_2_MILK",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/2-day-2/Day_2_MILK.pdf",
-    kind: "pdf",
   },
   {
     id: "e4bad180-ca6d-5048-9409-da041cca77c3",
@@ -2060,6 +2060,13 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
+    id: "97263bc6-de7f-574c-b289-324613bb98e4",
+    lessonId: "97ac414d-def6-50c0-8afc-b8f6081f8ffa",
+    title: "Fast Ae Vowel Pronunciation Practice Cat Sound",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/4-fast/fast-ae-vowel-pronunciation-practice-cat-sound.pdf",
+    kind: "pdf",
+  },
+  {
     id: "2f777ad2-4614-51cd-8e9c-b17bb22b5077",
     lessonId: "97ac414d-def6-50c0-8afc-b8f6081f8ffa",
     title: "Fast Notes",
@@ -2067,17 +2074,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "d8e799fa-cdac-5534-ae26-eedfc74aee5d",
-    lessonId: "97ac414d-def6-50c0-8afc-b8f6081f8ffa",
-    title: "Fast_AE_Vowel_Pronunciation_Practice_Cat_Sound",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/4-fast/Fast_AE_Vowel_Pronunciation_Practice_Cat_Sound.pdf",
-    kind: "pdf",
-  },
-  {
-    id: "676baff0-d766-5efc-abf0-7decb75c621d",
+    id: "c094bd0d-a4d5-5187-a089-7b88894a2bb0",
     lessonId: "a693ff3d-1f58-5c48-ac80-c86fbe7b5980",
-    title: "Glide_vs_Step_Explanation",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/2-gliding-vs-stepping/Glide_vs_Step_Explanation.pdf",
+    title: "Glide Vs Step Explanation",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/2-gliding-vs-stepping/glide-vs-step-explanation.pdf",
     kind: "pdf",
   },
   {
@@ -2095,10 +2095,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "79c5670a-5c27-5aba-8fae-6fbf9f743791",
+    id: "20a27c42-711b-517e-b8c2-747971cb6d80",
     lessonId: "a75c097f-9c0d-50ca-bc82-a6a11d023af7",
-    title: "Fast_i_Vowel_Pronunciation_Practice_See_Sound",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/2-fast-i/Fast_i_Vowel_Pronunciation_Practice_See_Sound.pdf",
+    title: "Fast I Vowel Pronunciation Practice See Sound",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/2-fast-i/fast-i-vowel-pronunciation-practice-see-sound.pdf",
     kind: "pdf",
   },
   {
@@ -2130,10 +2130,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "d9099cec-0915-57bd-9706-f7b531eecd29",
+    id: "ed53980c-8fed-5cfd-9efb-dda88431b021",
     lessonId: "bda5e5cc-3ec6-511d-91a3-438451926128",
-    title: "Fall_Rise_Intonation_With_Functions",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/5-fall-rise-intonation/Fall_Rise_Intonation_With_Functions.pdf",
+    title: "Fall Rise Intonation With Functions",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/5-fall-rise-intonation/fall-rise-intonation-with-functions.pdf",
     kind: "pdf",
   },
   {
@@ -2144,17 +2144,17 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "ccc4f213-1c3b-5fd7-9147-5433ad8106fa",
+    id: "b79c3ee1-b264-5d30-9b9f-68436a3ea129",
     lessonId: "bfdf8790-76e4-51ba-bef4-5368098d98d4",
-    title: "Short_E_Vowel_Pronunciation_Practice_Pen_Sound",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/5-fast/Short_E_Vowel_Pronunciation_Practice_Pen_Sound.pdf",
+    title: "Short E Vowel Pronunciation Practice Pen Sound",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/5-fast/short-e-vowel-pronunciation-practice-pen-sound.pdf",
     kind: "pdf",
   },
   {
-    id: "3e50c3c8-9dd7-5102-b7a6-afbc7edd2671",
+    id: "9617466b-132d-5c8e-b87e-e5a921e06936",
     lessonId: "c2b5d1d5-4c11-5fc6-a76d-23bc5f95634d",
-    title: "Diphthong_Phoneme_Practice_Updated",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/10-fast/Diphthong_Phoneme_Practice_Updated.pdf",
+    title: "Diphthong Phoneme Practice Updated",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/10-fast/diphthong-phoneme-practice-updated.pdf",
     kind: "pdf",
   },
   {
@@ -2172,10 +2172,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "da9e9006-121c-5ae9-8391-203e9fe9d31a",
+    id: "906f2ba9-f07a-51c0-8349-8dc8597e2c05",
     lessonId: "c3d7e57a-cee5-5efd-a587-714e7ef70490",
-    title: "Day_5_Practice_My_Sister",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/5-day-5/Day_5_Practice_My_Sister.pdf",
+    title: "Day 5 Practice My Sister",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/5-day-5/day-5-practice-my-sister.pdf",
     kind: "pdf",
   },
   {
@@ -2200,10 +2200,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "76140261-e5f3-5e58-859e-00463d2f49a7",
+    id: "65731742-e39d-5042-92ce-7e5a8b24dfc2",
     lessonId: "c874afa3-a610-547e-9869-322f559bb5a7",
-    title: "Day_3_Practice",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/3-day-3/Day_3_Practice.pdf",
+    title: "Day 3 Practice",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/3-day-3/day-3-practice.pdf",
     kind: "pdf",
   },
   {
@@ -2228,10 +2228,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "340e6e96-5115-5a52-9d3b-a8d602410cca",
+    id: "4cc84795-62cc-55ff-8bb5-54a7b8ae36b4",
     lessonId: "da0c1360-1308-5ef1-ac5b-fa726645c74d",
-    title: "Cot_Caught_Merger_Pronunciation_Practice",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/8-fast-cot-caught-merger/Cot_Caught_Merger_Pronunciation_Practice.pdf",
+    title: "Cot Caught Merger Pronunciation Practice",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/8-fast-cot-caught-merger/cot-caught-merger-pronunciation-practice.pdf",
     kind: "pdf",
   },
   {
@@ -2249,10 +2249,17 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "4f5d6e28-60a0-5645-9cf2-2d5ef655e005",
+    id: "2ae52169-2db6-5e59-b32a-d5fce2221d75",
     lessonId: "e9f9c7da-f658-5422-8d26-46cdc9e57066",
-    title: "DAY_11_The_Park_Practice",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/11-day-11/DAY_11_The_Park_Practice.pdf",
+    title: "Day 11 The Park Practice",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/11-day-11/day-11-the-park-practice.pdf",
+    kind: "pdf",
+  },
+  {
+    id: "0785b7fa-f6ef-5c6c-9b3b-eac907ff4017",
+    lessonId: "ec0f8c46-94af-572c-a9bb-18bbba9c16d9",
+    title: "Rise Fall Intonation Examples 2",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/6-rise-fall-intonation/rise-fall-intonation-examples-2.pdf",
     kind: "pdf",
   },
   {
@@ -2263,13 +2270,6 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "7907da6b-390b-5ed8-8ff7-4a57c005deba",
-    lessonId: "ec0f8c46-94af-572c-a9bb-18bbba9c16d9",
-    title: "Rise_Fall_Intonation_Examples_2",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/5-sound-natural-american-intonation-essentials/6-rise-fall-intonation/Rise_Fall_Intonation_Examples_2.pdf",
-    kind: "pdf",
-  },
-  {
     id: "80ac79eb-253d-5ca3-9ff0-f1cbb37ac2f2",
     lessonId: "ee7e2a17-deb3-5210-9101-6711366c0a31",
     title: "Day 10 Notes",
@@ -2277,10 +2277,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "44a9e6b4-7062-5c78-9fc5-f18bde201370",
+    id: "86ad3dd8-39ae-5e8a-b0bc-c0aca4e78409",
     lessonId: "ee7e2a17-deb3-5210-9101-6711366c0a31",
-    title: "Day_10_Practice_My_Breakfast",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/10-day-10/Day_10_Practice_My_Breakfast.pdf",
+    title: "Day 10 Practice My Breakfast",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/9-speak-with-confidence-in-30-days/10-day-10/day-10-practice-my-breakfast.pdf",
     kind: "pdf",
   },
   {
@@ -2298,10 +2298,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "95a12a57-7edd-5a45-89f6-acd5a62dfb03",
+    id: "a801c48b-b38d-5c32-922d-5498bc5d3834",
     lessonId: "f7d86055-9e76-5cc9-a761-aff2bf8adcbf",
-    title: "Diphthong_a_Pronunciation_Practice",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/9-fast-a/Diphthong_a_Pronunciation_Practice.pdf",
+    title: "Diphthong A Pronunciation Practice",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/9-fast-a/diphthong-a-pronunciation-practice.pdf",
     kind: "pdf",
   },
   {
@@ -2312,10 +2312,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "4d8dc63d-73a3-5acd-a4c1-c3903f8dc8d3",
+    id: "6fe7f0c7-c7b8-575c-a3fc-599a886da996",
     lessonId: "fde3a460-68f3-512a-afa6-b0168604666c",
-    title: "Curious_George_Plumbing_Complete_Guide",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/16-exercise-16-pronunciation-step-by-step-lesson/Curious_George_Plumbing_Complete_Guide.pdf",
+    title: "Curious George Plumbing Complete Guide",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/16-exercise-16-pronunciation-step-by-step-lesson/curious-george-plumbing-complete-guide.pdf",
     kind: "pdf",
   },
   {
@@ -2326,10 +2326,10 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
-    id: "52fd61d1-4c17-5932-8309-63872f339ca2",
+    id: "dc3e5c07-ef72-59a4-81fe-ae5b7e42815d",
     lessonId: "fde3a460-68f3-512a-afa6-b0168604666c",
-    title: "Transcripcion_Rodriguez_Martin",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/16-exercise-16-pronunciation-step-by-step-lesson/transcripcion_Rodriguez_Martin.docx",
+    title: "Transcripcion Rodriguez Martin",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/10-the-practice-zone-sharpen-your-skills/16-exercise-16-pronunciation-step-by-step-lesson/transcripcion-rodriguez-martin.docx",
     kind: "other",
   },
   {
@@ -2344,3 +2344,232 @@ const _seedContentResourceRaw = [
 export const seedContentResources: ReadonlyArray<Resource> = _seedContentResourceRaw.map((r) =>
   Resource.parse(r),
 );
+
+// Entity id → original raw on-disk name (pre-normalization). See
+// scripts/normalize-content-disk.ts and rename-manifest.json.
+export const seedContentSourceNames: Record<string, string> = {
+  "6361a41b-29e4-5679-8207-445797ed8fa7": "advanced-intermediate-course",
+  "2d0d3f73-6afe-579b-8db7-517d76e65fce": "1 Advanced Pronunciation Course",
+  "9e9d39a2-d2bb-57bb-9a5e-37de8c3e2a1c": "1 Welcome!",
+  "9ac4fbca-da99-58bd-a317-bb885d7d0a3e": "2 Lo que necesitas",
+  "6b5957ad-a84e-5a86-b1a8-8b373a9feb44": "3  INTRO",
+  "93d616f2-8c89-5c4d-bbc2-89ba080f00e7": "readme.md",
+  "ff205e3f-04d3-514b-bfa5-c76c559d09f5": "4 ARTICULATORY SETTINGS",
+  "7dddcff9-2ac6-5856-a9ab-0f870e95d849": "readme.md",
+  "433bd13b-89fb-50ea-aaea-02964c1b6292": "10 The Practice Zone: Sharpen Your Skills",
+  "79239e36-9570-56e6-8fe4-836a1410d3d8": "1 Exercise 1 : Pronunciation Step-by-Step Lesson",
+  "63f58009-191d-5471-8aed-ff8653fa297c": "readme.md",
+  "7a583b11-b8bd-5405-a89f-b4faf90645b8": "10 Exercise 10: Pronunciation Step-by-Step Lesson",
+  "f7ecce72-8877-535f-b1bb-f5bc43b5d4a9": "readme.md",
+  "03ae5634-6f01-52b6-aed1-50a92409f1a6": "11 Exercise 11 : Pronunciation Step-by-Step Lesson",
+  "c5fd4fe6-07a0-5e15-a905-da16994ba048": "readme.md",
+  "1b0b5197-f2f1-503f-bb89-08272b7fa7b4": "12 Exercise 12 : Pronunciation Step-by-Step Lesson",
+  "2ded0b0c-917b-5e2d-993d-f69d9343996c": "readme.md",
+  "63ba6fc2-631b-5c70-b7dd-6afd5b74773c": "13 Exercise 13 : Pronunciation Step-by-Step Lesson",
+  "f766b0e9-41ca-52c5-9851-99c64d5463e5": "readme.md",
+  "49cf7c66-e972-5538-94df-4042d84d0e33": "14 Exercise 14: Pronunciation Step-by-Step Lesson",
+  "e4d3bc00-47d0-5476-bb96-b2b584dcbec3": "readme.md",
+  "528b93b0-9e74-5342-a278-9a30267d20d7": "15 Exercise 15: Pronunciation Step-by-Step Lesson",
+  "7895bba4-5212-5db1-8635-699d81c03d65": "readme.md",
+  "aecbf74c-198a-5bd9-ba79-894e7d968e92": "Beat_it_FillInTheBlanks.pdf",
+  "55745d75-124d-553c-8d9f-752f47da08e9": "beat_it_full_example.pptx",
+  "fde3a460-68f3-512a-afa6-b0168604666c": "16 Exercise 16: Pronunciation Step-by-Step Lesson",
+  "9c0a6fc9-b104-5b7b-9ec0-da010241ffa3": "readme.md",
+  "6fe7f0c7-c7b8-575c-a3fc-599a886da996": "Curious_George_Plumbing_Complete_Guide.pdf",
+  "dc3e5c07-ef72-59a4-81fe-ae5b7e42815d": "transcripcion_Rodriguez_Martin.docx",
+  "04cc9ff8-15e2-57f8-b04d-ea3199b63b57": "2 Exercise 2 : Pronunciation Step-by-Step Lesson",
+  "9db8ec93-66c9-5a91-b9c5-f6d671394202": "readme.md",
+  "f6de9fa2-8e75-5c6b-8ac7-f9aa65c5e35b": "3 Exercise 3: Pronunciation Step-by-Step Lesson",
+  "71658549-03d8-5795-b580-03892e799e2d": "readme.md",
+  "75a9726a-33db-5d98-900b-745679383c73": "4 Exercise 4 : Pronunciation Step-by-Step Lesson",
+  "a7e71fd2-ff52-51d6-969f-565185e25285": "readme.md",
+  "093bfbe6-bc1f-5e7b-9ab2-8365d1c036bf": "5 Exercise 5 : Pronunciation Step-by-Step Lesson",
+  "de6ceb48-6074-5699-b7bc-b4d6f8408877": "readme.md",
+  "7abbc61e-6aa0-5026-81dd-7d9df44c5acd": "6 Exercise 6 : Pronunciation Step-by-Step Lesson",
+  "66baec41-ce1f-5e3d-a41c-1cb8b48ac6b3": "readme.md",
+  "5cbcc448-1821-59e7-8af0-97938b03b9d0": "7 Exercise 7 : Pronunciation Step-by-Step Lesson",
+  "8ab83e01-e7d4-53db-8fa1-ec9ea298d307": "readme.md",
+  "032c3f2a-7904-58df-8646-4822da9139e6": "8 Exercise 8 : Pronunciation Step-by-Step Lesson",
+  "76123968-6ecb-51ba-b48a-8dea1db63ed0": "readme.md",
+  "d726576b-fa42-558e-824d-f99bbfb14600": "9 Exercise 9 : Pronunciation Step-by-Step Lesson",
+  "78dc4705-0e5f-531f-8cef-1f218a1fbe1d": "readme.md",
+  "56cccce2-2b42-56cb-a536-c99d5378144b": "2 Advanced Vowel Pronunciation in American English",
+  "489b3a52-30cd-5b51-92a5-922de0423a0f": "1 INTRO",
+  "326b2fba-862c-5114-85a6-e4dcf4e82c72": "readme.md",
+  "c2b5d1d5-4c11-5fc6-a76d-23bc5f95634d": "10 Fast ɔɪ",
+  "bc9c5aa8-c3d4-5fa0-aa18-2a454655f24f": "readme.md",
+  "9617466b-132d-5c8e-b87e-e5a921e06936": "Diphthong_Phoneme_Practice_Updated.pdf",
+  "28869f4e-cdba-55c6-8730-a20f736b6be2": "11 Fast ə",
+  "e695b676-55c5-590c-babf-1e88415729c1": "readme.md",
+  "be020ca6-f218-5504-ab30-1f1678a3a2a8": "FAST_Schwa_Pronunciation_Practice.pdf",
+  "4b90f68d-98a7-5280-a946-19f2c5a21e76": "12 Fast ɪ",
+  "9be6e039-9a5b-590c-8a42-7f0afad102e0": "readme.md",
+  "b0a24474-8962-5861-9043-a994cd3a0029":
+    "Short_I_Vowel_Pronunciation_Practice_Pin_Sound_Updated.pdf",
+  "2f9defa0-5f6e-579a-9e5a-53df1624402f": "13 Fast ʊ",
+  "84822001-e3eb-5afb-82b3-36e5413bce03": "readme.md",
+  "281169f1-f157-537a-b84b-56ed7c2a9c69": "Short_Vowel_Pronunciation_Practice_Put_Sound.pdf",
+  "a75c097f-9c0d-50ca-bc82-a6a11d023af7": "2 Fast i",
+  "7a431c55-e75c-5e29-b9b5-97eede9a0e34": "readme.md",
+  "20a27c42-711b-517e-b8c2-747971cb6d80": "Fast_i_Vowel_Pronunciation_Practice_See_Sound.pdf",
+  "0beab928-1bcf-5e2e-bac5-e6608a5a41fa": "3 Fast u",
+  "0a9a047e-f8c8-5c58-b17f-fca7f32ac89e": "readme.md",
+  "cd9b01d8-b664-59ac-8e83-24df9969e35c": "Fast_U_Sound_Pronunciation_Practice.pdf",
+  "97ac414d-def6-50c0-8afc-b8f6081f8ffa": "4 Fast æ",
+  "2f777ad2-4614-51cd-8e9c-b17bb22b5077": "readme.md",
+  "97263bc6-de7f-574c-b289-324613bb98e4": "Fast_AE_Vowel_Pronunciation_Practice_Cat_Sound.pdf",
+  "bfdf8790-76e4-51ba-bef4-5368098d98d4": "5 Fast ɛ",
+  "ffb0e6fe-86d4-52f3-81cc-129d3a43e88f": "readme.md",
+  "b79c3ee1-b264-5d30-9b9f-68436a3ea129": "Short_E_Vowel_Pronunciation_Practice_Pen_Sound.pdf",
+  "1b7391bd-a066-5c42-806b-d320db0f63a0": "6 Fast ɑ",
+  "4ccd6d4c-9ff8-50e4-9301-b29966e92687": "readme.md",
+  "69e96d97-7e05-55cf-b6a2-d380dd941b7c": "FAST_Sound_Practice_Bilingual_UPDATED_FINAL.pdf",
+  "5c5c7576-fff8-5ad7-93a0-0baefd6f55cd": "7 Fast ɔ",
+  "cf31b2a3-3183-5626-b660-b0eeb7b46f91": "readme.md",
+  "123e5159-8da8-5fc0-9196-0138e71a9c41": "Fast_Sound_Practice_1_.pdf",
+  "da0c1360-1308-5ef1-ac5b-fa726645c74d": "8 Fast Cot-Caught Merger",
+  "e6e62a4b-eed7-5fbb-8826-3e2a7e2a7839": "readme.md",
+  "4cc84795-62cc-55ff-8bb5-54a7b8ae36b4": "Cot_Caught_Merger_Pronunciation_Practice.pdf",
+  "f7d86055-9e76-5cc9-a761-aff2bf8adcbf": "9 Fast aɪ",
+  "03743bf4-6cad-5644-a769-4890e6a75e11": "readme.md",
+  "a801c48b-b38d-5c32-922d-5498bc5d3834": "Diphthong_a_Pronunciation_Practice.pdf",
+  "faad5d04-3911-5f06-94af-5d66cd0bb60e": "3 Contractions & Reductions",
+  "841a0a7b-5b75-521a-be57-fcaae161878d": "1 Intro",
+  "770ba6b6-4c9e-5902-b34a-9121ac9cce1f": "readme.md",
+  "c6140e63-571e-5a32-b3f1-8f31c2365be8": "2 Why Contractions & Reductions are important",
+  "54a96a3a-5204-5a4c-a54e-11e57d48bb49": "readme.md",
+  "add90381-3245-5a72-81ba-20fcf87fea8f": "3 I’m, you’re, he’s, she’s, it’s, we’re, they’re",
+  "d1f4c487-171a-5117-b024-bc608b2088c2": "readme.md",
+  "36d94321-88dd-5689-90ce-a1c5149f7f4f": "4 I'll, you'll, he'll, she'll, it'll, we'll, they'll",
+  "36a430df-005a-55ae-9f7f-0dcbfc3b8df0": "readme.md",
+  "118bd956-271f-5003-89a4-23e9f1cd880a": "5 I've, You've, We've, They've, He's, She's, It's",
+  "7a879eb8-26fc-53e6-aacd-c9542e66a11f": "readme.md",
+  "05ae5210-e34f-5ac1-a52b-366b506e83e9": "6 I’d, You’d, We’d… All the ‘Would’ Contractions",
+  "b4ef2f17-3a56-5fb9-a595-033686c487ec": "4 Key Sound Patterns and Features",
+  "22eb71a1-9b4c-581d-83a4-fdbbf182654b": "1 Weak & Strong forms",
+  "b4d265fd-9e31-5fae-8543-cb23e0bf29cc": "readme.md",
+  "209fd633-bf7f-51f6-8863-35e57aa0a755": "5 Sound Natural: American Intonation Essentials",
+  "f50c5eeb-7d68-5d8b-b2d2-004005c5b4b1": "1 Intro",
+  "6322082c-0af8-5295-9294-1afaae6c22af": "readme.md",
+  "a693ff3d-1f58-5c48-ac80-c86fbe7b5980": "2 Gliding VS Stepping",
+  "02588376-b693-57e3-b962-c869301d0e78": "readme.md",
+  "c094bd0d-a4d5-5187-a089-7b88894a2bb0": "Glide_vs_Step_Explanation.pdf",
+  "2654437e-047a-528d-a0c2-f8ebd825d924": "3 Falling intonation",
+  "78ab3579-6710-539e-8ba6-9ea6c9dce48b": "readme.md",
+  "e1a51e48-6769-5d55-b42c-72ceffc96823": "Falling_Intonation_with_Translations.pdf",
+  "4fc5717f-c3c1-51a1-9f11-b5220ecb7738": "4 Rising Intonation",
+  "e2714a2f-e4dd-5314-89f4-780e93687e53": "readme.md",
+  "ca4dadb8-d7f0-5fca-903c-54693422272c": "Rising_Intonation_Examples.pdf",
+  "bda5e5cc-3ec6-511d-91a3-438451926128": "5 Fall - Rise Intonation",
+  "93fce0f1-4948-5a7a-aaca-7d9dd5c45615": "readme.md",
+  "ed53980c-8fed-5cfd-9efb-dda88431b021": "Fall_Rise_Intonation_With_Functions.pdf",
+  "ec0f8c46-94af-572c-a9bb-18bbba9c16d9": "6 Rise - Fall Intonation",
+  "8191e9fc-ce04-5c33-9b83-d01ce43b2926": "readme.md",
+  "0785b7fa-f6ef-5c6c-9b3b-eac907ff4017": "Rise_Fall_Intonation_Examples_2.pdf",
+  "851043db-83fb-5328-b237-bc349c2eb328": "6 Rules for Speaking Fast & Natural in English",
+  "0bd0b4db-3c6c-5f9b-aa9d-8097d8ec4d59": "1 Rule # 1 : Conectando 2 Consonantes Plosivas",
+  "4750588c-a0f3-5614-85fa-262b2dc6452d": "readme.md",
+  "f110478b-8830-57dd-9aba-e2f49579f98e": "10 Rule#10 N+T+Vocal+N",
+  "59f80bb7-5b9e-5efa-9d64-d5fcc8e79272": "2 Rule #2 : Conectando 2 Consonantes Continuas",
+  "80e9ddb2-997d-582e-994a-0deeb71009b3": "readme.md",
+  "7d50a74b-62d2-57b3-a2c7-37f9018d06e8": "3 Rule #3 : D+Y = dʒ",
+  "70e2409a-3162-56ee-b523-f8e0dcdcedea": "readme.md",
+  "04199a47-d239-5673-9913-7d84bc138c59": "4 Rule # 4: La Regla de las 3 Consonantes",
+  "4d623b0e-2676-540b-b8ea-27b37bc4dadc": "readme.md",
+  "3b34b766-5c14-5442-b76d-1d55e5ea0bc8": "5 Rule # 5: T+ Y = CH",
+  "e2d32d52-dd76-55da-a35c-6c21c745b9a7": "readme.md",
+  "36d1b860-a7e0-550c-8ba6-4eb041f39cc2": "6 Rule # 6: S+Y = SH",
+  "e2a1396d-02c8-5813-84f8-256edde8df02": "readme.md",
+  "c40db62b-67ed-5b8d-bcd4-43d21cfca248": "7 Rule # 7: TS +Y = ʔCH",
+  "e018d611-2be5-5ab1-a466-c52dbc7154ee": "readme.md",
+  "bd2af810-6a10-52e9-b362-45b9e9ce394c": "8 Rule # 8: Unvoiced Z",
+  "906172f3-718b-5818-8095-bc638a8fb0d0": "readme.md",
+  "455243b9-4097-58de-b6a3-ab23ae8db424": "9 Rule # 9 : N+T+Vocal = N+Vocal",
+  "133d1366-5c99-5f6f-a505-426a56dd8e8b": "readme.md",
+  "675e40fc-9185-5a1e-ab56-b6ec6eee0ad2": "7 Everyday English Phrases PART 1 Master Them!",
+  "b5eba764-ea07-58c2-b4c8-012ef5c8d1c8": "1 Common English Expressions #1",
+  "423ba28d-5e7c-539d-ac3c-447c47928cb1": "readme.md",
+  "83a22bbc-0f23-51c0-8a94-7db75d88f410": "10 Common English Expressions #10",
+  "e9ffa906-75b0-5ce9-b257-c8e68fe6c20d": "11 Common English Expressions #11",
+  "889e63ea-e7d5-53e9-bde3-8c43a2ec89ca": "12 Common English Expressions #12",
+  "65a50523-2486-59f8-870f-8e4427b1d86a": "13 Common English Expressions #13",
+  "e425d607-44d6-5d98-8562-60158e27e203": "14 Common English Expressions #14",
+  "da6dd4ee-178c-548d-9029-dcad5988e0be": "15 Common English Expressions #15",
+  "cf1f6b98-676c-5896-acc6-15d3d84896d9": "16 Common English Expressions #16",
+  "1186b64b-1067-5492-9b70-210a74f1071f": "17 Common English Expressions #17",
+  "e4aeecd0-d659-5323-8fe1-d1e48289ccd7": "18 Common English Expressions #18",
+  "2821830c-f997-5678-a72e-e308433399de": "19 Common English Expressions #19",
+  "706282fb-fc30-579c-9841-5043707d96b9": "2 Common English Expressions #2",
+  "da97fc05-bf92-555f-9216-67955839cf2d": "readme.md",
+  "589f83f7-1b4c-5235-abce-40a5edfe7010": "20 Common English Expressions #20",
+  "d6b86c3f-bd82-5d3d-81f5-e5198466aef7": "21 Common English Expressions #21",
+  "6454f728-3494-58ce-b448-f32778822f38": "22 Common English Expressions #22",
+  "f9a1623b-5e7d-5585-b2f5-639877be2646": "23 Common English Expressions #23",
+  "8710cf75-623d-5e10-8f28-3ce859639419": "24 Common English Expressions #24",
+  "4655b47e-8bde-5432-a0c9-8d2c0af04d99": "25 Common English Expressions #25",
+  "f8e41b70-eef6-5f24-9a9d-f5f138b5befc": "26 Common English Expressions #26",
+  "41d5d216-586a-5747-96d8-2461c0f52f24": "27 Common English Expressions #27",
+  "d8c359a9-2c44-55b2-a875-dc78646335c5": "28 Common English Expressions #28",
+  "b45cb617-02fe-52a6-988f-b8481496eb0c": "29 Common English Expressions #29",
+  "4c002e9e-5d6f-5d02-9294-a83e52c872d9": "3 Common English Expressions #3",
+  "00e2cb7c-d55f-5c77-9727-eef5f8841df4": "readme.md",
+  "bf715aa4-a224-58e4-87cc-f13969aeeaf2": "30 Common English Expressions #30",
+  "33c77df0-4af9-5c75-9b16-a7b5e8c41c35": "31 Common English Expressions #31",
+  "c8a86af6-ee07-59a9-a6d0-f39f85d1f79d": "4 Common English Expressions #4",
+  "6e9bfc5e-8392-53c1-9bc8-328e240bf976": "readme.md",
+  "870485c4-8315-58db-af11-be753bb017e3": "5 Common English Expressions #5",
+  "e4bad180-ca6d-5048-9409-da041cca77c3": "readme.md",
+  "c8b8148b-00d7-5eed-b856-eb0f999c921c": "6 Common English Expressions #6",
+  "07324be9-2545-5fad-864c-0956022580c4": "readme.md",
+  "62960dd7-b6bc-53cb-bf12-88d7c85c27c3": "7 Common English Expressions #7",
+  "9b7506aa-607e-5c2b-92ce-d27c35048c68": "readme.md",
+  "2e3bd93b-0489-5bd4-8b68-d0428dbd6a01": "8 Common English Expressions #8",
+  "738a9d04-cbdf-57e4-96ec-ad3ba73e892a": "9 Common English Expressions #9",
+  "11cf243e-4da6-5035-b1db-dcff639d4e4d": "8 Everyday English Phrases PART 2 Master Them!",
+  "221d3c06-e720-5726-a747-e9bb6acd4c5a": "1 Common English Expressions #32",
+  "23a894f1-2ad6-56b6-b5db-878d3049bc2b": "2 Common English Expressions #33",
+  "96c5e0be-2239-529e-814a-fc83c238aecc": "3 Common English Expressions #34",
+  "4f587493-feef-5de0-af47-1fc92d008304": "4 Common English Expressions #35",
+  "a1e67771-d3be-510d-a85e-e2d3bc4c63cd": "5 Common English Expressions #36",
+  "cf34c994-acfe-5e5d-a10f-6d8c5d25d478": "6 Common English Expressions #37",
+  "728c37a3-5df2-5487-8bf8-a0c05a86dea2": "7 Common English Expressions #38",
+  "893589ff-6355-5089-9fb0-d47ffe5346b5": "9 Speak with Confidence in 30 Days",
+  "837ec33e-e909-58a4-bc93-3b5ae0fcb494": "1 Day#1",
+  "d97378ee-fd92-5efc-b3f5-d7a721f77285": "readme.md",
+  "6315f87c-8026-551c-b7bb-4b2b36596f39": "Day.docx",
+  "ee7e2a17-deb3-5210-9101-6711366c0a31": "10 Day #10",
+  "80ac79eb-253d-5ca3-9ff0-f1cbb37ac2f2": "readme.md",
+  "86ad3dd8-39ae-5e8a-b0bc-c0aca4e78409": "Day_10_Practice_My_Breakfast.pdf",
+  "e9f9c7da-f658-5422-8d26-46cdc9e57066": "11 Day #11",
+  "cab30509-2f25-566c-a097-f3ecc2888a0f": "readme.md",
+  "2ae52169-2db6-5e59-b32a-d5fce2221d75": "DAY_11_The_Park_Practice.pdf",
+  "2b627555-ad3f-580c-aa74-09233df6e409": "12 Day #12",
+  "bcc1b7b1-323d-5875-9172-4318367c2272": "readme.md",
+  "17fce34e-ed96-55ec-bd26-353ce6dc6c3a": "13 Day #13",
+  "40d468a1-522e-5367-8f6a-a16de510aefa": "readme.md",
+  "d91d0b70-342b-5587-85f0-29fbe8b7f893": "ingles_discursos_publicos.pdf",
+  "85f463ad-a7da-577b-9bf2-aac87859f272": "2 Day#2",
+  "1de05270-5328-5d24-903c-9e8f12f794bc": "readme.md",
+  "2ca65845-bbdf-51fb-a2cc-b1ede1f2bc4e": "Day_2_MILK.pdf",
+  "c874afa3-a610-547e-9869-322f559bb5a7": "3 Day# 3",
+  "368b8515-36c4-5df7-928f-6789cd34f4e8": "readme.md",
+  "65731742-e39d-5042-92ce-7e5a8b24dfc2": "Day_3_Practice.pdf",
+  "384a9dcf-99b0-5a6f-a91d-b00c1c36ecbe": "4 Day #4",
+  "b2ee0431-7ba3-5b1f-a3ae-44c045347f42": "readme.md",
+  "39deb794-f6cb-5aef-9726-04f90905b3b4": "My_typical_day_Practice.pdf",
+  "c3d7e57a-cee5-5efd-a587-714e7ef70490": "5 Day #5",
+  "930ffe4b-fbde-5d92-94c1-f908468d36b1": "readme.md",
+  "906f2ba9-f07a-51c0-8349-8dc8597e2c05": "Day_5_Practice_My_Sister.pdf",
+  "292ac925-92d2-5040-b127-81406b0e1f11": "6 Day# 6",
+  "6c7cf869-7bb7-5a66-a7bf-3ce219caf83c": "readme.md",
+  "e9028052-c5fa-546f-a5ec-a3bcae03060e": "Day_6_Practice.pdf",
+  "062fbf5e-3c3c-5104-8ca2-b450b3f76c7f": "7 Day #7",
+  "7b1ba73c-bb4b-5c8f-850d-61b1b799a9ab": "readme.md",
+  "985b6ca5-4bd3-5e30-9195-69aa99cea538": "Day_7_My_Phone.pdf",
+  "2e07262d-e6b0-5d0d-bb47-28bf7a368182": "8 Day #8",
+  "072e663f-6ef3-570d-ba75-552a6da2cbbb": "readme.md",
+  "6e0af909-ab42-5d30-ad18-a4033a2ba20d": "Day_8_Practice_My_School.pdf",
+  "10226103-da3c-5e94-86f4-927f07a82bb0": "9 Day #9",
+  "1bf35477-56b5-53aa-b30d-220e79715253": "readme.md",
+  "02afe2d6-9e14-5743-90f7-6f67e7544866": "Day_9_Practice_My_Best_Friend.pdf",
+};
