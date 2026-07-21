@@ -15,8 +15,7 @@ rules:
       and which existing test files / patterns will be mirrored.
 
   tasks:
-    - Each task MUST mark its TDD ordering explicitly, e.g.
-      `(TDD: test → impl)` — failing test first, then minimal impl.
+    - "Each task MUST mark its TDD ordering explicitly, e.g. `(TDD: test → impl)` — failing test first, then minimal impl."
     - Order tasks so dependencies come first: schema/types → pure logic
       (unit) → component (RTL) → e2e (last).
     - End the task list with a verification task: run `pnpm test:run` and
