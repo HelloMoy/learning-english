@@ -47,6 +47,17 @@ describe("slugify", () => {
     expect(result).toBe("manana");
   });
 
+  test("WHEN the input has DECOMPOSED (NFD) accents THEN they are stripped, not split", () => {
+    // Arrange — as macOS stores it: "é" = "e" + U+0301 combining acute.
+    const input = "Ingle\u0301s Americano"; // decomposed é
+
+    // Act
+    const result = slugify(input);
+
+    // Assert — must be "ingles-americano", NOT "ingle-s-americano".
+    expect(result).toBe("ingles-americano");
+  });
+
   test("WHEN the input contains a `:` THEN it is replaced with `-`", () => {
     // Arrange
     const input = "Sound Natural: American Intonation";
