@@ -8,6 +8,9 @@ import { notFound } from "next/navigation";
 import "../globals.css";
 
 import { GlobalProviders } from "@/components/global-providers";
+import { LocaleSwitcher } from "@/components/locale-switcher/locale-switcher";
+import { SkipLink } from "@/components/skip-link/skip-link";
+import { ThemeToggle } from "@/components/theme-toggle/theme-toggle";
 import { routing } from "@/i18n/routing";
 
 const geistSans = Geist({
@@ -66,7 +69,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="flex min-h-full flex-col">
+      <body className="flex min-h-full flex-col bg-background text-foreground">
         <NextIntlClientProvider>
           <ThemeProvider
             attribute="class"
@@ -74,7 +77,19 @@ export default async function LocaleLayout({ children, params }: Props) {
             enableSystem
             disableTransitionOnChange
           >
-            <GlobalProviders>{children}</GlobalProviders>
+            <SkipLink />
+            <header
+              className="sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60"
+              aria-label="Primary"
+            >
+              <div className="mx-auto flex w-full max-w-7xl items-center justify-end gap-3 px-4 py-3 sm:px-8">
+                <LocaleSwitcher />
+                <ThemeToggle />
+              </div>
+            </header>
+            <GlobalProviders>
+              <div className="flex-1">{children}</div>
+            </GlobalProviders>
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>
