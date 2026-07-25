@@ -3,7 +3,9 @@
     "title": "Learn English",
     "subtitle": "A simple, focused space to build vocabulary and practice every day.",
     "cta": "Get started",
-    "notFound": "Not found"
+    "notFound": "Not found",
+    "catalogHeading": "Courses",
+    "catalogEmpty": "No courses are available right now."
   },
   "LocaleSwitcher": {
     "label": "Language",
@@ -33,7 +35,11 @@
     },
     "ResourceList": {
       "title": "Resources",
+      "titleWithNotes": "Lesson materials",
       "empty": "No resources for this lesson."
+    },
+    "LessonNotes": {
+      "resourceTitle": "Lesson notes (source)"
     },
     "LessonBreadcrumb": {
       "ariaLabel": "Breadcrumb"
@@ -61,11 +67,45 @@
       "errorModuleNotInCourse": "We couldn't find this module in the course.",
       "errorLessonNotInModule": "We couldn't find this lesson in the module.",
       "goHome": "Go to home"
+    },
+    "InlineLessonNotes": {
+      "heading": "Notes"
+    }
+  },
+  "CourseCatalog": {
+    "card": {
+      "moduleCount": "{count, plural, =0 {No modules} one {# module} other {# modules}}",
+      "lessonCount": "{count, plural, =0 {No lessons} one {# lesson} other {# lessons}}",
+      "open": "Open course",
+      "posterAlt": "{title} course artwork"
+    },
+    "courseOverview": {
+      "title": "{title}",
+      "moduleCount": "{count, plural, =0 {No modules} one {# module} other {# modules}}",
+      "lessonCount": "{count, plural, =0 {No lessons} one {# lesson} other {# lessons}}",
+      "openModule": "Open module",
+      "startCourse": "Start course",
+      "trackLabel": "Course modules in order",
+      "courseNotFound": "We couldn't find this course.",
+      "goHome": "Go to home"
+    },
+    "moduleOverview": {
+      "title": "{title}",
+      "lessonCount": "{count, plural, =0 {No lessons} one {# lesson} other {# lessons}}",
+      "openLesson": "Open lesson",
+      "duration": "{minutes} min",
+      "moduleNotInCourse": "We couldn't find this module in the course.",
+      "goHome": "Go to home",
+      "backToCourse": "Back to course"
     }
   },
   "LocaleNotFound": {
     "heading": "Locale not supported",
     "description": "We don't ship translations for this language yet.",
     "goHome": "Go to home"
+  },
+  "Layout": {
+    "skipToContent": "Skip to main content",
+    "headerNav": "Primary"
   }
 }

@@ -3,7 +3,9 @@
     "title": "Aprenda inglês",
     "subtitle": "Um espaço simples e focado para construir vocabulário e praticar todos os dias.",
     "cta": "Começar",
-    "notFound": "Não encontrado"
+    "notFound": "Não encontrado",
+    "catalogHeading": "Cursos",
+    "catalogEmpty": "Nenhum curso disponível no momento."
   },
   "LocaleSwitcher": {
     "label": "Idioma",
@@ -33,7 +35,11 @@
     },
     "ResourceList": {
       "title": "Materiais",
+      "titleWithNotes": "Materiais da aula",
       "empty": "Esta aula não tem materiais."
+    },
+    "LessonNotes": {
+      "resourceTitle": "Notas da aula (arquivo)"
     },
     "LessonBreadcrumb": {
       "ariaLabel": "Trilha de navegação"
@@ -61,11 +67,45 @@
       "errorModuleNotInCourse": "Não encontramos este módulo no curso.",
       "errorLessonNotInModule": "Não encontramos esta aula no módulo.",
       "goHome": "Ir para o início"
+    },
+    "InlineLessonNotes": {
+      "heading": "Notas"
+    }
+  },
+  "CourseCatalog": {
+    "card": {
+      "moduleCount": "{count, plural, =0 {Nenhum módulo} one {# módulo} other {# módulos}}",
+      "lessonCount": "{count, plural, =0 {Nenhuma aula} one {# aula} other {# aulas}}",
+      "open": "Abrir curso",
+      "posterAlt": "Imagem do curso {title}"
+    },
+    "courseOverview": {
+      "title": "{title}",
+      "moduleCount": "{count, plural, =0 {Nenhum módulo} one {# módulo} other {# módulos}}",
+      "lessonCount": "{count, plural, =0 {Nenhuma aula} one {# aula} other {# aulas}}",
+      "openModule": "Abrir módulo",
+      "startCourse": "Começar curso",
+      "trackLabel": "Módulos do curso em ordem",
+      "courseNotFound": "Não encontramos este curso.",
+      "goHome": "Ir para o início"
+    },
+    "moduleOverview": {
+      "title": "{title}",
+      "lessonCount": "{count, plural, =0 {Nenhuma aula} one {# aula} other {# aulas}}",
+      "openLesson": "Abrir aula",
+      "duration": "{minutes} min",
+      "moduleNotInCourse": "Não encontramos este módulo no curso.",
+      "goHome": "Ir para o início",
+      "backToCourse": "Voltar para o curso"
     }
   },
   "LocaleNotFound": {
     "heading": "Idioma não suportado",
     "description": "Ainda não temos traduções para este idioma.",
     "goHome": "Ir para o início"
+  },
+  "Layout": {
+    "skipToContent": "Pular para o conteúdo principal",
+    "headerNav": "Principal"
   }
 }
