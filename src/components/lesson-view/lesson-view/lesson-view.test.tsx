@@ -84,6 +84,8 @@ describe("LessonView", () => {
     render(
       <LessonView
         view={view}
+        notes={null}
+        notesResource={null}
         markComplete={markComplete}
       />,
     );
@@ -115,6 +117,8 @@ describe("LessonView", () => {
     render(
       <LessonView
         view={readingView}
+        notes={null}
+        notesResource={null}
         markComplete={markComplete}
       />,
     );
