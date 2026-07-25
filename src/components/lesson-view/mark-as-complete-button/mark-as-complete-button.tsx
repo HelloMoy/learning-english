@@ -34,14 +34,23 @@ export function MarkAsCompleteButton({
   };
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={completed || isPending}
-      aria-pressed={completed}
-      className="rounded border border-slate-300 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-800"
-    >
-      {completed ? t("markedComplete") : t("markComplete")}
-    </button>
+    <div className="flex flex-col items-start gap-2">
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={completed || isPending}
+        aria-pressed={completed}
+        className="inline-flex min-h-11 items-center justify-center rounded-full border border-border bg-card px-5 text-sm font-semibold text-card-foreground hover:bg-slate-50 focus-visible:ring-3 focus-visible:ring-practice-blue/40 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-slate-800"
+      >
+        {completed ? t("markedComplete") : t("markComplete")}
+      </button>
+      <p
+        aria-live="polite"
+        className="text-sm text-muted-foreground"
+        data-testid="mark-as-complete-status"
+      >
+        {completed ? t("markedComplete") : isPending ? t("markComplete") : ""}
+      </p>
+    </div>
   );
 }
