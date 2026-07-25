@@ -86,6 +86,9 @@ export async function runGenerator(args: { sourceDir: string; outFile: string })
   for (const key of seed.keys) {
     if (!(await blobStore.exists(key))) missing.push(key);
   }
+  for (const key of Object.values(seed.notesKeys)) {
+    if (!(await blobStore.exists(key))) missing.push(key);
+  }
   if (missing.length > 0) {
     throw new Error(
       `${missing.length} content key(s) do not resolve on disk (run \`tsx scripts/normalize-content-disk.ts --apply\` first?):\n  ${missing.join("\n  ")}`,
@@ -98,6 +101,7 @@ export async function runGenerator(args: { sourceDir: string; outFile: string })
     seed.lessons,
     seed.resources,
     seed.sourceNames,
+    seed.notesKeys,
   );
   writeFileSync(args.outFile, output, "utf8");
   console.log(
@@ -121,6 +125,13 @@ export type BuiltSeed = {
    * to the content root. `runGenerator` validates each via `BlobStore.exists`.
    */
   keys: string[];
+  /**
+   * `lessonId` → the normalized Markdown notes key (relative to the content
+   * root) for that lesson's inline notes, when a `readme.md` is present.
+   * Lessons without Markdown notes have no entry. Keys are validated with
+   * `BlobStore.exists` by `runGenerator`.
+   */
+  notesKeys: Record<string, string>;
 };
 
 /** Shape of the manifest written by `scripts/normalize-content-disk.ts`. */
@@ -166,6 +177,7 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
   const originalNames = loadOriginalNameMap(sourceDir);
   const sourceNames: Record<string, string> = {};
   const keys: string[] = [];
+  const notesKeys: Record<string, string> = {};
   const recordSourceName = (id: string, slugRelPath: string, fallbackLeaf: string): void => {
     sourceNames[id] = originalNames.get(slugRelPath) ?? fallbackLeaf;
   };
@@ -238,6 +250,9 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
           : null;
         keys.push(videoFullKey);
         if (posterFullKey) keys.push(posterFullKey);
+        if (classified.readmeKey) {
+          notesKeys[lessonId] = `${courseSlug}/${moduleSlug}/${classified.readmeKey}`;
+        }
 
         const lesson = Lesson.parse({
           kind: "video",
@@ -314,7 +329,7 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
     moduleCount: modules.length,
   });
 
-  return { course, modules, lessons, resources, sourceNames, keys };
+  return { course, modules, lessons, resources, sourceNames, keys, notesKeys };
 }
 
 function buildResource(
@@ -340,6 +355,7 @@ function renderSeedFile(
   lessons: Lesson[],
   resources: Resource[],
   sourceNames: Record<string, string>,
+  notesKeys: Record<string, string>,
 ): string {
   // Per-line JSON for each entity keeps prettier happy and the diff
   // readable when content changes.
@@ -388,6 +404,11 @@ export const seedContentResources: ReadonlyArray<Resource> = _seedContentResourc
 // Entity id → original raw on-disk name (pre-normalization). See
 // scripts/normalize-content-disk.ts and rename-manifest.json.
 export const seedContentSourceNames: Record<string, string> = ${JSON.stringify(sourceNames, null, 2)};
+
+// lessonId → the normalized Markdown notes key (relative to the
+// BlobStore localRoot). Consumed by LocalFilesystemLessonNotesRepository
+// to render inline notes without re-deriving the path from the lesson slug.
+export const seedContentNotesKeys: Record<string, string> = ${JSON.stringify(notesKeys, null, 2)};
 `;
 }
 
