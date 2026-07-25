@@ -17,16 +17,31 @@ import type { ResourceRepository } from "@/domain/ports/resource-repository/reso
  */
 export function makeStubCourseRepository(seed?: {
   courses?: Course[];
+  available?: Course[];
+  bySlugMap?: Record<string, Course>;
   byIdRejects?: boolean;
+  listAvailableRejects?: unknown;
 }): CourseRepository {
   const courses = seed?.courses ?? [];
+  const available = seed?.available ?? courses;
+  const bySlugMap = seed?.bySlugMap;
   return {
     byId: async (id: CourseId) => {
       if (seed?.byIdRejects) throw new Error("simulated course-repo failure");
       return courses.find((c) => c.id === id) ?? null;
     },
-    bySlug: async (slug: Slug) => courses.find((c) => c.slug === slug) ?? null,
-    listAvailable: async () => courses,
+    bySlug: async (slug: Slug) => {
+      if (bySlugMap) {
+        return bySlugMap[slug] ?? null;
+      }
+      return courses.find((c) => c.slug === slug) ?? null;
+    },
+    listAvailable: async () => {
+      if (seed?.listAvailableRejects) {
+        throw seed.listAvailableRejects;
+      }
+      return available;
+    },
   };
 }
 
@@ -37,14 +52,19 @@ export function makeStubCourseRepository(seed?: {
  */
 export function makeStubLessonRepository(seed?: {
   lessons?: Lesson[];
+  listByCourse?: Record<string, Lesson[]>;
   listByCourseRejects?: boolean;
 }): LessonRepository {
   const lessons = seed?.lessons ?? [];
+  const listByCourseMap = seed?.listByCourse;
   return {
     byId: async (id: LessonId) => lessons.find((l) => l.id === id) ?? null,
     listByCourse: async (courseId: CourseId) => {
       if (seed?.listByCourseRejects) {
         throw new Error("simulated lesson-repo failure");
+      }
+      if (listByCourseMap) {
+        return (listByCourseMap[courseId] ?? []).slice().sort((a, b) => a.sequence - b.sequence);
       }
       return lessons
         .filter((l) => l.courseId === courseId)
@@ -60,9 +80,11 @@ export function makeStubLessonRepository(seed?: {
  */
 export function makeStubModuleRepository(seed?: {
   modules?: Module[];
+  listByCourse?: Record<string, Module[]>;
   listByCourseRejects?: boolean;
 }): ModuleRepository {
   const modules = seed?.modules ?? [];
+  const listByCourseMap = seed?.listByCourse;
   return {
     byId: async (id: ModuleId) => modules.find((m) => m.id === id) ?? null,
     byCourseAndSlug: async (courseId: CourseId, slug: Slug) =>
@@ -70,6 +92,9 @@ export function makeStubModuleRepository(seed?: {
     listByCourse: async (courseId: CourseId) => {
       if (seed?.listByCourseRejects) {
         throw new Error("simulated module-repo failure");
+      }
+      if (listByCourseMap) {
+        return (listByCourseMap[courseId] ?? []).slice().sort((a, b) => a.sequence - b.sequence);
       }
       return modules
         .filter((m) => m.courseId === courseId)
