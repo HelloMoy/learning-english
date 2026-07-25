@@ -41,13 +41,15 @@ const loadLessonView = cache(
   },
 );
 
+const loadLessonNotes = cache(async (lessonId: ReturnType<typeof LessonId.parse>) => {
+  const deps = getCoursePlatformDeps();
+  return deps.useCases.findLessonNotes({ lessonId });
+});
+
 /**
  * Per-page metadata. Sets `<title>` to the resolved lesson's title on
  * success, or to a localized fallback (`HomePage.notFound`) on any error
  * or invalid params.
- *
- * Spec: lesson-view-polish § Requirement: "The Lesson Page sets a per-page
- * <title>".
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, courseSlug, moduleSlug, lessonId } = await params;
@@ -69,34 +71,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: result.value.lesson.title };
 }
 
-/**
- * Server Component that renders the Lesson Page. Resolves the route
- * params through `findLessonForView` and renders `<LessonView>`. On any
- * failure, the page renders a kind-specific inline error message
- * via `<LessonPageError>`:
- *   - `course-not-found` → "Course not found" message + home link
- *   - `module-not-in-course` → "Module not in course" message + home link
- *   - `lesson-not-in-module` → "Lesson not in module" message + home link
- *   - `internal-error` → treated as a transient failure (renders the
- *     `lesson-not-in-module` fallback)
- *   - Invalid URL params → "Lesson not in module" fallback (`invalid-params` kind)
- *
- * The `course-not-found` case used to call `next/navigation`'s
- * `notFound()` to surface a 404, but Next.js 16's `notFound()` does not
- * always throw at runtime in dev — control can fall through to the
- * next statement, leaking the wrong inline error. The inline error
- * uniform path is simpler and matches the spec scenario
- * ("An unknown course renders an error state").
- *
- * Spec: lesson-page § Requirement: "The page handles domain errors with
- * a user-facing error state".
- */
 export default async function LessonPage({ params }: Props) {
   const { courseSlug, moduleSlug, lessonId } = await params;
 
-  // Validate URL params at the boundary. Invalid input (bad UUID, bad
-  // slug) routes to the same inline error state as a domain miss so the
-  // page never throws from a Zod parse.
   const courseSlugResult = Slug.safeParse(courseSlug);
   const moduleSlugResult = Slug.safeParse(moduleSlug);
   const lessonIdResult = LessonId.safeParse(lessonId);
@@ -111,13 +88,6 @@ export default async function LessonPage({ params }: Props) {
   );
 
   if (result.isErr()) {
-    // The page renders a kind-specific inline error for every error
-    // case. The original design called `notFound()` for the
-    // course-not-found case so the URL transitions to `/404`, but
-    // Next.js 16's `notFound()` does not always throw at runtime in
-    // dev — control can fall through to the next statement. Rendering
-    // the inline error uniformly is simpler and matches the spec
-    // scenario ("An unknown course renders an error state").
     const kind =
       result.error.kind === "course-not-found"
         ? "course-not-found"
@@ -128,10 +98,20 @@ export default async function LessonPage({ params }: Props) {
   }
 
   const view: LessonViewData = result.value;
+  const notesResult = await loadLessonNotes(view.lesson.id);
+  const notes = notesResult.isOk() ? notesResult.value : null;
+  const notesMarkdown = notes?.markdown ?? null;
+  // Always keep the original Markdown resource link in the Resources
+  // region so the learner can open the source file. When the notes are
+  // rendered inline, the resource also anchors the `Notes` heading.
+  const notesResource = notes?.resource ?? null;
+
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6">
       <LessonView
         view={view}
+        notes={notesMarkdown}
+        notesResource={notesResource}
         markComplete={markLessonCompleteAction}
       />
     </main>
