@@ -32,12 +32,17 @@ export function UpNextCard({
       {nextLesson && nextLessonModule ? (
         <Link
           href={`/courses/${course.slug}/modules/${nextLessonModule.slug}/lessons/${nextLesson.id}`}
-          className="text-sm text-blue-700 underline hover:no-underline dark:text-blue-300"
+          className="inline-flex min-h-9 items-center text-sm font-medium text-practice-blue underline underline-offset-2 hover:opacity-80 focus-visible:ring-3 focus-visible:ring-practice-blue/40 focus-visible:outline-ring"
         >
           {nextLesson.title}
         </Link>
       ) : (
-        <p className="text-sm text-slate-600 dark:text-slate-400">{t("courseCompleted")}</p>
+        <p
+          className="text-sm text-muted-foreground"
+          aria-live="polite"
+        >
+          {t("courseCompleted")}
+        </p>
       )}
     </section>
   );
