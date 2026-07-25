@@ -31,4 +31,13 @@ export interface BlobStore {
    * code paths that need to surface "missing media" states.
    */
   exists(key: string): Promise<boolean>;
+
+  /**
+   * Reads a bounded UTF-8 text blob for a known text key. Implementations
+   * MUST validate that the key is safe (no absolute prefixes, no `..` path
+   * segments) and reject keys that point to binary asset types before
+   * returning any text. Missing or non-text keys reject; the read is not
+   * a general arbitrary-path API.
+   */
+  readText(key: string): Promise<string>;
 }
