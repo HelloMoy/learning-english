@@ -52,7 +52,7 @@ describe("LessonBreadcrumb", () => {
     mockUseTranslations.mockReturnValue(((key: string) => key) as never);
   });
 
-  test("WHEN rendered THEN it shows three segments in order", () => {
+  test("WHEN rendered THEN it shows three segments in order with locale-aware overview links", () => {
     // Arrange
     const { course, module: courseModule, lesson } = fixtures();
 
@@ -69,6 +69,10 @@ describe("LessonBreadcrumb", () => {
     expect(screen.getByText(course.title)).toBeInTheDocument();
     expect(screen.getByText(courseModule.title)).toBeInTheDocument();
     expect(screen.getByText(lesson.title)).toBeInTheDocument();
+    const courseLink = screen.getByRole("link", { name: course.title });
+    const moduleLink = screen.getByRole("link", { name: courseModule.title });
+    expect(courseLink).toHaveAttribute("href", "/courses/my-course");
+    expect(moduleLink).toHaveAttribute("href", "/courses/my-course/modules/my-module");
   });
 
   test("WHEN rendered THEN the current lesson has aria-current=page", () => {
