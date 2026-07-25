@@ -86,6 +86,8 @@ type Story = StoryObj<typeof meta>;
 export const HappyPath: Story = {
   args: {
     view: happyPathView,
+    notes: null,
+    notesResource: null,
     markComplete: () => Promise.resolve({ completed: true }),
   },
 };
@@ -93,6 +95,8 @@ export const HappyPath: Story = {
 export const NoResources: Story = {
   args: {
     view: { ...happyPathView, resources: [] },
+    notes: null,
+    notesResource: null,
     markComplete: () => Promise.resolve({ completed: true }),
   },
 };
@@ -100,6 +104,8 @@ export const NoResources: Story = {
 export const CourseCompleted: Story = {
   args: {
     view: { ...happyPathView, nextLesson: null },
+    notes: null,
+    notesResource: null,
     markComplete: () => Promise.resolve({ completed: true }),
   },
 };
@@ -107,6 +113,17 @@ export const CourseCompleted: Story = {
 export const ReadingLesson: Story = {
   args: {
     view: { ...happyPathView, lesson: readingLesson, nextLesson: null },
+    notes: null,
+    notesResource: null,
+    markComplete: () => Promise.resolve({ completed: true }),
+  },
+};
+
+export const WithInlineNotes: Story = {
+  args: {
+    view: happyPathView,
+    notes: "# Welcome\n\nThese are the inline notes rendered safely.",
+    notesResource: resource,
     markComplete: () => Promise.resolve({ completed: true }),
   },
 };

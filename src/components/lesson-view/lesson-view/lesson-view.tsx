@@ -1,7 +1,9 @@
 "use client";
 
+import { InlineLessonNotes } from "@/components/lesson-notes/inline-lesson-notes";
 import type { LessonId } from "@/domain/entities/ids/ids";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
+import type { Resource } from "@/domain/entities/resource/resource";
 import type { LessonView as LessonViewData } from "@/domain/use-cases/find-lesson-for-view/find-lesson-for-view";
 
 import { useTranslations } from "next-intl";
@@ -21,12 +23,17 @@ import { UpNextCard } from "../up-next-card/up-next-card";
  */
 export function LessonView({
   view,
+  notes,
+  notesResource,
   markComplete,
 }: {
   view: LessonViewData;
+  notes: string | null;
+  notesResource: Resource | null;
   markComplete: (input: { lessonId: LessonId }) => Promise<{ completed: boolean }>;
 }) {
   const t = useTranslations("Components.NativeVideoPlayer");
+  const tLessonNotes = useTranslations("Components.LessonNotes");
   const { course, module, lesson, resources, nextLesson, modules, lessons } = view;
 
   // Precompute the lessons-by-module map for the Outline.
@@ -47,6 +54,14 @@ export function LessonView({
   // module — see design.md §D4).
   const modulesById = new Map(modules.map((m) => [m.id, m]));
   const nextLessonModule = nextLesson ? (modulesById.get(nextLesson.moduleId) ?? null) : null;
+
+  // The Resources region keeps the original Markdown resource link even
+  // when notes are rendered inline, so the learner can open the file.
+  // The Markdown resource is folded into a dedicated row beneath the
+  // main Resources card so the section never appears empty when only
+  // the notes resource is present.
+  const nonNotesResources = resources.filter((r) => r.id !== notesResource?.id);
+  const showNotesRow = notesResource !== null && notesResource !== undefined;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_3fr_1fr]">
@@ -82,6 +97,7 @@ export function LessonView({
             </article>
           </>
         )}
+        {notes ? <InlineLessonNotes markdown={notes} /> : null}
         <MarkAsCompleteButton
           lessonId={lesson.id}
           markComplete={markComplete}
@@ -89,7 +105,13 @@ export function LessonView({
       </main>
 
       <aside className="space-y-4">
-        <ResourceList resources={resources} />
+        <ResourceList resources={nonNotesResources} />
+        {showNotesRow ? (
+          <ResourceList
+            resources={[notesResource]}
+            titleOverride={tLessonNotes("resourceTitle")}
+          />
+        ) : null}
         <UpNextCard
           course={course}
           nextLesson={nextLesson}
