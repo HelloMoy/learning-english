@@ -63,7 +63,7 @@ describe("ModuleList", () => {
     );
 
     // Assert
-    expect(screen.getByRole("heading", { name: "Module A" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Module A" })).toBeInTheDocument();
     expect(screen.getByText("Lesson A")).toBeInTheDocument();
   });
 });
