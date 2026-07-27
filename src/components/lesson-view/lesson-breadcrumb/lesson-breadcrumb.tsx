@@ -27,11 +27,11 @@ export function LessonBreadcrumb({
       aria-label={t("ariaLabel")}
       className="text-sm"
     >
-      <ol className="flex flex-wrap items-center gap-1 text-slate-600 dark:text-slate-400">
+      <ol className="flex flex-wrap items-center gap-1 text-muted-foreground">
         <li>
           <Link
             href={courseOverviewPath(course) as never}
-            className="hover:underline focus-visible:ring-3 focus-visible:ring-slate-400/40 focus-visible:outline-ring"
+            className="hover:text-gold hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
           >
             {course.title}
           </Link>
@@ -40,7 +40,7 @@ export function LessonBreadcrumb({
         <li>
           <Link
             href={moduleOverviewPath(course, module) as never}
-            className="hover:underline focus-visible:ring-3 focus-visible:ring-slate-400/40 focus-visible:outline-ring"
+            className="hover:text-gold hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
           >
             {module.title}
           </Link>
@@ -48,7 +48,7 @@ export function LessonBreadcrumb({
         <li aria-hidden="true">›</li>
         <li
           aria-current="page"
-          className="font-medium text-slate-900 dark:text-slate-100"
+          className="font-semibold text-gold"
         >
           {lesson.title}
         </li>
