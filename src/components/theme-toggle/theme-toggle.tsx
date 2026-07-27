@@ -37,7 +37,7 @@ export function ThemeToggle() {
       <button
         type="button"
         aria-label={t("label")}
-        className="rounded-md border border-zinc-300 bg-white px-3 py-1 text-sm text-zinc-400 dark:border-zinc-700 dark:bg-zinc-900"
+        className="inline-flex items-center gap-2 rounded-md border border-border bg-foreground/5 px-3 py-1.5 text-xs text-muted-foreground"
         disabled
       >
         …
@@ -54,8 +54,9 @@ export function ThemeToggle() {
       type="button"
       aria-label={`${t("label")}: ${t(theme as Theme)}`}
       onClick={() => setTheme(nextTheme)}
-      className="rounded-md border border-zinc-300 bg-white px-3 py-1 text-sm hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+      className="inline-flex items-center gap-2 rounded-md border border-border bg-foreground/5 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
     >
+      <span aria-hidden="true">◐</span>
       {t(theme as Theme)}
     </button>
   );
