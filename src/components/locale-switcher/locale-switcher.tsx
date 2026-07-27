@@ -49,18 +49,19 @@ export function LocaleSwitcher() {
   }
 
   return (
-    <label className="flex items-center gap-2">
-      <span className="text-sm text-zinc-600 dark:text-zinc-400">{t("label")}:</span>
+    <label className="inline-flex items-center gap-2 rounded-md border border-border bg-foreground/5 px-3 py-1.5 text-xs text-muted-foreground focus-within:ring-3 focus-within:ring-ring/50">
+      <span>{t("label")}:</span>
       <select
         value={currentLocale}
         onChange={handleChange}
         disabled={isPending}
-        className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        className="cursor-pointer bg-transparent font-semibold text-foreground focus:outline-none"
       >
         {routing.locales.map((locale) => (
           <option
             key={locale}
             value={locale}
+            className="bg-popover text-popover-foreground"
           >
             {t(LOCALE_LABEL_KEY[locale])}
           </option>
