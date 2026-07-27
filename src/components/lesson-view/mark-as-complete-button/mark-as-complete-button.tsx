@@ -40,8 +40,9 @@ export function MarkAsCompleteButton({
         onClick={onClick}
         disabled={completed || isPending}
         aria-pressed={completed}
-        className="inline-flex min-h-11 items-center justify-center rounded-full border border-border bg-card px-5 text-sm font-semibold text-card-foreground hover:bg-slate-50 focus-visible:ring-3 focus-visible:ring-practice-blue/40 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-slate-800"
+        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary px-6 text-sm font-bold tracking-wide text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-70"
       >
+        <span aria-hidden="true">✓</span>
         {completed ? t("markedComplete") : t("markComplete")}
       </button>
       <p
