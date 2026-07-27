@@ -46,24 +46,24 @@ function lessonUrl(
 }
 
 test.describe("Course catalog navigation", () => {
-  test("WHEN the home is visited THEN the course card is rendered with the locale-aware link", async ({
+  test("WHEN the home is visited THEN the featured course renders with the locale-aware link", async ({
     page,
   }) => {
     await page.goto(homeUrl("en"));
 
-    const card = page.getByTestId("course-card");
-    await expect(card).toBeVisible();
+    const featured = page.getByTestId("featured-course");
+    await expect(featured).toBeVisible();
     await expect(page.getByRole("heading", { name: "Advanced Intermediate Course" })).toBeVisible();
-    await expect(page.getByTestId("course-card-link")).toHaveAttribute("href", courseUrl("en"));
+    await expect(page.getByTestId("home-open-course")).toHaveAttribute("href", courseUrl("en"));
   });
 
-  test("WHEN the course card is activated THEN the course overview renders the module list and start course CTA", async ({
+  test("WHEN the course card is activated THEN the course overview renders the episode grid and start course CTA", async ({
     page,
   }) => {
     await page.goto(courseUrl("en"));
 
     await expect(page.getByRole("heading", { name: "Advanced Intermediate Course" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "10 modules" })).toBeVisible();
+    await expect(page.getByTestId("course-episode-grid")).toBeVisible();
     const startLink = page.getByTestId("start-course");
     await expect(startLink).toBeVisible();
     await expect(startLink).toHaveAttribute(
@@ -85,7 +85,7 @@ test.describe("Course catalog navigation", () => {
     });
     await expect(moduleHeading).toBeVisible();
 
-    const firstLessonLink = page.getByRole("link", { name: /open lesson/i }).first();
+    const firstLessonLink = page.getByRole("link", { name: /^open$/i }).first();
     await expect(firstLessonLink).toHaveAttribute(
       "href",
       lessonUrl("en", COURSE_SLUG, FIRST_MODULE.slug, FIRST_LESSON.id),
@@ -132,7 +132,7 @@ test.describe("Course catalog — locale awareness", () => {
       page,
     }) => {
       await page.goto(homeUrl(locale));
-      await expect(page.getByTestId("course-card-link")).toHaveAttribute("href", courseUrl(locale));
+      await expect(page.getByTestId("home-open-course")).toHaveAttribute("href", courseUrl(locale));
     });
   }
 });
