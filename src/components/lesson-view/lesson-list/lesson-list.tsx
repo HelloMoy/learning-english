@@ -37,8 +37,8 @@ export function LessonList({
               aria-label={isCurrent ? t("currentLessonAria") : undefined}
               className={
                 isCurrent
-                  ? "block min-h-9 rounded bg-slate-200 px-2 py-2 text-sm font-medium text-ink focus-visible:ring-3 focus-visible:ring-practice-blue/40 focus-visible:outline-ring"
-                  : "block min-h-9 rounded px-2 py-2 text-sm text-ink/80 hover:bg-slate-100 focus-visible:ring-3 focus-visible:ring-practice-blue/40 focus-visible:outline-ring"
+                  ? "block min-h-9 rounded border-l-2 border-gold bg-gold/10 px-2 py-2 text-sm font-semibold text-gold focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                  : "block min-h-9 rounded px-2 py-2 text-sm text-muted-foreground hover:bg-foreground/5 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
               }
             >
               {lesson.title}
