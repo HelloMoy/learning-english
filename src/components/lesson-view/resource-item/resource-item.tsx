@@ -26,7 +26,7 @@ export function ResourceItem({ resource }: { resource: Resource }) {
         href={resource.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-2 text-sm text-blue-700 underline hover:no-underline dark:text-blue-300"
+        className="flex items-center gap-2 text-sm text-gold underline underline-offset-2 hover:no-underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
       >
         <Icon
           aria-hidden="true"
