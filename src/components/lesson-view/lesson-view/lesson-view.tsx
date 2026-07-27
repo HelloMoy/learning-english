@@ -1,6 +1,6 @@
 "use client";
 
-import { InlineLessonNotes } from "@/components/lesson-notes/inline-lesson-notes";
+import { Eyebrow } from "@/components/eyebrow/eyebrow";
 import type { LessonId } from "@/domain/entities/ids/ids";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
 import type { Resource } from "@/domain/entities/resource/resource";
@@ -9,6 +9,7 @@ import type { LessonView as LessonViewData } from "@/domain/use-cases/find-lesso
 import { useTranslations } from "next-intl";
 
 import { LessonBreadcrumb } from "../lesson-breadcrumb/lesson-breadcrumb";
+import { LessonNotesTabs } from "../lesson-notes-tabs/lesson-notes-tabs";
 import { MarkAsCompleteButton } from "../mark-as-complete-button/mark-as-complete-button";
 import { NativeVideoPlayer } from "../native-video-player/native-video-player";
 import { OutlineDrawer } from "../outline-drawer/outline-drawer";
@@ -64,7 +65,7 @@ export function LessonView({
   const showNotesRow = notesResource !== null && notesResource !== undefined;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_3fr_1fr]">
+    <div className="grid gap-8 lg:grid-cols-[260px_1fr_280px]">
       <OutlineDrawer
         course={course}
         modules={modules}
@@ -72,7 +73,7 @@ export function LessonView({
         currentLessonId={lesson.id}
       />
 
-      <main className="space-y-4">
+      <main className="min-w-0 space-y-6">
         <LessonBreadcrumb
           course={course}
           module={module}
@@ -80,24 +81,43 @@ export function LessonView({
         />
         {lesson.kind === "video" ? (
           <>
-            <NativeVideoPlayer
-              source={lesson.source}
-              poster={lesson.poster}
-              title={lesson.title}
-              ariaLabel={t("videoPlayerLabel")}
-            />
-            <h1 className="text-2xl font-bold">{lesson.title}</h1>
-            <p className="text-slate-700 dark:text-slate-300">{lesson.description}</p>
+            <div className="relative overflow-hidden rounded-2xl border border-border bg-black">
+              <NativeVideoPlayer
+                source={lesson.source}
+                poster={lesson.poster}
+                title={lesson.title}
+                ariaLabel={t("videoPlayerLabel")}
+              />
+              <div
+                className="pointer-events-none absolute inset-x-0 top-0 z-10 p-6 sm:p-8"
+                style={{
+                  background:
+                    "linear-gradient(180deg, color-mix(in oklab, var(--background) 55%, transparent), transparent)",
+                }}
+              >
+                <Eyebrow>{lesson.title}</Eyebrow>
+                <h2
+                  className="mt-2 max-w-2xl font-sans text-3xl leading-[0.95] font-extrabold text-amber sm:text-5xl"
+                  style={{
+                    textShadow: "0 3px 30px color-mix(in oklab, var(--glow) 40%, transparent)",
+                  }}
+                >
+                  {module.title}
+                </h2>
+              </div>
+            </div>
+            <h1 className="text-2xl font-bold text-foreground">{lesson.title}</h1>
+            <p className="text-muted-foreground">{lesson.description}</p>
           </>
         ) : (
           <>
-            <h1 className="text-2xl font-bold">{lesson.title}</h1>
-            <article className="prose dark:prose-invert">
+            <h1 className="text-2xl font-bold text-foreground">{lesson.title}</h1>
+            <article className="prose prose-slate dark:prose-invert max-w-none text-foreground">
               <p>{lesson.body}</p>
             </article>
           </>
         )}
-        {notes ? <InlineLessonNotes markdown={notes} /> : null}
+        {notes ? <LessonNotesTabs markdown={notes} /> : null}
         <MarkAsCompleteButton
           lessonId={lesson.id}
           markComplete={markComplete}
