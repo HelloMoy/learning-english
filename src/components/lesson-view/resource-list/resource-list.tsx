@@ -27,9 +27,11 @@ export function ResourceList({
     return (
       <section
         aria-label={heading}
-        className="rounded border border-slate-200 p-4 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-400"
+        className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground"
       >
-        <h2 className="mb-2 font-semibold">{heading}</h2>
+        <h2 className="mb-2 text-xs font-bold tracking-[0.24em] text-muted-foreground uppercase">
+          {heading}
+        </h2>
         <p>{t("empty")}</p>
       </section>
     );
@@ -37,9 +39,11 @@ export function ResourceList({
   return (
     <section
       aria-label={heading}
-      className="rounded border border-slate-200 p-4 dark:border-slate-700"
+      className="rounded-xl border border-border bg-card p-4"
     >
-      <h2 className="mb-2 font-semibold">{heading}</h2>
+      <h2 className="mb-2 text-xs font-bold tracking-[0.24em] text-muted-foreground uppercase">
+        {heading}
+      </h2>
       <ul className="space-y-2">
         {resources.map((resource) => (
           <ResourceItem
