@@ -3,7 +3,7 @@ import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -75,6 +75,23 @@ describe("CourseOverview", () => {
       "href",
       "/courses/course-1/modules/mod-1/lessons/44444444-4444-4444-8444-444444444444",
     );
+  });
+
+  test("renders one poster per module linking to its module overview (no practice track)", () => {
+    render(
+      <CourseOverview
+        course={course}
+        modules={[mod1, mod2]}
+        firstLesson={firstLesson}
+      />,
+    );
+    const grid = screen.getByTestId("course-episode-grid");
+    const links = within(grid).getAllByRole("link");
+    expect(links).toHaveLength(2);
+    expect(links[0]).toHaveAttribute("href", "/courses/course-1/modules/mod-1");
+    expect(links[1]).toHaveAttribute("href", "/courses/course-1/modules/mod-2");
+    // The old practice track is gone.
+    expect(screen.queryByTestId("course-track")).toBeNull();
   });
 
   test("omits the Start course CTA when the course has no first lesson", () => {
