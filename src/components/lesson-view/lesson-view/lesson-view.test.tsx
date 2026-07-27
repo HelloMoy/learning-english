@@ -127,4 +127,39 @@ describe("LessonView", () => {
     expect(screen.getByText("Reading body content.")).toBeInTheDocument();
     expect(document.querySelector("video")).toBeNull();
   });
+
+  test("video lesson renders a cinema hero overlay (module title) while preserving the native player", () => {
+    const { view } = fixtures();
+    render(
+      <LessonView
+        view={view}
+        notes={null}
+        notesResource={null}
+        markComplete={vi.fn().mockResolvedValue({ completed: true })}
+      />,
+    );
+    // The overlay headline is the module title; the native <video> remains.
+    expect(screen.getByRole("heading", { name: "Module" })).toBeInTheDocument();
+    expect(document.querySelector("video")).not.toBeNull();
+    // The current lesson is marked in the outline.
+    expect(document.querySelector('[aria-current="page"]')).not.toBeNull();
+  });
+
+  test("renders the Notes/Transcript tabs when notes are present", () => {
+    const { view } = fixtures();
+    render(
+      <LessonView
+        view={view}
+        notes={"# Intro\n\nTexto ES.\n\nEnglish text."}
+        notesResource={null}
+        markComplete={vi.fn().mockResolvedValue({ completed: true })}
+      />,
+    );
+    expect(screen.getByTestId("lesson-notes-tabs")).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "notes" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "transcript" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+  });
 });
