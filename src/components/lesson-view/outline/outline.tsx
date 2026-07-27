@@ -30,7 +30,7 @@ export function Outline({
       aria-label={t("title")}
       className="text-sm"
     >
-      <h2 className="mb-2 font-semibold">{t("title")}</h2>
+      <h2 className="mb-3 text-xs font-bold tracking-[0.24em] text-gold uppercase">{t("title")}</h2>
       <ModuleList
         course={course}
         modules={modules}
