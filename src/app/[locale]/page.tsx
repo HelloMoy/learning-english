@@ -1,5 +1,7 @@
 import { getCoursePlatformDeps } from "@/adapters/persistence/in-memory/use-case-dependencies/use-case-dependencies";
-import { CourseCard } from "@/components/course-catalog/course-card";
+import { CinemaHero } from "@/components/cinema-hero/cinema-hero";
+import { FeaturedCourse } from "@/components/featured-course/featured-course";
+import { courseOverviewPath } from "@/i18n/lesson-routes";
 
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
@@ -20,53 +22,54 @@ export default function Home({ params }: Props) {
   setRequestLocale(locale);
 
   const t = useTranslations("HomePage");
-  const tCatalog = useTranslations("CourseCatalog.courseOverview");
+  const tCatalog = useTranslations("CourseCatalog.card");
   const entries = use(loadCatalog());
+  const featured = entries[0] ?? null;
+  const featuredPoster =
+    featured?.firstLesson?.kind === "video" ? (featured.firstLesson.poster ?? null) : null;
 
   return (
-    <div className="flex flex-1 flex-col bg-studio-paper font-sans text-ink dark:bg-black">
-      <main
-        id="main"
-        className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-10 px-4 py-12 sm:px-8 sm:py-16"
-      >
-        <header className="flex flex-col gap-4">
-          <h1 className="text-3xl leading-10 font-semibold tracking-tight sm:text-4xl">
-            {t("title")}
-          </h1>
-          <p className="max-w-2xl text-lg leading-8 text-muted-foreground">{t("subtitle")}</p>
-        </header>
-        <section
-          aria-labelledby="catalog-heading"
-          className="flex flex-col gap-4"
-        >
-          <h2
-            id="catalog-heading"
-            className="text-xl font-semibold tracking-tight"
+    <main
+      id="main"
+      className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-12 sm:px-11 sm:py-20"
+    >
+      {featured ? (
+        <div className="grid flex-1 items-start gap-12 lg:grid-cols-[1fr_auto]">
+          <CinemaHero
+            eyebrow={t("eyebrow")}
+            title={t("title")}
+            subtitle={t("subtitle")}
+            openLabel={t("openCourse")}
+            openHref={courseOverviewPath(featured.course)}
+            myListLabel={t("myList")}
+          />
+          <FeaturedCourse
+            course={featured.course}
+            href={courseOverviewPath(featured.course)}
+            posterUrl={featuredPoster}
+            featuredLabel={t("featuredLabel")}
+            featureLabel={t("featureLabel")}
+            featureHeadline={t("featureHeadline")}
+            countsLabel={`${tCatalog("moduleCount", { count: featured.course.moduleCount })} · ${tCatalog("lessonCount", { count: featured.course.lessonCount })}`}
+          />
+        </div>
+      ) : (
+        <div className="flex flex-col gap-5">
+          <CinemaHero
+            eyebrow={t("eyebrow")}
+            title={t("title")}
+            subtitle={t("subtitle")}
+            openLabel={t("openCourse")}
+            myListLabel={t("myList")}
+          />
+          <p
+            className="text-sm text-muted-foreground"
+            role="status"
           >
-            {t("catalogHeading")}
-          </h2>
-          {entries.length === 0 ? (
-            <p
-              className="text-sm text-muted-foreground"
-              role="status"
-            >
-              {t("catalogEmpty")}
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-6">
-              {entries.map((entry) => (
-                <li key={entry.course.id}>
-                  <CourseCard
-                    course={entry.course}
-                    firstLesson={entry.firstLesson}
-                    trackLabel={tCatalog("trackLabel")}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </main>
-    </div>
+            {t("catalogEmpty")}
+          </p>
+        </div>
+      )}
+    </main>
   );
 }
