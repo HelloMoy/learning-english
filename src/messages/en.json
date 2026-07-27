@@ -5,7 +5,21 @@
     "cta": "Get started",
     "notFound": "Not found",
     "catalogHeading": "Courses",
-    "catalogEmpty": "No courses are available right now."
+    "catalogEmpty": "No courses are available right now.",
+    "eyebrow": "Now streaming · Spoken English",
+    "openCourse": "Open course",
+    "myList": "+ My List",
+    "featuredLabel": "Courses · Featured",
+    "featureLabel": "Feature",
+    "featureHeadline": "Welcome"
+  },
+  "SiteHeader": {
+    "navLabel": "Primary",
+    "tagline": "Immersion Cinema",
+    "sectionHome": "Home",
+    "sectionCourse": "Course",
+    "sectionModule": "Module",
+    "sectionLesson": "Lesson"
   },
   "LocaleSwitcher": {
     "label": "Language",
@@ -70,6 +84,13 @@
     },
     "InlineLessonNotes": {
       "heading": "Notes"
+    },
+    "LessonTabs": {
+      "notes": "Notes",
+      "transcript": "Transcript",
+      "transcriptUnavailable": "No transcript is available for this lesson yet.",
+      "spanish": "Español",
+      "english": "English"
     }
   },
   "CourseCatalog": {
@@ -87,7 +108,11 @@
       "startCourse": "Start course",
       "trackLabel": "Course modules in order",
       "courseNotFound": "We couldn't find this course.",
-      "goHome": "Go to home"
+      "goHome": "Go to home",
+      "limitedSeries": "Limited series",
+      "season": "Season 1 · {count, plural, one {# episode} other {# episodes}}",
+      "moduleLabel": "Module",
+      "episodesGridLabel": "Course episodes"
     },
     "moduleOverview": {
       "title": "{title}",
@@ -96,7 +121,10 @@
       "duration": "{minutes} min",
       "moduleNotInCourse": "We couldn't find this module in the course.",
       "goHome": "Go to home",
-      "backToCourse": "Back to course"
+      "backToCourse": "Back to course",
+      "moduleLabel": "Module {number}",
+      "episode": "Episode {number}",
+      "open": "Open"
     }
   },
   "LocaleNotFound": {
