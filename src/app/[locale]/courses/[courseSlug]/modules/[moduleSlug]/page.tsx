@@ -49,7 +49,7 @@ export default async function ModuleOverviewPage({ params }: Props) {
   return (
     <main
       id="main"
-      className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-8 sm:py-16"
+      className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-11 sm:py-16"
     >
       <ModuleOverview
         course={result.value.course}
