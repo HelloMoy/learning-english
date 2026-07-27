@@ -34,8 +34,8 @@ export function OutlineDrawer({
     <>
       {/* Mobile: collapsible accordion. Native <details> gives keyboard
           support and a11y semantics for free. */}
-      <details className="rounded border border-slate-200 p-3 lg:hidden dark:border-slate-700">
-        <summary className="cursor-pointer font-semibold text-slate-900 dark:text-slate-100">
+      <details className="rounded-xl border border-border bg-card p-3 lg:hidden">
+        <summary className="cursor-pointer text-xs font-bold tracking-[0.24em] text-gold uppercase">
           {t("title")}
         </summary>
         <div className="mt-2">
@@ -49,7 +49,7 @@ export function OutlineDrawer({
       </details>
 
       {/* Desktop: permanent sidebar. */}
-      <aside className="hidden lg:block">
+      <aside className="hidden rounded-2xl border border-border bg-card p-5 lg:block">
         <Outline
           course={course}
           modules={modules}
