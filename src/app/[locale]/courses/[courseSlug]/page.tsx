@@ -41,7 +41,7 @@ export default async function CourseOverviewPage({ params }: Props) {
   return (
     <main
       id="main"
-      className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-8 sm:py-16"
+      className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-11 sm:py-16"
     >
       <CourseOverview
         course={result.value.course}
