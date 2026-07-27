@@ -44,7 +44,7 @@ export function ModuleList({
               <Link
                 href={moduleOverviewPath(course, mod) as never}
                 aria-current={isOpen ? "true" : undefined}
-                className="text-sm font-semibold text-slate-700 hover:underline focus-visible:ring-3 focus-visible:ring-practice-blue/40 focus-visible:outline-ring dark:text-slate-300"
+                className="text-sm font-semibold text-foreground hover:text-gold focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
               >
                 {mod.title}
               </Link>
