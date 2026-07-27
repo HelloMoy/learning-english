@@ -26,13 +26,13 @@ export function UpNextCard({
   return (
     <section
       aria-label={t("title")}
-      className="rounded border border-slate-200 p-4 dark:border-slate-700"
+      className="rounded-xl border border-gold/40 bg-gold/5 p-4"
     >
-      <h2 className="mb-2 text-sm font-semibold">{t("title")}</h2>
+      <h2 className="mb-2 text-xs font-bold tracking-[0.24em] text-gold uppercase">{t("title")}</h2>
       {nextLesson && nextLessonModule ? (
         <Link
           href={`/courses/${course.slug}/modules/${nextLessonModule.slug}/lessons/${nextLesson.id}`}
-          className="inline-flex min-h-9 items-center text-sm font-medium text-practice-blue underline underline-offset-2 hover:opacity-80 focus-visible:ring-3 focus-visible:ring-practice-blue/40 focus-visible:outline-ring"
+          className="inline-flex min-h-9 items-center text-sm font-semibold text-foreground hover:text-gold focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
         >
           {nextLesson.title}
         </Link>
