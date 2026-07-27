@@ -25,7 +25,7 @@ export function NativeVideoPlayer({
       title={title}
       aria-label={ariaLabel}
       poster={poster}
-      className="aspect-video w-full rounded bg-slate-900"
+      className="aspect-video w-full bg-black"
     >
       <source
         src={source}
