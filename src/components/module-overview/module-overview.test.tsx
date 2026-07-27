@@ -20,15 +20,15 @@ const course = Course.parse({
   title: "Course 1",
   description: "Desc",
   language: "en",
-  lessonCount: 2,
+  lessonCount: 3,
   moduleCount: 1,
 });
 const mod1 = Module.parse({
   id: "22222222-2222-4222-8222-222222222222",
   courseId: course.id,
   slug: "mod-1",
-  title: "Module 1",
-  sequence: 1,
+  title: "Contractions Reductions",
+  sequence: 3,
 });
 
 const lessonA = Lesson.parse({
@@ -48,6 +48,15 @@ const lessonB = Lesson.parse({
   sequence: 2,
   title: "Lesson B",
 });
+const readingLesson = Lesson.parse({
+  kind: "reading",
+  id: "55555555-5555-4555-8555-555555555555",
+  courseId: course.id,
+  moduleId: mod1.id,
+  sequence: 3,
+  title: "Reading Lesson",
+  body: "Some body text.",
+});
 
 describe("ModuleOverview", () => {
   beforeEach(() => {
@@ -60,7 +69,7 @@ describe("ModuleOverview", () => {
     );
   });
 
-  test("renders one link per lesson with locale-aware href and a duration label", () => {
+  test("renders one Open link per lesson, in sequence order, with locale-aware hrefs", () => {
     render(
       <ModuleOverview
         course={course}
@@ -68,7 +77,7 @@ describe("ModuleOverview", () => {
         lessons={[lessonA, lessonB]}
       />,
     );
-    const links = screen.getAllByRole("link", { name: "CourseCatalog.moduleOverview.openLesson" });
+    const links = screen.getAllByRole("link", { name: /CourseCatalog\.moduleOverview\.open/ });
     expect(links).toHaveLength(2);
     expect(links[0]).toHaveAttribute(
       "href",
@@ -78,8 +87,33 @@ describe("ModuleOverview", () => {
       "href",
       "/courses/course-1/modules/mod-1/lessons/44444444-4444-4444-8444-444444444444",
     );
+  });
+
+  test("shows a duration for video lessons and omits it for reading lessons", () => {
+    render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonA, readingLesson]}
+      />,
+    );
+    // Only the video lesson has a duration label.
     expect(screen.getAllByText('CourseCatalog.moduleOverview.duration:{"minutes":4}')).toHaveLength(
-      2,
+      1,
+    );
+  });
+
+  test("back link returns to the course overview", () => {
+    render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonA]}
+      />,
+    );
+    expect(screen.getByRole("link", { name: "← Course 1" })).toHaveAttribute(
+      "href",
+      "/courses/course-1",
     );
   });
 });
