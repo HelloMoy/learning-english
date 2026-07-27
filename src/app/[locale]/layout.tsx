@@ -7,10 +7,10 @@ import { notFound } from "next/navigation";
 
 import "../globals.css";
 
+import { CinemaBackground } from "@/components/cinema-background/cinema-background";
 import { GlobalProviders } from "@/components/global-providers";
-import { LocaleSwitcher } from "@/components/locale-switcher/locale-switcher";
+import { SiteHeader } from "@/components/site-header/site-header";
 import { SkipLink } from "@/components/skip-link/skip-link";
-import { ThemeToggle } from "@/components/theme-toggle/theme-toggle";
 import { routing } from "@/i18n/routing";
 
 const geistSans = Geist({
@@ -78,15 +78,8 @@ export default async function LocaleLayout({ children, params }: Props) {
             disableTransitionOnChange
           >
             <SkipLink />
-            <header
-              className="sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60"
-              aria-label="Primary"
-            >
-              <div className="mx-auto flex w-full max-w-7xl items-center justify-end gap-3 px-4 py-3 sm:px-8">
-                <LocaleSwitcher />
-                <ThemeToggle />
-              </div>
-            </header>
+            <CinemaBackground />
+            <SiteHeader />
             <GlobalProviders>
               <div className="flex-1">{children}</div>
             </GlobalProviders>
