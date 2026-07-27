@@ -5,7 +5,21 @@
     "cta": "Começar",
     "notFound": "Não encontrado",
     "catalogHeading": "Cursos",
-    "catalogEmpty": "Nenhum curso disponível no momento."
+    "catalogEmpty": "Nenhum curso disponível no momento.",
+    "eyebrow": "Agora em exibição · Inglês falado",
+    "openCourse": "Abrir curso",
+    "myList": "+ Minha lista",
+    "featuredLabel": "Cursos · Em destaque",
+    "featureLabel": "Destaque",
+    "featureHeadline": "Bem-vindo"
+  },
+  "SiteHeader": {
+    "navLabel": "Principal",
+    "tagline": "Cinema imersivo",
+    "sectionHome": "Início",
+    "sectionCourse": "Curso",
+    "sectionModule": "Módulo",
+    "sectionLesson": "Aula"
   },
   "LocaleSwitcher": {
     "label": "Idioma",
@@ -70,6 +84,13 @@
     },
     "InlineLessonNotes": {
       "heading": "Notas"
+    },
+    "LessonTabs": {
+      "notes": "Notas",
+      "transcript": "Transcrição",
+      "transcriptUnavailable": "Ainda não há transcrição disponível para esta aula.",
+      "spanish": "Español",
+      "english": "English"
     }
   },
   "CourseCatalog": {
@@ -87,7 +108,11 @@
       "startCourse": "Começar curso",
       "trackLabel": "Módulos do curso em ordem",
       "courseNotFound": "Não encontramos este curso.",
-      "goHome": "Ir para o início"
+      "goHome": "Ir para o início",
+      "limitedSeries": "Série limitada",
+      "season": "Temporada 1 · {count, plural, one {# episódio} other {# episódios}}",
+      "moduleLabel": "Módulo",
+      "episodesGridLabel": "Episódios do curso"
     },
     "moduleOverview": {
       "title": "{title}",
@@ -96,7 +121,10 @@
       "duration": "{minutes} min",
       "moduleNotInCourse": "Não encontramos este módulo no curso.",
       "goHome": "Ir para o início",
-      "backToCourse": "Voltar para o curso"
+      "backToCourse": "Voltar para o curso",
+      "moduleLabel": "Módulo {number}",
+      "episode": "Episódio {number}",
+      "open": "Abrir"
     }
   },
   "LocaleNotFound": {
