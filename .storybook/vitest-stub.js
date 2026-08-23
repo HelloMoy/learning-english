@@ -25,7 +25,6 @@
 // `storybookTest` Vitest project when the test panel is wanted.
 
 const noop = () => {};
-const asyncNoop = async () => {};
 
 export const vi = {
   fn: () => () => {},
@@ -54,7 +53,7 @@ export const beforeEach = noop;
 export const afterEach = noop;
 export const onTestFinished = noop;
 
-export default {
+const vitestStub = {
   vi,
   expect,
   describe,
@@ -66,3 +65,5 @@ export default {
   afterEach,
   onTestFinished,
 };
+
+export default vitestStub;
