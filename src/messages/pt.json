@@ -66,6 +66,12 @@
       "markComplete": "Marcar como concluída",
       "markedComplete": "Concluída"
     },
+    "LessonVideoResume": {
+      "dialogLabel": "Retomar reprodução",
+      "resumeCta": "Retomar",
+      "restartCta": "Reiniciar do começo",
+      "resumeFrom": "Retomar de {seconds}"
+    },
     "LessonList": {
       "currentLessonAria": "Aula atual"
     },
