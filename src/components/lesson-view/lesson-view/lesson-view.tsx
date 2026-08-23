@@ -11,8 +11,8 @@ import { useTranslations } from "next-intl";
 import { LessonBreadcrumb } from "../lesson-breadcrumb/lesson-breadcrumb";
 import { LessonNotesTabs } from "../lesson-notes-tabs/lesson-notes-tabs";
 import { MarkAsCompleteButton } from "../mark-as-complete-button/mark-as-complete-button";
-import { NativeVideoPlayer } from "../native-video-player/native-video-player";
 import { OutlineDrawer } from "../outline-drawer/outline-drawer";
+import { PlaybackPositionedVideoPlayer } from "../playback-positioned-video-player/playback-positioned-video-player";
 import { ResourceList } from "../resource-list/resource-list";
 import { UpNextCard } from "../up-next-card/up-next-card";
 
@@ -82,11 +82,13 @@ export function LessonView({
         {lesson.kind === "video" ? (
           <>
             <div className="relative overflow-hidden rounded-2xl border border-border bg-black">
-              <NativeVideoPlayer
+              <PlaybackPositionedVideoPlayer
+                lessonId={lesson.id}
                 source={lesson.source}
                 poster={lesson.poster}
                 title={lesson.title}
                 ariaLabel={t("videoPlayerLabel")}
+                durationSeconds={lesson.durationSeconds}
               />
               <div
                 className="pointer-events-none absolute inset-x-0 top-0 z-10 p-6 sm:p-8"
