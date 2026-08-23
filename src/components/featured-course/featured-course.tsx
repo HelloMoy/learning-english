@@ -47,6 +47,7 @@ export function FeaturedCourse({
           headline={posterUrl ? undefined : featureHeadline}
           posterUrl={posterUrl}
           posterAlt={course.title}
+          priority
           framed={false}
           showMeta={false}
           aspect="video"

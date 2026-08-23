@@ -22,6 +22,12 @@ const NUMBER_SIZE = { sm: "text-3xl", md: "text-4xl", lg: "text-5xl" } as const;
  * When `href` is set the whole card is a locale-aware Link whose accessible
  * name is the title — that link IS the control, so the inner play circle is
  * purely decorative and never nests a button inside a link.
+ *
+ * Set `priority` on the one card that is above the fold (the home page's
+ * featured poster). It preloads the artwork instead of lazy-loading it,
+ * which is what Next.js asks for when that image is the Largest Contentful
+ * Paint. Leave it off for cards in a grid — preloading them all would
+ * compete for bandwidth and defeat the purpose.
  */
 export function PosterCard({
   title,
@@ -32,6 +38,7 @@ export function PosterCard({
   headline,
   posterUrl,
   posterAlt,
+  priority = false,
   badge,
   showPlay = true,
   showMeta = true,
@@ -48,6 +55,8 @@ export function PosterCard({
   headline?: string;
   posterUrl?: string | null;
   posterAlt?: string;
+  /** Preload the artwork — set only on the above-the-fold card. */
+  priority?: boolean;
   badge?: React.ReactNode;
   showPlay?: boolean;
   showMeta?: boolean;
@@ -71,6 +80,7 @@ export function PosterCard({
             alt={posterAlt ?? ""}
             fill
             sizes="(max-width: 640px) 100vw, 400px"
+            priority={priority}
             className="object-cover opacity-60"
           />
           <div
