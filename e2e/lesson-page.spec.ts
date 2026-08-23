@@ -1,18 +1,22 @@
 import {
-  SEED_LESSON_READING_A_ID,
-  SEED_LESSON_READING_B_ID,
-  SEED_LESSON_VIDEO_ID,
-} from "@/adapters/persistence/in-memory/seed/seed";
+  seedContentLessons,
+  seedContentModules,
+  seedContentResources,
+} from "@/adapters/persistence/in-memory/seed/seed-content";
 
 import { expect, test } from "@playwright/test";
 
 /**
  * E2E tests for the Lesson Page (capability: `lesson-page`).
  *
- * URLs are derived from `src/adapters/persistence/in-memory/seed/seed.ts`
- * — the production seed is the only fixture in v1, so the e2e suite and
- * the seed must agree on slugs and UUIDs. The IDs are imported from the
- * seed module directly so a future rename fails both at the same time.
+ * Fixtures come from the **content seed**, because `playwright.config.ts`
+ * boots the webServer with `USE_COURSE_CONTENT_SEED=1` — the A1 seed in
+ * `seed.ts` is not served there, so its URLs render "We couldn't find this
+ * course." `course-catalog.spec.ts` resolves its fixtures the same way.
+ *
+ * Everything is derived from the generated seed module (slugs, ids, titles,
+ * resource names) rather than hardcoded, so regenerating the seed keeps the
+ * suite honest instead of silently asserting stale copy.
  *
  * Spec coverage:
  *   - "A valid route renders the Lesson Page"
@@ -26,12 +30,42 @@ import { expect, test } from "@playwright/test";
  *   - Module-not-in-course variant
  */
 
-const COURSE_SLUG = "english-a1-pronunciation";
-const MODULE_A_SLUG = "vowels-and-video-intro";
-const MODULE_B_SLUG = "consonants-and-stress";
-const VIDEO_LESSON_ID = SEED_LESSON_VIDEO_ID;
-const READING_A_LESSON_ID = SEED_LESSON_READING_A_ID;
-const READING_B_LESSON_ID = SEED_LESSON_READING_B_ID;
+const COURSE_SLUG = "advanced-intermediate-course";
+
+const bySequence = <T extends { sequence: number }>(items: ReadonlyArray<T>): T[] =>
+  [...items].sort((a, b) => a.sequence - b.sequence);
+
+const MODULES = bySequence(seedContentModules);
+const MODULE_A = MODULES[0]!;
+const MODULE_B = MODULES[1]!;
+const LAST_MODULE = MODULES[MODULES.length - 1]!;
+
+const lessonsIn = (moduleId: string) =>
+  bySequence(seedContentLessons.filter((lesson) => lesson.moduleId === moduleId));
+
+const MODULE_A_LESSONS = lessonsIn(MODULE_A.id);
+
+/**
+ * The primary fixture is the first lesson in module A that carries a
+ * resource — the "Resources" region assertion needs one to be meaningful,
+ * and it must not be the module's last lesson so "up next stays inside the
+ * module" is exercisable.
+ */
+const PRIMARY_LESSON = MODULE_A_LESSONS.find(
+  (lesson, index) =>
+    index < MODULE_A_LESSONS.length - 1 &&
+    seedContentResources.some((resource) => resource.lessonId === lesson.id),
+)!;
+const PRIMARY_RESOURCE = seedContentResources.find(
+  (resource) => resource.lessonId === PRIMARY_LESSON.id,
+)!;
+const LESSON_AFTER_PRIMARY = MODULE_A_LESSONS[MODULE_A_LESSONS.indexOf(PRIMARY_LESSON) + 1]!;
+
+const LAST_LESSON_OF_MODULE_A = MODULE_A_LESSONS[MODULE_A_LESSONS.length - 1]!;
+const FIRST_LESSON_OF_MODULE_B = lessonsIn(MODULE_B.id)[0]!;
+
+const LAST_MODULE_LESSONS = lessonsIn(LAST_MODULE.id);
+const FINAL_LESSON = LAST_MODULE_LESSONS[LAST_MODULE_LESSONS.length - 1]!;
 
 function lessonUrl(locale: string, moduleSlug: string, lessonId: string): string {
   return `/${locale}/courses/${COURSE_SLUG}/modules/${moduleSlug}/lessons/${lessonId}`;
@@ -41,10 +75,10 @@ test.describe("Lesson Page — happy path", () => {
   test("WHEN a valid route is visited THEN all regions render and the title is the lesson's title", async ({
     page,
   }) => {
-    await page.goto(lessonUrl("en", MODULE_A_SLUG, VIDEO_LESSON_ID));
+    await page.goto(lessonUrl("en", MODULE_A.slug, PRIMARY_LESSON.id));
 
     // Document <title> reflects the resolved lesson.
-    await expect(page).toHaveTitle(/^Vowels: short vs\. long$/);
+    await expect(page).toHaveTitle(PRIMARY_LESSON.title);
 
     // Breadcrumb shows three segments.
     await expect(page.getByRole("navigation", { name: /breadcrumb/i })).toBeVisible();
@@ -58,16 +92,16 @@ test.describe("Lesson Page — happy path", () => {
     await expect(video).toBeVisible();
     await expect(video).toHaveAttribute("controls", "");
 
-    // Resources card lists the seed resource (PDF on the video lesson).
+    // Resources card lists the seed resource attached to this lesson.
     await expect(page.getByRole("region", { name: /resources/i })).toBeVisible();
-    await expect(page.getByText("Vowel chart")).toBeVisible();
+    await expect(page.getByText(PRIMARY_RESOURCE.title)).toBeVisible();
 
     // Up next card points to the next lesson in the same module.
     const upNext = page.getByRole("region", { name: /up next/i });
     await expect(upNext).toBeVisible();
     await expect(upNext.getByRole("link")).toHaveAttribute(
       "href",
-      new RegExp(`/modules/${MODULE_A_SLUG}/lessons/${READING_A_LESSON_ID}`),
+      new RegExp(`/modules/${MODULE_A.slug}/lessons/${LESSON_AFTER_PRIMARY.id}`),
     );
 
     // Mark as complete button starts in the incomplete state.
@@ -76,7 +110,7 @@ test.describe("Lesson Page — happy path", () => {
   });
 
   test("WHEN mark-as-complete is clicked THEN the label toggles", async ({ page }) => {
-    await page.goto(lessonUrl("en", MODULE_A_SLUG, VIDEO_LESSON_ID));
+    await page.goto(lessonUrl("en", MODULE_A.slug, PRIMARY_LESSON.id));
 
     const button = page.getByRole("button", { name: /mark as complete/i });
     await button.click();
@@ -94,23 +128,20 @@ test.describe("Lesson Page — cross-module navigation", () => {
   test("WHEN the current lesson is the last in its module THEN up-next links to the first lesson of the next module", async ({
     page,
   }) => {
-    // Reading A is the last lesson in Module A (sequence 2 of 2). The next
-    // lesson is the first lesson of Module B.
-    await page.goto(lessonUrl("en", MODULE_A_SLUG, READING_A_LESSON_ID));
+    await page.goto(lessonUrl("en", MODULE_A.slug, LAST_LESSON_OF_MODULE_A.id));
 
     const upNext = page.getByRole("region", { name: /up next/i });
     const link = upNext.getByRole("link");
     await expect(link).toHaveAttribute(
       "href",
-      new RegExp(`/modules/${MODULE_B_SLUG}/lessons/${READING_B_LESSON_ID}`),
+      new RegExp(`/modules/${MODULE_B.slug}/lessons/${FIRST_LESSON_OF_MODULE_B.id}`),
     );
   });
 
   test("WHEN the current lesson is the last lesson of the last module THEN up-next shows the terminal message", async ({
     page,
   }) => {
-    // Reading B is the last lesson of the last module in the seed.
-    await page.goto(lessonUrl("en", MODULE_B_SLUG, READING_B_LESSON_ID));
+    await page.goto(lessonUrl("en", LAST_MODULE.slug, FINAL_LESSON.id));
 
     const upNext = page.getByRole("region", { name: /up next/i });
     await expect(upNext.getByRole("link")).toHaveCount(0);
@@ -122,7 +153,7 @@ test.describe("Lesson Page — error states", () => {
   test("WHEN the URL contains an invalid UUID THEN the inline error state renders", async ({
     page,
   }) => {
-    await page.goto(`/en/courses/${COURSE_SLUG}/modules/${MODULE_A_SLUG}/lessons/not-a-uuid`);
+    await page.goto(`/en/courses/${COURSE_SLUG}/modules/${MODULE_A.slug}/lessons/not-a-uuid`);
 
     // The localized error heading is shown with a "Go home" affordance.
     await expect(
@@ -135,7 +166,7 @@ test.describe("Lesson Page — error states", () => {
     page,
   }) => {
     await page.goto(
-      `/en/courses/does-not-exist/modules/${MODULE_A_SLUG}/lessons/${VIDEO_LESSON_ID}`,
+      `/en/courses/does-not-exist/modules/${MODULE_A.slug}/lessons/${PRIMARY_LESSON.id}`,
     );
 
     // The page renders the course-specific inline error (not the
@@ -150,7 +181,9 @@ test.describe("Lesson Page — error states", () => {
   test("WHEN the module does not belong to the course THEN the inline error state renders", async ({
     page,
   }) => {
-    await page.goto(`/en/courses/${COURSE_SLUG}/modules/does-not-exist/lessons/${VIDEO_LESSON_ID}`);
+    await page.goto(
+      `/en/courses/${COURSE_SLUG}/modules/does-not-exist/lessons/${PRIMARY_LESSON.id}`,
+    );
 
     await expect(
       page.getByRole("heading", { name: /couldn't find this module in the course/i }),
@@ -161,8 +194,8 @@ test.describe("Lesson Page — error states", () => {
   test("WHEN the lesson does not belong to the resolved module THEN the inline error state renders", async ({
     page,
   }) => {
-    // VIDEO_LESSON_ID belongs to Module A. Visit it under Module B's slug.
-    await page.goto(lessonUrl("en", MODULE_B_SLUG, VIDEO_LESSON_ID));
+    // PRIMARY_LESSON belongs to module A. Visit it under module B's slug.
+    await page.goto(lessonUrl("en", MODULE_B.slug, PRIMARY_LESSON.id));
 
     await expect(
       page.getByRole("heading", { name: /couldn't find this lesson in the module/i }),
@@ -173,7 +206,7 @@ test.describe("Lesson Page — error states", () => {
 
 test.describe("Lesson Page — locale awareness", () => {
   test("WHEN the locale is es THEN the UI chrome is translated", async ({ page }) => {
-    await page.goto(lessonUrl("es", MODULE_A_SLUG, VIDEO_LESSON_ID));
+    await page.goto(lessonUrl("es", MODULE_A.slug, PRIMARY_LESSON.id));
 
     // The Spanish translation of "Mark as complete" appears.
     await expect(page.getByRole("button", { name: /marcar como completada/i })).toBeVisible();
