@@ -7,6 +7,7 @@ import type { Slug } from "@/domain/entities/slug/slug";
 import type { CourseRepository } from "@/domain/ports/course-repository/course-repository";
 import type { LessonRepository } from "@/domain/ports/lesson-repository/lesson-repository";
 import type { ModuleRepository } from "@/domain/ports/module-repository/module-repository";
+import type { PlaybackPositionRepository } from "@/domain/ports/playback-position-repository/playback-position-repository";
 import type { ProgressTracker } from "@/domain/ports/progress-tracker/progress-tracker";
 import type { ResourceRepository } from "@/domain/ports/resource-repository/resource-repository";
 
@@ -129,5 +130,29 @@ export function makeStubProgressTracker(): ProgressTracker {
       completed.add(lessonId);
     },
     isComplete: async (lessonId: LessonId) => completed.has(lessonId),
+  };
+}
+
+/**
+ * Test double: an in-memory `PlaybackPositionRepository`. Stores positions
+ * in a `Map`. Used only in unit tests.
+ */
+export function makeStubPlaybackPositionRepository(seed?: {
+  positions?: Record<string, number>;
+  getPositionRejects?: boolean;
+  setPositionRejects?: boolean;
+}): PlaybackPositionRepository {
+  const positions = new Map<LessonId, number>(
+    Object.entries(seed?.positions ?? {}).map(([id, seconds]) => [id as LessonId, seconds]),
+  );
+  return {
+    getPosition: async (lessonId: LessonId) => {
+      if (seed?.getPositionRejects) throw new Error("simulated playback-position-repo failure");
+      return positions.get(lessonId) ?? null;
+    },
+    setPosition: async (lessonId: LessonId, seconds: number) => {
+      if (seed?.setPositionRejects) throw new Error("simulated playback-position-repo failure");
+      positions.set(lessonId, seconds);
+    },
   };
 }

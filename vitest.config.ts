@@ -14,7 +14,11 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
-    exclude: ["node_modules/**", "e2e/**", ".next/**"],
+    // `.claude/**` holds throwaway agent worktrees — full checkouts of this
+    // repo. Without this, vitest collects their copies of every test file
+    // and fails on imports that only resolved at the commit they branched
+    // from. `.prettierignore` and the ESLint config skip the same folder.
+    exclude: ["node_modules/**", "e2e/**", ".next/**", ".claude/**"],
     css: true,
     coverage: {
       provider: "v8",

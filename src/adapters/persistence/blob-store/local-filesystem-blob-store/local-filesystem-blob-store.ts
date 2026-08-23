@@ -78,7 +78,6 @@ export class LocalFilesystemBlobStore implements BlobStore {
     assertSafeKey(key);
     assertTextKey(key);
     const absolute = path.join(this.#localRoot, key);
-    let handle: Awaited<ReturnType<typeof access>> | undefined;
     try {
       await access(absolute);
     } catch {

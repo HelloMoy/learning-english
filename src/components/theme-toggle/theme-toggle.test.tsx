@@ -22,10 +22,22 @@ vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
+/**
+ * Hydration state is a module-level flag rather than a `vi.doMock`: the
+ * component is imported statically here, so a late mock would never reach
+ * it. Tests flip this and `beforeEach` restores the hydrated default.
+ */
+let isHydrated = true;
+
+vi.mock("@/hooks/use-is-hydrated/use-is-hydrated", () => ({
+  useIsHydrated: () => isHydrated,
+}));
+
 const mockUseTheme = vi.mocked(useTheme);
 
 describe("ThemeToggle", () => {
   beforeEach(() => {
+    isHydrated = true;
     mockUseTheme.mockReturnValue({
       theme: "light",
       setTheme: vi.fn(),
@@ -66,6 +78,30 @@ describe("ThemeToggle", () => {
         setTheme: vi.fn(),
         themes: ["light", "dark", "system"],
         resolvedTheme: undefined,
+        systemTheme: undefined,
+      });
+
+      // Act
+      render(<ThemeToggle />);
+
+      // Assert
+      const button = screen.getByRole("button");
+      expect(button).toBeDisabled();
+      expect(button).toHaveTextContent("…");
+    });
+  });
+
+  describe("GIVEN React has not finished hydrating yet", () => {
+    test("WHEN rendered with a resolved theme THEN the placeholder still wins", async () => {
+      // Arrange — `next-themes` has already read localStorage on the client,
+      // but the server HTML shows the placeholder. Emitting the real button
+      // during hydration is the mismatch this guard prevents.
+      isHydrated = false;
+      mockUseTheme.mockReturnValue({
+        theme: "dark",
+        setTheme: vi.fn(),
+        themes: ["light", "dark", "system"],
+        resolvedTheme: "dark",
         systemTheme: undefined,
       });
 

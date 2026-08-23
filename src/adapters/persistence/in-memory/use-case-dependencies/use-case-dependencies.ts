@@ -4,6 +4,7 @@ import { LocalFilesystemBlobStore } from "@/adapters/persistence/blob-store/loca
 import { InMemoryCourseRepository } from "@/adapters/persistence/in-memory/in-memory-course-repository/in-memory-course-repository";
 import { InMemoryLessonRepository } from "@/adapters/persistence/in-memory/in-memory-lesson-repository/in-memory-lesson-repository";
 import { InMemoryModuleRepository } from "@/adapters/persistence/in-memory/in-memory-module-repository/in-memory-module-repository";
+import { InMemoryPlaybackPositionRepository } from "@/adapters/persistence/in-memory/in-memory-playback-position-repository/in-memory-playback-position-repository";
 import { InMemoryProgressTracker } from "@/adapters/persistence/in-memory/in-memory-progress-tracker/in-memory-progress-tracker";
 import { InMemoryResourceRepository } from "@/adapters/persistence/in-memory/in-memory-resource-repository/in-memory-resource-repository";
 import {
@@ -28,6 +29,7 @@ import type { CourseRepository } from "@/domain/ports/course-repository/course-r
 import type { LessonNotesRepository } from "@/domain/ports/lesson-notes-repository/lesson-notes-repository";
 import type { LessonRepository } from "@/domain/ports/lesson-repository/lesson-repository";
 import type { ModuleRepository } from "@/domain/ports/module-repository/module-repository";
+import type { PlaybackPositionRepository } from "@/domain/ports/playback-position-repository/playback-position-repository";
 import type { ProgressTracker } from "@/domain/ports/progress-tracker/progress-tracker";
 import type { ResourceRepository } from "@/domain/ports/resource-repository/resource-repository";
 import { makeFindCourseCatalog } from "@/domain/use-cases/find-course-catalog/find-course-catalog";
@@ -36,12 +38,19 @@ import { makeFindLessonForView } from "@/domain/use-cases/find-lesson-for-view/f
 import { makeFindLessonNotes } from "@/domain/use-cases/find-lesson-notes/find-lesson-notes";
 import { makeFindModuleForView } from "@/domain/use-cases/find-module-for-view/find-module-for-view";
 import { makeFindNextLesson } from "@/domain/use-cases/find-next-lesson/find-next-lesson";
+import { makeGetPlaybackPosition } from "@/domain/use-cases/get-playback-position/get-playback-position";
 import { makeMarkLessonComplete } from "@/domain/use-cases/mark-lesson-complete/mark-lesson-complete";
+import { makeRecordPlaybackPosition } from "@/domain/use-cases/record-playback-position/record-playback-position";
 
 /**
  * The shape every driving adapter (Next.js page, Storybook) uses to consume
  * the domain. Bundles the in-memory ports and the use case factories so the
  * caller never imports adapters or use cases directly.
+ *
+ * `positions` is the playback-position port, backed here by the in-memory
+ * adapter for SSR and tests. A client component gets the localStorage-backed
+ * implementation from `usePlaybackPosition` instead — same contract, only
+ * the storage differs.
  */
 export type CoursePlatformDeps = {
   courses: CourseRepository;
@@ -50,6 +59,7 @@ export type CoursePlatformDeps = {
   resources: ResourceRepository;
   notes: LessonNotesRepository;
   progress: ProgressTracker;
+  positions: PlaybackPositionRepository;
   useCases: {
     findNextLesson: ReturnType<typeof makeFindNextLesson>;
     findLessonForView: ReturnType<typeof makeFindLessonForView>;
@@ -58,6 +68,8 @@ export type CoursePlatformDeps = {
     findCourseForView: ReturnType<typeof makeFindCourseForView>;
     findModuleForView: ReturnType<typeof makeFindModuleForView>;
     findLessonNotes: ReturnType<typeof makeFindLessonNotes>;
+    recordPlaybackPosition: ReturnType<typeof makeRecordPlaybackPosition>;
+    getPlaybackPosition: ReturnType<typeof makeGetPlaybackPosition>;
   };
 };
 
@@ -84,6 +96,12 @@ export const isCourseContentSeedEnabled = (): boolean =>
  *
  * Seed source is chosen at call time from `USE_COURSE_CONTENT_SEED` so the
  * env var can be flipped in dev without restarting the Node process.
+ *
+ * The `positions` adapter is a fresh ephemeral in-memory store — adequate
+ * for SSR, Storybook and tests, and the only implementation this factory
+ * builds. Browser persistence deliberately lives outside it: client
+ * components reach `BrowserLocalStoragePlaybackPositionRepository` through
+ * the `usePlaybackPosition` hook, because this factory is server-only.
  */
 export function getCoursePlatformDeps(): CoursePlatformDeps {
   if (isCourseContentSeedEnabled()) {
@@ -110,6 +128,7 @@ function buildDeps(
   const lessonsRepo = new InMemoryLessonRepository(lessons);
   const resourcesRepo = new InMemoryResourceRepository(resources);
   const progress = new InMemoryProgressTracker();
+  const positions = new InMemoryPlaybackPositionRepository();
   const blobStore = new LocalFilesystemBlobStore({
     baseUrl: "/local-filesystem-lesson",
     localRoot: path.resolve("public/local-filesystem-lesson"),
@@ -152,6 +171,11 @@ function buildDeps(
     lessons: lessonsRepo,
   });
   const findLessonNotes = makeFindLessonNotes({ notes: notesRepo });
+  const recordPlaybackPosition = makeRecordPlaybackPosition({
+    lessons: lessonsRepo,
+    positions,
+  });
+  const getPlaybackPosition = makeGetPlaybackPosition({ positions });
 
   return {
     courses: coursesRepo,
@@ -160,6 +184,7 @@ function buildDeps(
     resources: resourcesRepo,
     notes: notesRepo,
     progress,
+    positions,
     useCases: {
       findNextLesson,
       findLessonForView,
@@ -168,6 +193,8 @@ function buildDeps(
       findCourseForView,
       findModuleForView,
       findLessonNotes,
+      recordPlaybackPosition,
+      getPlaybackPosition,
     },
   };
 }

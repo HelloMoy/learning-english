@@ -1,5 +1,7 @@
 "use client";
 
+import { useIsHydrated } from "@/hooks/use-is-hydrated/use-is-hydrated";
+
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 
@@ -18,12 +20,14 @@ const THEMES: Theme[] = ["light", "dark", "system"];
  * post-0.4. We keep `next-themes` rather than reimplementing the
  * provider. See `openspec/changes/polish-lesson-view-ux/design.md` §D6.
  *
- * `next-themes`'s `useTheme()` returns `undefined` until the component
- * has mounted on the client (the theme value lives in localStorage and
- * isn't available on the server). We render a stable placeholder while
- * `theme === undefined` to avoid a hydration mismatch — no `useState` /
- * `useEffect` / `mounted` flag needed, which sidesteps the React 19
- * `react-hooks/set-state-in-effect` lint rule.
+ * `next-themes`'s `useTheme()` returns `undefined` on the server, but by
+ * the client's *hydration* render the provider has already read
+ * `localStorage` — so `theme` is populated there. Gating on
+ * `theme === undefined` alone therefore renders the placeholder on the
+ * server and the real button during hydration, which is exactly the
+ * mismatch it was meant to prevent. {@link useIsHydrated} closes the gap:
+ * it reports `false` for both the server render and the hydration render,
+ * so the placeholder is what both passes emit.
  *
  * Cycles through `light` → `dark` → `system` on click. Keyboard accessible
  * via the native `<button>` element.
@@ -31,8 +35,9 @@ const THEMES: Theme[] = ["light", "dark", "system"];
 export function ThemeToggle() {
   const t = useTranslations("ThemeToggle");
   const { theme, setTheme } = useTheme();
+  const isHydrated = useIsHydrated();
 
-  if (theme === undefined) {
+  if (!isHydrated || theme === undefined) {
     return (
       <button
         type="button"
