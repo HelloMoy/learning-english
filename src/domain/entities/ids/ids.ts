@@ -6,11 +6,11 @@ import { z } from "zod";
  * Brands prevent a `CourseId` from being passed where a `LessonId` is expected
  * and force adapters to validate their inputs at the boundary.
  */
-export const CourseId = z.string().uuid().brand<"CourseId">();
-export const LessonId = z.string().uuid().brand<"LessonId">();
-export const ModuleId = z.string().uuid().brand<"ModuleId">();
-export const ResourceId = z.string().uuid().brand<"ResourceId">();
-export const StudentId = z.string().uuid().brand<"StudentId">();
+export const CourseId = z.uuid().brand<"CourseId">();
+export const LessonId = z.uuid().brand<"LessonId">();
+export const ModuleId = z.uuid().brand<"ModuleId">();
+export const ResourceId = z.uuid().brand<"ResourceId">();
+export const StudentId = z.uuid().brand<"StudentId">();
 
 export type CourseId = z.infer<typeof CourseId>;
 export type LessonId = z.infer<typeof LessonId>;
