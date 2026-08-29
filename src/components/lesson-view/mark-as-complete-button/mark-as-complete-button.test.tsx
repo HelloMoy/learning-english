@@ -21,7 +21,7 @@ describe("MarkAsCompleteButton", () => {
 
   test("WHEN rendered THEN it shows the 'Mark as complete' label", () => {
     // Arrange
-    const markComplete = vi.fn().mockResolvedValue({ completed: true });
+    const markComplete = vi.fn().mockResolvedValue({ data: { completed: true } });
 
     // Act
     render(
@@ -38,7 +38,7 @@ describe("MarkAsCompleteButton", () => {
   test("WHEN clicked THEN it calls markComplete with the lessonId and toggles the label", async () => {
     // Arrange
     const lessonId = LessonId.parse(faker.string.uuid());
-    const markComplete = vi.fn().mockResolvedValue({ completed: true });
+    const markComplete = vi.fn().mockResolvedValue({ data: { completed: true } });
     const user = userEvent.setup();
 
     // Act
@@ -57,7 +57,7 @@ describe("MarkAsCompleteButton", () => {
 
   test("WHEN completed THEN the button is disabled", async () => {
     // Arrange
-    const markComplete = vi.fn().mockResolvedValue({ completed: true });
+    const markComplete = vi.fn().mockResolvedValue({ data: { completed: true } });
     const user = userEvent.setup();
 
     // Act

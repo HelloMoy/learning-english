@@ -78,7 +78,7 @@ describe("LessonView", () => {
   test("WHEN rendered for a video lesson THEN it shows the player, title, description, resources, and up next", () => {
     // Arrange
     const { view } = fixtures();
-    const markComplete = vi.fn().mockResolvedValue({ completed: true });
+    const markComplete = vi.fn().mockResolvedValue({ data: { completed: true } });
 
     // Act
     render(
@@ -111,7 +111,7 @@ describe("LessonView", () => {
         // etc.; construct it cleanly to satisfy the Zod schema.
       } as LessonViewData["lesson"],
     };
-    const markComplete = vi.fn().mockResolvedValue({ completed: true });
+    const markComplete = vi.fn().mockResolvedValue({ data: { completed: true } });
 
     // Act
     render(
@@ -135,7 +135,7 @@ describe("LessonView", () => {
         view={view}
         notes={null}
         notesResource={null}
-        markComplete={vi.fn().mockResolvedValue({ completed: true })}
+        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
       />,
     );
     // The overlay headline is the module title; the native <video> remains.
@@ -152,7 +152,7 @@ describe("LessonView", () => {
         view={view}
         notes={"# Intro\n\nTexto ES.\n\nEnglish text."}
         notesResource={null}
-        markComplete={vi.fn().mockResolvedValue({ completed: true })}
+        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
       />,
     );
     expect(screen.getByTestId("lesson-notes-tabs")).toBeInTheDocument();
