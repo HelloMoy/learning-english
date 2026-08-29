@@ -5,16 +5,8 @@ import { Module } from "@/domain/entities/module/module";
 
 import { faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useTranslations } from "next-intl";
-import { vi } from "vitest";
 
 import { ModuleList } from "./module-list";
-
-vi.mock("next-intl", () => ({
-  useTranslations: vi.fn(() => (key: string) => key),
-}));
-
-void useTranslations;
 
 const courseId = CourseId.parse(faker.string.uuid());
 const course = Course.parse({
@@ -66,6 +58,41 @@ const map = new Map<string, Lesson[]>([
   [modB.id, [lessonB1]],
 ]);
 
+/**
+ * A third module plus extra lessons per module, so the disclosure has
+ * something worth revealing: the collapsed rows are the point of the story.
+ */
+const modC = Module.parse({
+  id: ModuleId.parse(faker.string.uuid()),
+  courseId,
+  slug: "intonation-and-rhythm",
+  title: "Intonation",
+  sequence: 3,
+});
+
+function readingLesson(module: Module, sequence: number, title: string): Lesson {
+  return Lesson.parse({
+    kind: "reading",
+    id: LessonId.parse(faker.string.uuid()),
+    courseId,
+    moduleId: module.id,
+    sequence,
+    title,
+    body: "body",
+  });
+}
+
+const lessonA2 = readingLesson(modA, 2, "Vowel drills");
+const lessonB2 = readingLesson(modB, 2, "Consonant clusters");
+const lessonC1 = readingLesson(modC, 1, "Sentence stress");
+const lessonC2 = readingLesson(modC, 2, "Pitch contours");
+
+const threeModuleMap = new Map<string, Lesson[]>([
+  [modA.id, [lessonA1, lessonA2]],
+  [modB.id, [lessonB1, lessonB2]],
+  [modC.id, [lessonC1, lessonC2]],
+]);
+
 const meta = {
   title: "LessonView/ModuleList",
   component: ModuleList,
@@ -88,6 +115,21 @@ export const OneModule: Story = {
     course,
     modules: [modA],
     lessonsByModuleId: new Map([[modA.id, [lessonA1]]]),
+    currentLessonId: lessonA1.id,
+  },
+};
+
+/**
+ * The disclosure's default state: the current lesson's module is expanded,
+ * the other two are collapsed behind their chevrons. Click any collapsed
+ * title to expand it — the others stay as they are, several can be open at
+ * once, and none of them navigates away.
+ */
+export const CollapsedModules: Story = {
+  args: {
+    course,
+    modules: [modA, modB, modC],
+    lessonsByModuleId: threeModuleMap,
     currentLessonId: lessonA1.id,
   },
 };
