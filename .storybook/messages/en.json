@@ -8,6 +8,21 @@
       "sizeSmall": "Small",
       "sizeDefault": "Default",
       "sizeLarge": "Large"
+    },
+    "CinemaHero": {
+      "eyebrow": "Now playing",
+      "title": "Speak with confidence",
+      "subtitle": "A cinematic course that trains your ear before it trains your tongue.",
+      "openLabel": "Open course",
+      "myListLabel": "My list"
+    },
+    "FeaturedCourse": {
+      "featuredLabel": "Courses · Featured",
+      "featureLabel": "Feature",
+      "featureHeadline": "Season 1",
+      "countsLabel": "10 modules · 107 lessons",
+      "courseTitle": "Advanced Intermediate Course",
+      "courseDescription": "Train your ear, then your tongue, across ten modules of guided listening."
     }
   }
 }
