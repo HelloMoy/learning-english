@@ -1,16 +1,8 @@
 import { LessonId } from "@/domain/entities/ids/ids";
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useTranslations } from "next-intl";
-import { vi } from "vitest";
 
 import { PlaybackPositionedVideoPlayer } from "./playback-positioned-video-player";
-
-vi.mock("next-intl", () => ({
-  useTranslations: vi.fn(() => (key: string) => key),
-}));
-
-void useTranslations;
 
 /**
  * Each story owns a distinct lesson id so their `localStorage` entries never

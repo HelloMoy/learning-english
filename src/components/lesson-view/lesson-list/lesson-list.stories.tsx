@@ -5,16 +5,8 @@ import { Module } from "@/domain/entities/module/module";
 
 import { faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useTranslations } from "next-intl";
-import { vi } from "vitest";
 
 import { LessonList } from "./lesson-list";
-
-vi.mock("next-intl", () => ({
-  useTranslations: vi.fn(() => (key: string) => key),
-}));
-
-void useTranslations;
 
 const courseId = CourseId.parse(faker.string.uuid());
 const moduleId = ModuleId.parse(faker.string.uuid());
