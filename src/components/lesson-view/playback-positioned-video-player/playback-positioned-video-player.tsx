@@ -57,10 +57,12 @@ export function PlaybackPositionedVideoPlayer({
   const hasInteractedRef = useRef(false);
   const [savedPosition, setSavedPosition] = useState<number | null>(null);
 
+  // Only the interaction gate lives here. Range and finiteness are the
+  // `PlaybackPosition` value object's job, enforced inside the hook — a
+  // second copy of those rules here would be one to keep in sync.
   const writeIfAllowed = useCallback(
     async (seconds: number) => {
       if (!hasInteractedRef.current) return;
-      if (!Number.isFinite(seconds) || seconds < 0) return;
       await position.set(seconds);
     },
     [position],
