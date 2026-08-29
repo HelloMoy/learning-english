@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 
-import { PracticeTrackSummary } from "./practice-track";
+import { PracticeTrackSummary } from "./practice-track-summary";
 
 describe("PracticeTrackSummary", () => {
   test("renders one numeric mark per module and exposes an accessible label", () => {
