@@ -31,7 +31,9 @@ export function LessonView({
   view: LessonViewData;
   notes: string | null;
   notesResource: Resource | null;
-  markComplete: (input: { lessonId: LessonId }) => Promise<{ completed: boolean }>;
+  markComplete: (input: {
+    lessonId: LessonId;
+  }) => Promise<{ data?: { completed: boolean } } | undefined>;
 }) {
   const t = useTranslations("Components.NativeVideoPlayer");
   const tLessonNotes = useTranslations("Components.LessonNotes");

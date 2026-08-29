@@ -8,6 +8,21 @@
       "sizeSmall": "Pequeno",
       "sizeDefault": "Padrão",
       "sizeLarge": "Grande"
+    },
+    "CinemaHero": {
+      "eyebrow": "Em reprodução",
+      "title": "Fale com confiança",
+      "subtitle": "Um curso cinematográfico que treina seu ouvido antes da sua fala.",
+      "openLabel": "Abrir curso",
+      "myListLabel": "Minha lista"
+    },
+    "FeaturedCourse": {
+      "featuredLabel": "Cursos · Destaque",
+      "featureLabel": "Destaque",
+      "featureHeadline": "Temporada 1",
+      "countsLabel": "10 módulos · 107 lições",
+      "courseTitle": "Curso intermediário avançado",
+      "courseDescription": "Treine seu ouvido e depois sua pronúncia, ao longo de dez módulos guiados."
     }
   }
 }

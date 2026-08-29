@@ -1,14 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useTranslations } from "next-intl";
-import { vi } from "vitest";
 
 import { LessonVideoResume } from "./lesson-video-resume";
-
-vi.mock("next-intl", () => ({
-  useTranslations: vi.fn(() => (key: string) => key),
-}));
-
-void useTranslations;
 
 const noop = () => undefined;
 const resumeAt = (seconds: number) => () => seconds;

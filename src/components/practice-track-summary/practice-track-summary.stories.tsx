@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { PracticeTrackSummary } from "./practice-track";
+import { PracticeTrackSummary } from "./practice-track-summary";
 
 const meta: Meta<typeof PracticeTrackSummary> = {
   title: "Components/PracticeTrackSummary",

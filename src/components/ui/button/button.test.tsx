@@ -1,7 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import Link from "next/link";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { Button } from "./button";
@@ -104,9 +103,14 @@ describe("Button", () => {
     test("WHEN rendered THEN the child element is rendered instead of <button>", () => {
       // Arrange
       const label = faker.lorem.word();
+      // A bare <a>, not next/link: this asserts that `asChild` renders the
+      // child in place of <button>. Pulling in a router-aware Link would
+      // couple the test to navigation it never exercises. The href is
+      // external so `@next/next/no-html-link-for-pages` stays quiet — it
+      // only objects to hand-rolled links at internal routes.
       render(
         <Button asChild>
-          <Link href="/dashboard">{label}</Link>
+          <a href="https://example.com/dashboard">{label}</a>
         </Button>,
       );
 
@@ -115,7 +119,7 @@ describe("Button", () => {
 
       // Assert
       expect(link).toBeInTheDocument();
-      expect(link).toHaveAttribute("href", "/dashboard");
+      expect(link).toHaveAttribute("href", "https://example.com/dashboard");
     });
   });
 });

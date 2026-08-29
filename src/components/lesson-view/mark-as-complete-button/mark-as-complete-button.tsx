@@ -12,13 +12,22 @@ import { useState, useTransition } from "react";
  *
  * The button is a Client Component because it owns local state and runs the
  * Server Action via a transition.
+ *
+ * `markComplete` is injected rather than imported so the component stays
+ * testable without a server. Its type is written structurally — the
+ * `{ data }` envelope is what `next-safe-action` resolves to, but naming
+ * that library's types here would drag a server concern into the view. A
+ * result without `data` means validation rejected the input, so the button
+ * stays in its incomplete state.
  */
 export function MarkAsCompleteButton({
   lessonId,
   markComplete,
 }: {
   lessonId: LessonId;
-  markComplete: (input: { lessonId: LessonId }) => Promise<{ completed: boolean }>;
+  markComplete: (input: {
+    lessonId: LessonId;
+  }) => Promise<{ data?: { completed: boolean } } | undefined>;
 }) {
   const t = useTranslations("Components.MarkAsCompleteButton");
   const [completed, setCompleted] = useState(false);
@@ -27,7 +36,7 @@ export function MarkAsCompleteButton({
   const onClick = () => {
     startTransition(async () => {
       const result = await markComplete({ lessonId });
-      if (result.completed) {
+      if (result?.data?.completed === true) {
         setCompleted(true);
       }
     });

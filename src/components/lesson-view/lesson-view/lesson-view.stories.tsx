@@ -7,16 +7,8 @@ import type { LessonView as LessonViewData } from "@/domain/use-cases/find-lesso
 
 import { faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useTranslations } from "next-intl";
-import { vi } from "vitest";
 
 import { LessonView } from "./lesson-view";
-
-vi.mock("next-intl", () => ({
-  useTranslations: vi.fn(() => (key: string) => key),
-}));
-
-void useTranslations;
 
 const courseId = CourseId.parse(faker.string.uuid());
 const moduleId = ModuleId.parse(faker.string.uuid());
@@ -88,7 +80,7 @@ export const HappyPath: Story = {
     view: happyPathView,
     notes: null,
     notesResource: null,
-    markComplete: () => Promise.resolve({ completed: true }),
+    markComplete: () => Promise.resolve({ data: { completed: true } }),
   },
 };
 
@@ -97,7 +89,7 @@ export const NoResources: Story = {
     view: { ...happyPathView, resources: [] },
     notes: null,
     notesResource: null,
-    markComplete: () => Promise.resolve({ completed: true }),
+    markComplete: () => Promise.resolve({ data: { completed: true } }),
   },
 };
 
@@ -106,7 +98,7 @@ export const CourseCompleted: Story = {
     view: { ...happyPathView, nextLesson: null },
     notes: null,
     notesResource: null,
-    markComplete: () => Promise.resolve({ completed: true }),
+    markComplete: () => Promise.resolve({ data: { completed: true } }),
   },
 };
 
@@ -115,7 +107,7 @@ export const ReadingLesson: Story = {
     view: { ...happyPathView, lesson: readingLesson, nextLesson: null },
     notes: null,
     notesResource: null,
-    markComplete: () => Promise.resolve({ completed: true }),
+    markComplete: () => Promise.resolve({ data: { completed: true } }),
   },
 };
 
@@ -124,6 +116,6 @@ export const WithInlineNotes: Story = {
     view: happyPathView,
     notes: "# Welcome\n\nThese are the inline notes rendered safely.",
     notesResource: resource,
-    markComplete: () => Promise.resolve({ completed: true }),
+    markComplete: () => Promise.resolve({ data: { completed: true } }),
   },
 };

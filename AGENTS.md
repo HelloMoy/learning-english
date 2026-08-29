@@ -170,8 +170,18 @@ own.
 **Enforcement:** the custom ESLint rule
 `local-structure/folder-per-entity` (in `eslint.config.mjs`) flags any `.ts`/`.tsx` file
 that lives directly under a watched hexagonal root (`src/domain/**`, `src/lib/**`,
-`src/hooks/**`, `src/adapters/persistence/in-memory/**`). It runs as part of `pnpm lint`,
-which `pnpm verify` already invokes — new violations fail CI without manual review.
+`src/hooks/**`, and each persistence-adapter root: `in-memory`, `local-filesystem`,
+`browser-local-storage`). It runs as part of `pnpm lint`, which `pnpm verify` already
+invokes — new violations fail CI without manual review.
+
+`src/adapters/persistence/blob-store` is deliberately **not** watched: `blob-store.ts`
+is the shared interface, not a driven adapter, so it correctly sits at the root of that
+folder and the rule would report a false positive.
+
+The rule does not cover `src/components/**` — that layer keeps its own PascalCase
+convention with named exceptions (`global-providers.tsx`). The invariant there is the
+same in spirit: the folder name, the entry file name, and the **exported component
+name** must agree (`PracticeTrackSummary` → `practice-track-summary/practice-track-summary.tsx`).
 
 ## Existing mocks (vitest.setup.ts)
 
@@ -286,14 +296,30 @@ const schema = z.object({
   email: z.email(),
 });
 
-export const createUserAction = actionClient.schema(schema).action(async ({ parsedInput }) => {
+export const createUserAction = actionClient.inputSchema(schema).action(async ({ parsedInput }) => {
   // parsedInput is fully typed: { name: string, email: string }
   return { id: "..." };
 });
 ```
 
+**This project is on next-safe-action v8**, where the method is `.inputSchema()`.
+`.schema()` is the deprecated v7 spelling — do not use it in new code.
+
+The caller receives an envelope, not the bare return value:
+
+```ts
+const result = await createUserAction({ name, email });
+result?.data; //             the action's return value — the body ran
+result?.validationErrors; // the schema rejected the input; the body never ran
+result?.serverError; //      the body threw
+```
+
+Keep that distinction when handling results. Collapsing `validationErrors` and a
+falsy `data` into one boolean throws away the reason it failed, which is the
+whole point of using the library.
+
 Always pair with a **Zod schema**. For actions that need auth, derive a new client via
-`.use(...)` — see the docstring in `src/lib/safe-action.ts`.
+`.use(...)` — see the docstring in `src/lib/safe-action/safe-action.ts`.
 
 ### URL search params — `nuqs`
 
@@ -488,7 +514,26 @@ export const InSpanish: Story = {
 **Rules:**
 
 - One `*.stories.tsx` per component, colocated.
-- Every story must have a `title` so it shows up in the sidebar (use the `Components/<ComponentName>` convention — e.g. `Components/ThemeToggle`).
+- Every story must have a `title` so it shows up in the sidebar. The prefix
+  groups the sidebar and is chosen by what the component **is**, not where it
+  happens to sit:
+
+  | Prefix        | For                                           | Example                    |
+  | ------------- | --------------------------------------------- | -------------------------- |
+  | `UI/`         | shadcn/ui primitives (`src/components/ui/**`) | `UI/Button`                |
+  | `Cinema/`     | Immersion Cinema design-system primitives     | `Cinema/PosterCard`        |
+  | `LessonView/` | components in the lesson-view feature group   | `LessonView/OutlineDrawer` |
+  | `Components/` | every other project component                 | `Components/ThemeToggle`   |
+
+  The segment after the slash is the **exported component name** in PascalCase,
+  not the folder name — they match anyway if the folder-per-entity rule is
+  respected.
+
+- **Never mock `next-intl` in a story.** `.storybook/preview.tsx` already wraps
+  every story in `NextIntlClientProvider` with the real messages merged with
+  the `Stories.*` namespace, so a `vi.mock("next-intl", ...)` renders raw keys
+  (`resumeCta` instead of "Resume") and silently breaks the locale toolbar. If
+  a story shows keys instead of copy, that mock is why.
 - Don't mock next/link or next/navigation — the `nextjs-vite` framework provides working mocks automatically.
 - Accessibility violations appear in the addon panel — switch the `a11y.test` parameter from `"todo"` to `"error"` in CI if you want hard enforcement.
 

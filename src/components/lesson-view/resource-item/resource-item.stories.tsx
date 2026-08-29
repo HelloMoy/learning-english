@@ -2,16 +2,8 @@ import { Resource } from "@/domain/entities/resource/resource";
 
 import { faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useTranslations } from "next-intl";
-import { vi } from "vitest";
 
 import { ResourceItem } from "./resource-item";
-
-vi.mock("next-intl", () => ({
-  useTranslations: vi.fn(() => (key: string) => key),
-}));
-
-void useTranslations;
 
 const meta = {
   title: "LessonView/ResourceItem",
