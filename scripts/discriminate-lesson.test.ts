@@ -8,6 +8,7 @@ import {
   classifyLessonFolder,
   classifyResourceKind,
   humanize,
+  normalizeApostrophes,
   notesHeading,
   parseSequence,
   resourceTitleFromFile,
@@ -306,6 +307,51 @@ describe("classifyLessonFolder — title from the notes heading", () => {
     expect(disabled.title).toBe("Notes");
   });
 
+  test("WHEN an adopted heading has straight apostrophes THEN they are normalized", () => {
+    // Arrange — the module mixes U+0027 and U+2019 across sibling lessons.
+    const folder = videoLessonWithHeading("4-i-ll-you-ll", "I'll, you'll, he'll");
+
+    // Act
+    const result = classifyLessonFolder(folder, "4-i-ll-you-ll", {
+      titleFromNotesHeading: true,
+    });
+
+    // Assert
+    expect(result.title).toBe("I’ll, you’ll, he’ll");
+    expect(result.title).not.toContain("'");
+  });
+
+  test("WHEN the title falls back to the slug THEN nothing is normalized", () => {
+    // Arrange — slugification strips apostrophes, so there is nothing to convert.
+    mkdirSync(path.join(dir, "4-i-ll-you-ll"));
+    writeFileSync(path.join(dir, "4-i-ll-you-ll", "lesson.mp4"), "fake");
+
+    // Act
+    const result = classifyLessonFolder(path.join(dir, "4-i-ll-you-ll"), "4-i-ll-you-ll", {
+      titleFromNotesHeading: true,
+    });
+
+    // Assert
+    expect(result.title).toBe("I Ll You Ll");
+  });
+
+  test("WHEN a heading has mixed case, an ampersand or odd spacing THEN only apostrophes change", () => {
+    // Arrange — this is the guard that stops the normalization rule from
+    // quietly growing into a general title cleaner.
+    const folder = videoLessonWithHeading(
+      "2-why-contractions",
+      "Why Contractions & Reductions are important",
+    );
+
+    // Act
+    const result = classifyLessonFolder(folder, "2-why-contractions", {
+      titleFromNotesHeading: true,
+    });
+
+    // Assert — the `&` survives, and so does the lowercase "are important".
+    expect(result.title).toBe("Why Contractions & Reductions are important");
+  });
+
   test("WHEN no options are passed THEN the slug-derived title is used", () => {
     // Arrange — the default must stay the old behaviour, so every existing
     // caller and test is unaffected.
@@ -316,6 +362,33 @@ describe("classifyLessonFolder — title from the notes heading", () => {
 
     // Assert
     expect(result.title).toBe("Fast");
+  });
+});
+
+describe("normalizeApostrophes", () => {
+  // Asserted by code point, never by glyph: U+0027 and U+2019 are nearly
+  // indistinguishable in a diff, so a visual comparison would pass either way.
+  const STRAIGHT = "'";
+  const TYPOGRAPHIC = "’";
+
+  test("WHEN the text uses a straight apostrophe THEN it becomes typographic", () => {
+    expect(normalizeApostrophes(`I${STRAIGHT}ll, you${STRAIGHT}ll`)).toBe(
+      `I${TYPOGRAPHIC}ll, you${TYPOGRAPHIC}ll`,
+    );
+  });
+
+  test("WHEN the text already uses the typographic apostrophe THEN it is unchanged", () => {
+    const already = `I${TYPOGRAPHIC}m, you${TYPOGRAPHIC}re`;
+    expect(normalizeApostrophes(already)).toBe(already);
+  });
+
+  test("WHEN the text has no apostrophes THEN it is unchanged", () => {
+    expect(normalizeApostrophes("Fast Cot-Caught Merger")).toBe("Fast Cot-Caught Merger");
+  });
+
+  test("WHEN normalization runs twice THEN the result is identical", () => {
+    const once = normalizeApostrophes(`it${STRAIGHT}s`);
+    expect(normalizeApostrophes(once)).toBe(once);
   });
 });
 
