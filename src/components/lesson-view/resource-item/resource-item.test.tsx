@@ -42,6 +42,33 @@ describe("ResourceItem", () => {
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
   });
 
+  /**
+   * `Resource.url` admits two shapes (see `urlOrRelativePath`): an absolute
+   * URL, and a site-relative path to a static asset under `public/`. The
+   * test above covers the first; this one covers the second, which the
+   * `faker.internet.url()` fixture never produces.
+   *
+   * NOTE: this is coverage, NOT the guard against the locale-prefix
+   * regression. next-intl applies `localePrefix` during the *server*
+   * render, so under jsdom even the locale-aware `Link` emits an
+   * unprefixed href — this case passes whether or not the bug is present.
+   * The real guard is the e2e case "resource links resolve" in
+   * `e2e/lesson-page.spec.ts`.
+   */
+  test("WHEN the url is a site-relative asset path THEN it reaches the href unmodified", () => {
+    // Arrange — a real seeded resource URL: a static file under `public/`.
+    const url =
+      "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/2-fast-i/fast-i-vowel-pronunciation-practice-see-sound.pdf";
+    const resource = { ...fixtureResource(), url };
+
+    // Act
+    render(<ResourceItem resource={resource} />);
+
+    // Assert
+    const link = screen.getByRole("link", { name: new RegExp(resource.title) });
+    expect(link).toHaveAttribute("href", url);
+  });
+
   test("WHEN rendered THEN the kind label is in the accessible name", () => {
     // Arrange
     const resource = fixtureResource();

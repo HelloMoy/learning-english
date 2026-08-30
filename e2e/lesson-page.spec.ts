@@ -71,6 +71,14 @@ function lessonUrl(locale: string, moduleSlug: string, lessonId: string): string
   return `/${locale}/courses/${COURSE_SLUG}/modules/${moduleSlug}/lessons/${lessonId}`;
 }
 
+/**
+ * Seed titles carry regex metacharacters (`/i/`, `I've`, parentheses), so
+ * they must be escaped before being used as an accessible-name matcher.
+ */
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 test.describe("Lesson Page — happy path", () => {
   test("WHEN a valid route is visited THEN all regions render and the title is the lesson's title", async ({
     page,
@@ -122,6 +130,50 @@ test.describe("Lesson Page — happy path", () => {
       "true",
     );
   });
+});
+
+/**
+ * Regression guard for the locale-prefixed resource link (change:
+ * `fix-resource-links-locale-prefix`).
+ *
+ * A `Resource.url` is a static asset served from `public/` at the origin
+ * root, never an in-app route. Rendering it through the locale-aware
+ * `Link` prefixed `/en` onto the path and every Resources link 404'd.
+ *
+ * This must live at the e2e layer: next-intl applies the prefix during the
+ * server render, so the defect is invisible to jsdom — the equivalent RTL
+ * assertion passes both before and after the fix. See design.md §D2.
+ */
+test.describe("Lesson Page — resource links resolve", () => {
+  const RESOURCES_OF_PRIMARY_LESSON = seedContentResources.filter(
+    (resource) => resource.lessonId === PRIMARY_LESSON.id,
+  );
+
+  for (const locale of ["en", "es"]) {
+    test(`WHEN the ${locale} lesson page is visited THEN every resource link is unprefixed and fetches 200`, async ({
+      page,
+    }) => {
+      await page.goto(lessonUrl(locale, MODULE_A.slug, PRIMARY_LESSON.id));
+
+      // Covers both right-rail cards: the "Resources" card and the
+      // "Lesson notes (source)" card render through the same ResourceItem,
+      // and the seed attaches a readme.md notes resource to this lesson.
+      expect(RESOURCES_OF_PRIMARY_LESSON.length).toBeGreaterThan(0);
+
+      for (const resource of RESOURCES_OF_PRIMARY_LESSON) {
+        const link = page.getByRole("link", { name: new RegExp(escapeRegExp(resource.title)) });
+
+        // The href is the Resource.url verbatim — no locale segment.
+        await expect(link).toHaveAttribute("href", resource.url);
+
+        // ...and it actually resolves. This is the assertion the learner
+        // cares about; the one above only explains a failure.
+        const href = (await link.getAttribute("href"))!;
+        const response = await page.request.get(href);
+        expect(response.status(), `${resource.title} -> ${href}`).toBe(200);
+      }
+    });
+  }
 });
 
 test.describe("Lesson Page — cross-module navigation", () => {
