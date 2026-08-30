@@ -323,7 +323,11 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
     id: courseId,
     slug: courseSlug,
     title: humanize(courseSlug),
-    description: `Course content generated from ${sourceDir}.`,
+    // Relative to the repo root, never the absolute `sourceDir`: the CLI
+    // resolves that to wherever the repo happens to be checked out, which
+    // would bake one machine's home directory into the committed seed and
+    // make regeneration produce a diff on every other machine.
+    description: `Course content generated from ${toPosix(path.relative(process.cwd(), sourceDir))}.`,
     language: "en",
     lessonCount: lessons.length,
     moduleCount: modules.length,
