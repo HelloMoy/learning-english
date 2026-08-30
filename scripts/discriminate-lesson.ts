@@ -185,6 +185,30 @@ export function notesHeading(markdown: string): string | null {
 }
 
 /**
+ * Rewrites straight apostrophes (U+0027) as typographic ones (U+2019).
+ *
+ * @remarks
+ * Authors type whichever their keyboard offers, so one module can mix both:
+ * `I’m, you’re…` beside `I'll, you'll…`. U+2019 is the correct character for
+ * an English contraction, so titles converge on it.
+ *
+ * Scope is deliberately one character. Not backticks, not `‘`, not quotation
+ * marks, and emphatically not case, ampersands or punctuation spacing — each
+ * of those is a separate editorial judgement, and bundling them here would
+ * turn a narrow fix into an unreviewable title rewriter.
+ *
+ * The known cost: a heading legitimately using `'` as a single quotation mark
+ * would be rewritten. No heading in the content does, and a title is not a
+ * realistic place for one.
+ *
+ * @param text - The title text to normalize
+ * @returns The text with apostrophes unified to `’`
+ */
+export function normalizeApostrophes(text: string): string {
+  return text.replaceAll("'", "’");
+}
+
+/**
  * The title for a lesson whose module has opted into notes-derived titles.
  *
  * @remarks
@@ -208,7 +232,7 @@ export function lessonTitle(lessonSlug: string, markdown: string): string {
   const derived = humanize(lessonSlug);
   const heading = notesHeading(markdown);
   if (heading === null) return derived;
-  return heading.toLowerCase() === derived.toLowerCase() ? derived : heading;
+  return heading.toLowerCase() === derived.toLowerCase() ? derived : normalizeApostrophes(heading);
 }
 
 /**

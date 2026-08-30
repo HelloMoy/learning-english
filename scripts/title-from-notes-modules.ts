@@ -32,6 +32,12 @@ export const TITLE_FROM_NOTES_MODULES: ReadonlySet<string> = new Set([
   // 8 of its 13 folders slugged to a bare "fast"; the headings carry the
   // vowel each lesson is actually about.
   "2-advanced-vowel-pronunciation-in-american-english",
+  // A module about apostrophes displayed none: "I M You Re He S She S It S".
+  // The headings restore them, plus the `&` in "Contractions & Reductions".
+  // They mix U+2019 and U+0027, which the apostrophe normalization unifies.
+  // Its last lesson has no readme at all and needs an entry in
+  // `title-overrides.ts` instead.
+  "3-contractions-reductions",
 ]);
 
 /**

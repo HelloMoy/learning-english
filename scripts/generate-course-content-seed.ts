@@ -19,6 +19,7 @@ import {
 import { probeDurationSeconds } from "./ffprobe.ts";
 import { resolveSlug, toPosix } from "./resolve-slug.ts";
 import { usesTitleFromNotes } from "./title-from-notes-modules.ts";
+import { lessonTitleOverride } from "./title-overrides.ts";
 import { uuidv5 } from "./uuid.ts";
 
 /**
@@ -233,6 +234,12 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
         { titleFromNotesHeading: usesTitleFromNotes(moduleSlug) },
       );
 
+      // Resolved once and threaded into both the lesson and its notes
+      // Resource: they are titled from the same string, so they cannot drift
+      // apart. An override outranks the heading and the slug alike.
+      const title =
+        lessonTitleOverride(`${courseSlug}/${moduleSlug}/${lessonSlug}`) ?? classified.title;
+
       if (classified.kind === "video") {
         const videoPath = path.join(
           sourceDir,
@@ -262,7 +269,7 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
           courseId,
           moduleId,
           sequence: lessonSequence,
-          title: classified.title,
+          title,
           description: classified.description,
           source: blobStore.url(videoFullKey),
           durationSeconds,
@@ -274,7 +281,7 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
           const resourceKey = classified.resourceKeys[i] as string;
           const rawName = classified.resourceRawNames[i] as string;
           const fullKey = `${courseSlug}/${moduleSlug}/${resourceKey}`;
-          const resource = buildResource(lessonId, fullKey, blobStore, classified.title);
+          const resource = buildResource(lessonId, fullKey, blobStore, title);
           resources.push(resource);
           // Priority for sourceNames: raw on-disk filename (always available
           // because classifyLessonFolder reads the folder at walk time) >
@@ -289,7 +296,7 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
           courseId,
           moduleId,
           sequence: lessonSequence,
-          title: classified.title,
+          title,
           body: classified.body,
         });
         lessons.push(lesson);
@@ -298,7 +305,7 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
           const resourceKey = classified.resourceKeys[i] as string;
           const rawName = classified.resourceRawNames[i] as string;
           const fullKey = `${courseSlug}/${moduleSlug}/${resourceKey}`;
-          const resource = buildResource(lessonId, fullKey, blobStore, classified.title);
+          const resource = buildResource(lessonId, fullKey, blobStore, title);
           resources.push(resource);
           // Priority for sourceNames: raw on-disk filename (always available
           // because classifyLessonFolder reads the folder at walk time) >
