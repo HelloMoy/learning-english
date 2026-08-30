@@ -8,6 +8,7 @@ import {
   classifyLessonFolder,
   classifyResourceKind,
   humanize,
+  notesHeading,
   parseSequence,
   resourceTitleFromFile,
 } from "./discriminate-lesson";
@@ -188,6 +189,160 @@ describe("classifyLessonFolder", () => {
     expect(() => classifyLessonFolder(path.join(dir, "lesson-slug"), "lesson-slug")).toThrow(
       /neither an .mp4 nor a readme.md/,
     );
+  });
+});
+
+describe("classifyLessonFolder — title from the notes heading", () => {
+  let dir: string;
+
+  beforeEach(() => {
+    dir = mkdtempSync(path.join(tmpdir(), "classify-title-"));
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  /** A video lesson folder whose readme opens with `heading`. */
+  function videoLessonWithHeading(slug: string, heading: string): string {
+    mkdirSync(path.join(dir, slug));
+    writeFileSync(path.join(dir, slug, "lesson.mp4"), "fake");
+    writeFileSync(path.join(dir, slug, "readme.md"), `# ${heading}\n\nBody.\n`);
+    return path.join(dir, slug);
+  }
+
+  test("WHEN enabled THEN the heading becomes the title, recovering what the slug lost", () => {
+    // Arrange — the folder slug flattened "Fast /æ/" down to "4-fast".
+    const folder = videoLessonWithHeading("4-fast", "Fast /æ/");
+
+    // Act
+    const result = classifyLessonFolder(folder, "4-fast", { titleFromNotesHeading: true });
+
+    // Assert
+    expect(result.title).toBe("Fast /æ/");
+  });
+
+  test("WHEN disabled THEN the slug-derived title is kept even though a heading exists", () => {
+    // Arrange — this is what protects every module outside the allowlist.
+    const folder = videoLessonWithHeading("4-fast", "Fast /æ/");
+
+    // Act
+    const result = classifyLessonFolder(folder, "4-fast", { titleFromNotesHeading: false });
+
+    // Assert
+    expect(result.title).toBe("Fast");
+  });
+
+  test("WHEN enabled and the folder has no readme THEN it falls back to the slug", () => {
+    // Arrange
+    mkdirSync(path.join(dir, "4-fast"));
+    writeFileSync(path.join(dir, "4-fast", "lesson.mp4"), "fake");
+
+    // Act
+    const result = classifyLessonFolder(path.join(dir, "4-fast"), "4-fast", {
+      titleFromNotesHeading: true,
+    });
+
+    // Assert
+    expect(result.title).toBe("Fast");
+  });
+
+  test("WHEN enabled and the readme has no heading THEN it falls back to the slug", () => {
+    // Arrange
+    mkdirSync(path.join(dir, "4-fast"));
+    writeFileSync(path.join(dir, "4-fast", "lesson.mp4"), "fake");
+    writeFileSync(path.join(dir, "4-fast", "readme.md"), "Just prose, no heading.\n");
+
+    // Act
+    const result = classifyLessonFolder(path.join(dir, "4-fast"), "4-fast", {
+      titleFromNotesHeading: true,
+    });
+
+    // Assert
+    expect(result.title).toBe("Fast");
+  });
+
+  test("WHEN the heading differs only in case THEN the slug-derived title wins", () => {
+    // Arrange — capitalization survives slugification, so an all-caps
+    // heading carries no information the slug lost.
+    const folder = videoLessonWithHeading("1-intro", "INTRO");
+
+    // Act
+    const result = classifyLessonFolder(folder, "1-intro", { titleFromNotesHeading: true });
+
+    // Assert
+    expect(result.title).toBe("Intro");
+  });
+
+  test("WHEN the heading differs by punctuation THEN it is adopted", () => {
+    // Arrange — the hyphen is real information the slug flattened away.
+    const folder = videoLessonWithHeading("8-fast-cot-caught-merger", "Fast Cot-Caught Merger");
+
+    // Act
+    const result = classifyLessonFolder(folder, "8-fast-cot-caught-merger", {
+      titleFromNotesHeading: true,
+    });
+
+    // Assert
+    expect(result.title).toBe("Fast Cot-Caught Merger");
+  });
+
+  test("WHEN the lesson is a reading lesson THEN the same rules apply", () => {
+    // Arrange — no video, so this exercises the other branch.
+    mkdirSync(path.join(dir, "5-notes"));
+    writeFileSync(path.join(dir, "5-notes", "readme.md"), "# Real /ɛ/ Title\n\nBody.\n");
+
+    // Act
+    const enabled = classifyLessonFolder(path.join(dir, "5-notes"), "5-notes", {
+      titleFromNotesHeading: true,
+    });
+    const disabled = classifyLessonFolder(path.join(dir, "5-notes"), "5-notes", {
+      titleFromNotesHeading: false,
+    });
+
+    // Assert
+    expect(enabled.kind).toBe("reading");
+    expect(enabled.title).toBe("Real /ɛ/ Title");
+    expect(disabled.title).toBe("Notes");
+  });
+
+  test("WHEN no options are passed THEN the slug-derived title is used", () => {
+    // Arrange — the default must stay the old behaviour, so every existing
+    // caller and test is unaffected.
+    const folder = videoLessonWithHeading("4-fast", "Fast /æ/");
+
+    // Act
+    const result = classifyLessonFolder(folder, "4-fast");
+
+    // Assert
+    expect(result.title).toBe("Fast");
+  });
+});
+
+describe("notesHeading", () => {
+  test("WHEN the markdown opens with an ATX heading THEN it returns that heading", () => {
+    expect(notesHeading("# Fast /æ/\n\nSome prose.\n")).toBe("Fast /æ/");
+  });
+
+  test("WHEN the heading carries trailing whitespace THEN it is trimmed", () => {
+    expect(notesHeading("#   Fast /ɔɪ/   \n")).toBe("Fast /ɔɪ/");
+  });
+
+  test("WHEN blank lines precede the heading THEN it is still found", () => {
+    expect(notesHeading("\n\n\n# Fast /ʊ/\n")).toBe("Fast /ʊ/");
+  });
+
+  test("WHEN prose and sub-headings precede the first heading THEN the first `# ` wins", () => {
+    // A `##` is not the lesson title, and neither is body text.
+    expect(notesHeading("Intro paragraph.\n\n## Section\n\n# Real Title\n")).toBe("Real Title");
+  });
+
+  test("WHEN there is no ATX heading THEN it returns null", () => {
+    expect(notesHeading("Just prose.\n\n## Only a sub-heading\n")).toBeNull();
+  });
+
+  test("WHEN the markdown is empty THEN it returns null", () => {
+    expect(notesHeading("")).toBeNull();
   });
 });
 

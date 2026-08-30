@@ -18,6 +18,7 @@ import {
 } from "./discriminate-lesson.ts";
 import { probeDurationSeconds } from "./ffprobe.ts";
 import { resolveSlug, toPosix } from "./resolve-slug.ts";
+import { usesTitleFromNotes } from "./title-from-notes-modules.ts";
 import { uuidv5 } from "./uuid.ts";
 
 /**
@@ -229,6 +230,7 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
       const classified = classifyLessonFolder(
         path.join(sourceDir, courseFolder, moduleFolder, lessonFolder),
         lessonSlug,
+        { titleFromNotesHeading: usesTitleFromNotes(moduleSlug) },
       );
 
       if (classified.kind === "video") {
