@@ -8,6 +8,7 @@ import { Link } from "@/i18n/navigation";
 
 import { Play } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 
 const THUMB_GLOW =
   "radial-gradient(120% 120% at 30% 12%, color-mix(in oklab, var(--glow) 26%, var(--background)), var(--background) 72%)";
@@ -27,6 +28,22 @@ function lessonDurationMinutes(lesson: Lesson): number | null {
  * course, a hero poster + title, and one row per lesson (thumbnail,
  * "Episode N" eyebrow, title, duration, and an "Open" action linking to
  * the Lesson Page).
+ *
+ * @remarks
+ * A row's thumbnail shows the lesson's `poster` artwork, falling back to
+ * the gradient tile and a decorative play circle when the lesson has none
+ * — reading lessons never carry one. The gradient also sits behind the
+ * image, so a slow or missing JPEG degrades to the placeholder instead of
+ * a broken-image icon.
+ *
+ * The thumbnail links to the same lesson as the row's "Open" action, but
+ * is deliberately pointer-only: `aria-hidden` plus `tabIndex={-1}` keep it
+ * out of the accessibility tree and the tab order. It duplicates a
+ * destination the row already exposes, so announcing it would read every
+ * lesson twice and double the tab stops — 214 of them on the largest
+ * module. If the row is ever restructured so the thumbnail becomes the
+ * primary control, that treatment and the image's empty `alt` must both
+ * flip to a real accessible name.
  */
 export function ModuleOverview({
   course,
@@ -94,21 +111,34 @@ export function ModuleOverview({
         <ul className="flex flex-col">
           {lessons.map((lesson) => {
             const minutes = lessonDurationMinutes(lesson);
+            const poster = lesson.kind === "video" ? lesson.poster : undefined;
             return (
               <li
                 key={lesson.id}
                 className="flex items-center gap-4 border-b border-border py-4 first:border-t"
               >
-                <div
-                  className="relative hidden h-14 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border sm:flex"
-                  style={{ background: THUMB_GLOW }}
+                <Link
+                  href={lessonPath(course, module, lesson) as never}
                   aria-hidden="true"
+                  tabIndex={-1}
+                  className="relative hidden h-14 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border transition-colors hover:border-gold/50 sm:flex"
+                  style={{ background: THUMB_GLOW }}
                 >
-                  <PlayButton
-                    size="sm"
-                    decorative
-                  />
-                </div>
+                  {poster ? (
+                    <Image
+                      src={poster}
+                      alt=""
+                      fill
+                      sizes="96px"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <PlayButton
+                      size="sm"
+                      decorative
+                    />
+                  )}
+                </Link>
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <Eyebrow>{t("episode", { number: lesson.sequence })}</Eyebrow>
                   <span className="truncate text-base font-semibold text-foreground">
