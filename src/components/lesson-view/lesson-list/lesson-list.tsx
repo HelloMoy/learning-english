@@ -1,3 +1,4 @@
+import { LessonCompletionMark } from "@/components/lesson-completion-mark/lesson-completion-mark";
 import type { Course } from "@/domain/entities/course/course";
 import type { LessonId } from "@/domain/entities/ids/ids";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
@@ -41,7 +42,10 @@ export function LessonList({
                   : "block min-h-9 rounded px-2 py-2 text-sm text-muted-foreground hover:bg-foreground/5 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
               }
             >
-              {lesson.title}
+              <span className="flex items-center justify-between gap-2">
+                {lesson.title}
+                <LessonCompletionMark lessonId={lesson.id} />
+              </span>
             </Link>
           </li>
         );

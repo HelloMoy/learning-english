@@ -91,3 +91,100 @@ describe("LessonList", () => {
     expect(current?.textContent).toBe("Second");
   });
 });
+
+describe("LessonList — completion indicator", () => {
+  const STORAGE_KEY_PREFIX = "learning-english:completed:";
+
+  beforeEach(() => {
+    mockUseTranslations.mockReturnValue(((key: string) => key) as never);
+    window.localStorage.clear();
+    window.dispatchEvent(new StorageEvent("storage", { key: null }));
+  });
+
+  test("WHEN a lesson has been completed THEN its row shows the indicator", () => {
+    // Arrange
+    const lessons = [makeLesson(1, "First"), makeLesson(2, "Second")];
+    window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessons[1]!.id}`, "1");
+    window.dispatchEvent(new StorageEvent("storage", { key: null }));
+
+    // Act
+    const { container } = render(
+      <LessonList
+        course={course}
+        module={courseModule}
+        lessons={lessons}
+        currentLessonId={lessons[0]!.id}
+      />,
+    );
+
+    // Assert — exactly one mark, on the completed row.
+    const marks = container.querySelectorAll('[data-testid="lesson-completion-mark"]');
+    expect(marks).toHaveLength(1);
+    const items = within(container.querySelector("ul")!).getAllByRole("listitem");
+    expect(items[1]!.querySelector('[data-testid="lesson-completion-mark"]')).not.toBeNull();
+  });
+
+  test("WHEN no lesson has been completed THEN no marker of any kind is rendered", () => {
+    // Arrange — the absence matters: an explicit "not completed" marker would
+    // assert something false in the pre-hydration frame.
+    const lessons = [makeLesson(1, "First"), makeLesson(2, "Second")];
+
+    // Act
+    const { container } = render(
+      <LessonList
+        course={course}
+        module={courseModule}
+        lessons={lessons}
+        currentLessonId={lessons[0]!.id}
+      />,
+    );
+
+    // Assert
+    expect(container.querySelectorAll('[data-testid="lesson-completion-mark"]')).toHaveLength(0);
+  });
+
+  test("WHEN the current lesson is also complete THEN both markers coexist", () => {
+    // Arrange
+    const lessons = [makeLesson(1, "First"), makeLesson(2, "Second")];
+    window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessons[0]!.id}`, "1");
+    window.dispatchEvent(new StorageEvent("storage", { key: null }));
+
+    // Act
+    const { container } = render(
+      <LessonList
+        course={course}
+        module={courseModule}
+        lessons={lessons}
+        currentLessonId={lessons[0]!.id}
+      />,
+    );
+
+    // Assert — the completion mark does not displace aria-current.
+    const current = container.querySelector('[aria-current="page"]');
+    expect(current).not.toBeNull();
+    const items = within(container.querySelector("ul")!).getAllByRole("listitem");
+    expect(items[0]!.querySelector('[data-testid="lesson-completion-mark"]')).not.toBeNull();
+  });
+
+  test("WHEN the indicator renders THEN it carries a localized accessible name", () => {
+    // Arrange
+    const lessons = [makeLesson(1, "First")];
+    window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessons[0]!.id}`, "1");
+    window.dispatchEvent(new StorageEvent("storage", { key: null }));
+
+    // Act
+    const { container } = render(
+      <LessonList
+        course={course}
+        module={courseModule}
+        lessons={lessons}
+        currentLessonId={lessons[0]!.id}
+      />,
+    );
+
+    // Assert — meaning is carried by text, not by colour or the icon alone.
+    const mark = container.querySelector('[data-testid="lesson-completion-mark"]');
+    expect(mark?.textContent).toContain("completed");
+    expect(mark?.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+  });
+});
