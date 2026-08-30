@@ -215,3 +215,84 @@ describe("ModuleOverview", () => {
     );
   });
 });
+
+describe("ModuleOverview — completion indicator", () => {
+  const STORAGE_KEY_PREFIX = "learning-english:completed:";
+
+  beforeEach(() => {
+    mockUseTranslations.mockImplementation(
+      () =>
+        ((key: string, values?: Record<string, unknown>) =>
+          values
+            ? `CourseCatalog.moduleOverview.${key}:${JSON.stringify(values)}`
+            : `CourseCatalog.moduleOverview.${key}`) as never,
+    );
+    window.localStorage.clear();
+    window.dispatchEvent(new StorageEvent("storage", { key: null }));
+  });
+
+  test("WHEN a lesson has been completed THEN its episode row shows the indicator", () => {
+    // Arrange
+    window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessonB.id}`, "1");
+    window.dispatchEvent(new StorageEvent("storage", { key: null }));
+
+    // Act
+    const { container } = render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonA, lessonB]}
+      />,
+    );
+
+    // Assert — exactly one mark, on the completed row.
+    const marks = container.querySelectorAll('[data-testid="lesson-completion-mark"]');
+    expect(marks).toHaveLength(1);
+    const rows = container.querySelectorAll("li");
+    expect(rows[1]!.querySelector('[data-testid="lesson-completion-mark"]')).not.toBeNull();
+  });
+
+  test("WHEN nothing is completed THEN no marker is rendered", () => {
+    // Act
+    const { container } = render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonA, lessonB]}
+      />,
+    );
+
+    // Assert
+    expect(container.querySelectorAll('[data-testid="lesson-completion-mark"]')).toHaveLength(0);
+  });
+
+  test("WHEN a row shows the indicator THEN it keeps its eyebrow, title, duration and Open action", () => {
+    // Arrange
+    window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessonA.id}`, "1");
+    window.dispatchEvent(new StorageEvent("storage", { key: null }));
+
+    // Act
+    render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonA]}
+      />,
+    );
+
+    // Assert — the indicator supplements the row, it does not displace it.
+    expect(screen.getByText("Lesson A")).toBeInTheDocument();
+    expect(
+      screen.getByText('CourseCatalog.moduleOverview.episode:{"number":1}'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('CourseCatalog.moduleOverview.duration:{"minutes":4}'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /CourseCatalog\.moduleOverview\.open/ }),
+    ).toHaveAttribute(
+      "href",
+      "/courses/course-1/modules/mod-1/lessons/33333333-3333-4333-8333-333333333333",
+    );
+  });
+});

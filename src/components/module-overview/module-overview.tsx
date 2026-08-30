@@ -1,4 +1,5 @@
 import { Eyebrow } from "@/components/eyebrow/eyebrow";
+import { LessonCompletionMark } from "@/components/lesson-completion-mark/lesson-completion-mark";
 import { PlayButton } from "@/components/play-button/play-button";
 import type { Course } from "@/domain/entities/course/course";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
@@ -141,8 +142,11 @@ export function ModuleOverview({
                 </Link>
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <Eyebrow>{t("episode", { number: lesson.sequence })}</Eyebrow>
-                  <span className="truncate text-base font-semibold text-foreground">
-                    {lesson.title}
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className="truncate text-base font-semibold text-foreground">
+                      {lesson.title}
+                    </span>
+                    <LessonCompletionMark lessonId={lesson.id} />
                   </span>
                 </div>
                 {minutes !== null ? (
