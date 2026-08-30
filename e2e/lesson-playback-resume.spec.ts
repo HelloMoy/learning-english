@@ -177,6 +177,29 @@ test.describe("Lesson playback-position resume cycle", () => {
       .toBe(30);
   });
 
+  test("WHEN the resume dialog is dismissed with Escape THEN the <video> stays at the beginning", async ({
+    page,
+    context,
+  }) => {
+    test.setTimeout(20_000);
+    await clearStorageFor(context);
+    await seedSavedPosition(context, 30);
+    await page.goto(lessonUrl("en"));
+
+    const dialog = page.getByRole("dialog", { name: /resume playback/i });
+    await expect(dialog).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(dialog).not.toBeVisible();
+
+    // Dismissing is "restart from the beginning" — never a silent resume.
+    const video = page.locator("video");
+    expect(await video.evaluate((el) => (el as HTMLVideoElement).currentTime)).toBe(0);
+
+    // …and the saved position survives for the next visit.
+    expect(await readSavedPosition(page)).toBe(30);
+  });
+
   test("WHEN a saved position is within the last 10 seconds of the lesson THEN the overlay does NOT render", async ({
     page,
     context,

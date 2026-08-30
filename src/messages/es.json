@@ -41,6 +41,9 @@
       "courseCompleted": "Has llegado al final del curso.",
       "error": "No pudimos cargar la siguiente lección ahora."
     },
+    "Dialog": {
+      "closeLabel": "Cerrar"
+    },
     "ResourceItem": {
       "pdf": "PDF",
       "slides": "Diapositivas",
@@ -66,8 +69,9 @@
       "markComplete": "Marcar como completada",
       "markedComplete": "Completada"
     },
-    "LessonVideoResume": {
+    "LessonVideoResumeModal": {
       "dialogLabel": "Reanudar reproducción",
+      "description": "Dejaste de ver la lección a medias. Continúa donde lo dejaste o empieza de nuevo desde el principio.",
       "resumeCta": "Reanudar",
       "restartCta": "Reiniciar desde el principio",
       "resumeFrom": "Reanudar desde {seconds}"

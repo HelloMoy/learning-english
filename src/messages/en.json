@@ -41,6 +41,9 @@
       "courseCompleted": "You've reached the end of the course.",
       "error": "We couldn't load the next lesson right now."
     },
+    "Dialog": {
+      "closeLabel": "Close"
+    },
     "ResourceItem": {
       "pdf": "PDF",
       "slides": "Slides",
@@ -66,8 +69,9 @@
       "markComplete": "Mark as complete",
       "markedComplete": "Marked complete"
     },
-    "LessonVideoResume": {
+    "LessonVideoResumeModal": {
       "dialogLabel": "Resume playback",
+      "description": "You stopped watching partway through. Pick up where you left off, or start again from the beginning.",
       "resumeCta": "Resume",
       "restartCta": "Restart from beginning",
       "resumeFrom": "Resume from {seconds}"
