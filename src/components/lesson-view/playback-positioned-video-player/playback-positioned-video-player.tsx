@@ -2,31 +2,38 @@
 
 import type { LessonId } from "@/domain/entities/ids/ids";
 import { usePlaybackPosition } from "@/hooks/use-playback-position/use-playback-position";
+import { isPositionResumable } from "@/lib/playback-resume-thresholds/playback-resume-thresholds";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import NiceModal from "@ebay/nice-modal-react";
+import { useCallback, useEffect, useRef } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
-import { isPositionResumable, LessonVideoResume } from "../lesson-video-resume/lesson-video-resume";
+import {
+  LessonVideoResumeModal,
+  type LessonVideoResumeChoice,
+} from "../../modals/lesson-video-resume-modal/lesson-video-resume-modal";
 import { NativeVideoPlayer } from "../native-video-player/native-video-player";
 
 /**
  * Smart wrapper around `NativeVideoPlayer` that persists the playback
- * position to `localStorage` and renders the "Resume from MM:SS" overlay
- * over the video when a saved position passes the thresholds.
+ * position to `localStorage` and offers the "Resume from MM:SS" modal when a
+ * saved position passes the thresholds.
  *
  * Persistence rules:
  *
  * - On mount the wrapper reads the saved position; if it passes the resume
- *   thresholds (`isPositionResumable`), the `<video>` element's
- *   `currentTime` is set to that value. This is a **seek**, not a write.
+ *   thresholds (`isPositionResumable`), it opens `LessonVideoResumeModal` and
+ *   waits for the learner's answer. The `<video>` is seeked **only** if they
+ *   choose Resume — restarting and dismissing both leave it at `0`. Either way
+ *   this is a **seek**, not a write.
  * - The wrapper MUST NOT persist a position before the first user
  *   interaction with the video element — that would overwrite a stored
  *   value with `0` on cold load.
  * - `timeupdate` writes are **debounced** at 1500ms to avoid hammering
  *   `localStorage`. `pause`, `seeking`, `ended`, and `beforeunload` write
  *   immediately so graceful closes never lose progress.
- * - The "Resume" and "Restart" overlay actions seek the element directly
- *   through the local `videoRef` and flush the debounced timer.
+ * - Resuming seeks the element directly through the local `videoRef` and
+ *   flushes the debounced timer.
  *
  * Persistence is keyed by `lessonId` via the `usePlaybackPosition` hook
  * (browser-only). Server Components do NOT import this file.
@@ -64,7 +71,10 @@ export function PlaybackPositionedVideoPlayer({
   // re-render, and a `pause` arriving in the same tick would still run the
   // listener closed over `false` — dropping the write.
   const hasInteractedRef = useRef(false);
-  const [savedPosition, setSavedPosition] = useState<number | null>(null);
+  // The resume prompt is a one-shot offer. Without this guard a Strict Mode
+  // double-invoke — or any change to the effect's deps — would stack a second
+  // dialog on top of the first, or re-ask a learner who already answered.
+  const hasOfferedResumeRef = useRef(false);
 
   // The callback lives in a ref, not in the listener effect's deps. Callers
   // pass an inline arrow, so a dep would re-subscribe on every render — and
@@ -88,26 +98,36 @@ export function PlaybackPositionedVideoPlayer({
 
   const debouncedWrite = useDebouncedCallback(writeIfAllowed, 1500);
 
-  // On mount: read the saved position, hold it in state (drives the
-  // overlay), and seek the <video> if it passes the thresholds. Pure
-  // read — does NOT write.
+  // On mount: read the saved position and, when it is worth offering, ask the
+  // learner what to do with it. Pure read — does NOT write.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const saved = await position.get();
-      if (cancelled) return;
-      setSavedPosition(saved);
-      if (saved === null) return;
+      if (cancelled || hasOfferedResumeRef.current) return;
       if (!isPositionResumable(saved, durationSeconds)) return;
+
+      hasOfferedResumeRef.current = true;
+      const choice = (await NiceModal.show(LessonVideoResumeModal, {
+        positionSeconds: saved,
+      })) as LessonVideoResumeChoice;
+
+      // "restart" and "dismissed" both mean "start from the top", which is
+      // where the element already is — only a resume needs a seek.
+      if (cancelled || choice.action !== "resume") return;
       const video = videoRef.current;
       if (video !== null) {
-        video.currentTime = saved;
+        video.currentTime = choice.seconds;
       }
+      // Choosing to resume is a deliberate interaction, so the write gate
+      // opens: from here on, position updates are allowed to persist.
+      hasInteractedRef.current = true;
+      debouncedWrite.flush();
     })();
     return () => {
       cancelled = true;
     };
-  }, [position, durationSeconds]);
+  }, [position, durationSeconds, debouncedWrite]);
 
   // Lifecycle subscriptions: timeupdate (debounced), pause/seeking/ended
   // (immediate), play (sets interaction flag), beforeunload (flush + write).
@@ -149,41 +169,15 @@ export function PlaybackPositionedVideoPlayer({
     };
   }, [debouncedWrite, writeIfAllowed]);
 
-  const onResume = (seconds: number) => {
-    const video = videoRef.current;
-    if (video !== null) {
-      video.currentTime = seconds;
-    }
-    hasInteractedRef.current = true;
-    debouncedWrite.flush();
-    setSavedPosition(null);
-  };
-
-  const onRestart = () => {
-    const video = videoRef.current;
-    if (video !== null) {
-      video.currentTime = 0;
-    }
-    hasInteractedRef.current = true;
-    debouncedWrite.flush();
-    setSavedPosition(null);
-  };
-
+  // No wrapper element: the resume prompt is portalled to the document root
+  // by NiceModal, so there is nothing left for a positioning context to hold.
   return (
-    <div className="relative">
-      <NativeVideoPlayer
-        source={source}
-        poster={poster}
-        title={title}
-        ariaLabel={ariaLabel}
-        ref={videoRef}
-      />
-      <LessonVideoResume
-        positionSeconds={savedPosition}
-        durationSeconds={durationSeconds}
-        onResume={onResume}
-        onRestart={onRestart}
-      />
-    </div>
+    <NativeVideoPlayer
+      source={source}
+      poster={poster}
+      title={title}
+      ariaLabel={ariaLabel}
+      ref={videoRef}
+    />
   );
 }

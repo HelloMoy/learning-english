@@ -1,7 +1,9 @@
 import { LessonId } from "@/domain/entities/ids/ids";
 
+import NiceModal from "@ebay/nice-modal-react";
 import { faker } from "@faker-js/faker";
-import { act, fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 import { useTranslations } from "next-intl";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -14,6 +16,28 @@ vi.mock("next-intl", () => ({
 const mockUseTranslations = vi.mocked(useTranslations);
 
 const mockStorage = new Map<string, string>();
+
+const storageKeyFor = (lessonId: string) => `learning-english:playback:${lessonId}`;
+
+/**
+ * The resume prompt is a NiceModal-driven `Dialog`, so it is portalled to the
+ * document root rather than rendered inside the player. Every render needs the
+ * provider, and every assertion about the prompt goes through `screen`, not the
+ * returned container.
+ */
+const renderPlayer = (ui: React.ReactElement) =>
+  render(<NiceModal.Provider>{ui}</NiceModal.Provider>);
+
+/** Lets the async mount-read resolve and the modal commit. */
+const settle = async () => {
+  await act(async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+};
+
+const videoIn = (container: HTMLElement) => container.querySelector("video") as HTMLVideoElement;
 
 beforeEach(() => {
   // Echo the key plus any ICU values, so the overlay's interpolated
@@ -50,7 +74,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
       const source = "/videos/" + faker.system.fileName();
       const title = faker.lorem.sentence();
 
-      const { getByTitle } = render(
+      const { getByTitle } = renderPlayer(
         <PlaybackPositionedVideoPlayer
           lessonId={lessonId}
           source={source}
@@ -68,7 +92,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
       const lessonId = LessonId.parse(faker.string.uuid());
       const poster = faker.internet.url();
 
-      const { container } = render(
+      const { container } = renderPlayer(
         <PlaybackPositionedVideoPlayer
           lessonId={lessonId}
           source="/videos/x.mp4"
@@ -78,23 +102,6 @@ describe("PlaybackPositionedVideoPlayer", () => {
       );
 
       expect(container.querySelector("video")).toHaveAttribute("poster", poster);
-    });
-
-    test("WHEN rendered THEN the wrapper provides a positioning context for the resume overlay", () => {
-      const lessonId = LessonId.parse(faker.string.uuid());
-
-      const { container } = render(
-        <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source="/videos/x.mp4"
-          title="t"
-        />,
-      );
-
-      // The wrapper wraps the video + overlay in a `relative` container so
-      // the absolute-positioned overlay can anchor to the video bounds.
-      const positioningContext = container.querySelector("div.relative");
-      expect(positioningContext).not.toBeNull();
     });
   });
 
@@ -109,7 +116,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
       const lessonId = LessonId.parse(faker.string.uuid());
       const onPlaybackStart = vi.fn();
 
-      const { container } = render(
+      const { container } = renderPlayer(
         <PlaybackPositionedVideoPlayer
           lessonId={lessonId}
           source="/videos/x.mp4"
@@ -129,7 +136,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
     test("WHEN no onPlaybackStart is provided THEN a play event does not throw", () => {
       const lessonId = LessonId.parse(faker.string.uuid());
 
-      const { container } = render(
+      const { container } = renderPlayer(
         <PlaybackPositionedVideoPlayer
           lessonId={lessonId}
           source="/videos/x.mp4"
@@ -146,11 +153,11 @@ describe("PlaybackPositionedVideoPlayer", () => {
     });
   });
 
-  describe("Resume overlay wiring", () => {
-    test("WHEN there is no saved position THEN the overlay is not rendered", () => {
+  describe("Resume dialog wiring", () => {
+    test("WHEN there is no saved position THEN no dialog is opened", async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
 
-      const { queryByRole } = render(
+      renderPlayer(
         <PlaybackPositionedVideoPlayer
           lessonId={lessonId}
           source="/videos/x.mp4"
@@ -158,15 +165,50 @@ describe("PlaybackPositionedVideoPlayer", () => {
           durationSeconds={600}
         />,
       );
+      await settle();
 
-      expect(queryByRole("dialog")).toBeNull();
+      expect(screen.queryByRole("dialog")).toBeNull();
     });
 
-    test("WHEN a saved position passes the thresholds THEN the overlay renders with that position", async () => {
+    test("WHEN the saved position is below the threshold THEN no dialog is opened", async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(`learning-english:playback:${lessonId}`, "180");
+      mockStorage.set(storageKeyFor(lessonId), "10");
 
-      const { findByRole } = render(
+      renderPlayer(
+        <PlaybackPositionedVideoPlayer
+          lessonId={lessonId}
+          source="/videos/x.mp4"
+          title="t"
+          durationSeconds={600}
+        />,
+      );
+      await settle();
+
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+
+    test("WHEN the saved position is within the last 10 seconds THEN no dialog is opened", async () => {
+      const lessonId = LessonId.parse(faker.string.uuid());
+      mockStorage.set(storageKeyFor(lessonId), "595");
+
+      renderPlayer(
+        <PlaybackPositionedVideoPlayer
+          lessonId={lessonId}
+          source="/videos/x.mp4"
+          title="t"
+          durationSeconds={600}
+        />,
+      );
+      await settle();
+
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+
+    test("WHEN the saved position passes the thresholds THEN a dialog opens showing that position", async () => {
+      const lessonId = LessonId.parse(faker.string.uuid());
+      mockStorage.set(storageKeyFor(lessonId), "180");
+
+      renderPlayer(
         <PlaybackPositionedVideoPlayer
           lessonId={lessonId}
           source="/videos/x.mp4"
@@ -175,16 +217,15 @@ describe("PlaybackPositionedVideoPlayer", () => {
         />,
       );
 
-      const dialog = await findByRole("dialog");
-      expect(dialog).toBeInTheDocument();
+      const dialog = await screen.findByRole("dialog");
       expect(dialog).toHaveTextContent("03:00");
     });
 
-    test("WHEN a saved position is below the threshold THEN the overlay does not render", async () => {
+    test("WHEN the player re-renders THEN the dialog is not opened a second time", async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(`learning-english:playback:${lessonId}`, "10");
+      mockStorage.set(storageKeyFor(lessonId), "180");
 
-      const { container } = render(
+      const { rerender } = renderPlayer(
         <PlaybackPositionedVideoPlayer
           lessonId={lessonId}
           source="/videos/x.mp4"
@@ -192,10 +233,132 @@ describe("PlaybackPositionedVideoPlayer", () => {
           durationSeconds={600}
         />,
       );
+      await settle();
 
-      // Let the mount effect resolve.
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      expect(container.querySelector('[role="dialog"]')).toBeNull();
+      rerender(
+        <NiceModal.Provider>
+          <PlaybackPositionedVideoPlayer
+            lessonId={lessonId}
+            source="/videos/x.mp4"
+            title="t"
+            durationSeconds={600}
+          />
+        </NiceModal.Provider>,
+      );
+      await settle();
+
+      expect(screen.getAllByRole("dialog")).toHaveLength(1);
+    });
+
+    test("WHEN the dialog is open THEN the video has not been seeked yet", async () => {
+      const lessonId = LessonId.parse(faker.string.uuid());
+      mockStorage.set(storageKeyFor(lessonId), "180");
+
+      const { container } = renderPlayer(
+        <PlaybackPositionedVideoPlayer
+          lessonId={lessonId}
+          source="/videos/x.mp4"
+          title="t"
+          durationSeconds={600}
+        />,
+      );
+      await screen.findByRole("dialog");
+
+      // Seeking is the learner's decision, not a side effect of being offered
+      // the choice — see the "restart from the beginning" requirement.
+      expect(videoIn(container).currentTime).toBe(0);
+    });
+  });
+
+  describe("Acting on the learner's choice", () => {
+    const renderWithSavedPosition = async (seconds: string) => {
+      const lessonId = LessonId.parse(faker.string.uuid());
+      mockStorage.set(storageKeyFor(lessonId), seconds);
+
+      const { container, rerender } = renderPlayer(
+        <PlaybackPositionedVideoPlayer
+          lessonId={lessonId}
+          source="/videos/x.mp4"
+          title="t"
+          durationSeconds={600}
+        />,
+      );
+      await screen.findByRole("dialog");
+
+      return { lessonId, container, rerender };
+    };
+
+    test("WHEN Resume is chosen THEN the video seeks to the saved position and the dialog closes", async () => {
+      const user = userEvent.setup();
+      const { container } = await renderWithSavedPosition("180");
+
+      await user.click(screen.getByRole("button", { name: "resumeCta" }));
+      await settle();
+
+      expect(videoIn(container).currentTime).toBe(180);
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+
+    test("WHEN Restart is chosen THEN the video stays at the beginning and the dialog closes", async () => {
+      const user = userEvent.setup();
+      const { container } = await renderWithSavedPosition("180");
+
+      await user.click(screen.getByRole("button", { name: "restartCta" }));
+      await settle();
+
+      expect(videoIn(container).currentTime).toBe(0);
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+
+    test("WHEN the dialog is dismissed with Escape THEN the video stays at the beginning", async () => {
+      const user = userEvent.setup();
+      const { container } = await renderWithSavedPosition("180");
+
+      await user.keyboard("{Escape}");
+      await settle();
+
+      expect(videoIn(container).currentTime).toBe(0);
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+
+    test("WHEN the dialog is dismissed THEN the saved position is left intact for the next visit", async () => {
+      const user = userEvent.setup();
+      const { lessonId } = await renderWithSavedPosition("180");
+
+      await user.keyboard("{Escape}");
+      await settle();
+
+      expect(mockStorage.get(storageKeyFor(lessonId))).toBe("180");
+    });
+
+    /**
+     * Regression: the `usePlaybackPosition` hook used to return a new object on
+     * every render, which made the mount-read effect's `position` dep appear
+     * "changed" every render — re-firing the read and re-opening the prompt
+     * even after the learner had answered it. The hook is memoized on
+     * `lessonId` now, and the player additionally guards on a ref, so a
+     * re-render after a choice must not bring the dialog back.
+     */
+    test("WHEN the player re-renders after a choice THEN the dialog does not re-open", async () => {
+      const user = userEvent.setup();
+      const { lessonId, rerender } = await renderWithSavedPosition("180");
+
+      await user.click(screen.getByRole("button", { name: "resumeCta" }));
+      await settle();
+
+      rerender(
+        <NiceModal.Provider>
+          <PlaybackPositionedVideoPlayer
+            lessonId={lessonId}
+            source="/videos/x.mp4"
+            title="t"
+            durationSeconds={600}
+          />
+        </NiceModal.Provider>,
+      );
+      await settle();
+
+      expect(screen.queryByRole("dialog")).toBeNull();
     });
   });
 
@@ -204,7 +367,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
       const lessonId = LessonId.parse(faker.string.uuid());
       mockStorage.set(`learning-english:playback:${lessonId}`, "180");
 
-      render(
+      renderPlayer(
         <PlaybackPositionedVideoPlayer
           lessonId={lessonId}
           source="/videos/x.mp4"
@@ -217,119 +380,6 @@ describe("PlaybackPositionedVideoPlayer", () => {
       // but does NOT write before user interaction.
       await new Promise((resolve) => setTimeout(resolve, 50));
       expect(mockStorage.get(`learning-english:playback:${lessonId}`)).toBe("180");
-    });
-  });
-
-  describe("Resume / Restart closure", () => {
-    /**
-     * Regression: the `usePlaybackPosition` hook used to return a new object
-     * on every render, which made the mount-read `useEffect`'s `position`
-     * dep appear "changed" every render. After a `setSavedPosition(null)`
-     * from a Resume / Restart click, the effect refired and reseeded
-     * `savedPosition` from storage (where the value was still 180),
-     * re-opening the overlay. The hook is now memoized on `lessonId`,
-     * so the effect fires only on mount or when the lesson actually changes.
-     * This test exercises the closure path: clicking must keep the overlay
-     * closed after a re-render cycle.
-     */
-    test("WHEN Resume clears the overlay AND storage still has the saved value THEN the overlay does NOT re-open after a microtask", async () => {
-      const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(`learning-english:playback:${lessonId}`, "180");
-
-      const { container, rerender } = render(
-        <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source="/videos/x.mp4"
-          title="t"
-          durationSeconds={600}
-        />,
-      );
-
-      // Wait for the async mount-read to set savedPosition and render the
-      // overlay. Three ticks covers the promise resolution + React commit.
-      await act(async () => {
-        await Promise.resolve();
-        await Promise.resolve();
-        await Promise.resolve();
-      });
-
-      const dialogBeforeClick = container.querySelector('[role="dialog"]');
-      expect(dialogBeforeClick).not.toBeNull();
-
-      const ResumeBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-        (b.textContent ?? "").includes("resumeCta"),
-      ) as HTMLButtonElement | undefined;
-      expect(ResumeBtn).toBeDefined();
-
-      await act(async () => {
-        ResumeBtn?.click();
-      });
-
-      // Force a re-render. With the bug, the mount-read would re-fire
-      // (because `position` returned a new object each render) and
-      // re-seed `savedPosition` from storage — re-opening the dialog.
-      rerender(
-        <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source="/videos/x.mp4"
-          title="t"
-          durationSeconds={600}
-        />,
-      );
-
-      await act(async () => {
-        await Promise.resolve();
-        await Promise.resolve();
-      });
-
-      expect(container.querySelector('[role="dialog"]')).toBeNull();
-    });
-
-    test("WHEN Restart clears the overlay AND storage still has the saved value THEN the overlay does NOT re-open after a microtask", async () => {
-      const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(`learning-english:playback:${lessonId}`, "180");
-
-      const { container, rerender } = render(
-        <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source="/videos/x.mp4"
-          title="t"
-          durationSeconds={600}
-        />,
-      );
-
-      await act(async () => {
-        await Promise.resolve();
-        await Promise.resolve();
-        await Promise.resolve();
-      });
-
-      expect(container.querySelector('[role="dialog"]')).not.toBeNull();
-
-      const RestartBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-        (b.textContent ?? "").includes("restartCta"),
-      ) as HTMLButtonElement | undefined;
-      expect(RestartBtn).toBeDefined();
-
-      await act(async () => {
-        RestartBtn?.click();
-      });
-
-      rerender(
-        <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source="/videos/x.mp4"
-          title="t"
-          durationSeconds={600}
-        />,
-      );
-
-      await act(async () => {
-        await Promise.resolve();
-        await Promise.resolve();
-      });
-
-      expect(container.querySelector('[role="dialog"]')).toBeNull();
     });
   });
 });
