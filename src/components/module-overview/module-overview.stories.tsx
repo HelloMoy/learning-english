@@ -38,6 +38,28 @@ const lessons = Array.from({ length: 4 }, (_, index) =>
   }),
 );
 
+/**
+ * Real seed paths, so the artwork actually resolves in the Storybook
+ * preview instead of rendering four broken boxes.
+ */
+const SEED_POSTERS = [
+  "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/1-common-english-expressions-32/d4f813e-37a2-7017-d07-15b4830b8b3-snapshot-2104770.jpeg",
+  "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/2-common-english-expressions-33/acc2f4e-111e-65f-7113-8336a34c210-snapshot-2104771.jpeg",
+  "/local-filesystem-lesson/advanced-intermediate-course/8-everyday-english-phrases-part-2-master-them/3-common-english-expressions-34/57830-c24e-baeb-46bc-e773e6a24b7-snapshot-2104772.jpeg",
+];
+
+/**
+ * Three lessons with artwork and one deliberately without, so the poster
+ * rows and the gradient fallback can be compared side by side. The real
+ * course never produces the fallback — all 107 lessons have a poster — so
+ * this story is the only place it is reviewable.
+ */
+const mixedLessons = lessons.map((lesson, index) =>
+  Lesson.parse(
+    index < SEED_POSTERS.length ? { ...lesson, poster: SEED_POSTERS[index] } : { ...lesson },
+  ),
+);
+
 const meta: Meta<typeof ModuleOverview> = {
   title: "Components/ModuleOverview",
   component: ModuleOverview,
@@ -53,3 +75,15 @@ export default meta;
 type Story = StoryObj<typeof ModuleOverview>;
 
 export const Default: Story = {};
+
+/**
+ * Episode rows showing their own artwork. The fourth lesson has no poster
+ * and keeps the gradient tile with its play circle.
+ *
+ * The thumbnails are clickable and lead to the same lesson as "Open", but
+ * only for pointer users — they are `aria-hidden` and out of the tab order,
+ * so tabbing through this story should stop once per row, not twice.
+ */
+export const WithPosters: Story = {
+  args: { lessons: mixedLessons },
+};

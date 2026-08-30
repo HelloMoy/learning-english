@@ -48,6 +48,19 @@ const lessonB = Lesson.parse({
   sequence: 2,
   title: "Lesson B",
 });
+/**
+ * The only lesson here carrying artwork. The real course cannot cover the
+ * no-poster branch — all 107 seed lessons have one — so `lessonA` above is
+ * deliberately left without a poster to exercise the fallback.
+ */
+const lessonWithPoster = Lesson.parse({
+  ...lessonA,
+  id: "66666666-6666-4666-8666-666666666666",
+  sequence: 4,
+  title: "Lesson With Poster",
+  poster: "/local-filesystem-lesson/course-1/mod-1/lesson-a/snapshot.jpeg",
+});
+
 const readingLesson = Lesson.parse({
   kind: "reading",
   id: "55555555-5555-4555-8555-555555555555",
@@ -101,6 +114,91 @@ describe("ModuleOverview", () => {
     expect(screen.getAllByText('CourseCatalog.moduleOverview.duration:{"minutes":4}')).toHaveLength(
       1,
     );
+  });
+
+  test("WHEN a lesson has a poster THEN its row renders that artwork", () => {
+    // Act
+    const { container } = render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonWithPoster]}
+      />,
+    );
+
+    // Assert — queried through the DOM, not getByRole("img"): the thumbnail
+    // is hidden from the accessibility tree on purpose (design D1), so the
+    // role query cannot reach it.
+    const image = container.querySelector("img");
+    expect(image).toHaveAttribute(
+      "src",
+      "/local-filesystem-lesson/course-1/mod-1/lesson-a/snapshot.jpeg",
+    );
+  });
+
+  test("WHEN a lesson has no poster THEN its row keeps the placeholder tile", () => {
+    // Act — lessonA is a video without artwork; readingLesson has no poster
+    // field at all, which the discriminated union guarantees.
+    const { container } = render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonA, readingLesson]}
+      />,
+    );
+
+    // Assert — no broken or empty image is rendered for either row.
+    expect(container.querySelector("img")).toBeNull();
+  });
+
+  test("WHEN a row renders THEN its thumbnail links to the same lesson as its Open action", () => {
+    // Act
+    const { container } = render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonWithPoster]}
+      />,
+    );
+
+    // Assert — compared against each other rather than against a hardcoded
+    // path, so this fails the moment the two destinations diverge.
+    const open = screen.getByRole("link", { name: /CourseCatalog\.moduleOverview\.open/ });
+    const thumbnail = container.querySelector('a[aria-hidden="true"]');
+    expect(thumbnail).toHaveAttribute("href", open.getAttribute("href"));
+  });
+
+  test("WHEN a row renders THEN its thumbnail is out of the a11y tree and the tab order", () => {
+    // Act
+    const { container } = render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonWithPoster]}
+      />,
+    );
+
+    // Assert
+    const thumbnail = container.querySelector('a[aria-hidden="true"]');
+    expect(thumbnail).toHaveAttribute("tabindex", "-1");
+  });
+
+  test("WHEN a module has several lessons THEN each row exposes exactly one link", () => {
+    // Act — the regression this guards: a thumbnail link that is announced
+    // would double every row's tab stops and read each lesson twice.
+    render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonWithPoster, lessonA, lessonB]}
+      />,
+    );
+
+    // Assert — three rows, three links: the back link plus one "Open" each.
+    expect(
+      screen.getAllByRole("link", { name: /CourseCatalog\.moduleOverview\.open/ }),
+    ).toHaveLength(3);
+    expect(screen.getAllByRole("link")).toHaveLength(4);
   });
 
   test("back link returns to the course overview", () => {

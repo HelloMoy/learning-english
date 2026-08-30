@@ -1,10 +1,4 @@
-# Capability: cinema-module-overview
-
-## Purpose
-
-Define the Immersion Cinema presentation of the module overview route (`/[locale]/courses/[courseSlug]/modules/[moduleSlug]`). The module is presented as an episode list within a series: a hero `PosterCard` for the module with its episode number and short title, followed by an ordered list of episode rows — one per lesson — each showing a thumbnail/play affordance, an "Episode N" eyebrow, the lesson title, duration when known, and an "Open" action that links to the Lesson Page.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Module overview renders as an episode list with a hero poster
 
