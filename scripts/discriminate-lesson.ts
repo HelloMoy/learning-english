@@ -53,7 +53,11 @@ const VIDEO_EXTENSIONS = new Set([".mp4", ".mov", ".webm", ".mkv"]);
 const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png"]);
 const SLIDES_EXTENSIONS = new Set([".pptx", ".key", ".ppt"]);
 
-export function classifyLessonFolder(folderPath: string, lessonSlug: string): ClassifiedLesson {
+export function classifyLessonFolder(
+  folderPath: string,
+  lessonSlug: string,
+  options: { titleFromNotesHeading?: boolean } = {},
+): ClassifiedLesson {
   const files = readdirSync(folderPath, { withFileTypes: true })
     .filter((d) => d.isFile())
     .map((d) => d.name);
@@ -62,8 +66,13 @@ export function classifyLessonFolder(folderPath: string, lessonSlug: string): Cl
   const imageFile = files.find((f) => IMAGE_EXTENSIONS.has(path.extname(f).toLowerCase()));
   const readmeFile = files.find((f) => f.toLowerCase() === "readme.md");
 
+  const resolveTitle = (): string =>
+    options.titleFromNotesHeading === true && readmeFile !== undefined
+      ? lessonTitle(lessonSlug, readFileSync(path.join(folderPath, readmeFile), "utf8"))
+      : humanize(lessonSlug);
+
   if (videoFile) {
-    const title = humanize(lessonSlug);
+    const title = resolveTitle();
     const description =
       "Video lesson. The full description lives in the linked notes (Resource below).";
     const videoKey = `${lessonSlug}/${normalizeFileName(videoFile)}`;
@@ -98,7 +107,7 @@ export function classifyLessonFolder(folderPath: string, lessonSlug: string): Cl
 
   if (readmeFile) {
     const body = readFileSync(path.join(folderPath, readmeFile), "utf8");
-    const title = humanize(lessonSlug);
+    const title = resolveTitle();
     const resourceKeys: string[] = [];
     const resourceRawNames: string[] = [];
     for (const f of files) {
@@ -147,6 +156,59 @@ export function humanize(slug: string): string {
     .filter((w) => w.length > 0)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
+}
+
+/**
+ * The first ATX (`# `) heading in a Markdown document, trimmed, or `null`
+ * when there is none.
+ *
+ * @remarks
+ * Lesson notes open with the lesson's real name, which is often richer than
+ * anything the folder slug preserved — `# Fast /æ/` where the folder is only
+ * `4-fast`. This is how the generator recovers it.
+ *
+ * Deliberately naive: the first `# ` line wins, with no tracking of fenced
+ * code blocks. A `#` inside a fence before the real heading would be picked
+ * up, but no lesson in the content has that shape, and a Markdown parser
+ * here would be more machinery than the input justifies. Sub-headings
+ * (`##`) and body text before the heading are skipped.
+ *
+ * @param markdown - Raw file contents
+ * @returns The heading text without its `#` marker, or `null` if absent
+ */
+export function notesHeading(markdown: string): string | null {
+  for (const line of markdown.split("\n")) {
+    const match = /^#\s+(.*\S)\s*$/.exec(line);
+    if (match) return match[1] as string;
+  }
+  return null;
+}
+
+/**
+ * The title for a lesson whose module has opted into notes-derived titles.
+ *
+ * @remarks
+ * Prefers the notes heading, because that is where the author wrote the
+ * lesson's real name — `# Fast /æ/` for a folder the slug pipeline reduced
+ * to `4-fast`.
+ *
+ * Falls back to the slug when there is no heading, and — deliberately —
+ * when the heading matches the slug-derived title apart from
+ * capitalization. Case survives slugification intact, so an all-caps
+ * `# INTRO` sitting above a derived `Intro` is a styling choice in the
+ * source document, not information the slug lost. Adopting it would put a
+ * shouting row next to `Fast /i/` for no gain.
+ *
+ * @param lessonSlug - The lesson's slug, used for the fallback title
+ * @param markdown - Raw contents of the lesson's `readme.md`
+ * @returns The heading when it carries recovered information, else the
+ *          slug-derived title
+ */
+export function lessonTitle(lessonSlug: string, markdown: string): string {
+  const derived = humanize(lessonSlug);
+  const heading = notesHeading(markdown);
+  if (heading === null) return derived;
+  return heading.toLowerCase() === derived.toLowerCase() ? derived : heading;
 }
 
 /**

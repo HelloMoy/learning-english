@@ -18,6 +18,7 @@ import {
 } from "./discriminate-lesson.ts";
 import { probeDurationSeconds } from "./ffprobe.ts";
 import { resolveSlug, toPosix } from "./resolve-slug.ts";
+import { usesTitleFromNotes } from "./title-from-notes-modules.ts";
 import { uuidv5 } from "./uuid.ts";
 
 /**
@@ -229,6 +230,7 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
       const classified = classifyLessonFolder(
         path.join(sourceDir, courseFolder, moduleFolder, lessonFolder),
         lessonSlug,
+        { titleFromNotesHeading: usesTitleFromNotes(moduleSlug) },
       );
 
       if (classified.kind === "video") {
@@ -323,7 +325,11 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
     id: courseId,
     slug: courseSlug,
     title: humanize(courseSlug),
-    description: `Course content generated from ${sourceDir}.`,
+    // Relative to the repo root, never the absolute `sourceDir`: the CLI
+    // resolves that to wherever the repo happens to be checked out, which
+    // would bake one machine's home directory into the committed seed and
+    // make regeneration produce a diff on every other machine.
+    description: `Course content generated from ${toPosix(path.relative(process.cwd(), sourceDir))}.`,
     language: "en",
     lessonCount: lessons.length,
     moduleCount: modules.length,

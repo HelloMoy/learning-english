@@ -581,7 +581,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "56cccce2-2b42-56cb-a536-c99d5378144b",
     sequence: 2,
-    title: "Fast I",
+    title: "Fast /i/",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/2-fast-i/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
@@ -595,7 +595,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "56cccce2-2b42-56cb-a536-c99d5378144b",
     sequence: 3,
-    title: "Fast U",
+    title: "Fast /u/",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/3-fast-u/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
@@ -609,7 +609,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "56cccce2-2b42-56cb-a536-c99d5378144b",
     sequence: 4,
-    title: "Fast",
+    title: "Fast /æ/",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/4-fast/aprende-ingles-americano-con-fluidez-desde-cero-1.mp4",
@@ -623,7 +623,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "56cccce2-2b42-56cb-a536-c99d5378144b",
     sequence: 5,
-    title: "Fast",
+    title: "Fast /ɛ/",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/5-fast/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
@@ -637,7 +637,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "56cccce2-2b42-56cb-a536-c99d5378144b",
     sequence: 6,
-    title: "Fast",
+    title: "Fast /ɑ/",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/6-fast/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
@@ -651,7 +651,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "56cccce2-2b42-56cb-a536-c99d5378144b",
     sequence: 7,
-    title: "Fast",
+    title: "Fast /ɔ/",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/7-fast/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
@@ -665,7 +665,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "56cccce2-2b42-56cb-a536-c99d5378144b",
     sequence: 8,
-    title: "Fast Cot Caught Merger",
+    title: "Fast Cot-Caught Merger",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/8-fast-cot-caught-merger/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
@@ -679,7 +679,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "56cccce2-2b42-56cb-a536-c99d5378144b",
     sequence: 9,
-    title: "Fast A",
+    title: "Fast /aɪ/",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/9-fast-a/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
@@ -693,7 +693,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "56cccce2-2b42-56cb-a536-c99d5378144b",
     sequence: 10,
-    title: "Fast",
+    title: "Fast /ɔɪ/",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/10-fast/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
@@ -707,7 +707,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "56cccce2-2b42-56cb-a536-c99d5378144b",
     sequence: 11,
-    title: "Fast",
+    title: "Fast /ə/",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/11-fast/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
@@ -721,7 +721,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "56cccce2-2b42-56cb-a536-c99d5378144b",
     sequence: 12,
-    title: "Fast",
+    title: "Fast /ɪ/",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/12-fast/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
@@ -735,7 +735,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "56cccce2-2b42-56cb-a536-c99d5378144b",
     sequence: 13,
-    title: "Fast",
+    title: "Fast /ʊ/",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/13-fast/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
@@ -1663,7 +1663,7 @@ const _seedContentResourceRaw = [
   {
     id: "0a9a047e-f8c8-5c58-b17f-fca7f32ac89e",
     lessonId: "0beab928-1bcf-5e2e-bac5-e6608a5a41fa",
-    title: "Fast U Notes",
+    title: "Fast /u/ Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/3-fast-u/readme.md",
     kind: "other",
   },
@@ -1719,7 +1719,7 @@ const _seedContentResourceRaw = [
   {
     id: "4ccd6d4c-9ff8-50e4-9301-b29966e92687",
     lessonId: "1b7391bd-a066-5c42-806b-d320db0f63a0",
-    title: "Fast Notes",
+    title: "Fast /ɑ/ Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/6-fast/readme.md",
     kind: "other",
   },
@@ -1754,7 +1754,7 @@ const _seedContentResourceRaw = [
   {
     id: "e695b676-55c5-590c-babf-1e88415729c1",
     lessonId: "28869f4e-cdba-55c6-8730-a20f736b6be2",
-    title: "Fast Notes",
+    title: "Fast /ə/ Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/11-fast/readme.md",
     kind: "other",
   },
@@ -1803,7 +1803,7 @@ const _seedContentResourceRaw = [
   {
     id: "84822001-e3eb-5afb-82b3-36e5413bce03",
     lessonId: "2f9defa0-5f6e-579a-9e5a-53df1624402f",
-    title: "Fast Notes",
+    title: "Fast /ʊ/ Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/13-fast/readme.md",
     kind: "other",
   },
@@ -1873,7 +1873,7 @@ const _seedContentResourceRaw = [
   {
     id: "9be6e039-9a5b-590c-8a42-7f0afad102e0",
     lessonId: "4b90f68d-98a7-5280-a946-19f2c5a21e76",
-    title: "Fast Notes",
+    title: "Fast /ɪ/ Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/12-fast/readme.md",
     kind: "other",
   },
@@ -1936,7 +1936,7 @@ const _seedContentResourceRaw = [
   {
     id: "cf31b2a3-3183-5626-b660-b0eeb7b46f91",
     lessonId: "5c5c7576-fff8-5ad7-93a0-0baefd6f55cd",
-    title: "Fast Notes",
+    title: "Fast /ɔ/ Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/7-fast/readme.md",
     kind: "other",
   },
@@ -2060,18 +2060,18 @@ const _seedContentResourceRaw = [
     kind: "other",
   },
   {
+    id: "2f777ad2-4614-51cd-8e9c-b17bb22b5077",
+    lessonId: "97ac414d-def6-50c0-8afc-b8f6081f8ffa",
+    title: "Fast /æ/ Notes",
+    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/4-fast/readme.md",
+    kind: "other",
+  },
+  {
     id: "97263bc6-de7f-574c-b289-324613bb98e4",
     lessonId: "97ac414d-def6-50c0-8afc-b8f6081f8ffa",
     title: "Fast Ae Vowel Pronunciation Practice Cat Sound",
     url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/4-fast/fast-ae-vowel-pronunciation-practice-cat-sound.pdf",
     kind: "pdf",
-  },
-  {
-    id: "2f777ad2-4614-51cd-8e9c-b17bb22b5077",
-    lessonId: "97ac414d-def6-50c0-8afc-b8f6081f8ffa",
-    title: "Fast Notes",
-    url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/4-fast/readme.md",
-    kind: "other",
   },
   {
     id: "c094bd0d-a4d5-5187-a089-7b88894a2bb0",
@@ -2090,7 +2090,7 @@ const _seedContentResourceRaw = [
   {
     id: "7a431c55-e75c-5e29-b9b5-97eede9a0e34",
     lessonId: "a75c097f-9c0d-50ca-bc82-a6a11d023af7",
-    title: "Fast I Notes",
+    title: "Fast /i/ Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/2-fast-i/readme.md",
     kind: "other",
   },
@@ -2139,7 +2139,7 @@ const _seedContentResourceRaw = [
   {
     id: "ffb0e6fe-86d4-52f3-81cc-129d3a43e88f",
     lessonId: "bfdf8790-76e4-51ba-bef4-5368098d98d4",
-    title: "Fast Notes",
+    title: "Fast /ɛ/ Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/5-fast/readme.md",
     kind: "other",
   },
@@ -2160,7 +2160,7 @@ const _seedContentResourceRaw = [
   {
     id: "bc9c5aa8-c3d4-5fa0-aa18-2a454655f24f",
     lessonId: "c2b5d1d5-4c11-5fc6-a76d-23bc5f95634d",
-    title: "Fast Notes",
+    title: "Fast /ɔɪ/ Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/10-fast/readme.md",
     kind: "other",
   },
@@ -2237,7 +2237,7 @@ const _seedContentResourceRaw = [
   {
     id: "e6e62a4b-eed7-5fbb-8826-3e2a7e2a7839",
     lessonId: "da0c1360-1308-5ef1-ac5b-fa726645c74d",
-    title: "Fast Cot Caught Merger Notes",
+    title: "Fast Cot-Caught Merger Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/8-fast-cot-caught-merger/readme.md",
     kind: "other",
   },
@@ -2307,7 +2307,7 @@ const _seedContentResourceRaw = [
   {
     id: "03743bf4-6cad-5644-a769-4890e6a75e11",
     lessonId: "f7d86055-9e76-5cc9-a761-aff2bf8adcbf",
-    title: "Fast A Notes",
+    title: "Fast /aɪ/ Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/2-advanced-vowel-pronunciation-in-american-english/9-fast-a/readme.md",
     kind: "other",
   },
