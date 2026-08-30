@@ -1533,7 +1533,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "faad5d04-3911-5f06-94af-5d66cd0bb60e",
     sequence: 2,
-    title: "Why Contractions Reductions Are Important",
+    title: "Why Contractions & Reductions are important",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/2-why-contractions-reductions-are-important/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
@@ -1547,7 +1547,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "faad5d04-3911-5f06-94af-5d66cd0bb60e",
     sequence: 3,
-    title: "I M You Re He S She S It S We Re They Re",
+    title: "I’m, you’re, he’s, she’s, it’s, we’re, they’re",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/3-i-m-you-re-he-s-she-s-it-s-we-re-they-re/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
@@ -1561,7 +1561,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "faad5d04-3911-5f06-94af-5d66cd0bb60e",
     sequence: 4,
-    title: "I Ll You Ll He Ll She Ll It Ll We Ll They Ll",
+    title: "I’ll, you’ll, he’ll, she’ll, it’ll, we’ll, they’ll",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/4-i-ll-you-ll-he-ll-she-ll-it-ll-we-ll-they-ll/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
@@ -1575,7 +1575,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "faad5d04-3911-5f06-94af-5d66cd0bb60e",
     sequence: 5,
-    title: "I Ve You Ve We Ve They Ve He S She S It S",
+    title: "I’ve, You’ve, We’ve, They’ve, He’s, She’s, It’s",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/5-i-ve-you-ve-we-ve-they-ve-he-s-she-s-it-s/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
@@ -1589,7 +1589,7 @@ const _seedContentLessonRaw = [
     courseId: "6361a41b-29e4-5679-8207-445797ed8fa7",
     moduleId: "faad5d04-3911-5f06-94af-5d66cd0bb60e",
     sequence: 6,
-    title: "I D You D We D All The Would Contractions",
+    title: "I’d, you’d, we’d — all the WOULD contractions",
     description: "Video lesson. The full description lives in the linked notes (Resource below).",
     source:
       "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/6-i-d-you-d-we-d-all-the-would-contractions/aprende-ingles-americano-con-fluidez-desde-cero.mp4",
@@ -1691,7 +1691,7 @@ const _seedContentResourceRaw = [
   {
     id: "7a879eb8-26fc-53e6-aacd-c9542e66a11f",
     lessonId: "118bd956-271f-5003-89a4-23e9f1cd880a",
-    title: "I Ve You Ve We Ve They Ve He S She S It S Notes",
+    title: "I’ve, You’ve, We’ve, They’ve, He’s, She’s, It’s Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/5-i-ve-you-ve-we-ve-they-ve-he-s-she-s-it-s/readme.md",
     kind: "other",
   },
@@ -1824,7 +1824,7 @@ const _seedContentResourceRaw = [
   {
     id: "36a430df-005a-55ae-9f7f-0dcbfc3b8df0",
     lessonId: "36d94321-88dd-5689-90ce-a1c5149f7f4f",
-    title: "I Ll You Ll He Ll She Ll It Ll We Ll They Ll Notes",
+    title: "I’ll, you’ll, he’ll, she’ll, it’ll, we’ll, they’ll Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/4-i-ll-you-ll-he-ll-she-ll-it-ll-we-ll-they-ll/readme.md",
     kind: "other",
   },
@@ -2104,7 +2104,7 @@ const _seedContentResourceRaw = [
   {
     id: "d1f4c487-171a-5117-b024-bc608b2088c2",
     lessonId: "add90381-3245-5a72-81ba-20fcf87fea8f",
-    title: "I M You Re He S She S It S We Re They Re Notes",
+    title: "I’m, you’re, he’s, she’s, it’s, we’re, they’re Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/3-i-m-you-re-he-s-she-s-it-s-we-re-they-re/readme.md",
     kind: "other",
   },
@@ -2188,7 +2188,7 @@ const _seedContentResourceRaw = [
   {
     id: "54a96a3a-5204-5a4c-a54e-11e57d48bb49",
     lessonId: "c6140e63-571e-5a32-b3f1-8f31c2365be8",
-    title: "Why Contractions Reductions Are Important Notes",
+    title: "Why Contractions & Reductions are important Notes",
     url: "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/2-why-contractions-reductions-are-important/readme.md",
     kind: "other",
   },
