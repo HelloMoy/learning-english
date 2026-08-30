@@ -70,9 +70,9 @@ because `next/image` rejects undeclared remote hosts. That derivation is
 evaluated once at config load, so changing the _host_ needs a server restart
 even though the URLs themselves repoint per request.
 
-> These variables are also listed in `.env.example`, but note that the repo's
-> `.gitignore` matches `.env*` — that file is untracked, so this table is the
-> versioned source of truth.
+> Both variables are also listed in `.env.example`. That file is tracked via a
+> narrow `!.env.example` negation in `.gitignore`; the surrounding `.env*`
+> rule still excludes `.env` itself, which holds real API keys.
 
 ## Migration story
 

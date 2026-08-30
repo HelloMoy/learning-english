@@ -38,6 +38,10 @@ debug-storybook.log
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...except the template, which carries no secrets and is the one file a new
+# clone needs in order to know which variables exist. The negation must stay
+# narrow: `.env` itself holds real API keys and must never be tracked.
+!.env.example
 
 # vercel
 .vercel
