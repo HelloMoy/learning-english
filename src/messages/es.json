@@ -97,6 +97,9 @@
       "transcriptUnavailable": "Todavía no hay transcripción disponible para esta lección.",
       "spanish": "Español",
       "english": "English"
+    },
+    "LessonCompletion": {
+      "completed": "Completada"
     }
   },
   "CourseCatalog": {
