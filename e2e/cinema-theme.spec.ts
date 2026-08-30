@@ -1,5 +1,5 @@
 import {
-  seedContentLessons,
+  seedContentLessonRows,
   seedContentModules,
 } from "@/adapters/persistence/in-memory/seed/seed-content";
 
@@ -12,11 +12,11 @@ import { expect, test } from "@playwright/test";
  */
 const COURSE_SLUG = "advanced-intermediate-course";
 const FIRST_MODULE = seedContentModules[0]!;
-const FIRST_LESSON = seedContentLessons.find((lesson) => lesson.moduleId === FIRST_MODULE.id)!;
+const FIRST_LESSON = seedContentLessonRows.find((lesson) => lesson.moduleId === FIRST_MODULE.id)!;
 
 // A module whose intro lesson carries bilingual notes (drives the tabs).
 const NOTES_MODULE = seedContentModules.find((m) => m.slug === "3-contractions-reductions")!;
-const NOTES_LESSON = seedContentLessons
+const NOTES_LESSON = seedContentLessonRows
   .filter((lesson) => lesson.moduleId === NOTES_MODULE.id)
   .sort((a, b) => a.sequence - b.sequence)[0]!;
 

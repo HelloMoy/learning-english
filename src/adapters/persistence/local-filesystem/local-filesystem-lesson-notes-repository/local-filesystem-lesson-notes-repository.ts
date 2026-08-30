@@ -1,6 +1,9 @@
 import type { BlobStore } from "@/adapters/persistence/blob-store/blob-store";
+import {
+  resolveResourceRow,
+  type ResourceRow,
+} from "@/adapters/persistence/local-filesystem/resolve-content-row/resolve-content-row";
 import type { LessonId } from "@/domain/entities/ids/ids";
-import type { Resource } from "@/domain/entities/resource/resource";
 import type {
   LessonNotes,
   LessonNotesRepository,
@@ -12,24 +15,31 @@ import type {
  * Resolves the Markdown notes for a lesson using a generated `lessonId → key`
  * map and a `BlobStore`. The adapter only reads keys the seed generator
  * has validated via `BlobStore.exists`; the UI never supplies a key.
+ *
+ * The notes `Resource` is located by comparing content KEYS. Matching on the
+ * resolved URL instead would couple this adapter to the resource adapter
+ * having been given an identically-configured `BlobStore`: when the two
+ * disagree the lookup returns `null` and the notes silently disappear with no
+ * error. Keys are configuration-independent, so that failure mode is gone.
  */
 export class LocalFilesystemLessonNotesRepository implements LessonNotesRepository {
   readonly #notes: Map<LessonId, string>;
-  readonly #resources: Map<string, Resource>;
+  /** Keyed by `${lessonId}:${contentKey}` — the notes map holds both halves. */
+  readonly #rowsByLessonAndKey: Map<string, ResourceRow>;
   readonly #blobStore: BlobStore;
 
   constructor(params: {
     notesKeys: Readonly<Record<string, string>>;
-    resources: ReadonlyArray<Resource>;
+    resourceRows: ReadonlyArray<ResourceRow>;
     blobStore: BlobStore;
   }) {
     this.#notes = new Map();
     for (const [lessonId, key] of Object.entries(params.notesKeys)) {
       this.#notes.set(lessonId as LessonId, key);
     }
-    this.#resources = new Map();
-    for (const resource of params.resources) {
-      this.#resources.set(`${resource.lessonId}:${resource.url}`, resource);
+    this.#rowsByLessonAndKey = new Map();
+    for (const row of params.resourceRows) {
+      this.#rowsByLessonAndKey.set(`${row.lessonId}:${row.url}`, row);
     }
     this.#blobStore = params.blobStore;
   }
@@ -37,21 +47,11 @@ export class LocalFilesystemLessonNotesRepository implements LessonNotesReposito
   async byLesson(lessonId: LessonId): Promise<LessonNotes | null> {
     const key = this.#notes.get(lessonId);
     if (!key) return null;
+    // Read first: an unsafe key must be rejected whether or not a matching
+    // resource row exists.
     const markdown = await this.#blobStore.readText(key);
-    const resource = this.#findMarkdownResource(lessonId, key);
-    if (!resource) return null;
-    return { resource, markdown };
-  }
-
-  #findMarkdownResource(lessonId: LessonId, key: string): Resource | null {
-    const expectedUrl = this.#blobStore.url(key);
-    const direct = this.#resources.get(`${lessonId}:${expectedUrl}`);
-    if (direct) return direct;
-    for (const resource of this.#resources.values()) {
-      if (resource.lessonId === lessonId && resource.url === expectedUrl) {
-        return resource;
-      }
-    }
-    return null;
+    const row = this.#rowsByLessonAndKey.get(`${lessonId}:${key}`);
+    if (!row) return null;
+    return { resource: resolveResourceRow(row, this.#blobStore), markdown };
   }
 }

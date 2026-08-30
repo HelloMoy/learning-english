@@ -11,17 +11,17 @@ on disk; in production it will be an S3-compatible bucket. The
 `LocalFilesystemLessonRepository` and `LocalFilesystemResourceRepository`
 adapters must not care which.
 
-`BlobStore` is the abstraction that lets both adapters stay agnostic. They
-take a pre-resolved seed (URLs already baked in at seed-gen time), so they
-don't even import the `BlobStore` type today — but the seed generator does,
-and that is where the abstraction earns its keep.
+`BlobStore` is the abstraction that lets both adapters stay agnostic. The
+generated seed stores opaque **keys**; the adapters resolve them through the
+`BlobStore` on every read, then parse the result into domain entities. Nothing
+downstream of the adapters ever sees a key.
 
 ```
                        ┌──────────────────┐
-                       │  Seed generator  │
-                       │  (scripts/...)   │
+                       │ Lesson/Resource  │
+                       │    adapters      │
                        └────────┬─────────┘
-                                │ url(key)
+                                │ url(key), at read time
                                 ▼
                        ┌──────────────────┐
                        │   BlobStore      │
@@ -48,19 +48,44 @@ and that is where the abstraction earns its keep.
    driver needs as **separate** arguments (URL prefix ≠ filesystem path).
 4. Add a test file using `mkdtempSync` for filesystem-isolated fixtures and
    a fake bucket client for S3-isolated tests.
-5. Wire the new driver in the seed generator (when that lands in group 7).
+5. Select the new driver in `use-case-dependencies.ts` — that is the only
+   composition root, and the same instance is shared by the lesson, resource
+   and notes adapters so they cannot disagree about where content lives.
+
+## Configuration
+
+The driver's public prefix and local root come from the environment, read on
+every dependency-graph build (so a dev can flip them without restarting Node):
+
+| Variable             | Default                          | Meaning                                           |
+| -------------------- | -------------------------------- | ------------------------------------------------- |
+| `CONTENT_BASE_URL`   | `/local-filesystem-lesson`       | public URL prefix prepended to every content key  |
+| `CONTENT_LOCAL_ROOT` | `public/local-filesystem-lesson` | filesystem root the local driver reads bytes from |
+
+Both are optional; unset means today's local behaviour, byte for byte.
+
+Setting `CONTENT_BASE_URL` to an absolute URL also widens
+`images.remotePatterns` in `next.config.ts` (derived from the same variable),
+because `next/image` rejects undeclared remote hosts. That derivation is
+evaluated once at config load, so changing the _host_ needs a server restart
+even though the URLs themselves repoint per request.
+
+> These variables are also listed in `.env.example`, but note that the repo's
+> `.gitignore` matches `.env*` — that file is untracked, so this table is the
+> versioned source of truth.
 
 ## Migration story
 
-When the time comes to point the app at a real bucket, three things change:
+When the time comes to point the app at a real bucket:
 
-1. Replace the `LocalFilesystemBlobStore` constructor call in the seed
-   generator with an `S3BlobStore` constructor call.
+1. Implement `S3BlobStore` and select it in `use-case-dependencies.ts`.
 2. Move the assets from `public/local-filesystem-lesson/` to the bucket.
-3. Re-run the seed generator against the new location.
+3. Set `CONTENT_BASE_URL` to the bucket/CDN prefix.
 
-The domain, the lesson/resource adapters, and the lesson page **do not
-change**. The "config swap" benefit is real.
+The domain, the lesson/resource adapters, the seed and the lesson page **do
+not change** — the seed stores keys, not URLs, so it is not regenerated. This
+is also what makes per-request **signed** URLs possible: a signed URL expires,
+so it could never have been baked into a committed file.
 
 ## Why "blob"?
 

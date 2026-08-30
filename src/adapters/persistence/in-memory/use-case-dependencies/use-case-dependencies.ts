@@ -15,16 +15,14 @@ import {
 } from "@/adapters/persistence/in-memory/seed/seed";
 import {
   seedContentCourse,
-  seedContentLessons,
+  seedContentLessonRows,
   seedContentModules,
   seedContentNotesKeys,
-  seedContentResources,
+  seedContentResourceRows,
 } from "@/adapters/persistence/in-memory/seed/seed-content";
 import { LocalFilesystemLessonNotesRepository } from "@/adapters/persistence/local-filesystem/local-filesystem-lesson-notes-repository/local-filesystem-lesson-notes-repository";
-import type { Course } from "@/domain/entities/course/course";
-import type { Lesson } from "@/domain/entities/lesson/lesson";
-import type { Module } from "@/domain/entities/module/module";
-import type { Resource } from "@/domain/entities/resource/resource";
+import { LocalFilesystemLessonRepository } from "@/adapters/persistence/local-filesystem/local-filesystem-lesson-repository/local-filesystem-lesson-repository";
+import { LocalFilesystemResourceRepository } from "@/adapters/persistence/local-filesystem/local-filesystem-resource-repository/local-filesystem-resource-repository";
 import type { CourseRepository } from "@/domain/ports/course-repository/course-repository";
 import type { LessonNotesRepository } from "@/domain/ports/lesson-notes-repository/lesson-notes-repository";
 import type { LessonRepository } from "@/domain/ports/lesson-repository/lesson-repository";
@@ -105,39 +103,105 @@ export const isCourseContentSeedEnabled = (): boolean =>
  */
 export function getCoursePlatformDeps(): CoursePlatformDeps {
   if (isCourseContentSeedEnabled()) {
-    return buildDeps(
-      [seedContentCourse],
-      seedContentModules,
-      seedContentLessons,
-      seedContentResources,
-      seedContentNotesKeys,
-    );
+    return buildContentSeedDeps();
   }
-  return buildDeps([seedCourse], seedModules, seedLessons, seedResources);
+  return buildA1SeedDeps();
 }
 
-function buildDeps(
-  courses: ReadonlyArray<Course>,
-  modules: ReadonlyArray<Module>,
-  lessons: ReadonlyArray<Lesson>,
-  resources: ReadonlyArray<Resource>,
-  notesKeys: Readonly<Record<string, string>> = {},
-): CoursePlatformDeps {
-  const coursesRepo = new InMemoryCourseRepository(courses);
-  const modulesRepo = new InMemoryModuleRepository(modules);
-  const lessonsRepo = new InMemoryLessonRepository(lessons);
-  const resourcesRepo = new InMemoryResourceRepository(resources);
+/**
+ * Default public URL prefix for course content. Chosen to preserve the
+ * pre-configuration behaviour exactly: before `CONTENT_BASE_URL` existed
+ * this literal was hardcoded here and in the seed generator.
+ */
+const DEFAULT_CONTENT_BASE_URL = "/local-filesystem-lesson";
+
+/** Default filesystem root the local driver reads bytes from. */
+const DEFAULT_CONTENT_LOCAL_ROOT = "public/local-filesystem-lesson";
+
+/**
+ * Builds the `BlobStore` from configuration.
+ *
+ * Read per call rather than at module load, mirroring
+ * `isCourseContentSeedEnabled()` — a developer can repoint content in dev
+ * without restarting the Node process. `CONTENT_BASE_URL` is deliberately
+ * NOT `NEXT_PUBLIC_`: resolution happens in Server Components and the
+ * resolved URLs reach the client as plain props. A client that needs a
+ * fresh (or signed) URL should ask the server rather than rebuild one.
+ */
+function buildBlobStore(): LocalFilesystemBlobStore {
+  return new LocalFilesystemBlobStore({
+    baseUrl: process.env.CONTENT_BASE_URL ?? DEFAULT_CONTENT_BASE_URL,
+    localRoot: path.resolve(process.env.CONTENT_LOCAL_ROOT ?? DEFAULT_CONTENT_LOCAL_ROOT),
+  });
+}
+
+/**
+ * The generated content seed. Lessons and resources are ROWS holding content
+ * keys, so they get the local-filesystem adapters, which resolve those keys
+ * through the shared `BlobStore` on every read.
+ *
+ * One `BlobStore` instance is shared by the lesson, resource and notes
+ * adapters so the three can never disagree about where content lives.
+ */
+function buildContentSeedDeps(): CoursePlatformDeps {
+  const blobStore = buildBlobStore();
+  return assemble({
+    coursesRepo: new InMemoryCourseRepository([seedContentCourse]),
+    modulesRepo: new InMemoryModuleRepository(seedContentModules),
+    lessonsRepo: new LocalFilesystemLessonRepository({
+      rows: seedContentLessonRows,
+      blobStore,
+    }),
+    resourcesRepo: new LocalFilesystemResourceRepository({
+      rows: seedContentResourceRows,
+      blobStore,
+    }),
+    notesRepo: new LocalFilesystemLessonNotesRepository({
+      notesKeys: seedContentNotesKeys,
+      resourceRows: seedContentResourceRows,
+      blobStore,
+    }),
+  });
+}
+
+/**
+ * The A1 hardcoded seed. It carries no content keys — its URLs are literals
+ * written by hand — so it keeps the pass-through in-memory adapters. Giving
+ * it key-aware adapters would mean a branch that is always false on every
+ * read.
+ */
+function buildA1SeedDeps(): CoursePlatformDeps {
+  return assemble({
+    coursesRepo: new InMemoryCourseRepository([seedCourse]),
+    modulesRepo: new InMemoryModuleRepository(seedModules),
+    lessonsRepo: new InMemoryLessonRepository(seedLessons),
+    resourcesRepo: new InMemoryResourceRepository(seedResources),
+    // The A1 seed has no Markdown notes. With an empty key map `byLesson`
+    // returns null before it ever consults the rows, so passing none is
+    // equivalent to passing all of them — and honest about the absence.
+    notesRepo: new LocalFilesystemLessonNotesRepository({
+      notesKeys: {},
+      resourceRows: [],
+      blobStore: buildBlobStore(),
+    }),
+  });
+}
+
+function assemble({
+  coursesRepo,
+  modulesRepo,
+  lessonsRepo,
+  resourcesRepo,
+  notesRepo,
+}: {
+  coursesRepo: CourseRepository;
+  modulesRepo: ModuleRepository;
+  lessonsRepo: LessonRepository;
+  resourcesRepo: ResourceRepository;
+  notesRepo: LessonNotesRepository;
+}): CoursePlatformDeps {
   const progress = new InMemoryProgressTracker();
   const positions = new InMemoryPlaybackPositionRepository();
-  const blobStore = new LocalFilesystemBlobStore({
-    baseUrl: "/local-filesystem-lesson",
-    localRoot: path.resolve("public/local-filesystem-lesson"),
-  });
-  const notesRepo = new LocalFilesystemLessonNotesRepository({
-    notesKeys,
-    resources,
-    blobStore,
-  });
 
   const findNextLesson = makeFindNextLesson({
     courses: coursesRepo,
