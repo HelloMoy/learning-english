@@ -53,7 +53,28 @@ describe("runGenerator — exists() validation", () => {
     // Assert
     expect(existsSync(outFile)).toBe(true);
     const written = readFileSync(outFile, "utf8");
-    expect(written).toContain("seedContentResources");
+    expect(written).toContain("seedContentResourceRows");
+  });
+
+  test("WHEN the seed is written THEN no emitted key carries a base-URL prefix", async () => {
+    // Arrange — the whole point of the change: the public URL prefix is a
+    // deployment concern and is not knowable at generation time.
+    const lessonDir = path.join(root, "test-course", "1-first-module", "01-intro");
+    mkdirSync(lessonDir, { recursive: true });
+    writeFileSync(path.join(lessonDir, "readme.md"), "# Intro body");
+    writeFileSync(path.join(lessonDir, "handout.pdf"), "fake-pdf");
+
+    // Act
+    await runGenerator({ sourceDir: root, outFile });
+
+    // Assert — keys begin with the course slug, never with a base URL. The
+    // check targets emitted VALUES, not the file text: the header comment
+    // legitimately mentions the content folder by name.
+    const written = readFileSync(outFile, "utf8");
+    // Prettier unquotes object keys, so the emitted form is `url: "..."`.
+    const prefixed = written.match(/\b(?:source|poster|url): "\/[^"]*"/g);
+    expect(prefixed).toBeNull();
+    expect(written).toContain('url: "test-course/1-first-module/01-intro/handout.pdf"');
   });
 });
 
@@ -165,7 +186,7 @@ describe("runGenerator — seedContentSourceNames (manifest bridge)", () => {
     const seed = await buildSeed(root);
 
     // Assert — the resource id maps to the RAW original name.
-    const pdf = seed.resources.find((r) => r.url.endsWith("/vowel-chart-v2.pdf"));
+    const pdf = seed.resourceRows.find((r) => r.url.endsWith("/vowel-chart-v2.pdf"));
     expect(pdf).toBeDefined();
     if (pdf) {
       expect(seed.sourceNames[pdf.id]).toBe("Vowel Chart (v2).pdf");

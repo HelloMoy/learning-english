@@ -2,10 +2,14 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 import { LocalFilesystemBlobStore } from "../src/adapters/persistence/blob-store/local-filesystem-blob-store/local-filesystem-blob-store.ts";
+import {
+  resolveLessonRow,
+  resolveResourceRow,
+  type LessonRow,
+  type ResourceRow,
+} from "../src/adapters/persistence/local-filesystem/resolve-content-row/resolve-content-row.ts";
 import { Course } from "../src/domain/entities/course/course.ts";
-import { Lesson } from "../src/domain/entities/lesson/lesson.ts";
 import { Module } from "../src/domain/entities/module/module.ts";
-import { Resource } from "../src/domain/entities/resource/resource.ts";
 import {
   classifyLessonFolder,
   classifyResourceKind,
@@ -78,10 +82,15 @@ export async function runGenerator(args: { sourceDir: string; outFile: string })
   const seed = await buildSeed(args.sourceDir);
 
   // Fail loudly if any emitted key does not resolve on disk — this is the
-  // guard that prevents slug↔disk drift (kebab-case URLs pointing at raw
+  // guard that prevents slug↔disk drift (kebab-case keys pointing at raw
   // folders) from ever shipping silently again.
+  //
+  // `baseUrl` is irrelevant here: this store is used ONLY for `exists()`,
+  // which resolves against `localRoot`. The generator does not resolve keys
+  // to URLs — the public prefix is a deployment concern, decided at boot by
+  // `use-case-dependencies.ts`.
   const blobStore = new LocalFilesystemBlobStore({
-    baseUrl: "/local-filesystem-lesson",
+    baseUrl: UNUSED_BASE_URL,
     localRoot: path.resolve(args.sourceDir),
   });
   const missing: string[] = [];
@@ -100,22 +109,32 @@ export async function runGenerator(args: { sourceDir: string; outFile: string })
   const output = renderSeedFile(
     seed.course,
     seed.modules,
-    seed.lessons,
-    seed.resources,
+    seed.lessonRows,
+    seed.resourceRows,
     seed.sourceNames,
     seed.notesKeys,
   );
   writeFileSync(args.outFile, await formatWithPrettier(output, args.outFile), "utf8");
   console.log(
-    `[seed-gen] Wrote ${seed.modules.length} modules, ${seed.lessons.length} lessons, ${seed.resources.length} resources → ${args.outFile}`,
+    `[seed-gen] Wrote ${seed.modules.length} modules, ${seed.lessonRows.length} lessons, ${seed.resourceRows.length} resources → ${args.outFile}`,
   );
 }
+
+/**
+ * Placeholder prefix for the `LocalFilesystemBlobStore` instances this script
+ * builds. Both are used only for validation (`exists()` on disk, and a
+ * resolve-then-parse pass that proves each row yields a valid entity); the
+ * value never reaches the emitted seed.
+ */
+const UNUSED_BASE_URL = "/unused-by-the-generator";
 
 export type BuiltSeed = {
   course: Course;
   modules: Module[];
-  lessons: Lesson[];
-  resources: Resource[];
+  /** Lesson rows whose `source` / `poster` hold content KEYS, not URLs. */
+  lessonRows: LessonRow[];
+  /** Resource rows whose `url` holds a content KEY, not a URL. */
+  resourceRows: ResourceRow[];
   /**
    * Entity id → original raw name (as it appeared on disk before the
    * normalization rename). Sourced from `rename-manifest.json`; falls back
@@ -166,13 +185,17 @@ function loadOriginalNameMap(sourceDir: string): Map<string, string> {
 }
 
 /**
- * Pure builder: walks the source directory and returns the parsed seed
- * arrays. Side-effect-free (aside from reading files). The CLI entry
+ * Pure builder: walks the source directory and returns the seed's course and
+ * modules as parsed entities, and its lessons and resources as ROWS holding
+ * content keys. Side-effect-free (aside from reading files). The CLI entry
  * point (`runGenerator`) writes the rendered file.
  */
 export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
-  const blobStore = new LocalFilesystemBlobStore({
-    baseUrl: "/local-filesystem-lesson",
+  // Validation only. Every row is run through the same resolver the runtime
+  // adapters use, so a row that could never become a valid entity fails here
+  // rather than at request time. The prefix it resolves with is discarded.
+  const validationStore = new LocalFilesystemBlobStore({
+    baseUrl: UNUSED_BASE_URL,
     localRoot: path.resolve(sourceDir),
   });
 
@@ -199,8 +222,8 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
   recordSourceName(courseId, courseSlug, courseFolder);
 
   const modules: Module[] = [];
-  const lessons: Lesson[] = [];
-  const resources: Resource[] = [];
+  const lessonRows: LessonRow[] = [];
+  const resourceRows: ResourceRow[] = [];
 
   const moduleFolders = listSubdirectories(path.join(sourceDir, courseFolder));
 
@@ -263,7 +286,10 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
           notesKeys[lessonId] = `${courseSlug}/${moduleSlug}/${classified.readmeKey}`;
         }
 
-        const lesson = Lesson.parse({
+        // The row carries KEYS. `resolveLessonRow` is called purely to prove
+        // the row becomes a valid entity once a BlobStore resolves it; its
+        // return value is discarded.
+        const row: LessonRow = {
           kind: "video",
           id: lessonId,
           courseId,
@@ -271,26 +297,28 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
           sequence: lessonSequence,
           title,
           description: classified.description,
-          source: blobStore.url(videoFullKey),
+          source: videoFullKey,
           durationSeconds,
-          poster: posterFullKey ? blobStore.url(posterFullKey) : undefined,
-        });
-        lessons.push(lesson);
+          ...(posterFullKey ? { poster: posterFullKey } : {}),
+        };
+        resolveLessonRow(row, validationStore);
+        lessonRows.push(row);
 
         for (let i = 0; i < classified.resourceKeys.length; i++) {
           const resourceKey = classified.resourceKeys[i] as string;
           const rawName = classified.resourceRawNames[i] as string;
           const fullKey = `${courseSlug}/${moduleSlug}/${resourceKey}`;
-          const resource = buildResource(lessonId, fullKey, blobStore, title);
-          resources.push(resource);
+          const resourceRow = buildResourceRow(lessonId, fullKey, title);
+          resolveResourceRow(resourceRow, validationStore);
+          resourceRows.push(resourceRow);
           // Priority for sourceNames: raw on-disk filename (always available
           // because classifyLessonFolder reads the folder at walk time) >
           // manifest entry (legacy path) > current slugified basename.
-          recordSourceName(resource.id, fullKey, rawName);
+          recordSourceName(resourceRow.id, fullKey, rawName);
           keys.push(fullKey);
         }
       } else {
-        const lesson = Lesson.parse({
+        const row: LessonRow = {
           kind: "reading",
           id: lessonId,
           courseId,
@@ -298,19 +326,21 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
           sequence: lessonSequence,
           title,
           body: classified.body,
-        });
-        lessons.push(lesson);
+        };
+        resolveLessonRow(row, validationStore);
+        lessonRows.push(row);
 
         for (let i = 0; i < classified.resourceKeys.length; i++) {
           const resourceKey = classified.resourceKeys[i] as string;
           const rawName = classified.resourceRawNames[i] as string;
           const fullKey = `${courseSlug}/${moduleSlug}/${resourceKey}`;
-          const resource = buildResource(lessonId, fullKey, blobStore, title);
-          resources.push(resource);
+          const resourceRow = buildResourceRow(lessonId, fullKey, title);
+          resolveResourceRow(resourceRow, validationStore);
+          resourceRows.push(resourceRow);
           // Priority for sourceNames: raw on-disk filename (always available
           // because classifyLessonFolder reads the folder at walk time) >
           // manifest entry (legacy path) > current slugified basename.
-          recordSourceName(resource.id, fullKey, rawName);
+          recordSourceName(resourceRow.id, fullKey, rawName);
           keys.push(fullKey);
         }
       }
@@ -319,11 +349,11 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
 
   // Sort: modules and lessons by sequence; resources by lessonId then title.
   modules.sort((a, b) => a.sequence - b.sequence);
-  lessons.sort((a, b) => {
+  lessonRows.sort((a, b) => {
     if (a.moduleId !== b.moduleId) return a.moduleId.localeCompare(b.moduleId);
     return a.sequence - b.sequence;
   });
-  resources.sort((a, b) => {
+  resourceRows.sort((a, b) => {
     if (a.lessonId !== b.lessonId) return a.lessonId.localeCompare(b.lessonId);
     return a.title.localeCompare(b.title);
   });
@@ -338,28 +368,23 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
     // make regeneration produce a diff on every other machine.
     description: `Course content generated from ${toPosix(path.relative(process.cwd(), sourceDir))}.`,
     language: "en",
-    lessonCount: lessons.length,
+    lessonCount: lessonRows.length,
     moduleCount: modules.length,
   });
 
-  return { course, modules, lessons, resources, sourceNames, keys, notesKeys };
+  return { course, modules, lessonRows, resourceRows, sourceNames, keys, notesKeys };
 }
 
-function buildResource(
-  lessonId: string,
-  resourceKey: string,
-  blobStore: LocalFilesystemBlobStore,
-  lessonTitle: string,
-): Resource {
+function buildResourceRow(lessonId: string, resourceKey: string, lessonTitle: string): ResourceRow {
   const fileName = path.basename(resourceKey);
   const isReadme = fileName.toLowerCase() === "readme.md";
-  return Resource.parse({
+  return {
     id: uuidv5(`resource:${resourceKey}`),
     lessonId,
     title: isReadme ? `${lessonTitle} Notes` : resourceTitleFromFile(fileName),
-    url: blobStore.url(resourceKey),
+    url: resourceKey,
     kind: classifyResourceKind(fileName),
-  });
+  };
 }
 
 /**
@@ -378,8 +403,8 @@ async function formatWithPrettier(source: string, filePath: string): Promise<str
 function renderSeedFile(
   course: Course,
   modules: Module[],
-  lessons: Lesson[],
-  resources: Resource[],
+  lessonRows: LessonRow[],
+  resourceRows: ResourceRow[],
   sourceNames: Record<string, string>,
   notesKeys: Record<string, string>,
 ): string {
@@ -394,11 +419,20 @@ function renderSeedFile(
 //
 // The generator formats this file with the repo's Prettier config, so the
 // committed output is what \`pnpm format\` would produce — no hand-edits.
+//
+// Lesson and resource entries are ROWS, not entities: their \`source\`,
+// \`poster\` and \`url\` fields hold opaque content KEYS. A key is turned into
+// a URL at read time by the local-filesystem adapters, using whichever
+// BlobStore \`use-case-dependencies.ts\` was configured with. That is what
+// makes repointing storage a config change instead of a regeneration — and
+// what makes per-request signed URLs possible at all.
 
+import type {
+  LessonRow,
+  ResourceRow,
+} from "@/adapters/persistence/local-filesystem/resolve-content-row/resolve-content-row";
 import { Course } from "@/domain/entities/course/course";
-import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
-import { Resource } from "@/domain/entities/resource/resource";
 
 export const SEED_CONTENT_COURSE_ID = "${course.id}";
 
@@ -412,21 +446,13 @@ export const seedContentModules: ReadonlyArray<Module> = _seedContentModuleRaw.m
   Module.parse(m),
 );
 
-const _seedContentLessonRaw = [
-  ${renderJsonArray(lessons)},
+export const seedContentLessonRows: ReadonlyArray<LessonRow> = [
+  ${renderJsonArray(lessonRows)},
 ];
 
-export const seedContentLessons: ReadonlyArray<Lesson> = _seedContentLessonRaw.map((l) =>
-  Lesson.parse(l),
-);
-
-const _seedContentResourceRaw = [
-  ${renderJsonArray(resources)},
+export const seedContentResourceRows: ReadonlyArray<ResourceRow> = [
+  ${renderJsonArray(resourceRows)},
 ];
-
-export const seedContentResources: ReadonlyArray<Resource> = _seedContentResourceRaw.map((r) =>
-  Resource.parse(r),
-);
 
 // Entity id → original raw on-disk name (pre-normalization). See
 // scripts/normalize-content-disk.ts and rename-manifest.json.

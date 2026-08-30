@@ -3,6 +3,7 @@ import {
   SEED_CONTENT_COURSE_ID,
   seedContentCourse,
 } from "@/adapters/persistence/in-memory/seed/seed-content";
+import { CourseId } from "@/domain/entities/ids/ids";
 
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 
@@ -15,18 +16,34 @@ import { getCoursePlatformDeps, isCourseContentSeedEnabled } from "./use-case-de
  * state into each other or into the rest of the suite.
  */
 const ORIGINAL_ENV = process.env.USE_COURSE_CONTENT_SEED;
+const ORIGINAL_BASE_URL = process.env.CONTENT_BASE_URL;
+
+const restore = (name: string, original: string | undefined): void => {
+  if (original === undefined) {
+    delete process.env[name];
+  } else {
+    process.env[name] = original;
+  }
+};
+
+/** First video lesson of the content seed, read through the real deps graph. */
+const firstContentVideoSource = async (): Promise<string> => {
+  const deps = getCoursePlatformDeps();
+  const lessons = await deps.lessons.listByCourse(CourseId.parse(SEED_CONTENT_COURSE_ID));
+  const video = lessons.find((l) => l.kind === "video");
+  if (video?.kind !== "video") throw new Error("content seed has no video lesson");
+  return video.source;
+};
 
 describe("getCoursePlatformDeps env-var switch", () => {
   beforeEach(() => {
     delete process.env.USE_COURSE_CONTENT_SEED;
+    delete process.env.CONTENT_BASE_URL;
   });
 
   afterEach(() => {
-    if (ORIGINAL_ENV === undefined) {
-      delete process.env.USE_COURSE_CONTENT_SEED;
-    } else {
-      process.env.USE_COURSE_CONTENT_SEED = ORIGINAL_ENV;
-    }
+    restore("USE_COURSE_CONTENT_SEED", ORIGINAL_ENV);
+    restore("CONTENT_BASE_URL", ORIGINAL_BASE_URL);
   });
 
   describe("isCourseContentSeedEnabled", () => {
@@ -104,6 +121,48 @@ describe("getCoursePlatformDeps env-var switch", () => {
       // Assert
       expect(courses).toHaveLength(1);
       expect(courses[0]?.id).toBe(SEED_COURSE_ID);
+    });
+  });
+
+  describe("CONTENT_BASE_URL", () => {
+    test("WHEN it is unset THEN content URLs keep the pre-change local prefix", async () => {
+      // Arrange — the default must be byte-identical to the old baked-in
+      // behaviour, or every existing page silently 404s.
+      process.env.USE_COURSE_CONTENT_SEED = "1";
+
+      // Act
+      const source = await firstContentVideoSource();
+
+      // Assert
+      expect(source.startsWith("/local-filesystem-lesson/")).toBe(true);
+    });
+
+    test("WHEN it is set THEN content URLs carry the configured prefix, with the seed untouched", async () => {
+      // Arrange — the payoff: repointing storage is configuration, not a
+      // regeneration of seed-content.ts.
+      process.env.USE_COURSE_CONTENT_SEED = "1";
+      process.env.CONTENT_BASE_URL = "https://cdn.example.com/course-content";
+
+      // Act
+      const source = await firstContentVideoSource();
+
+      // Assert
+      expect(source.startsWith("https://cdn.example.com/course-content/")).toBe(true);
+      expect(source).toMatch(/\.mp4$/);
+    });
+
+    test("WHEN it has a trailing slash THEN the resolved URL has no double slash", async () => {
+      // Arrange — LocalFilesystemBlobStore normalizes this; assert the
+      // composition root does not defeat that by pre-joining.
+      process.env.USE_COURSE_CONTENT_SEED = "1";
+      process.env.CONTENT_BASE_URL = "https://cdn.example.com/course-content/";
+
+      // Act
+      const source = await firstContentVideoSource();
+
+      // Assert
+      expect(source.startsWith("https://cdn.example.com/course-content/")).toBe(true);
+      expect(source).not.toContain("course-content//");
     });
   });
 });

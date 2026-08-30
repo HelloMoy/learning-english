@@ -1,5 +1,5 @@
 import {
-  seedContentLessons,
+  seedContentLessonRows,
   seedContentModules,
 } from "@/adapters/persistence/in-memory/seed/seed-content";
 import type { VideoLesson } from "@/domain/entities/lesson/lesson";
@@ -38,7 +38,7 @@ import { expect, test } from "@playwright/test";
 
 const COURSE_SLUG = "advanced-intermediate-course";
 const MODULE = seedContentModules[0]!;
-const LESSON = seedContentLessons
+const LESSON = seedContentLessonRows
   .filter(
     (lesson): lesson is VideoLesson => lesson.moduleId === MODULE.id && lesson.kind === "video",
   )

@@ -1,37 +1,51 @@
+import type { BlobStore } from "@/adapters/persistence/blob-store/blob-store";
+import {
+  resolveLessonRow,
+  type LessonRow,
+} from "@/adapters/persistence/local-filesystem/resolve-content-row/resolve-content-row";
 import type { CourseId, LessonId } from "@/domain/entities/ids/ids";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
 import type { LessonRepository } from "@/domain/ports/lesson-repository/lesson-repository";
 
 /**
- * Driven adapter: filesystem-backed `LessonRepository`.
+ * Driven adapter: `LessonRepository` backed by generated seed rows whose
+ * content keys are resolved through a `BlobStore` on every read.
  *
- * Lessons are stored in insertion order. The adapter is a thin pass-through
- * over the seed array: it does not re-resolve URLs, does not scan the
- * filesystem at construction, and does not consult any BlobStore. URL
- * resolution happened at seed-gen time inside
- * `scripts/generate-course-content-seed.ts`, which owned the BlobStore.
+ * Rows are stored in insertion order and hold opaque content KEYS in
+ * `source` and `poster`. Resolution happens at read time, not at seed-gen
+ * time, so repointing storage (local folder → S3/R2 bucket) is a change of
+ * `BlobStore` driver rather than a regeneration of `seed-content.ts`. It is
+ * also what makes per-request signed URLs possible: a signed URL expires and
+ * therefore cannot be baked into a committed file.
  *
- * The "filesystem-backed" name is historical — it describes where the
- * seed DATA was generated from. At runtime the adapter is functionally
- * identical to `InMemoryLessonRepository`.
+ * Parsing happens after resolution — `urlOrRelativePath()` rejects a bare
+ * key — so a row that resolves to a malformed URL is rejected here rather
+ * than reaching a `src` attribute in the UI.
  */
 export class LocalFilesystemLessonRepository implements LessonRepository {
-  readonly #lessons: ReadonlyArray<Lesson>;
+  readonly #rows: ReadonlyArray<LessonRow>;
+  readonly #blobStore: BlobStore;
 
-  constructor(lessons: ReadonlyArray<Lesson>) {
-    this.#lessons = lessons;
+  constructor({ rows, blobStore }: { rows: ReadonlyArray<LessonRow>; blobStore: BlobStore }) {
+    this.#rows = rows;
+    this.#blobStore = blobStore;
   }
 
   byId(id: LessonId): Promise<Lesson | null> {
-    return Promise.resolve(this.#lessons.find((l) => l.id === id) ?? null);
+    const row = this.#rows.find((r) => r.id === id);
+    return Promise.resolve(row ? this.#resolve(row) : null);
   }
 
   listByCourse(courseId: CourseId): Promise<Lesson[]> {
     return Promise.resolve(
-      this.#lessons
-        .filter((l) => l.courseId === courseId)
-        .slice()
+      this.#rows
+        .filter((r) => r.courseId === courseId)
+        .map((r) => this.#resolve(r))
         .sort((a, b) => a.sequence - b.sequence),
     );
+  }
+
+  #resolve(row: LessonRow): Lesson {
+    return resolveLessonRow(row, this.#blobStore);
   }
 }

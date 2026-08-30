@@ -4,16 +4,31 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 
+import type { BlobStore } from "@/adapters/persistence/blob-store/blob-store";
+import {
+  resolveLessonRow,
+  resolveResourceRow,
+  type LessonRow,
+} from "@/adapters/persistence/local-filesystem/resolve-content-row/resolve-content-row";
 import { Course } from "@/domain/entities/course/course";
-import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
-import { Resource } from "@/domain/entities/resource/resource";
 
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import { buildSeed } from "./generate-course-content-seed";
 
 const execFileAsync = promisify(execFile);
+
+/**
+ * The generator emits KEYS. These tests resolve them the way the runtime
+ * adapters do, so "does this row become a valid entity?" is asserted through
+ * the same path production uses.
+ */
+const testStore: BlobStore = {
+  url: (key) => `https://test.example/${key}`,
+  exists: () => Promise.resolve(true),
+  readText: () => Promise.resolve(""),
+};
 
 /**
  * Skip the integration suite when ffmpeg is missing — ffprobe is required
@@ -104,7 +119,7 @@ describe.skipIf(!FFMPEG_AVAILABLE)("buildSeed (integration)", () => {
     expect(() => Course.parse(seed.course)).not.toThrow();
     expect(seed.course.slug).toBe("test-course");
     expect(seed.course.title).toBe("Test Course");
-    expect(seed.course.lessonCount).toBe(seed.lessons.length);
+    expect(seed.course.lessonCount).toBe(seed.lessonRows.length);
     expect(seed.course.moduleCount).toBe(seed.modules.length);
   });
 
@@ -123,8 +138,8 @@ describe.skipIf(!FFMPEG_AVAILABLE)("buildSeed (integration)", () => {
     const seed = await buildSeed(sourceDir);
 
     // Assert
-    expect(seed.lessons).toHaveLength(4);
-    expect(() => seed.lessons.forEach((l) => Lesson.parse(l))).not.toThrow();
+    expect(seed.lessonRows).toHaveLength(4);
+    expect(() => seed.lessonRows.forEach((l) => resolveLessonRow(l, testStore))).not.toThrow();
   });
 
   test("AND the bimodal lesson (video + readme) becomes a VideoLesson plus a Resource of kind 'other'", async () => {
@@ -133,14 +148,14 @@ describe.skipIf(!FFMPEG_AVAILABLE)("buildSeed (integration)", () => {
 
     // Assert — exactly one video lesson in module 1 lesson 3, and the
     // readme is its notes resource.
-    const bimodalLesson = seed.lessons.find(
-      (l): l is Extract<Lesson, { kind: "video" }> =>
+    const bimodalLesson = seed.lessonRows.find(
+      (l): l is Extract<LessonRow, { kind: "video" }> =>
         l.kind === "video" && l.title.includes("Bimodal"),
     );
     expect(bimodalLesson).toBeDefined();
     if (!bimodalLesson) return;
 
-    const bimodalResources = seed.resources.filter((r) => r.lessonId === bimodalLesson.id);
+    const bimodalResources = seed.resourceRows.filter((r) => r.lessonId === bimodalLesson.id);
     const notesResource = bimodalResources.find(
       (r) => r.kind === "other" && r.title.endsWith("Notes"),
     );
@@ -155,14 +170,14 @@ describe.skipIf(!FFMPEG_AVAILABLE)("buildSeed (integration)", () => {
     const seed = await buildSeed(sourceDir);
 
     // Assert
-    const introLesson = seed.lessons.find(
-      (l): l is Extract<Lesson, { kind: "video" }> =>
+    const introLesson = seed.lessonRows.find(
+      (l): l is Extract<LessonRow, { kind: "video" }> =>
         l.kind === "video" && l.title.includes("Intro"),
     );
     expect(introLesson).toBeDefined();
     if (!introLesson) return;
 
-    const introResources = seed.resources.filter((r) => r.lessonId === introLesson.id);
+    const introResources = seed.resourceRows.filter((r) => r.lessonId === introLesson.id);
     const pdf = introResources.find((r) => r.kind === "pdf");
     expect(pdf).toBeDefined();
     if (pdf) {
@@ -177,8 +192,8 @@ describe.skipIf(!FFMPEG_AVAILABLE)("buildSeed (integration)", () => {
     // Assert — look for the reading lesson in the FIRST module by
     // matching on title (since lessons are sorted by (moduleId, sequence)
     // and we want the deterministic "Reading" lesson, not "Farewell").
-    const readingLesson = seed.lessons.find(
-      (l): l is Extract<Lesson, { kind: "reading" }> =>
+    const readingLesson = seed.lessonRows.find(
+      (l): l is Extract<LessonRow, { kind: "reading" }> =>
         l.kind === "reading" && l.title === "Reading",
     );
     expect(readingLesson).toBeDefined();
@@ -191,14 +206,14 @@ describe.skipIf(!FFMPEG_AVAILABLE)("buildSeed (integration)", () => {
     const seed = await buildSeed(sourceDir);
 
     // Assert
-    const readingLesson = seed.lessons.find(
-      (l): l is Extract<Lesson, { kind: "reading" }> =>
+    const readingLesson = seed.lessonRows.find(
+      (l): l is Extract<LessonRow, { kind: "reading" }> =>
         l.kind === "reading" && l.title === "Reading",
     );
     expect(readingLesson).toBeDefined();
     if (!readingLesson) return;
 
-    const readingResources = seed.resources.filter((r) => r.lessonId === readingLesson.id);
+    const readingResources = seed.resourceRows.filter((r) => r.lessonId === readingLesson.id);
     const docx = readingResources.find((r) => r.title.toLowerCase().includes("exercise"));
     expect(docx).toBeDefined();
     expect(docx?.kind).toBe("other");
@@ -210,8 +225,8 @@ describe.skipIf(!FFMPEG_AVAILABLE)("buildSeed (integration)", () => {
 
     // Assert
     expect(() => seed.modules.forEach((m) => Module.parse(m))).not.toThrow();
-    expect(() => seed.lessons.forEach((l) => Lesson.parse(l))).not.toThrow();
-    expect(() => seed.resources.forEach((r) => Resource.parse(r))).not.toThrow();
+    expect(() => seed.lessonRows.forEach((l) => resolveLessonRow(l, testStore))).not.toThrow();
+    expect(() => seed.resourceRows.forEach((r) => resolveResourceRow(r, testStore))).not.toThrow();
   });
 
   test("AND modules are sorted by sequence ascending", async () => {
@@ -229,7 +244,7 @@ describe.skipIf(!FFMPEG_AVAILABLE)("buildSeed (integration)", () => {
 
     // Assert
     const byModule = new Map<string, number[]>();
-    for (const l of seed.lessons) {
+    for (const l of seed.lessonRows) {
       const arr = byModule.get(l.moduleId) ?? [];
       arr.push(l.sequence);
       byModule.set(l.moduleId, arr);
@@ -251,16 +266,23 @@ describe.skipIf(!FFMPEG_AVAILABLE)("buildSeed (integration)", () => {
     );
   });
 
-  test("AND the URL on each VideoLesson is the blobStore.url() of its key", async () => {
+  test("AND each video row's source is a bare content key, not a URL", async () => {
     // Act
     const seed = await buildSeed(sourceDir);
 
-    // Assert
-    const videoLesson = seed.lessons.find((l) => l.kind === "video");
-    expect(videoLesson).toBeDefined();
-    if (videoLesson && videoLesson.kind === "video") {
-      expect(videoLesson.source).toMatch(/^\/local-filesystem-lesson\/test-course\//);
-      expect(videoLesson.source).toMatch(/\.mp4$/);
+    // Assert — the key starts at the course slug. No base-URL prefix is
+    // baked in: the public prefix is a deployment concern, applied by the
+    // adapter at read time.
+    const videoRow = seed.lessonRows.find((l) => l.kind === "video");
+    expect(videoRow).toBeDefined();
+    if (videoRow && videoRow.kind === "video") {
+      expect(videoRow.source).toMatch(/^test-course\//);
+      expect(videoRow.source).toMatch(/\.mp4$/);
+
+      // And it becomes a URL only once a BlobStore resolves it.
+      const resolved = resolveLessonRow(videoRow, testStore);
+      if (resolved.kind !== "video") throw new Error("unreachable");
+      expect(resolved.source).toBe(`https://test.example/${videoRow.source}`);
     }
   });
 });

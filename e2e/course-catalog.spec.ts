@@ -1,6 +1,6 @@
 import {
   SEED_CONTENT_COURSE_ID,
-  seedContentLessons,
+  seedContentLessonRows,
   seedContentModules,
 } from "@/adapters/persistence/in-memory/seed/seed-content";
 
@@ -22,8 +22,8 @@ import { expect, test } from "@playwright/test";
  */
 const COURSE_SLUG = "advanced-intermediate-course";
 const FIRST_MODULE = seedContentModules[0]!;
-const FIRST_LESSON = seedContentLessons.find((lesson) => lesson.moduleId === FIRST_MODULE.id)!;
-const SECOND_LESSON = seedContentLessons.find(
+const FIRST_LESSON = seedContentLessonRows.find((lesson) => lesson.moduleId === FIRST_MODULE.id)!;
+const SECOND_LESSON = seedContentLessonRows.find(
   (lesson) => lesson.moduleId === FIRST_MODULE.id && lesson.sequence === 2,
 )!;
 

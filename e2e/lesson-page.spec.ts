@@ -1,7 +1,7 @@
 import {
-  seedContentLessons,
+  seedContentLessonRows,
   seedContentModules,
-  seedContentResources,
+  seedContentResourceRows,
 } from "@/adapters/persistence/in-memory/seed/seed-content";
 
 import { expect, test } from "@playwright/test";
@@ -35,13 +35,20 @@ const COURSE_SLUG = "advanced-intermediate-course";
 const bySequence = <T extends { sequence: number }>(items: ReadonlyArray<T>): T[] =>
   [...items].sort((a, b) => a.sequence - b.sequence);
 
+/**
+ * Resolves a seed content key the way the running server does. The seed
+ * stores keys, not URLs; `CONTENT_BASE_URL` is unset in
+ * `playwright.config.ts`, so the default local prefix applies.
+ */
+const contentUrl = (key: string): string => `/local-filesystem-lesson/${key}`;
+
 const MODULES = bySequence(seedContentModules);
 const MODULE_A = MODULES[0]!;
 const MODULE_B = MODULES[1]!;
 const LAST_MODULE = MODULES[MODULES.length - 1]!;
 
 const lessonsIn = (moduleId: string) =>
-  bySequence(seedContentLessons.filter((lesson) => lesson.moduleId === moduleId));
+  bySequence(seedContentLessonRows.filter((lesson) => lesson.moduleId === moduleId));
 
 const MODULE_A_LESSONS = lessonsIn(MODULE_A.id);
 
@@ -54,9 +61,9 @@ const MODULE_A_LESSONS = lessonsIn(MODULE_A.id);
 const PRIMARY_LESSON = MODULE_A_LESSONS.find(
   (lesson, index) =>
     index < MODULE_A_LESSONS.length - 1 &&
-    seedContentResources.some((resource) => resource.lessonId === lesson.id),
+    seedContentResourceRows.some((resource) => resource.lessonId === lesson.id),
 )!;
-const PRIMARY_RESOURCE = seedContentResources.find(
+const PRIMARY_RESOURCE = seedContentResourceRows.find(
   (resource) => resource.lessonId === PRIMARY_LESSON.id,
 )!;
 const LESSON_AFTER_PRIMARY = MODULE_A_LESSONS[MODULE_A_LESSONS.indexOf(PRIMARY_LESSON) + 1]!;
@@ -145,7 +152,7 @@ test.describe("Lesson Page — happy path", () => {
  * assertion passes both before and after the fix. See design.md §D2.
  */
 test.describe("Lesson Page — resource links resolve", () => {
-  const RESOURCES_OF_PRIMARY_LESSON = seedContentResources.filter(
+  const RESOURCES_OF_PRIMARY_LESSON = seedContentResourceRows.filter(
     (resource) => resource.lessonId === PRIMARY_LESSON.id,
   );
 
@@ -163,8 +170,11 @@ test.describe("Lesson Page — resource links resolve", () => {
       for (const resource of RESOURCES_OF_PRIMARY_LESSON) {
         const link = page.getByRole("link", { name: new RegExp(escapeRegExp(resource.title)) });
 
-        // The href is the Resource.url verbatim — no locale segment.
-        await expect(link).toHaveAttribute("href", resource.url);
+        // The seed stores a content KEY; the href is that key resolved by
+        // the BlobStore the server booted with. `playwright.config.ts` sets
+        // no CONTENT_BASE_URL, so the default local prefix applies — and no
+        // locale segment is added.
+        await expect(link).toHaveAttribute("href", contentUrl(resource.url));
 
         // ...and it actually resolves. This is the assertion the learner
         // cares about; the one above only explains a failure.
