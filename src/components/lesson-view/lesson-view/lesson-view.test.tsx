@@ -6,7 +6,7 @@ import { Resource } from "@/domain/entities/resource/resource";
 import type { LessonView as LessonViewData } from "@/domain/use-cases/find-lesson-for-view/find-lesson-for-view";
 
 import { faker } from "@faker-js/faker";
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -18,7 +18,9 @@ vi.mock("next-intl", () => ({
 
 const mockUseTranslations = vi.mocked(useTranslations);
 
-const fixtures = (): {
+const fixtures = (
+  options: { poster?: string } = {},
+): {
   view: LessonViewData;
 } => {
   const courseId = CourseId.parse(faker.string.uuid());
@@ -49,6 +51,7 @@ const fixtures = (): {
     description: "Lecture description",
     source: faker.internet.url(),
     durationSeconds: 600,
+    ...(options.poster === undefined ? {} : { poster: options.poster }),
   });
   const resource = Resource.parse({
     id: faker.string.uuid(),
@@ -128,7 +131,7 @@ describe("LessonView", () => {
     expect(document.querySelector("video")).toBeNull();
   });
 
-  test("video lesson renders a cinema hero overlay (module title) while preserving the native player", () => {
+  test("a poster-less video lesson shows the title cover over the idle player", () => {
     const { view } = fixtures();
     render(
       <LessonView
@@ -138,11 +141,56 @@ describe("LessonView", () => {
         markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
       />,
     );
-    // The overlay headline is the module title; the native <video> remains.
+    // Without a poster the frame is black, so the cover is the only cover
+    // art the page has. Its headline is the module title.
     expect(screen.getByRole("heading", { name: "Module" })).toBeInTheDocument();
     expect(document.querySelector("video")).not.toBeNull();
     // The current lesson is marked in the outline.
     expect(document.querySelector('[aria-current="page"]')).not.toBeNull();
+  });
+
+  test("a video lesson WITH a poster never shows the title cover", () => {
+    const { view } = fixtures({ poster: "/thumbnails/lecture.jpg" });
+    render(
+      <LessonView
+        view={view}
+        notes={null}
+        notesResource={null}
+        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+      />,
+    );
+    // The thumbnail is the cover; painting titles over it would be the
+    // watermark this change exists to remove.
+    expect(screen.queryByRole("heading", { name: "Module" })).toBeNull();
+    expect(document.querySelector("video")).toHaveAttribute("poster", "/thumbnails/lecture.jpg");
+  });
+
+  test("starting playback retires the title cover for the rest of the session", () => {
+    const { view } = fixtures();
+    render(
+      <LessonView
+        view={view}
+        notes={null}
+        notesResource={null}
+        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+      />,
+    );
+    const video = document.querySelector("video") as HTMLVideoElement;
+    expect(screen.getByRole("heading", { name: "Module" })).toBeInTheDocument();
+
+    act(() => {
+      fireEvent.play(video);
+    });
+    expect(screen.queryByRole("heading", { name: "Module" })).toBeNull();
+
+    // Regression guard for the reported bug: the cover must not flash back
+    // when the learner pauses mid-lesson, nor on a seek or on ended.
+    act(() => {
+      fireEvent.pause(video);
+      fireEvent.seeking(video);
+      fireEvent.ended(video);
+    });
+    expect(screen.queryByRole("heading", { name: "Module" })).toBeNull();
   });
 
   test("renders the Notes/Transcript tabs when notes are present", () => {

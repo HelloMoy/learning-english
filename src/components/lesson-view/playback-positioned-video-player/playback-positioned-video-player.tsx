@@ -30,6 +30,10 @@ import { NativeVideoPlayer } from "../native-video-player/native-video-player";
  *
  * Persistence is keyed by `lessonId` via the `usePlaybackPosition` hook
  * (browser-only). Server Components do NOT import this file.
+ *
+ * The wrapper also reports the first `play` upward through the optional
+ * `onPlaybackStart` callback, so a parent can react to "playback has begun"
+ * without opening a second subscription on the same element.
  */
 export function PlaybackPositionedVideoPlayer({
   lessonId,
@@ -38,6 +42,7 @@ export function PlaybackPositionedVideoPlayer({
   title,
   ariaLabel,
   durationSeconds = 0,
+  onPlaybackStart,
 }: {
   lessonId: LessonId;
   source: string;
@@ -47,6 +52,10 @@ export function PlaybackPositionedVideoPlayer({
   /** Lesson `durationSeconds` (from the `VideoLesson` entity). Used to
    *  filter the resume overlay's threshold check. */
   durationSeconds?: number;
+  /** Fired on every `play` event, from the same listener that flips the
+   *  interaction gate. `LessonView` uses it to retire the title cover;
+   *  callers that do not care may omit it. */
+  onPlaybackStart?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const position = usePlaybackPosition(lessonId);
@@ -56,6 +65,15 @@ export function PlaybackPositionedVideoPlayer({
   // listener closed over `false` — dropping the write.
   const hasInteractedRef = useRef(false);
   const [savedPosition, setSavedPosition] = useState<number | null>(null);
+
+  // The callback lives in a ref, not in the listener effect's deps. Callers
+  // pass an inline arrow, so a dep would re-subscribe on every render — and
+  // that effect's cleanup calls `debouncedWrite.flush()`, which would force
+  // an immediate write per render and defeat the 1500ms debounce entirely.
+  const onPlaybackStartRef = useRef(onPlaybackStart);
+  useEffect(() => {
+    onPlaybackStartRef.current = onPlaybackStart;
+  }, [onPlaybackStart]);
 
   // Only the interaction gate lives here. Range and finiteness are the
   // `PlaybackPosition` value object's job, enforced inside the hook — a
@@ -106,6 +124,7 @@ export function PlaybackPositionedVideoPlayer({
     };
     const onPlay = () => {
       hasInteractedRef.current = true;
+      onPlaybackStartRef.current?.();
     };
     const onBeforeUnload = () => {
       debouncedWrite.flush();

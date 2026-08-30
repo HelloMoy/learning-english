@@ -1,7 +1,7 @@
 import { LessonId } from "@/domain/entities/ids/ids";
 
 import { faker } from "@faker-js/faker";
-import { act, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { useTranslations } from "next-intl";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -95,6 +95,54 @@ describe("PlaybackPositionedVideoPlayer", () => {
       // the absolute-positioned overlay can anchor to the video bounds.
       const positioningContext = container.querySelector("div.relative");
       expect(positioningContext).not.toBeNull();
+    });
+  });
+
+  describe("Playback start reporting", () => {
+    /**
+     * The wrapper already owns the only `play` subscription (it flips the
+     * interaction gate there). `onPlaybackStart` rides that same listener so
+     * "playback has begun" has a single source of truth — `LessonView` uses
+     * it to retire the gold title cover.
+     */
+    test("WHEN the <video> emits play THEN onPlaybackStart is called", () => {
+      const lessonId = LessonId.parse(faker.string.uuid());
+      const onPlaybackStart = vi.fn();
+
+      const { container } = render(
+        <PlaybackPositionedVideoPlayer
+          lessonId={lessonId}
+          source="/videos/x.mp4"
+          title="t"
+          onPlaybackStart={onPlaybackStart}
+        />,
+      );
+
+      const video = container.querySelector("video") as HTMLVideoElement;
+      act(() => {
+        fireEvent.play(video);
+      });
+
+      expect(onPlaybackStart).toHaveBeenCalled();
+    });
+
+    test("WHEN no onPlaybackStart is provided THEN a play event does not throw", () => {
+      const lessonId = LessonId.parse(faker.string.uuid());
+
+      const { container } = render(
+        <PlaybackPositionedVideoPlayer
+          lessonId={lessonId}
+          source="/videos/x.mp4"
+          title="t"
+        />,
+      );
+
+      const video = container.querySelector("video") as HTMLVideoElement;
+      expect(() => {
+        act(() => {
+          fireEvent.play(video);
+        });
+      }).not.toThrow();
     });
   });
 

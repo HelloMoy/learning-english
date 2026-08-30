@@ -7,6 +7,7 @@ import type { Resource } from "@/domain/entities/resource/resource";
 import type { LessonView as LessonViewData } from "@/domain/use-cases/find-lesson-for-view/find-lesson-for-view";
 
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 import { LessonBreadcrumb } from "../lesson-breadcrumb/lesson-breadcrumb";
 import { LessonNotesTabs } from "../lesson-notes-tabs/lesson-notes-tabs";
@@ -21,6 +22,12 @@ import { UpNextCard } from "../up-next-card/up-next-card";
  * from `findLessonForView` and the Server Action that completes a lesson.
  * Dispatches on `lesson.kind` so video and reading lessons render
  * appropriately (video → NativeVideoPlayer; reading → body).
+ *
+ * The gold title block over the player is **cover art**, not a watermark:
+ * it renders only while the lesson has no `poster` (nothing else covers the
+ * black idle frame) and playback has not started. The first `play` retires
+ * it for the session, so the speaker's mouth — the content of a
+ * pronunciation lesson — is never obstructed mid-video.
  */
 export function LessonView({
   view,
@@ -35,6 +42,10 @@ export function LessonView({
     lessonId: LessonId;
   }) => Promise<{ data?: { completed: boolean } } | undefined>;
 }) {
+  // A one-way latch: set on the first `play`, never reset. Pausing or
+  // seeking must NOT bring the cover back — once playback has begun the
+  // learner is watching the frame, not the title.
+  const [playbackStarted, setPlaybackStarted] = useState(false);
   const t = useTranslations("Components.NativeVideoPlayer");
   const tLessonNotes = useTranslations("Components.LessonNotes");
   const { course, module, lesson, resources, nextLesson, modules, lessons } = view;
@@ -91,24 +102,27 @@ export function LessonView({
                 title={lesson.title}
                 ariaLabel={t("videoPlayerLabel")}
                 durationSeconds={lesson.durationSeconds}
+                onPlaybackStart={() => setPlaybackStarted(true)}
               />
-              <div
-                className="pointer-events-none absolute inset-x-0 top-0 z-10 p-6 sm:p-8"
-                style={{
-                  background:
-                    "linear-gradient(180deg, color-mix(in oklab, var(--background) 55%, transparent), transparent)",
-                }}
-              >
-                <Eyebrow>{lesson.title}</Eyebrow>
-                <h2
-                  className="mt-2 max-w-2xl font-sans text-3xl leading-[0.95] font-extrabold text-amber sm:text-5xl"
+              {lesson.poster === undefined && !playbackStarted ? (
+                <div
+                  className="pointer-events-none absolute inset-x-0 top-0 z-10 p-6 sm:p-8"
                   style={{
-                    textShadow: "0 3px 30px color-mix(in oklab, var(--glow) 40%, transparent)",
+                    background:
+                      "linear-gradient(180deg, color-mix(in oklab, var(--background) 55%, transparent), transparent)",
                   }}
                 >
-                  {module.title}
-                </h2>
-              </div>
+                  <Eyebrow>{lesson.title}</Eyebrow>
+                  <h2
+                    className="mt-2 max-w-2xl font-sans text-3xl leading-[0.95] font-extrabold text-amber sm:text-5xl"
+                    style={{
+                      textShadow: "0 3px 30px color-mix(in oklab, var(--glow) 40%, transparent)",
+                    }}
+                  >
+                    {module.title}
+                  </h2>
+                </div>
+              ) : null}
             </div>
             <h1 className="text-2xl font-bold text-foreground">{lesson.title}</h1>
             <p className="text-muted-foreground">{lesson.description}</p>
