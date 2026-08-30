@@ -1,5 +1,4 @@
 import type { Resource, ResourceKind } from "@/domain/entities/resource/resource";
-import { Link } from "@/i18n/navigation";
 
 import { Code, FileText, Paperclip, Presentation } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -22,7 +21,19 @@ export function ResourceItem({ resource }: { resource: Resource }) {
   const Icon = KIND_ICONS[resource.kind];
   return (
     <li>
-      <Link
+      {/*
+        A plain `<a>`, deliberately NOT the locale-aware `Link` from
+        `@/i18n/navigation`. A `Resource.url` addresses content — an
+        absolute URL, or a site-relative path to a static asset that
+        Next.js serves from the origin root — never an in-app route.
+        Since `routing.localePrefix` is "always", the locale-aware `Link`
+        would rewrite `/local-filesystem-lesson/…` to
+        `/en/local-filesystem-lesson/…`, which no route and no `public/`
+        file matches: every resource link 404s. Guarded by the e2e case
+        "resource links resolve" in `e2e/lesson-page.spec.ts` — the
+        prefix is applied during the server render, so jsdom cannot see it.
+      */}
+      <a
         href={resource.url}
         target="_blank"
         rel="noopener noreferrer"
@@ -34,7 +45,7 @@ export function ResourceItem({ resource }: { resource: Resource }) {
         />
         <span>{resource.title}</span>
         <span className="sr-only">({t(resource.kind)})</span>
-      </Link>
+      </a>
     </li>
   );
 }
