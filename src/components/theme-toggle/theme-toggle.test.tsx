@@ -70,6 +70,64 @@ describe("ThemeToggle", () => {
     });
   });
 
+  describe("GIVEN the toggle must survive its label being hidden on a phone", () => {
+    test("WHEN rendered THEN its accessible name comes from aria-label, not from the visible text", () => {
+      // Arrange — the theme name is hidden below `sm` so the chip fits the
+      // header's width budget at 320px. If the name were derived from the
+      // visible text instead, hiding it would leave the button unnamed.
+      mockUseTheme.mockReturnValue({
+        theme: "dark",
+        setTheme: vi.fn(),
+        themes: ["light", "dark", "system"],
+        resolvedTheme: "dark",
+        systemTheme: undefined,
+      });
+
+      // Act
+      render(<ThemeToggle />);
+
+      // Assert
+      expect(screen.getByRole("button")).toHaveAttribute("aria-label", "label: dark");
+    });
+
+    test("WHEN rendered THEN the theme name is still in the DOM for wider viewports", () => {
+      // Arrange
+      mockUseTheme.mockReturnValue({
+        theme: "dark",
+        setTheme: vi.fn(),
+        themes: ["light", "dark", "system"],
+        resolvedTheme: "dark",
+        systemTheme: undefined,
+      });
+
+      // Act
+      render(<ThemeToggle />);
+
+      // Assert — which viewport reveals it is a CSS concern jsdom cannot
+      // resolve; that the text exists to be revealed is the part worth fixing.
+      expect(screen.getByRole("button")).toHaveTextContent("dark");
+    });
+
+    test("WHEN the pre-hydration placeholder renders THEN it is named too", () => {
+      // Arrange
+      isHydrated = false;
+      mockUseTheme.mockReturnValue({
+        theme: "dark",
+        setTheme: vi.fn(),
+        themes: ["light", "dark", "system"],
+        resolvedTheme: "dark",
+        systemTheme: undefined,
+      });
+
+      // Act
+      render(<ThemeToggle />);
+
+      // Assert — the placeholder shows only "…", so without its own
+      // aria-label it would be an unnamed button in the server HTML.
+      expect(screen.getByRole("button", { name: "label" })).toBeInTheDocument();
+    });
+  });
+
   describe("GIVEN the theme is not yet resolved (theme === undefined, pre-mount)", () => {
     test("WHEN rendered THEN a disabled placeholder is shown", () => {
       // Arrange

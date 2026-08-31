@@ -75,3 +75,18 @@ export const InSystemMode: Story = {
     ),
   ],
 };
+
+/**
+ * The phone variant: below `sm` the theme name is hidden and only the `◐` icon
+ * remains, in a 44×44 hit area. The button keeps its full `Theme: <name>`
+ * accessible name, so what a screen reader announces does not change with the
+ * viewport.
+ */
+export const NarrowPhone: Story = {
+  parameters: {
+    viewport: {
+      options: { phone320: { name: "320px", styles: { width: "320px", height: "720px" } } },
+    },
+  },
+  globals: { viewport: { value: "phone320" } },
+};

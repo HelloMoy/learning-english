@@ -131,7 +131,11 @@ export function ModuleOverview({
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <Eyebrow>{t("videoOrdinal", { number: lesson.sequence })}</Eyebrow>
                   <span className="flex min-w-0 items-center gap-2">
-                    <span className="truncate text-base font-semibold text-foreground">
+                    {/* Truncation only from `sm` up. These titles share long
+                        prefixes, so on a phone a single line cuts every row to
+                        the same unusable stem — wrapping is what keeps the
+                        list selectable. */}
+                    <span className="text-base font-semibold text-foreground sm:truncate">
                       {lesson.title}
                     </span>
                     <LessonCompletionMark lessonId={lesson.id} />

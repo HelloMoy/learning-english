@@ -291,6 +291,39 @@ describe("ModuleOverview — completion indicator", () => {
     expect(container.querySelectorAll('[data-testid="lesson-completion-mark"]')).toHaveLength(0);
   });
 
+  test("WHEN titles share a long prefix THEN each row renders its title in full", () => {
+    // Arrange — the real course's largest module is 16 rows all beginning
+    // "Exercise N Pronunciation Step By Step Lesson". Truncated to a phone's
+    // width they read identically, so the list stops being a way to pick a
+    // lesson. Shortening must stay a CSS concern that a wider row undoes —
+    // never something the component bakes into the DOM.
+    const longFirst = Lesson.parse({
+      ...lessonA,
+      id: "77777777-7777-4777-8777-777777777777",
+      sequence: 1,
+      title: "Exercise 1 Pronunciation Step By Step Lesson",
+    });
+    const longSecond = Lesson.parse({
+      ...lessonA,
+      id: "88888888-8888-4888-8888-888888888888",
+      sequence: 2,
+      title: "Exercise 2 Pronunciation Step By Step Lesson",
+    });
+
+    // Act
+    render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[longFirst, longSecond]}
+      />,
+    );
+
+    // Assert — both full titles present, and distinguishable from each other.
+    expect(screen.getByText("Exercise 1 Pronunciation Step By Step Lesson")).toBeInTheDocument();
+    expect(screen.getByText("Exercise 2 Pronunciation Step By Step Lesson")).toBeInTheDocument();
+  });
+
   test("WHEN a row shows the indicator THEN it keeps its eyebrow, title, duration and Open action", () => {
     // Arrange
     window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessonA.id}`, "1");

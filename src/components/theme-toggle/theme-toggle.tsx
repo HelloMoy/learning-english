@@ -42,7 +42,7 @@ export function ThemeToggle() {
       <button
         type="button"
         aria-label={t("label")}
-        className="inline-flex items-center gap-2 rounded-md border border-border bg-foreground/5 px-3 py-1.5 text-xs text-muted-foreground"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-md border border-border bg-foreground/5 px-3 text-xs text-muted-foreground"
         disabled
       >
         …
@@ -59,10 +59,10 @@ export function ThemeToggle() {
       type="button"
       aria-label={`${t("label")}: ${t(theme as Theme)}`}
       onClick={() => setTheme(nextTheme)}
-      className="inline-flex items-center gap-2 rounded-md border border-border bg-foreground/5 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+      className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-border bg-foreground/5 px-3 text-xs text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
     >
       <span aria-hidden="true">◐</span>
-      {t(theme as Theme)}
+      <span className="hidden sm:inline">{t(theme as Theme)}</span>
     </button>
   );
 }
