@@ -29,6 +29,21 @@ or reorder them.
 **Exceptions** (ask the human partner before skipping the flow): throwaway prototypes,
 generated code, pure config files, and cosmetic-only fixes (typos, formatting).
 
+The exception is **void the moment any file under `src/`, `scripts/`, or `e2e/` changes.**
+A task that starts as "just formatting" and turns out to need a code change is a behavior
+change: stop, report the finding, and open an OpenSpec change before touching the code.
+Never bundle a code edit into a content-only task because the content needs it to render.
+
+**Course content Markdown is not cosmetic.** The lesson `readme.md` files under
+`public/local-filesystem-lesson/` are inputs to the seed generator, not free-form prose.
+The first `#` heading feeds lesson-title derivation for allowlisted modules
+(`openspec/specs/course-content-storage/spec.md`), so rewording it rewrites
+`src/adapters/persistence/in-memory/seed/seed-content.ts` — a source file — on the next
+generator run. The body shape feeds `splitBilingualNotes`, which decides whether the
+Notes tab renders one column or the ES/EN pair. Editing either one is a behavior change
+and goes through OpenSpec. Reformatting a lesson body while leaving its `#` heading
+byte-for-byte intact is the only part that stays cosmetic.
+
 When the user asks for a "feature", "new thing", or behavior change, default to this
 flow even if they don't mention OpenSpec explicitly. Suggest `/opsx:propose` as the
 first response.

@@ -11,7 +11,17 @@ vi.mock("next-intl", () => ({
 
 const mockUseTranslations = vi.mocked(useTranslations);
 
-const BILINGUAL = ["# Intro", "", "Texto en español.", "", "English text."].join("\n");
+const BILINGUAL = [
+  "# Intro",
+  "",
+  "## 🇪🇸 Español",
+  "",
+  "Texto en español.",
+  "",
+  "## 🇺🇸 English",
+  "",
+  "English text.",
+].join("\n");
 
 describe("LessonNotesTabs", () => {
   beforeEach(() => {
