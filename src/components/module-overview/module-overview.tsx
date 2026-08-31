@@ -25,8 +25,8 @@ function lessonDurationMinutes(lesson: Lesson): number | null {
 }
 
 /**
- * The module overview as a video list: a back link to the course, a hero
- * poster + title, and one row per lesson (thumbnail, "Video N" eyebrow,
+ * The module overview as a video list: a back link to the course, a title
+ * header, and one row per lesson (thumbnail, "Video N" eyebrow,
  * title, duration, and an "Open" action linking to the Lesson Page).
  *
  * Rows used to be labelled "Episode N". That term denoted a Module on the
@@ -61,7 +61,6 @@ export function ModuleOverview({
 }) {
   const t = useTranslations("CourseCatalog.moduleOverview");
   const moduleNumber = String(module.sequence).padStart(2, "0");
-  const posterHeadline = (module.title.split(" ")[0] ?? module.title).toUpperCase();
   return (
     <article
       data-testid="module-overview"
@@ -79,22 +78,7 @@ export function ModuleOverview({
         </Link>
       </nav>
 
-      <header className="flex flex-col gap-6 sm:flex-row sm:items-center">
-        <div
-          className="relative h-40 w-full shrink-0 overflow-hidden rounded-2xl border border-border sm:w-72"
-          style={{ background: THUMB_GLOW }}
-          aria-hidden="true"
-        >
-          <span
-            className="absolute top-3 right-5 font-sans text-4xl font-extrabold text-gold tabular-nums"
-            style={{ textShadow: "0 2px 24px color-mix(in oklab, var(--glow) 45%, transparent)" }}
-          >
-            {moduleNumber}
-          </span>
-          <span className="absolute bottom-5 left-5 font-sans text-2xl font-extrabold tracking-tight text-amber">
-            {posterHeadline}
-          </span>
-        </div>
+      <header className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
           <Eyebrow>
             {t("lessonCount", { count: lessons.length })} ·{" "}
