@@ -2,16 +2,14 @@
   "HomePage": {
     "title": "Learn English",
     "subtitle": "A simple, focused space to build vocabulary and practice every day.",
-    "cta": "Get started",
     "notFound": "Not found",
-    "catalogHeading": "Courses",
     "catalogEmpty": "No courses are available right now.",
     "eyebrow": "Now streaming · Spoken English",
-    "openCourse": "Open course",
-    "myList": "+ My List",
-    "featuredLabel": "Courses · Featured",
-    "featureLabel": "Feature",
-    "featureHeadline": "Welcome"
+    "heading": "Start where your ear is",
+    "intro": "Pronunciation-first courses, in order. Each one assumes the sounds from the one before it — so the only real question is where you get on.",
+    "coursesEyebrow": "Available courses",
+    "coursesHeading": "{count, plural, one {One level, in order} other {# levels, in order}}",
+    "coursesCount": "{count, plural, one {# course} other {# courses}}"
   },
   "SiteHeader": {
     "navLabel": "Primary",
@@ -103,6 +101,28 @@
     },
     "LessonCompletion": {
       "completed": "Completed"
+    },
+    "CourseLadder": {
+      "listLabel": "Available courses, in order",
+      "trackLabel": "Course levels"
+    },
+    "CourseLevelCard": {
+      "levelOrdinal": "Level {number}",
+      "inProgress": "In progress",
+      "notStarted": "Not started",
+      "continueCourse": "Continue course",
+      "startCourse": "Start course",
+      "moduleOrdinal": "Lesson {number}",
+      "moreModules": "+{count} more",
+      "moduleListLabel": "Lessons in this course"
+    },
+    "ContinueWatching": {
+      "heading": "Continue watching",
+      "breadcrumb": "{course} · {module}",
+      "resume": "Resume",
+      "courseOutline": "Course outline",
+      "remaining": "{remaining} left of {total}",
+      "progressLabel": "Playback progress"
     }
   },
   "CourseCatalog": {

@@ -128,6 +128,15 @@ export async function runGenerator(args: { sourceDir: string; outFile: string })
  */
 const UNUSED_BASE_URL = "/unused-by-the-generator";
 
+/**
+ * Where the generated course sits in the home's ladder of levels.
+ *
+ * The generator emits exactly one course, so its ladder position cannot be
+ * derived from the content it walks — it has to be declared. `1` belongs to
+ * the hand-written A1 seed in `seed.ts`; this course follows it.
+ */
+const CONTENT_COURSE_SEQUENCE = 2;
+
 export type BuiltSeed = {
   course: Course;
   modules: Module[];
@@ -370,6 +379,7 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
     language: "en",
     lessonCount: lessonRows.length,
     moduleCount: modules.length,
+    sequence: CONTENT_COURSE_SEQUENCE,
   });
 
   return { course, modules, lessonRows, resourceRows, sourceNames, keys, notesKeys };

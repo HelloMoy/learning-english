@@ -29,6 +29,7 @@ export const Default: Story = {
       language: "en",
       lessonCount: 3,
       moduleCount: 2,
+      sequence: 1,
     }),
     module: Module.parse({
       id: moduleId,

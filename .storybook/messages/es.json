@@ -12,17 +12,7 @@
     "CinemaHero": {
       "eyebrow": "En reproducción",
       "title": "Habla con confianza",
-      "subtitle": "Un curso cinematográfico que educa tu oído antes que tu lengua.",
-      "openLabel": "Abrir curso",
-      "myListLabel": "Mi lista"
-    },
-    "FeaturedCourse": {
-      "featuredLabel": "Cursos · Destacado",
-      "featureLabel": "Destacado",
-      "featureHeadline": "Temporada 1",
-      "countsLabel": "10 módulos · 107 lecciones",
-      "courseTitle": "Curso intermedio avanzado",
-      "courseDescription": "Educa tu oído y después tu pronunciación, a lo largo de diez módulos guiados."
+      "subtitle": "Un curso cinematográfico que educa tu oído antes que tu lengua."
     }
   }
 }

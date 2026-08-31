@@ -9,25 +9,21 @@ import { CinemaHero } from "./cinema-hero";
  * file. Spanish and Portuguese run noticeably longer than English here —
  * that is the point: the headline must not reflow badly when it does.
  */
-function HeroStory({ openHref }: { openHref?: string }) {
+function HeroStory() {
   const t = useTranslations("Stories.CinemaHero");
   return (
     <CinemaHero
       eyebrow={t("eyebrow")}
       title={t("title")}
       subtitle={t("subtitle")}
-      openLabel={t("openLabel")}
-      openHref={openHref}
-      myListLabel={t("myListLabel")}
     />
   );
 }
 
 /**
- * Typed against the component rather than `typeof meta`: every story supplies
+ * Typed against the component rather than `typeof meta`: the story supplies
  * its props through `render`, because the copy has to be read from the
- * translation context at render time. Binding to `meta` would demand a
- * duplicate literal `args` block that nothing ever uses.
+ * translation context at render time.
  */
 const meta: Meta<typeof CinemaHero> = {
   title: "Cinema/CinemaHero",
@@ -37,15 +33,7 @@ const meta: Meta<typeof CinemaHero> = {
 export default meta;
 type Story = StoryObj<typeof CinemaHero>;
 
-/** The hero as the home page renders it, linking to a course. */
+/** The hero as the home page renders it, above the continue-watching panel. */
 export const Default: Story = {
-  render: () => <HeroStory openHref="/en/courses/advanced-intermediate-course" />,
-};
-
-/**
- * No `openHref`. The primary CTA has nowhere to go yet — the state the home
- * page falls back to before course routes resolve.
- */
-export const WithoutCourseLink: Story = {
   render: () => <HeroStory />,
 };

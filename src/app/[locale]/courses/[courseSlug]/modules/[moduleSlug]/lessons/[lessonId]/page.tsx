@@ -1,5 +1,6 @@
 import { getCoursePlatformDeps } from "@/adapters/persistence/in-memory/use-case-dependencies/use-case-dependencies";
 import { LessonPageError, LessonView } from "@/components/lesson-view";
+import { RememberContinueWatching } from "@/components/lesson-view/remember-continue-watching/remember-continue-watching";
 import { LessonId } from "@/domain/entities/ids/ids";
 import { Slug } from "@/domain/entities/slug/slug";
 import type { LessonView as LessonViewData } from "@/domain/use-cases/find-lesson-for-view/find-lesson-for-view";
@@ -108,6 +109,17 @@ export default async function LessonPage({ params }: Props) {
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6">
+      {/*
+        Renders nothing. It records where the learner is so the home can offer
+        to bring them back — the smallest possible client island around one
+        `localStorage` write, mounted here because this page is the only place
+        that knows all three route segments.
+      */}
+      <RememberContinueWatching
+        courseSlug={courseSlugResult.data}
+        moduleSlug={moduleSlugResult.data}
+        lessonId={lessonIdResult.data}
+      />
       <LessonView
         view={view}
         notes={notesMarkdown}

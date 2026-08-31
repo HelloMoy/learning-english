@@ -30,6 +30,9 @@ export const seedCourse = Course.parse({
   language: "en",
   lessonCount: 3,
   moduleCount: 2,
+  // The entry level of the ladder. The filesystem-backed course generated
+  // into `seed-content.ts` sits above it at 2.
+  sequence: 1,
 });
 
 export const seedModules = [

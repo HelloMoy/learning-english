@@ -18,6 +18,13 @@ export const Course = z.object({
     .regex(/^[a-z]{2}$/, "ISO 639-1 lower-case"),
   lessonCount: z.number().int().nonnegative(),
   moduleCount: z.number().int().nonnegative(),
+  /**
+   * The course's place in the catalog ladder, 1-based like
+   * {@link Module.sequence}. The home renders it as `Level {sequence}` and
+   * `CourseRepository.listAvailable` orders on it, so catalog order is data
+   * rather than the order an adapter happened to return rows in.
+   */
+  sequence: z.number().int().positive(),
 });
 
 export type Course = z.infer<typeof Course>;

@@ -17,6 +17,7 @@ const course = Course.parse({
   language: "en",
   lessonCount: 2,
   moduleCount: 1,
+  sequence: 1,
 });
 
 const module_ = Module.parse({
@@ -93,6 +94,136 @@ describe("findCourseCatalog", () => {
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value.entries[0]?.firstLesson).toBeNull();
+    }
+  });
+
+  it("previews the course's leading modules in sequence order", async () => {
+    const laterModule = Module.parse({
+      id: ModuleId.parse("22222222-2222-4222-8222-222222222223"),
+      courseId: course.id,
+      slug: "mod-2",
+      title: "Module 2",
+      sequence: 2,
+    });
+    const useCase = makeFindCourseCatalog({
+      courses: makeStubCourseRepository({ available: [course] }),
+      modules: makeStubModuleRepository({
+        listByCourse: { [course.id]: [laterModule, module_] },
+      }),
+      lessons: makeStubLessonRepository({
+        lessons: [lesson1, lesson2],
+        listByCourse: { [course.id]: [lesson1, lesson2] },
+      }),
+    });
+
+    const result = await useCase();
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.entries[0]?.leadingModules.map((m) => m.id)).toEqual([
+        module_.id,
+        laterModule.id,
+      ]);
+    }
+  });
+
+  it("caps the module preview so a ten-module course does not list them all", async () => {
+    const modules = Array.from({ length: 10 }, (_, index) =>
+      Module.parse({
+        id: ModuleId.parse(`22222222-2222-4222-8222-22222222220${index}`),
+        courseId: course.id,
+        slug: `mod-${index + 1}`,
+        title: `Module ${index + 1}`,
+        sequence: index + 1,
+      }),
+    );
+    const useCase = makeFindCourseCatalog({
+      courses: makeStubCourseRepository({ available: [course] }),
+      modules: makeStubModuleRepository({ listByCourse: { [course.id]: modules } }),
+      lessons: makeStubLessonRepository({ listByCourse: { [course.id]: [] } }),
+    });
+
+    const result = await useCase();
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      const leading = result.value.entries[0]?.leadingModules ?? [];
+      expect(leading.length).toBeLessThan(modules.length);
+      expect(leading.map((m) => m.sequence)).toEqual([1, 2, 3]);
+    }
+  });
+
+  it("returns an empty module preview when the course has no modules", async () => {
+    const useCase = makeFindCourseCatalog({
+      courses: makeStubCourseRepository({ available: [course] }),
+      modules: makeStubModuleRepository({ listByCourse: { [course.id]: [] } }),
+      lessons: makeStubLessonRepository({ listByCourse: { [course.id]: [] } }),
+    });
+
+    const result = await useCase();
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.entries).toHaveLength(1);
+      expect(result.value.entries[0]?.leadingModules).toEqual([]);
+    }
+  });
+
+  it("derives the preview from the modules it already loads, without a second call", async () => {
+    let listByCourseCalls = 0;
+    const modules = makeStubModuleRepository({ listByCourse: { [course.id]: [module_] } });
+    const countingModules = {
+      ...modules,
+      listByCourse: async (courseId: CourseId) => {
+        listByCourseCalls += 1;
+        return modules.listByCourse(courseId);
+      },
+    };
+    const useCase = makeFindCourseCatalog({
+      courses: makeStubCourseRepository({ available: [course] }),
+      modules: countingModules,
+      lessons: makeStubLessonRepository({
+        lessons: [lesson1],
+        listByCourse: { [course.id]: [lesson1] },
+      }),
+    });
+
+    await useCase();
+
+    expect(listByCourseCalls).toBe(1);
+  });
+
+  it("preserves the order the course repository returns", async () => {
+    // Ordering is the repository's guarantee (`listAvailable` sorts by
+    // `Course.sequence`); the use case must not shuffle it back.
+    const secondCourse = Course.parse({
+      id: CourseId.parse("11111111-1111-4111-8111-111111111112"),
+      slug: "course-2",
+      title: "Course 2",
+      description: "Desc",
+      language: "en",
+      lessonCount: 0,
+      moduleCount: 0,
+      sequence: 2,
+    });
+    const useCase = makeFindCourseCatalog({
+      courses: makeStubCourseRepository({ available: [course, secondCourse] }),
+      modules: makeStubModuleRepository({
+        listByCourse: { [course.id]: [module_], [secondCourse.id]: [] },
+      }),
+      lessons: makeStubLessonRepository({
+        listByCourse: { [course.id]: [lesson1], [secondCourse.id]: [] },
+      }),
+    });
+
+    const result = await useCase();
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.entries.map((entry) => entry.course.id)).toEqual([
+        course.id,
+        secondCourse.id,
+      ]);
     }
   });
 

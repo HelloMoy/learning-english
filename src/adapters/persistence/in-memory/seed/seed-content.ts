@@ -28,6 +28,7 @@ export const seedContentCourse = Course.parse({
   language: "en",
   lessonCount: 107,
   moduleCount: 10,
+  sequence: 2,
 });
 
 const _seedContentModuleRaw = [

@@ -27,6 +27,7 @@ const fixtures = () => {
     language: "en",
     lessonCount: 1,
     moduleCount: 1,
+    sequence: 1,
   });
   const courseModule = Module.parse({
     id: moduleId,

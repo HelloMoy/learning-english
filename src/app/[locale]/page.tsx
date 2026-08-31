@@ -1,9 +1,7 @@
 import { getCoursePlatformDeps } from "@/adapters/persistence/in-memory/use-case-dependencies/use-case-dependencies";
-import { CinemaHero } from "@/components/cinema-hero/cinema-hero";
-import { FeaturedCourse } from "@/components/featured-course/featured-course";
-import { courseOverviewPath } from "@/i18n/lesson-routes";
+import type { CourseLevel } from "@/components/course-ladder/course-ladder";
+import { HomeView } from "@/components/home-view/home-view";
 
-import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { cache, use } from "react";
 
@@ -17,59 +15,31 @@ const loadCatalog = cache(async () => {
   return result.isOk() ? result.value.entries : [];
 });
 
+/**
+ * The locale home route. A thin shell: it resolves the catalog through the
+ * use case and hands the levels to `HomeView`, mirroring how the course and
+ * module routes delegate to `CourseOverview` and `ModuleOverview`.
+ *
+ * Only the fields the ladder renders cross into the view — the catalog's
+ * `firstLesson` stays here, unread, rather than being serialized into the
+ * client payload for a card that never shows it.
+ */
 export default function Home({ params }: Props) {
   const { locale } = use(params);
   setRequestLocale(locale);
 
-  const t = useTranslations("HomePage");
-  const tCatalog = useTranslations("CourseCatalog.card");
   const entries = use(loadCatalog());
-  const featured = entries[0] ?? null;
-  const featuredPoster =
-    featured?.firstLesson?.kind === "video" ? (featured.firstLesson.poster ?? null) : null;
+  const levels: CourseLevel[] = entries.map((entry) => ({
+    course: entry.course,
+    leadingModules: entry.leadingModules,
+  }));
 
   return (
     <main
       id="main"
-      className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-12 sm:px-11 sm:py-20"
+      className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-14 px-4 py-12 sm:px-11 sm:py-20"
     >
-      {featured ? (
-        <div className="grid flex-1 items-start gap-12 lg:grid-cols-[1fr_auto]">
-          <CinemaHero
-            eyebrow={t("eyebrow")}
-            title={t("title")}
-            subtitle={t("subtitle")}
-            openLabel={t("openCourse")}
-            openHref={courseOverviewPath(featured.course)}
-            myListLabel={t("myList")}
-          />
-          <FeaturedCourse
-            course={featured.course}
-            href={courseOverviewPath(featured.course)}
-            posterUrl={featuredPoster}
-            featuredLabel={t("featuredLabel")}
-            featureLabel={t("featureLabel")}
-            featureHeadline={t("featureHeadline")}
-            countsLabel={`${tCatalog("moduleCount", { count: featured.course.moduleCount })} · ${tCatalog("lessonCount", { count: featured.course.lessonCount })}`}
-          />
-        </div>
-      ) : (
-        <div className="flex flex-col gap-5">
-          <CinemaHero
-            eyebrow={t("eyebrow")}
-            title={t("title")}
-            subtitle={t("subtitle")}
-            openLabel={t("openCourse")}
-            myListLabel={t("myList")}
-          />
-          <p
-            className="text-sm text-muted-foreground"
-            role="status"
-          >
-            {t("catalogEmpty")}
-          </p>
-        </div>
-      )}
+      <HomeView levels={levels} />
     </main>
   );
 }

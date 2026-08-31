@@ -11,6 +11,7 @@ const baseCourseShape = {
   language: "en",
   lessonCount: 3,
   moduleCount: 2,
+  sequence: 1,
 };
 
 describe("Course", () => {
@@ -65,6 +66,51 @@ describe("Course", () => {
     test("WHEN parsed THEN Zod throws", () => {
       // Arrange
       const input = { ...baseCourseShape, moduleCount: 1.5 };
+
+      // Act + Assert
+      expect(() => Course.parse(input)).toThrow();
+    });
+  });
+
+  describe("GIVEN a course carrying its catalog sequence", () => {
+    test("WHEN parsed THEN the sequence is returned", () => {
+      // Arrange
+      const input = { ...baseCourseShape, sequence: 2 };
+
+      // Act
+      const result = Course.parse(input);
+
+      // Assert
+      expect(result.sequence).toBe(2);
+    });
+  });
+
+  describe("GIVEN a course with a zero sequence", () => {
+    test("WHEN parsed THEN Zod throws", () => {
+      // Arrange
+      // Sequences are 1-based like `Module.sequence`: a zeroth level would
+      // render as `Level 0` in the home ladder.
+      const input = { ...baseCourseShape, sequence: 0 };
+
+      // Act + Assert
+      expect(() => Course.parse(input)).toThrow();
+    });
+  });
+
+  describe("GIVEN a course with a fractional sequence", () => {
+    test("WHEN parsed THEN Zod throws", () => {
+      // Arrange
+      const input = { ...baseCourseShape, sequence: 1.5 };
+
+      // Act + Assert
+      expect(() => Course.parse(input)).toThrow();
+    });
+  });
+
+  describe("GIVEN a course missing its sequence", () => {
+    test("WHEN parsed THEN Zod throws", () => {
+      // Arrange
+      const input = { ...baseCourseShape, sequence: undefined };
 
       // Act + Assert
       expect(() => Course.parse(input)).toThrow();

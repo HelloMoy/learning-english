@@ -28,6 +28,7 @@ function buildCourseFixture() {
     language: "en",
     lessonCount: 3,
     moduleCount: 1,
+    sequence: 1,
   });
   const courseModule = Module.parse({
     id: moduleId,
@@ -68,6 +69,7 @@ function buildTwoModuleCourseFixture() {
     language: "en",
     lessonCount: 3,
     moduleCount: 2,
+    sequence: 1,
   });
   const courseModule1 = Module.parse({
     id: module1Id,
