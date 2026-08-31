@@ -210,6 +210,21 @@ describe("ModuleList", () => {
     expect(container.querySelectorAll("svg")).toHaveLength(threeModules.length);
   });
 
+  test("WHEN a module's lessons are scrolled THEN its title stays pinned below the outline heading", () => {
+    // Act
+    renderThreeModules();
+
+    // Assert — the outline is a bounded scroll region, so a long module's
+    // lessons would otherwise carry their own module title out of sight.
+    // The offset comes from the heading that sits above it. The opaque
+    // background keeps lesson rows passing behind the title, not through
+    // it. Class assertions, as elsewhere for layout-only concerns.
+    const toggle = screen.getByRole("button", { name: "Module A" });
+    expect(toggle).toHaveClass("sticky");
+    expect(toggle).toHaveClass("bg-card");
+    expect(toggle.className).toMatch(/top-\[var\(--outline-heading-offset/);
+  });
+
   test("WHEN the module title is reached by keyboard THEN Enter and Space toggle it", async () => {
     // Arrange
     const user = userEvent.setup();

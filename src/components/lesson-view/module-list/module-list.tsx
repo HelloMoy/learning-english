@@ -31,6 +31,13 @@ import { LessonList } from "../lesson-list/lesson-list";
  * Expansion is intentionally ephemeral: it is seeded on mount and never
  * persisted, so a reload or a navigation returns to "current module open".
  *
+ * Each module title pins itself just below the outline heading while its own
+ * lessons are on screen, so a learner scrolling a nine-exercise module never
+ * loses sight of which module the exercises belong to. The offset comes from
+ * `--outline-heading-offset`, published by the `Outline`. The title's
+ * padding replaces what would otherwise be a transparent margin below it —
+ * rows must pass behind the pinned title, never through a gap under it.
+ *
  * @param course - The course the modules belong to; passed through to each lesson link
  * @param modules - Modules to render, already sorted by `sequence`
  * @param lessonsByModuleId - Precomputed moduleId → lessons map, each list sorted by `sequence`
@@ -76,15 +83,12 @@ export function ModuleList({
         const lessons = lessonsByModuleId.get(mod.id) ?? [];
         const isOpen = openModuleIds.has(mod.id);
         return (
-          <li
-            key={mod.id}
-            className="space-y-1"
-          >
+          <li key={mod.id}>
             <button
               type="button"
               aria-expanded={isOpen}
               onClick={() => toggleModule(mod.id)}
-              className="flex min-h-9 w-full items-center justify-between gap-2 rounded px-1 py-1 text-left text-sm font-semibold text-foreground hover:text-gold focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+              className="sticky top-[var(--outline-heading-offset,0rem)] z-[5] flex min-h-9 w-full items-center justify-between gap-2 rounded bg-card px-1 pt-1 pb-2 text-left text-sm font-semibold text-foreground hover:text-gold focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
             >
               {mod.title}
               <ChevronRight
