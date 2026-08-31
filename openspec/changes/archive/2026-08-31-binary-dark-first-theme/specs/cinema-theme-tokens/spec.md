@@ -1,9 +1,5 @@
-# Capability: cinema-theme-tokens
+## MODIFIED Requirements
 
-## Purpose
-
-Define the "Immersion Cinema" design tokens and the shared presentational primitives that the four locale views (home, course overview, module overview, lesson view) compose. The token layer wires the application's color palette as CSS custom properties in `src/app/globals.css`, exposing a warm light variant on `:root` and a warm dark variant on `.dark`, both derived from the gold/amber hue family. The primitives layer provides reusable, accessible building blocks (`CinemaBackground`, `Brand`, section eyebrow, `PosterCard`, `GoldBadge`, `PlayButton`) so the views compose a coherent cinematic experience without re-implementing its visual language.
-## Requirements
 ### Requirement: Immersion Cinema token layer with two accessible variants
 
 The application SHALL define its color tokens as an "Immersion Cinema" palette in `src/app/globals.css`, exposing a warm light variant on `:root` and a warm dark variant on `.dark`, both derived from the gold/amber hue family. The dark variant SHALL use the mockup values (`bg #08080b`, `ink #f4f1ea`, `gold #e7b64c`, `amber #f0c869`). Existing semantic utilities (`bg-background`, `text-foreground`, `text-ink`, `bg-card`, `text-muted-foreground`, `bg-signal-yellow`) SHALL resolve to cinema colors without requiring per-component className changes.
@@ -66,4 +62,3 @@ Because an earlier build persisted `system` as a theme, the control SHALL treat 
 #### Scenario: The toggle never names a third theme
 - **WHEN** the theme toggle renders in any locale, in either state
 - **THEN** its visible text and its accessible name read either the dark or the light theme's name, and no "system" wording appears
-

@@ -5,9 +5,23 @@ import { useIsHydrated } from "@/hooks/use-is-hydrated/use-is-hydrated";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 
-type Theme = "light" | "dark" | "system";
+type Theme = "light" | "dark";
 
-const THEMES: Theme[] = ["light", "dark", "system"];
+/**
+ * Resolve whatever `next-themes` hands us into one of the two themes the app
+ * recognises.
+ *
+ * An earlier build ran with `enableSystem` and persisted `"system"` to real
+ * browsers, so that value is still in learners' `localStorage` and is what
+ * `useTheme()` returns on their next visit. Disabling `enableSystem` governs
+ * what the library will *write*; it does not sanitise what is already stored.
+ *
+ * The rule is deliberately "light, or else dark" rather than a list of the
+ * invalid inputs: dark is the default, so anything that is not an explicit
+ * choice of light lands there — which keeps this correct against a corrupted
+ * or hand-edited storage entry, not just against the one legacy value.
+ */
+const resolveTheme = (stored: string | undefined): Theme => (stored === "light" ? "light" : "dark");
 
 /**
  * Theme switcher backed by `next-themes`.
@@ -29,8 +43,11 @@ const THEMES: Theme[] = ["light", "dark", "system"];
  * it reports `false` for both the server render and the hydration render,
  * so the placeholder is what both passes emit.
  *
- * Cycles through `light` → `dark` → `system` on click. Keyboard accessible
- * via the native `<button>` element.
+ * Swaps between `dark` and `light` on click — one press always reaches the
+ * other theme. There is no third state: Immersion Cinema is a dark design, so
+ * dark is the default and light is the alternate a learner opts into, rather
+ * than either being selected on their behalf by an OS setting. Keyboard
+ * accessible via the native `<button>` element.
  */
 export function ThemeToggle() {
   const t = useTranslations("ThemeToggle");
@@ -50,19 +67,18 @@ export function ThemeToggle() {
     );
   }
 
-  const currentIndex = THEMES.indexOf(theme as Theme);
-  const nextIndex = (currentIndex + 1) % THEMES.length;
-  const nextTheme = THEMES[nextIndex]!;
+  const currentTheme = resolveTheme(theme);
+  const nextTheme: Theme = currentTheme === "dark" ? "light" : "dark";
 
   return (
     <button
       type="button"
-      aria-label={`${t("label")}: ${t(theme as Theme)}`}
+      aria-label={`${t("label")}: ${t(currentTheme)}`}
       onClick={() => setTheme(nextTheme)}
       className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-border bg-foreground/5 px-3 text-xs text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
     >
       <span aria-hidden="true">◐</span>
-      <span className="hidden sm:inline">{t(theme as Theme)}</span>
+      <span className="hidden sm:inline">{t(currentTheme)}</span>
     </button>
   );
 }

@@ -30,8 +30,7 @@
   "ThemeToggle": {
     "label": "Tema",
     "light": "Claro",
-    "dark": "Oscuro",
-    "system": "Sistema"
+    "dark": "Oscuro"
   },
   "Components": {
     "CourseNavigator": {
