@@ -87,3 +87,27 @@ export const Default: Story = {};
 export const WithPosters: Story = {
   args: { lessons: mixedLessons },
 };
+
+/**
+ * The failure the `sm:truncate` breakpoint exists to prevent. The real
+ * course's largest module is 16 rows whose titles all begin
+ * "Exercise N Pronunciation Step By Step Lesson"; cut to one line on a phone
+ * every row reads "Exercise 1 Pronunciati…" and the list stops being a way to
+ * choose a lesson. At this width the titles must wrap.
+ */
+export const SharedPrefixTitlesOnPhone: Story = {
+  args: {
+    lessons: lessons.map((lesson, index) =>
+      Lesson.parse({
+        ...lesson,
+        title: `Exercise ${index + 1} Pronunciation Step By Step Lesson`,
+      }),
+    ),
+  },
+  parameters: {
+    viewport: {
+      options: { phone320: { name: "320px", styles: { width: "320px", height: "720px" } } },
+    },
+  },
+  globals: { viewport: { value: "phone320" } },
+};

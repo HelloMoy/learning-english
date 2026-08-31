@@ -52,3 +52,43 @@ export const LessonSection: Story = {
     },
   },
 };
+
+/**
+ * The narrowest supported viewport. Below `sm` the wordmark steps down a type
+ * scale, the section eyebrow drops, the locale control shows its ISO code, and
+ * the theme toggle goes icon-only — together they fit the 288px of usable width
+ * a 320px screen leaves. Anything wider than that and the whole document
+ * scrolls sideways, which is what this set exists to catch.
+ */
+export const NarrowPhone: Story = {
+  parameters: {
+    nextjs: { navigation: { pathname: "/" } },
+    viewport: {
+      options: { phone320: { name: "320px", styles: { width: "320px", height: "720px" } } },
+    },
+  },
+  globals: { viewport: { value: "phone320" } },
+};
+
+/** The same header in Spanish, whose longer labels are the worst case for width. */
+export const NarrowPhoneSpanish: Story = {
+  parameters: {
+    locale: "es",
+    nextjs: { navigation: { pathname: "/" } },
+    viewport: {
+      options: { phone320: { name: "320px", styles: { width: "320px", height: "720px" } } },
+    },
+  },
+  globals: { viewport: { value: "phone320" } },
+};
+
+/** iPhone-class width — the common case, one step up from the floor. */
+export const Phone390: Story = {
+  parameters: {
+    nextjs: { navigation: { pathname: "/" } },
+    viewport: {
+      options: { phone390: { name: "390px", styles: { width: "390px", height: "844px" } } },
+    },
+  },
+  globals: { viewport: { value: "phone390" } },
+};

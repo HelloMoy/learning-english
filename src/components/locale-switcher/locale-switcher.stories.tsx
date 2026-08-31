@@ -41,3 +41,19 @@ export const Spanish: Story = {
 export const Portuguese: Story = {
   parameters: { locale: "pt" },
 };
+
+/**
+ * The phone variant. Below `sm` the trigger shows the locale's ISO code
+ * instead of its full name — the control's whole reason for existing as a
+ * button rather than a `<select>`, whose width would still be dictated by
+ * "Portugués" no matter what was on screen.
+ */
+export const NarrowPhone: Story = {
+  parameters: {
+    locale: "es",
+    viewport: {
+      options: { phone320: { name: "320px", styles: { width: "320px", height: "720px" } } },
+    },
+  },
+  globals: { viewport: { value: "phone320" } },
+};

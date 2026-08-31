@@ -33,13 +33,19 @@ export function SiteHeader() {
       aria-label={t("navLabel")}
     >
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-11">
-        <div className="flex items-baseline gap-4">
+        {/* `min-w-0` is what lets flex-shrink engage at all: a flex item's
+            default `min-width: auto` floors it at its intrinsic content width,
+            and the wordmark has no spaces to wrap at. Without it the row's
+            minimum was 512px and the whole document scrolled sideways on every
+            phone. `overflow-hidden` bounds the worst case to a clipped
+            wordmark rather than a sideways-scrolling page. */}
+        <div className="flex min-w-0 shrink items-baseline gap-4 overflow-hidden">
           <Brand />
           <span className="hidden text-[10px] tracking-[0.24em] text-muted-foreground uppercase sm:inline">
             {t("tagline")} · {section}
           </span>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex min-w-0 shrink-0 items-center gap-2.5">
           <LocaleSwitcher />
           <ThemeToggle />
         </div>
