@@ -65,4 +65,45 @@ describe("Outline", () => {
     expect(screen.getByText("Module")).toBeInTheDocument();
     expect(screen.getByText("Lesson")).toBeInTheDocument();
   });
+
+  test("WHEN the outline is scrolled THEN its heading stays pinned to the top of the region", () => {
+    // Act
+    render(
+      <Outline
+        course={course}
+        modules={[mod]}
+        lessonsByModuleId={new Map([[mod.id, [lesson]]])}
+        currentLessonId={lesson.id}
+      />,
+    );
+
+    // Assert — the shell bounds the outline and scrolls it to the current
+    // lesson, which would carry the heading out of sight. Pinning it keeps
+    // the sidebar labelled; the opaque background stops rows showing
+    // through. Class assertions, as elsewhere for layout-only concerns.
+    const heading = screen.getByRole("heading", { name: "title" });
+    expect(heading).toHaveClass("sticky");
+    expect(heading).toHaveClass("top-0");
+    expect(heading).toHaveClass("bg-card");
+  });
+
+  test("WHEN the shell already names the region THEN the outline renders no second heading", () => {
+    // Act — `showHeading={false}` is how a shell whose own control already
+    // says "Course outline" (the mobile drawer's <summary>) avoids showing
+    // the same words twice.
+    render(
+      <Outline
+        course={course}
+        modules={[mod]}
+        lessonsByModuleId={new Map([[mod.id, [lesson]]])}
+        currentLessonId={lesson.id}
+        showHeading={false}
+      />,
+    );
+
+    // Assert — the visible heading is gone, but the region keeps its
+    // accessible name, so assistive technology loses nothing.
+    expect(screen.queryByRole("heading", { name: "title" })).not.toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "title" })).toBeInTheDocument();
+  });
 });

@@ -274,3 +274,38 @@ test.describe("Lesson Page — locale awareness", () => {
     await expect(page.getByRole("button", { name: /marcar como completada/i })).toBeVisible();
   });
 });
+
+/**
+ * Regression guard for the change `outline-current-lesson-visibility`.
+ *
+ * The outline marks the current lesson, but on the 107-lesson course the
+ * sidebar was taller than the viewport and scrolled with the page, so a
+ * lesson from a late module opened with its mark far below the fold. This
+ * must live at the e2e layer: it is a claim about real layout, and jsdom
+ * has none — every rect there reads back as zero.
+ */
+test.describe("Lesson Page — the outline shows where the learner is", () => {
+  const MID_LESSON_OF_LAST_MODULE =
+    LAST_MODULE_LESSONS[Math.floor(LAST_MODULE_LESSONS.length / 2)]!;
+
+  test("WHEN a lesson in the last module opens THEN the outline has scrolled it into view and the page has not moved", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(lessonUrl("en", LAST_MODULE.slug, MID_LESSON_OF_LAST_MODULE.id));
+
+    // The desktop outline is the only one in the accessibility tree at this
+    // width; the mobile drawer is display:none.
+    const outline = page.getByRole("navigation", { name: /course outline/i });
+    const currentLesson = outline.locator('[aria-current="page"]');
+
+    await expect(currentLesson).toHaveText(
+      new RegExp(escapeRegExp(MID_LESSON_OF_LAST_MODULE.title)),
+    );
+    await expect(currentLesson).toBeInViewport();
+
+    // Positioning the outline must not have dragged the learner away from
+    // the player they just opened.
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  });
+});
