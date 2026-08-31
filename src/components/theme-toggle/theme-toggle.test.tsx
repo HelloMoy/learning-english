@@ -35,13 +35,16 @@ vi.mock("@/hooks/use-is-hydrated/use-is-hydrated", () => ({
 
 const mockUseTheme = vi.mocked(useTheme);
 
+/** The only two themes the app recognises. `system` is deliberately absent. */
+const THEMES = ["dark", "light"] as const;
+
 describe("ThemeToggle", () => {
   beforeEach(() => {
     isHydrated = true;
     mockUseTheme.mockReturnValue({
       theme: "light",
       setTheme: vi.fn(),
-      themes: ["light", "dark", "system"],
+      themes: [...THEMES],
       resolvedTheme: "light",
       systemTheme: undefined,
     });
@@ -173,6 +176,28 @@ describe("ThemeToggle", () => {
     });
   });
 
+  describe("GIVEN the current theme is 'dark'", () => {
+    test("WHEN the user clicks the toggle THEN setTheme is called with 'light'", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      const setTheme = vi.fn();
+      mockUseTheme.mockReturnValue({
+        theme: "dark",
+        setTheme,
+        themes: [...THEMES],
+        resolvedTheme: "dark",
+        systemTheme: undefined,
+      });
+      render(<ThemeToggle />);
+
+      // Act
+      await user.click(screen.getByRole("button", { name: /Dark/i }));
+
+      // Assert
+      expect(setTheme).toHaveBeenCalledWith("light");
+    });
+  });
+
   describe("GIVEN the current theme is 'light'", () => {
     test("WHEN the user clicks the toggle THEN setTheme is called with 'dark'", async () => {
       // Arrange
@@ -181,7 +206,7 @@ describe("ThemeToggle", () => {
       mockUseTheme.mockReturnValue({
         theme: "light",
         setTheme,
-        themes: ["light", "dark", "system"],
+        themes: [...THEMES],
         resolvedTheme: "light",
         systemTheme: undefined,
       });
@@ -195,59 +220,83 @@ describe("ThemeToggle", () => {
     });
   });
 
-  describe("GIVEN the current theme is 'dark'", () => {
-    test("WHEN the user clicks the toggle THEN setTheme is called with 'system'", async () => {
-      // Arrange
-      const user = userEvent.setup();
-      const setTheme = vi.fn();
-      mockUseTheme.mockReturnValue({
-        theme: "dark",
-        setTheme,
-        themes: ["light", "dark", "system"],
-        resolvedTheme: "dark",
-        systemTheme: undefined,
-      });
-      render(<ThemeToggle />);
+  describe("GIVEN the toggle is binary", () => {
+    test.each(THEMES)(
+      "WHEN the user clicks the toggle from '%s' THEN setTheme is never called with 'system'",
+      async (theme) => {
+        // Arrange — the guard that the third state is gone rather than merely
+        // unreachable by the one path the cycle tests happen to walk.
+        const user = userEvent.setup();
+        const setTheme = vi.fn();
+        mockUseTheme.mockReturnValue({
+          theme,
+          setTheme,
+          themes: [...THEMES],
+          resolvedTheme: theme,
+          systemTheme: undefined,
+        });
+        render(<ThemeToggle />);
 
-      // Act
-      await user.click(screen.getByRole("button", { name: /Dark/i }));
+        // Act
+        await user.click(screen.getByRole("button"));
 
-      // Assert
-      expect(setTheme).toHaveBeenCalledWith("system");
-    });
+        // Assert
+        expect(setTheme).not.toHaveBeenCalledWith("system");
+      },
+    );
   });
 
-  describe("GIVEN the current theme is 'system'", () => {
-    test("WHEN the user clicks the toggle THEN setTheme is called with 'light' (cycle wraps)", async () => {
+  describe("GIVEN a returning learner whose storage still holds 'system'", () => {
+    test("WHEN rendered THEN the toggle reports dark, the new default", () => {
+      // Arrange — the previous build wrote "system" to real browsers, so this
+      // is what `useTheme()` hands the component on their next visit. It is
+      // in neither theme list; without normalising it the button would show a
+      // state it cannot name.
+      mockUseTheme.mockReturnValue({
+        theme: "system",
+        setTheme: vi.fn(),
+        themes: [...THEMES],
+        resolvedTheme: undefined,
+        systemTheme: "light",
+      });
+
+      // Act
+      render(<ThemeToggle />);
+
+      // Assert
+      expect(screen.getByRole("button")).toHaveAttribute("aria-label", "label: dark");
+    });
+
+    test("WHEN the user clicks the toggle THEN setTheme is called with 'light'", async () => {
       // Arrange
       const user = userEvent.setup();
       const setTheme = vi.fn();
       mockUseTheme.mockReturnValue({
         theme: "system",
         setTheme,
-        themes: ["light", "dark", "system"],
+        themes: [...THEMES],
         resolvedTheme: undefined,
         systemTheme: "light",
       });
       render(<ThemeToggle />);
 
       // Act
-      await user.click(screen.getByRole("button", { name: /System/i }));
+      await user.click(screen.getByRole("button"));
 
-      // Assert
+      // Assert — having resolved to dark, one press moves them to light.
       expect(setTheme).toHaveBeenCalledWith("light");
     });
   });
 
   describe("GIVEN a randomized theme label", () => {
     test("WHEN rendered THEN the button reflects the resolved theme label", () => {
-      // Arrange — randomly pick one of the three themes for fuzz coverage
-      const theme = faker.helpers.arrayElement(["light", "dark", "system"] as const);
+      // Arrange — randomly pick one of the two themes for fuzz coverage
+      const theme = faker.helpers.arrayElement(THEMES);
       mockUseTheme.mockReturnValue({
         theme,
         setTheme: vi.fn(),
-        themes: ["light", "dark", "system"],
-        resolvedTheme: theme === "system" ? "light" : theme,
+        themes: [...THEMES],
+        resolvedTheme: theme,
         systemTheme: undefined,
       });
 

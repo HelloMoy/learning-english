@@ -71,10 +71,18 @@ export default async function LocaleLayout({ children, params }: Props) {
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <NextIntlClientProvider>
+          {/* `enableSystem={false}` is what actually stops the OS deciding:
+              with it on, `next-themes` keeps `system` in its theme list and a
+              `prefers-color-scheme` listener alive, so changing only the
+              default would still leave a stored `system` driven by the OS.
+              `themes` is named explicitly rather than left to the library's
+              default so the app's two themes are stated where they are
+              configured. */}
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
-            enableSystem
+            defaultTheme="dark"
+            enableSystem={false}
+            themes={["dark", "light"]}
             disableTransitionOnChange
           >
             <SkipLink />
