@@ -201,6 +201,31 @@ describe("ModuleOverview", () => {
     expect(screen.getAllByRole("link")).toHaveLength(4);
   });
 
+  test("WHEN the header renders THEN it carries no decorative hero tile", () => {
+    // Act
+    const { container } = render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonA]}
+      />,
+    );
+
+    // Assert — the tile showed the uppercased first word of the module title
+    // beside a repeat of the ordinal. Read through the DOM rather than a role
+    // query: the tile was `aria-hidden`, so getByText could never see it and
+    // would pass whether or not it renders. The header's real content stays.
+    expect(container.textContent).not.toContain("CONTRACTIONS");
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Contractions Reductions" }),
+    ).toBeVisible();
+    expect(
+      screen.getByText('CourseCatalog.moduleOverview.moduleLabel:{"number":"03"}', {
+        exact: false,
+      }),
+    ).toBeInTheDocument();
+  });
+
   test("back link returns to the course overview", () => {
     render(
       <ModuleOverview
