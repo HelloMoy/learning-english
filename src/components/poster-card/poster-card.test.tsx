@@ -14,7 +14,7 @@ describe("PosterCard", () => {
     );
     const link = screen.getByRole("link", { name: /Contractions Reductions/ });
     expect(link).toHaveAttribute("href", "/courses/c/modules/m");
-    // The oversized episode number is part of the poster.
+    // The oversized sequence number is part of the poster.
     expect(screen.getByText("03")).toBeInTheDocument();
   });
 

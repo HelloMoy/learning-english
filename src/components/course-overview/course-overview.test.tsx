@@ -2,8 +2,9 @@ import { Course } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
+import type { ModuleSummary } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
 
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -36,6 +37,7 @@ const mod2 = Module.parse({
   ...mod1,
   id: ModuleId.parse("33333333-3333-4333-8333-333333333333"),
   slug: "mod-2",
+  title: "Module 2",
   sequence: 2,
 });
 
@@ -51,6 +53,36 @@ const firstLesson = Lesson.parse({
   durationSeconds: 240,
 });
 
+const summaryFor = (module: Module): ModuleSummary => ({
+  moduleId: module.id,
+  lessonCount: 2,
+  totalDurationSeconds: 600,
+  leadingLessons: [
+    {
+      id: LessonId.parse("55555555-5555-4555-8555-555555555555"),
+      sequence: 1,
+      title: `${module.title} lesson one`,
+      poster: "/local-filesystem-lesson/poster.jpeg",
+    },
+  ],
+});
+
+const renderOverview = (overrides?: {
+  modules?: Module[];
+  moduleSummaries?: ModuleSummary[];
+  firstLesson?: Lesson | null;
+}) => {
+  const modules = overrides?.modules ?? [mod1, mod2];
+  return render(
+    <CourseOverview
+      course={course}
+      modules={modules}
+      moduleSummaries={overrides?.moduleSummaries ?? modules.map(summaryFor)}
+      firstLesson={overrides?.firstLesson === undefined ? firstLesson : overrides.firstLesson}
+    />,
+  );
+};
+
 describe("CourseOverview", () => {
   beforeEach(() => {
     mockUseTranslations.mockImplementation(
@@ -62,14 +94,8 @@ describe("CourseOverview", () => {
     );
   });
 
-  test("renders the course title, module list and a Start course CTA when a first lesson exists", () => {
-    render(
-      <CourseOverview
-        course={course}
-        modules={[mod1, mod2]}
-        firstLesson={firstLesson}
-      />,
-    );
+  test("renders the course title and a Start course CTA when a first lesson exists", () => {
+    renderOverview();
     expect(screen.getByRole("heading", { level: 1, name: "Course 1" })).toBeInTheDocument();
     expect(screen.getByTestId("start-course")).toHaveAttribute(
       "href",
@@ -77,31 +103,44 @@ describe("CourseOverview", () => {
     );
   });
 
-  test("renders one poster per module linking to its module overview (no practice track)", () => {
-    render(
-      <CourseOverview
-        course={course}
-        modules={[mod1, mod2]}
-        firstLesson={firstLesson}
-      />,
-    );
-    const grid = screen.getByTestId("course-episode-grid");
-    const links = within(grid).getAllByRole("link");
-    expect(links).toHaveLength(2);
-    expect(links[0]).toHaveAttribute("href", "/courses/course-1/modules/mod-1");
-    expect(links[1]).toHaveAttribute("href", "/courses/course-1/modules/mod-2");
-    // The old practice track is gone.
+  test("renders one showcase card per module, numbered in sequence", () => {
+    renderOverview();
+    const ordinals = screen.getAllByTestId("module-showcase-ordinal");
+    expect(ordinals).toHaveLength(2);
+    expect(ordinals[0]).toHaveTextContent('moduleOrdinal:{"number":1}');
+    expect(ordinals[1]).toHaveTextContent('moduleOrdinal:{"number":2}');
+    const cards = [...screen.getByTestId("course-module-list").children];
+    expect(cards).toHaveLength(2);
+    for (const card of cards) expect(card.tagName).toBe("LI");
+  });
+
+  test("each card links to its module overview", () => {
+    renderOverview();
+    const ctas = screen.getAllByTestId("module-showcase-cta");
+    expect(ctas).toHaveLength(2);
+    expect(ctas[0]).toHaveAttribute("href", "/courses/course-1/modules/mod-1");
+    expect(ctas[1]).toHaveAttribute("href", "/courses/course-1/modules/mod-2");
+  });
+
+  test("drops the retired season heading, poster grid and Module badge", () => {
+    renderOverview();
+    // The grid and the practice track that preceded it are both gone.
+    expect(screen.queryByTestId("course-episode-grid")).toBeNull();
     expect(screen.queryByTestId("course-track")).toBeNull();
+    expect(screen.queryByTestId("poster-card")).toBeNull();
+    const overview = screen.getByTestId("course-overview");
+    expect(overview.textContent).not.toContain("season");
+    expect(overview.textContent).not.toContain("limitedSeries");
+    expect(overview.textContent).not.toContain("moduleLabel");
+  });
+
+  test("skips a module that has no summary rather than crashing", () => {
+    renderOverview({ moduleSummaries: [summaryFor(mod1)] });
+    expect(screen.getAllByTestId("module-showcase-ordinal")).toHaveLength(1);
   });
 
   test("omits the Start course CTA when the course has no first lesson", () => {
-    render(
-      <CourseOverview
-        course={course}
-        modules={[mod1, mod2]}
-        firstLesson={null}
-      />,
-    );
+    renderOverview({ firstLesson: null });
     expect(screen.queryByTestId("start-course")).toBeNull();
   });
 });

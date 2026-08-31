@@ -77,7 +77,7 @@ type Story = StoryObj<typeof ModuleOverview>;
 export const Default: Story = {};
 
 /**
- * Episode rows showing their own artwork. The fourth lesson has no poster
+ * Video rows showing their own artwork. The fourth lesson has no poster
  * and keeps the gradient tile with its play circle.
  *
  * The thumbnails are clickable and lead to the same lesson as "Open", but

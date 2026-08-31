@@ -18,7 +18,7 @@ import { useTransition } from "react";
  * arrival, and a mark survives a reload and a server restart.
  *
  * **The click writes to two places, on purpose.** It records the lesson in
- * the browser `ProgressTracker`, which is what the outline and episode-list
+ * the browser `ProgressTracker`, which is what the outline and video-list
  * indicators read, and it still calls the `markLessonComplete` Server
  * Action against the server's in-memory tracker. The Server Action is not
  * dead code: it is the path per-user progress will take when auth lands, so

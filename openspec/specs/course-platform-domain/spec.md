@@ -3,9 +3,7 @@
 ## Purpose
 
 Define the domain primitives for a course platform: entities (`Course`, `Lesson`, `Module`, `Resource` and value objects), ports for accessing collaborators (`CourseRepository`, `LessonRepository`, `ModuleRepository`, `ResourceRepository`, `ProgressTracker`, `Clock`, `IdGenerator`), and the use cases (`findNextLessonToRecommend`, `findLessonForView`, `markLessonComplete`). Use cases return `ResultAsync<T, DomainError>` via `neverthrow`; they never throw. The domain owns its error model and reaches outside only through declared ports — it knows nothing about Next.js, React, Server Actions, i18n, or any other delivery mechanism.
-
 ## Requirements
-
 ### Requirement: Domain entities are Zod schemas
 
 The domain SHALL define `Course`, `Lesson`, `Module`, `Resource`, and the value objects `CourseId`, `LessonId`, `ModuleId`, `ResourceId`, and `Slug` as Zod schemas under `src/domain/entities/**`. Entities SHALL be importable from `import type { Course, Lesson, Module, Resource } from "@/domain/entities/..."` and runtime-validated with `Lesson.parse(...)` / `Course.parse(...)` / `Module.parse(...)` / `Resource.parse(...)`.
@@ -61,7 +59,7 @@ The set of use cases SHALL include at minimum:
 - `findLessonForView({ courseSlug, moduleSlug, lessonId })` — returns a `View` object `{ course, module, lesson, resources, nextLesson }` composed from the ports, or a domain error.
 - `markLessonComplete({ lessonId })` — returns `{ completed: true }` on success or a domain error. In v1 the underlying storage is in-memory and ephemeral; the contract is unchanged when persistence arrives.
 - `findCourseCatalog()` — returns the ordered course catalog view, including the first entry lesson needed by the course card/CTA, or a domain error.
-- `findCourseForView({ courseSlug })` — returns the resolved course, its ordered modules and deterministic first lesson, or a domain error.
+- `findCourseForView({ courseSlug })` — returns the resolved course, its ordered modules, a per-module lesson summary, and the deterministic first lesson, or a domain error. The summary for a module reports its lesson count, the combined duration of its video lessons in seconds, and its leading lessons in `sequence` order. It is derived from the lessons the use case already loads to compute the first lesson, so exposing it SHALL NOT introduce an additional repository call.
 - `findModuleForView({ courseSlug, moduleSlug })` — returns the resolved course, module and only that module's ordered lessons, or a domain error.
 - `findLessonNotes({ lessonId })` — returns the lesson's Markdown notes and source Resource, `null` when no notes exist, or a domain error.
 - `recordPlaybackPosition({ lessonId, seconds })` — validates the lesson exists and writes the playback position through `PlaybackPositionRepository.setPosition`, returning `{ recorded: true }` on success or a domain error. The persisted position is per-device (localStorage) in v1; the use case contract is unchanged when a server-backed adapter is introduced.
@@ -82,6 +80,18 @@ The set of use cases SHALL include at minimum:
 #### Scenario: `findLessonForView` returns a domain error on invalid input
 - **WHEN** the input references a course, module, or lesson that does not exist
 - **THEN** the use case resolves to `{ ok: false, error: { kind: "course-not-found" | "module-not-in-course" | "lesson-not-in-module" } }`
+
+#### Scenario: `findCourseForView` summarizes each module's lessons
+- **WHEN** a course resolves with modules whose lessons carry durations and posters
+- **THEN** the use case resolves with one summary per module reporting that module's lesson count, the combined duration of its video lessons, and its leading lessons in `sequence` order
+
+#### Scenario: `findCourseForView` summarizes a module holding no lessons
+- **WHEN** a module has no lessons
+- **THEN** its summary reports a lesson count of zero, a combined duration of zero, and an empty list of leading lessons, rather than being omitted from the result
+
+#### Scenario: `findCourseForView` does not add a repository call for the summary
+- **WHEN** the use case runs against instrumented repositories
+- **THEN** it calls `LessonRepository.listByCourse` exactly once, deriving both the first lesson and every module summary from that single result
 
 #### Scenario: `markLessonComplete` resolves to `{ completed: true }` on success
 - **WHEN** a valid `lessonId` is passed
@@ -180,3 +190,4 @@ The server dependency graph SHALL continue to bind the in-memory adapter, whose 
 #### Scenario: Durability depends on the bound adapter, not on the use case
 - **WHEN** the same use case runs against the browser `localStorage` adapter instead of the in-memory one
 - **THEN** the result shape is unchanged, and the completed state remains observable after a reload or a server restart on that device
+

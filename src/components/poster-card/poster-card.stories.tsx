@@ -24,10 +24,10 @@ const meta: Meta<typeof PosterCard> = {
 export default meta;
 type Story = StoryObj<typeof PosterCard>;
 
-export const Episode: Story = {};
+export const Numbered: Story = {};
 
 export const WithBadge: Story = {
-  args: { badge: <span className="text-[11px] text-gold">6 episodes</span> },
+  args: { badge: <span className="text-[11px] text-gold">6 videos</span> },
 };
 
 export const Feature: Story = {

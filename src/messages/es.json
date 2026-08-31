@@ -108,36 +108,41 @@
   },
   "CourseCatalog": {
     "card": {
-      "moduleCount": "{count, plural, =0 {Sin módulos} one {# módulo} other {# módulos}}",
-      "lessonCount": "{count, plural, =0 {Sin lecciones} one {# lección} other {# lecciones}}",
+      "moduleCount": "{count, plural, =0 {Sin lecciones} one {# lección} other {# lecciones}}",
+      "lessonCount": "{count, plural, =0 {Sin videos} one {# video} other {# videos}}",
       "open": "Abrir curso",
       "posterAlt": "Imagen del curso {title}"
     },
     "courseOverview": {
       "title": "{title}",
-      "moduleCount": "{count, plural, =0 {Sin módulos} one {# módulo} other {# módulos}}",
-      "lessonCount": "{count, plural, =0 {Sin lecciones} one {# lección} other {# lecciones}}",
+      "moduleCount": "{count, plural, =0 {Sin lecciones} one {# lección} other {# lecciones}}",
+      "lessonCount": "{count, plural, =0 {Sin videos} one {# video} other {# videos}}",
       "openModule": "Abrir módulo",
       "startCourse": "Comenzar curso",
       "trackLabel": "Módulos del curso en orden",
       "courseNotFound": "No encontramos este curso.",
       "goHome": "Ir al inicio",
-      "limitedSeries": "Serie limitada",
-      "season": "Temporada 1 · {count, plural, one {# episodio} other {# episodios}}",
-      "moduleLabel": "Módulo",
-      "episodesGridLabel": "Episodios del curso"
+      "moduleOrdinal": "Lección {number}",
+      "videoCount": "{count, plural, =0 {Sin videos} one {# video} other {# videos}}",
+      "durationMinutes": "{minutes} min",
+      "durationHours": "{hours} h",
+      "durationHoursMinutes": "{hours} h {minutes} min",
+      "moduleMeta": "{videos} · {duration}",
+      "viewVideos": "Ver videos",
+      "remainingVideos": "+{count} más",
+      "moduleListLabel": "Lecciones del curso"
     },
     "moduleOverview": {
       "title": "{title}",
-      "lessonCount": "{count, plural, =0 {Sin lecciones} one {# lección} other {# lecciones}}",
+      "lessonCount": "{count, plural, =0 {Sin videos} one {# video} other {# videos}}",
       "openLesson": "Abrir lección",
       "duration": "{minutes} min",
       "moduleNotInCourse": "No encontramos este módulo en el curso.",
       "goHome": "Ir al inicio",
       "backToCourse": "Volver al curso",
-      "moduleLabel": "Módulo {number}",
-      "episode": "Episodio {number}",
-      "open": "Abrir"
+      "moduleLabel": "Lección {number}",
+      "open": "Abrir",
+      "videoOrdinal": "Video {number}"
     }
   },
   "LocaleNotFound": {
