@@ -57,13 +57,13 @@ test.describe("Course catalog navigation", () => {
     await expect(page.getByTestId("home-open-course")).toHaveAttribute("href", courseUrl("en"));
   });
 
-  test("WHEN the course card is activated THEN the course overview renders the episode grid and start course CTA", async ({
+  test("WHEN the course card is activated THEN the course overview renders the module list and start course CTA", async ({
     page,
   }) => {
     await page.goto(courseUrl("en"));
 
     await expect(page.getByRole("heading", { name: "Advanced Intermediate Course" })).toBeVisible();
-    await expect(page.getByTestId("course-episode-grid")).toBeVisible();
+    await expect(page.getByTestId("course-module-list")).toBeVisible();
     const startLink = page.getByTestId("start-course");
     await expect(startLink).toBeVisible();
     await expect(startLink).toHaveAttribute(

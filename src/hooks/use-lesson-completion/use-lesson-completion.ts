@@ -83,7 +83,7 @@ export function serverCompletionSnapshot(): ReadonlySet<string> {
  * @remarks
  * Reads through a module-level store rather than per-component state, so
  * every surface showing completion shares one snapshot: a lesson marked
- * while the outline and an episode row are both mounted updates both,
+ * while the outline and a video row are both mounted updates both,
  * with no reload.
  *
  * Marks appear only after hydration, because storage is a browser fact the

@@ -1,9 +1,13 @@
-# Capability: cinema-course-overview
+## REMOVED Requirements
 
-## Purpose
+### Requirement: Course overview renders as an episode poster catalog
 
-Define the Immersion Cinema presentation of the course overview route (`/[locale]/courses/[courseSlug]`). The course is presented as a numbered index of its modules: a course header with gold count pills, then one full-width showcase card per module, each preceded by its ordinal. A card pairs the module's title, an explicit video count and duration, and a call to action with a receding gallery of that module's leading lesson artwork, so a module reads as a container of several videos rather than as one video to play. A primary "Start course" action targets the deterministic first lesson. Neither the earlier interactive practice track nor the poster grid that replaced it remains in this view.
-## Requirements
+**Reason**: The poster grid is what caused the defect this change fixes. A `PosterCard` per module emits three strong "single video" signals — a 16:9 artwork box, a play circle, and an oversized number — against one weak container signal, the `Module` badge, so learners read each card as one video rather than a group of lessons. The `Season 1 · N episodes` heading compounded it by counting modules as episodes, while the module overview counted lessons as episodes.
+
+**Migration**: Replaced by "Course overview renders modules as showcase cards" below. Module navigation is preserved: every module remains reachable in sequence from the course overview, and the "Start course" action to the deterministic first lesson is retained unchanged.
+
+## ADDED Requirements
+
 ### Requirement: Course overview renders modules as showcase cards
 
 The course overview (`/[locale]/courses/[courseSlug]`) SHALL present the course header — title, description, and count pills for its modules and videos — followed by one full-width showcase card per module, listed in `sequence` order, one per row.
@@ -86,4 +90,3 @@ The `Season 1 · N episodes` heading and the per-module `Module` badge SHALL NOT
 #### Scenario: Course copy is localized
 - **WHEN** the locale is `es` or `pt`
 - **THEN** the module ordinals, count lines, call to action and "Start course" render from the matching message file
-

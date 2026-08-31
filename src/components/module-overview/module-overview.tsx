@@ -25,10 +25,14 @@ function lessonDurationMinutes(lesson: Lesson): number | null {
 }
 
 /**
- * The module overview as a cinema "episode list": a back link to the
- * course, a hero poster + title, and one row per lesson (thumbnail,
- * "Episode N" eyebrow, title, duration, and an "Open" action linking to
- * the Lesson Page).
+ * The module overview as a video list: a back link to the course, a hero
+ * poster + title, and one row per lesson (thumbnail, "Video N" eyebrow,
+ * title, duration, and an "Open" action linking to the Lesson Page).
+ *
+ * Rows used to be labelled "Episode N". That term denoted a Module on the
+ * course overview and a Lesson here, so a learner who opened "episode 3"
+ * landed on a list restarting at "Episode 1" — the same word pointing at two
+ * levels of the hierarchy. See the `course-vocabulary` capability.
  *
  * @remarks
  * A row's thumbnail shows the lesson's `poster` artwork, falling back to
@@ -141,7 +145,7 @@ export function ModuleOverview({
                   )}
                 </Link>
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <Eyebrow>{t("episode", { number: lesson.sequence })}</Eyebrow>
+                  <Eyebrow>{t("videoOrdinal", { number: lesson.sequence })}</Eyebrow>
                   <span className="flex min-w-0 items-center gap-2">
                     <span className="truncate text-base font-semibold text-foreground">
                       {lesson.title}

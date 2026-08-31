@@ -15,7 +15,7 @@ const NUMBER_SIZE = { sm: "text-3xl", md: "text-4xl", lg: "text-5xl" } as const;
 
 /**
  * The reusable Immersion Cinema "poster". Composes an artwork box (warm
- * radial glow, optional cover image behind a scrim, an oversized episode
+ * radial glow, optional cover image behind a scrim, an oversized sequence
  * number, an optional eyebrow/headline, and a decorative play circle) with
  * an optional meta row (title + badge) beneath it.
  *

@@ -231,7 +231,7 @@ describe("ModuleOverview — completion indicator", () => {
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 
-  test("WHEN a lesson has been completed THEN its episode row shows the indicator", () => {
+  test("WHEN a lesson has been completed THEN its video row shows the indicator", () => {
     // Arrange
     window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessonB.id}`, "1");
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
@@ -283,7 +283,7 @@ describe("ModuleOverview — completion indicator", () => {
     // Assert — the indicator supplements the row, it does not displace it.
     expect(screen.getByText("Lesson A")).toBeInTheDocument();
     expect(
-      screen.getByText('CourseCatalog.moduleOverview.episode:{"number":1}'),
+      screen.getByText('CourseCatalog.moduleOverview.videoOrdinal:{"number":1}'),
     ).toBeInTheDocument();
     expect(
       screen.getByText('CourseCatalog.moduleOverview.duration:{"minutes":4}'),

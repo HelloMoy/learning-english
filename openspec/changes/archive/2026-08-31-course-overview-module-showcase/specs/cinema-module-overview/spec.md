@@ -1,9 +1,5 @@
-# Capability: cinema-module-overview
+## MODIFIED Requirements
 
-## Purpose
-
-Define the Immersion Cinema presentation of the module overview route (`/[locale]/courses/[courseSlug]/modules/[moduleSlug]`). The module is presented as a video list: a hero `PosterCard` for the module with its ordinal and short title, followed by an ordered list of video rows — one per lesson — each showing a thumbnail/play affordance, a "Video N" eyebrow, the lesson title, duration when known, and an "Open" action that links to the Lesson Page.
-## Requirements
 ### Requirement: Module overview renders as an episode list with a hero poster
 
 The module overview (`/[locale]/courses/[courseSlug]/modules/[moduleSlug]`) SHALL present a back link to the course, a hero `PosterCard` for the module (module ordinal + short title), an eyebrow stating how many videos the module holds and its ordinal (`N videos · Lesson NN`), the module title, and an ordered list of video rows. Each row SHALL show a thumbnail/play affordance, a `Video N` eyebrow, the lesson title, its duration for video lessons, and an "Open" action linking to the Lesson Page. All copy SHALL be localized and links SHALL be locale-aware.
@@ -45,7 +41,7 @@ Each row's thumbnail SHALL render the lesson's `poster` artwork when the lesson 
 - **WHEN** the module overview renders in any supported locale
 - **THEN** no row or eyebrow is labelled with an episode or season term
 
-### Requirement: Video rows mark lessons the learner has already completed
+### Requirement: Episode rows mark lessons the learner has already completed
 
 In the module overview's video list, a row whose lesson has been completed SHALL carry a completion indicator distinguishing it from lessons not yet taken, so a learner scanning a module can see how far they got. The indicator SHALL be perceivable without relying on colour alone and SHALL carry a localized accessible name.
 
@@ -68,4 +64,3 @@ Because completion is read in the browser after hydration (see the `lesson-progr
 #### Scenario: The indicator is announced, not merely coloured
 - **WHEN** a screen reader reaches a completed lesson's row
 - **THEN** the completed state is announced through a localized accessible name, and the distinction does not depend on colour alone
-

@@ -12,7 +12,7 @@ const SIZES = {
  * The circular gold play affordance. Two modes:
  *
  *   - `decorative` (default) — a non-interactive `<span aria-hidden>` used
- *     INSIDE another control (e.g. a PosterCard link or an episode row),
+ *     INSIDE another control (e.g. a PosterCard link or a video row),
  *     so it never nests a button inside a link.
  *   - interactive — pass `decorative={false}` and a `label` to render a real
  *     `<button>` with an accessible name (used standalone, e.g. a hero).
