@@ -15,6 +15,19 @@ vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
 }));
 
+/**
+ * A stand-in for `PlayButton`, so its absence can be asserted directly.
+ *
+ * The real decorative branch renders an unlabelled `aria-hidden` `<span>` with
+ * no test id, which no accessible query can see. Querying its Tailwind classes
+ * instead would couple this test to styling and pass for the wrong reason after
+ * any restyle; the stand-in asserts the fact the requirement states — this card
+ * does not render that component.
+ */
+vi.mock("@/components/play-button/play-button", () => ({
+  PlayButton: () => <span data-testid="play-button-stand-in" />,
+}));
+
 const mockUseTranslations = vi.mocked(useTranslations);
 
 const course = Course.parse({
@@ -97,6 +110,12 @@ describe("ModuleShowcaseCard", () => {
     expect(
       within(screen.getByTestId("module-showcase-panel")).queryByTestId("module-showcase-ordinal"),
     ).toBeNull();
+  });
+
+  test("offers the call to action as the left panel's only playback affordance", () => {
+    renderCard();
+    expect(screen.getByTestId("module-showcase-cta")).toBeInTheDocument();
+    expect(screen.queryByTestId("play-button-stand-in")).toBeNull();
   });
 
   test("states the video count and duration alongside the deck", () => {
