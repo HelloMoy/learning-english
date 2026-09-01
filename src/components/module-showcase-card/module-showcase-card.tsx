@@ -1,5 +1,4 @@
 import { Eyebrow } from "@/components/eyebrow/eyebrow";
-import { PlayButton } from "@/components/play-button/play-button";
 import type { Course } from "@/domain/entities/course/course";
 import type { Module } from "@/domain/entities/module/module";
 import type { ModuleSummary } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
@@ -171,19 +170,13 @@ export function ModuleShowcaseCard({
             })}
           </p>
 
-          <div className="flex items-center gap-4">
-            <Link
-              href={href as never}
-              data-testid="module-showcase-cta"
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-primary px-6 text-sm font-bold tracking-wide text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none sm:w-auto"
-            >
-              {t("viewVideos")}
-            </Link>
-            <PlayButton
-              size="lg"
-              decorative
-            />
-          </div>
+          <Link
+            href={href as never}
+            data-testid="module-showcase-cta"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-primary px-6 text-sm font-bold tracking-wide text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none sm:w-auto sm:self-start"
+          >
+            {t("viewVideos")}
+          </Link>
         </div>
 
         {summary.leadingLessons.length > 0 ? (

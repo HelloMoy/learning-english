@@ -2,7 +2,6 @@
 
 import { findContinueWatchingAction, type ContinueWatchingPanel } from "@/app/[locale]/actions";
 import { Eyebrow } from "@/components/eyebrow/eyebrow";
-import { PlayButton } from "@/components/play-button/play-button";
 import type { ContinueWatchingLocation } from "@/domain/entities/continue-watching-location/continue-watching-location";
 import { LessonId } from "@/domain/entities/ids/ids";
 import type { ContinueWatchingRepository } from "@/domain/ports/continue-watching-repository/continue-watching-repository";
@@ -163,69 +162,60 @@ function Panel({
       </Eyebrow>
 
       <div
-        className="flex flex-col gap-6 rounded-2xl border border-border p-7 sm:flex-row sm:items-center sm:gap-10"
+        className="flex min-w-0 flex-col gap-4 rounded-2xl border border-border p-7"
         style={{ background: PANEL_GLOW }}
       >
-        <span className="hidden sm:block">
-          <PlayButton
-            size="lg"
-            decorative
-          />
-        </span>
+        <p
+          data-testid="continue-watching-breadcrumb"
+          className="truncate text-xs text-muted-foreground"
+        >
+          {t("breadcrumb", { course: panel.courseTitle, module: panel.moduleTitle })}
+        </p>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-4">
-          <p
-            data-testid="continue-watching-breadcrumb"
-            className="truncate text-xs text-muted-foreground"
-          >
-            {t("breadcrumb", { course: panel.courseTitle, module: panel.moduleTitle })}
-          </p>
+        <h3
+          id="continue-watching-heading"
+          className="font-sans text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
+        >
+          {panel.lessonTitle}
+        </h3>
 
-          <h3
-            id="continue-watching-heading"
-            className="font-sans text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
-          >
-            {panel.lessonTitle}
-          </h3>
-
-          {progress ? (
-            <div className="flex max-w-md flex-col gap-2">
-              <div
-                data-testid="continue-watching-progress"
-                role="progressbar"
-                aria-label={t("progressLabel")}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={progress.percent}
-                className="h-1 overflow-hidden rounded-full bg-foreground/10"
-              >
-                <span
-                  className="block h-full rounded-full bg-gold"
-                  style={{ width: `${progress.percent}%` }}
-                />
-              </div>
-              <p
-                data-testid="continue-watching-remaining"
-                className="text-xs text-muted-foreground tabular-nums"
-              >
-                {t("remaining", { remaining: progress.remaining, total: progress.total })}
-              </p>
-            </div>
-          ) : null}
-
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              href={panel.lessonHref as never}
-              data-testid="continue-watching-resume"
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-6 text-sm font-bold tracking-wide text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+        {progress ? (
+          <div className="flex max-w-md flex-col gap-2">
+            <div
+              data-testid="continue-watching-progress"
+              role="progressbar"
+              aria-label={t("progressLabel")}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progress.percent}
+              className="h-1 overflow-hidden rounded-full bg-foreground/10"
             >
-              <Play
-                className="size-4"
-                fill="currentColor"
+              <span
+                className="block h-full rounded-full bg-gold"
+                style={{ width: `${progress.percent}%` }}
               />
-              {t("resume")}
-            </Link>
+            </div>
+            <p
+              data-testid="continue-watching-remaining"
+              className="text-xs text-muted-foreground tabular-nums"
+            >
+              {t("remaining", { remaining: progress.remaining, total: progress.total })}
+            </p>
           </div>
+        ) : null}
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href={panel.lessonHref as never}
+            data-testid="continue-watching-resume"
+            className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-6 text-sm font-bold tracking-wide text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          >
+            <Play
+              className="size-4"
+              fill="currentColor"
+            />
+            {t("resume")}
+          </Link>
         </div>
       </div>
     </section>

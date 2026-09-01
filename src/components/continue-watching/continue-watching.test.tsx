@@ -13,6 +13,19 @@ vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
 }));
 
+/**
+ * A stand-in for `PlayButton`, so its absence can be asserted directly.
+ *
+ * The real decorative branch renders an unlabelled `aria-hidden` `<span>` with
+ * no test id, which no accessible query can see. Querying its Tailwind classes
+ * instead would couple this test to styling and pass for the wrong reason after
+ * any restyle; the stand-in asserts the fact the requirement states — this
+ * panel does not render that component.
+ */
+vi.mock("@/components/play-button/play-button", () => ({
+  PlayButton: () => <span data-testid="play-button-stand-in" />,
+}));
+
 const mockUseTranslations = vi.mocked(useTranslations);
 
 const msg = (namespace: string, key: string, values?: Record<string, unknown>) =>
@@ -112,6 +125,12 @@ describe("ContinueWatching", () => {
           module: videoPanel.moduleTitle,
         }),
       );
+    });
+
+    test("WHEN resolved THEN the action to the lesson is the only playback affordance", async () => {
+      renderPanel();
+      expect(await screen.findByTestId("continue-watching-resume")).toBeInTheDocument();
+      expect(screen.queryByTestId("play-button-stand-in")).toBeNull();
     });
 
     test("WHEN resolved THEN the primary action links to that lesson", async () => {
