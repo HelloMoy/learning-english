@@ -46,15 +46,17 @@ function lessonUrl(
 }
 
 test.describe("Course catalog navigation", () => {
-  test("WHEN the home is visited THEN the featured course renders with the locale-aware link", async ({
+  test("WHEN the home is visited THEN the course ladder links to the course overview", async ({
     page,
   }) => {
     await page.goto(homeUrl("en"));
 
-    const featured = page.getByTestId("featured-course");
-    await expect(featured).toBeVisible();
+    await expect(page.getByTestId("course-ladder")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Advanced Intermediate Course" })).toBeVisible();
-    await expect(page.getByTestId("home-open-course")).toHaveAttribute("href", courseUrl("en"));
+    await expect(page.getByRole("link", { name: "Advanced Intermediate Course" })).toHaveAttribute(
+      "href",
+      courseUrl("en"),
+    );
   });
 
   test("WHEN the course card is activated THEN the course overview renders the module list and start course CTA", async ({
@@ -132,7 +134,9 @@ test.describe("Course catalog — locale awareness", () => {
       page,
     }) => {
       await page.goto(homeUrl(locale));
-      await expect(page.getByTestId("home-open-course")).toHaveAttribute("href", courseUrl(locale));
+      await expect(
+        page.getByRole("link", { name: "Advanced Intermediate Course" }),
+      ).toHaveAttribute("href", courseUrl(locale));
     });
   }
 });

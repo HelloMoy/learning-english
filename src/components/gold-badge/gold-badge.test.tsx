@@ -13,4 +13,11 @@ describe("GoldBadge", () => {
     render(<GoldBadge variant="neutral">Module</GoldBadge>);
     expect(screen.getByText("Module")).toBeInTheDocument();
   });
+
+  test("forwards a test id so callers can target one badge among several", () => {
+    // A card carries several badges whose text is a translation key under
+    // test; without a handle, the only way to pick one out is its copy.
+    render(<GoldBadge data-testid="course-level-state">In progress</GoldBadge>);
+    expect(screen.getByTestId("course-level-state")).toHaveTextContent("In progress");
+  });
 });

@@ -33,6 +33,7 @@ const fixtures = (
     language: "en",
     lessonCount: 1,
     moduleCount: 1,
+    sequence: 1,
   });
   const mod = Module.parse({
     id: modId,

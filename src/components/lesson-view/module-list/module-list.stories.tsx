@@ -17,6 +17,7 @@ const course = Course.parse({
   language: "en",
   lessonCount: 3,
   moduleCount: 2,
+  sequence: 1,
 });
 const modA = Module.parse({
   id: ModuleId.parse(faker.string.uuid()),

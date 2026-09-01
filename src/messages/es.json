@@ -2,16 +2,14 @@
   "HomePage": {
     "title": "Aprende inglés",
     "subtitle": "Un espacio simple y enfocado para construir vocabulario y practicar todos los días.",
-    "cta": "Comenzar",
     "notFound": "No encontrado",
-    "catalogHeading": "Cursos",
     "catalogEmpty": "No hay cursos disponibles en este momento.",
     "eyebrow": "Ahora en emisión · Inglés hablado",
-    "openCourse": "Abrir curso",
-    "myList": "+ Mi lista",
-    "featuredLabel": "Cursos · Destacado",
-    "featureLabel": "Destacado",
-    "featureHeadline": "Bienvenido"
+    "heading": "Empieza donde esté tu oído",
+    "intro": "Cursos centrados en la pronunciación, en orden. Cada uno da por sabidos los sonidos del anterior, así que la única pregunta real es por dónde entras.",
+    "coursesEyebrow": "Cursos disponibles",
+    "coursesHeading": "{count, plural, one {Un nivel, en orden} other {# niveles, en orden}}",
+    "coursesCount": "{count, plural, one {# curso} other {# cursos}}"
   },
   "SiteHeader": {
     "navLabel": "Principal",
@@ -103,6 +101,28 @@
     },
     "LessonCompletion": {
       "completed": "Completada"
+    },
+    "CourseLadder": {
+      "listLabel": "Cursos disponibles, en orden",
+      "trackLabel": "Niveles del curso"
+    },
+    "CourseLevelCard": {
+      "levelOrdinal": "Nivel {number}",
+      "inProgress": "En curso",
+      "notStarted": "Sin empezar",
+      "continueCourse": "Continuar curso",
+      "startCourse": "Empezar curso",
+      "moduleOrdinal": "Lección {number}",
+      "moreModules": "+{count} más",
+      "moduleListLabel": "Lecciones de este curso"
+    },
+    "ContinueWatching": {
+      "heading": "Seguir viendo",
+      "breadcrumb": "{course} · {module}",
+      "resume": "Reanudar",
+      "courseOutline": "Índice del curso",
+      "remaining": "Quedan {remaining} de {total}",
+      "progressLabel": "Progreso de reproducción"
     }
   },
   "CourseCatalog": {

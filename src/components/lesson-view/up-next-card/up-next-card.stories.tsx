@@ -19,6 +19,7 @@ const course = Course.parse({
   language: "en",
   lessonCount: 1,
   moduleCount: 2,
+  sequence: 1,
 });
 const courseModule = Module.parse({
   id: moduleId,

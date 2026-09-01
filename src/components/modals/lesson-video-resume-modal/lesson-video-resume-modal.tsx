@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog/dialog";
+import { formatMinutesSeconds } from "@/lib/format-minutes-seconds/format-minutes-seconds";
 
 import NiceModal, { useModal } from "@ebay/nice-modal-react";
 import { useTranslations } from "next-intl";
@@ -27,13 +28,6 @@ import { useTranslations } from "next-intl";
  */
 export type LessonVideoResumeChoice =
   { action: "resume"; seconds: number } | { action: "restart" } | { action: "dismissed" };
-
-const formatMinutesSeconds = (totalSeconds: number): string => {
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = Math.floor(totalSeconds % 60);
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${pad(minutes)}:${pad(seconds)}`;
-};
 
 /**
  * The "Resume from MM:SS · Restart from beginning" modal, shown when a learner

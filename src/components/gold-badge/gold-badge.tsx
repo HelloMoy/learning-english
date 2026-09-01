@@ -8,13 +8,16 @@ export function GoldBadge({
   children,
   variant = "gold",
   className,
+  "data-testid": testId,
 }: {
   children: React.ReactNode;
   variant?: "gold" | "neutral";
   className?: string;
+  "data-testid"?: string;
 }) {
   return (
     <span
+      data-testid={testId}
       className={cn(
         "inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-[11px] font-semibold tracking-wide",
         variant === "gold"

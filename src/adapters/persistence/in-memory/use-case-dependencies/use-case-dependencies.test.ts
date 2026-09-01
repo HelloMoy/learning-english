@@ -94,7 +94,26 @@ describe("getCoursePlatformDeps env-var switch", () => {
       expect(courses[0]?.title).toBe(seedCourse.title);
     });
 
-    test("WHEN `USE_COURSE_CONTENT_SEED=1` THEN the dependency graph is built from the content seed", async () => {
+    test("WHEN `USE_COURSE_CONTENT_SEED=1` THEN the content course JOINS the A1 course in one catalog", async () => {
+      // Arrange — the flag is additive: it decides whether content that
+      // needs a large local content root is present, never whether the A1
+      // course is removed.
+      process.env.USE_COURSE_CONTENT_SEED = "1";
+
+      // Act
+      const deps = getCoursePlatformDeps();
+      const courses = await deps.courses.listAvailable();
+
+      // Assert
+      expect(courses).toHaveLength(2);
+      expect(courses.map((course) => course.id)).toEqual([SEED_COURSE_ID, SEED_CONTENT_COURSE_ID]);
+      expect(courses.map((course) => course.title)).toEqual([
+        seedCourse.title,
+        seedContentCourse.title,
+      ]);
+    });
+
+    test("WHEN both courses are served THEN they come back in ladder order", async () => {
       // Arrange
       process.env.USE_COURSE_CONTENT_SEED = "1";
 
@@ -102,12 +121,68 @@ describe("getCoursePlatformDeps env-var switch", () => {
       const deps = getCoursePlatformDeps();
       const courses = await deps.courses.listAvailable();
 
-      // Assert — the content seed has exactly one course and that course
-      // is the "Advanced Intermediate Pronunciation" placeholder (or the
-      // generator's real output once group 7 has run).
-      expect(courses).toHaveLength(1);
-      expect(courses[0]?.id).toBe(SEED_CONTENT_COURSE_ID);
-      expect(courses[0]?.title).toBe(seedContentCourse.title);
+      // Assert
+      expect(courses.map((course) => course.sequence)).toEqual([1, 2]);
+    });
+
+    test("WHEN both courses are served THEN each one's lessons resolve through the adapter that owns them", async () => {
+      // Arrange — the A1 seed's URLs are literals under `public/`; the
+      // content seed's are keys the BlobStore resolves. Merging the two
+      // must not put either through the other's resolution.
+      process.env.USE_COURSE_CONTENT_SEED = "1";
+
+      // Act
+      const deps = getCoursePlatformDeps();
+      const a1Lessons = await deps.lessons.listByCourse(CourseId.parse(SEED_COURSE_ID));
+      const contentLessons = await deps.lessons.listByCourse(
+        CourseId.parse(SEED_CONTENT_COURSE_ID),
+      );
+
+      // Assert
+      expect(a1Lessons).toHaveLength(seedCourse.lessonCount);
+      expect(contentLessons).toHaveLength(seedContentCourse.lessonCount);
+      const a1Video = a1Lessons.find((lesson) => lesson.kind === "video");
+      expect(a1Video?.kind === "video" && a1Video.source).toBe("/videos/vowels-short-vs-long.mp4");
+    });
+
+    test("WHEN a lesson id from either seed is looked up THEN the composite finds it", async () => {
+      // Arrange
+      process.env.USE_COURSE_CONTENT_SEED = "1";
+      const deps = getCoursePlatformDeps();
+      const [a1First] = await deps.lessons.listByCourse(CourseId.parse(SEED_COURSE_ID));
+      const [contentFirst] = await deps.lessons.listByCourse(
+        CourseId.parse(SEED_CONTENT_COURSE_ID),
+      );
+
+      // Act
+      const foundA1 = await deps.lessons.byId(a1First!.id);
+      const foundContent = await deps.lessons.byId(contentFirst!.id);
+
+      // Assert
+      expect(foundA1?.id).toBe(a1First!.id);
+      expect(foundContent?.id).toBe(contentFirst!.id);
+    });
+
+    test("WHEN the graph is assembled THEN it exposes the continue-watching use case", async () => {
+      // Arrange
+      process.env.USE_COURSE_CONTENT_SEED = "1";
+      const deps = getCoursePlatformDeps();
+      const [module_] = await deps.modules.listByCourse(CourseId.parse(SEED_COURSE_ID));
+      const [lesson] = await deps.lessons.listByCourse(CourseId.parse(SEED_COURSE_ID));
+
+      // Act
+      const result = await deps.useCases.findContinueWatching({
+        courseSlug: seedCourse.slug,
+        moduleSlug: module_!.slug,
+        lessonId: lesson!.id,
+      });
+
+      // Assert
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.course.id).toBe(SEED_COURSE_ID);
+        expect(result.value.lesson.id).toBe(lesson!.id);
+      }
     });
 
     test('WHEN the env var is set to a non-`"1"` value THEN the A1 seed is still used', async () => {
