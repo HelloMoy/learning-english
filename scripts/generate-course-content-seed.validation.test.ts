@@ -2,9 +2,9 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { afterEach, beforeEach, describe, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-import { runGenerator } from "./generate-course-content-seed";
+import { buildSeed, runGenerator } from "./generate-course-content-seed";
 
 /**
  * These suites use reading-only lessons (readme + a resource file) so they
@@ -191,5 +191,181 @@ describe("runGenerator — seedContentSourceNames (manifest bridge)", () => {
     if (pdf) {
       expect(seed.sourceNames[pdf.id]).toBe("Vowel Chart (v2).pdf");
     }
+  });
+});
+
+/**
+ * The manifest suite uses reading-only lessons for the same reason as the
+ * suites above: no `.mp4` means no ffprobe, so these run everywhere.
+ */
+describe("buildSeed — courses manifest", () => {
+  let root: string;
+
+  beforeEach(() => {
+    root = mkdtempSync(path.join(tmpdir(), "seed-manifest-"));
+  });
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  /** A reading lesson at `<course>/<module>/<lesson>/readme.md`. */
+  function writeLesson(
+    courseFolder: string,
+    moduleFolder: string,
+    lessonFolder: string,
+    body: string,
+  ): void {
+    const lessonDir = path.join(root, courseFolder, moduleFolder, lessonFolder);
+    mkdirSync(lessonDir, { recursive: true });
+    writeFileSync(path.join(lessonDir, "readme.md"), body);
+  }
+
+  function writeManifest(courses: Array<Record<string, unknown>>): void {
+    writeFileSync(
+      path.join(root, "courses.manifest.json"),
+      JSON.stringify({ version: 1, courses }),
+    );
+  }
+
+  test("WHEN there is no manifest THEN one course is emitted with the derived defaults", async () => {
+    writeLesson("test-course", "1-first-module", "01-intro", "# Intro body");
+
+    const seed = await buildSeed(root);
+
+    expect(seed.courses).toHaveLength(1);
+    expect(seed.courses[0]).toMatchObject({
+      slug: "test-course",
+      title: "Test Course",
+      language: "en",
+      sequence: 2,
+    });
+    expect(seed.courses[0]?.description).toMatch(/^Course content generated from /);
+  });
+
+  test("WHEN two courses are declared THEN both are emitted in sequence order with their rows merged", async () => {
+    writeLesson("second-course", "1-first-module", "01-intro", "# Second intro");
+    writeLesson("first-course", "1-first-module", "01-intro", "# First intro");
+    writeManifest([
+      { folder: "second-course", sequence: 3 },
+      { folder: "first-course", sequence: 1 },
+    ]);
+
+    const seed = await buildSeed(root);
+
+    expect(seed.courses.map((course) => course.slug)).toEqual(["first-course", "second-course"]);
+    expect(seed.modules).toHaveLength(2);
+    expect(seed.lessonRows).toHaveLength(2);
+    const courseIds = new Set(seed.courses.map((course) => course.id));
+    expect(seed.modules.every((module) => courseIds.has(module.courseId))).toBe(true);
+  });
+
+  test("WHEN a folder is not declared THEN it is skipped, named on stderr, and generation succeeds", async () => {
+    writeLesson("first-course", "1-first-module", "01-intro", "# First intro");
+    writeLesson("staging-course", "1-first-module", "01-intro", "# Staging intro");
+    writeManifest([{ folder: "first-course", sequence: 1 }]);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    const seed = await buildSeed(root);
+
+    expect(seed.courses).toHaveLength(1);
+    expect(warn.mock.calls.flat().join(" ")).toContain("staging-course");
+    warn.mockRestore();
+  });
+
+  test("WHEN metadata is declared THEN it reaches the emitted Course verbatim", async () => {
+    writeLesson("first-course", "1-first-module", "01-intro", "# First intro");
+    writeManifest([
+      {
+        folder: "first-course",
+        sequence: 7,
+        title: "Curso Avanzado",
+        description: "Un curso declarado a mano.",
+        language: "es",
+      },
+    ]);
+
+    const seed = await buildSeed(root);
+
+    expect(seed.courses[0]).toMatchObject({
+      title: "Curso Avanzado",
+      description: "Un curso declarado a mano.",
+      language: "es",
+      sequence: 7,
+    });
+  });
+
+  test("WHEN a course allowlists a module THEN its lesson titles come from the notes heading", async () => {
+    writeLesson("first-course", "1-vowels", "4-fast", "# Fast /æ/");
+    writeManifest([{ folder: "first-course", sequence: 1, titleFromNotesModules: ["1-vowels"] }]);
+
+    const seed = await buildSeed(root);
+
+    expect(seed.lessonRows[0]?.title).toBe("Fast /æ/");
+  });
+
+  test("WHEN another course allowlists a same-slug module THEN this course's titles stay slug-derived", async () => {
+    writeLesson("first-course", "1-vowels", "4-fast", "# Fast /æ/");
+    writeLesson("second-course", "1-vowels", "4-fast", "# Fast /ɛ/");
+    writeManifest([
+      { folder: "first-course", sequence: 1, titleFromNotesModules: ["1-vowels"] },
+      { folder: "second-course", sequence: 2 },
+    ]);
+
+    const seed = await buildSeed(root);
+
+    const titleFor = (slug: string): string | undefined => {
+      const course = seed.courses.find((c) => c.slug === slug);
+      return seed.lessonRows.find((row) => row.courseId === course?.id)?.title;
+    };
+    expect(titleFor("first-course")).toBe("Fast /æ/");
+    expect(titleFor("second-course")).toBe("Fast");
+  });
+
+  test("WHEN a lesson title override is declared THEN it outranks the heading", async () => {
+    writeLesson("first-course", "1-vowels", "4-fast", "# Fast /æ/");
+    writeManifest([
+      {
+        folder: "first-course",
+        sequence: 1,
+        titleFromNotesModules: ["1-vowels"],
+        lessonTitleOverrides: { "1-vowels/4-fast": "Fast — the reviewed name" },
+      },
+    ]);
+
+    const seed = await buildSeed(root);
+
+    expect(seed.lessonRows[0]?.title).toBe("Fast — the reviewed name");
+  });
+
+  test("WHEN the manifest declares a missing folder THEN generation fails without writing", async () => {
+    writeLesson("first-course", "1-first-module", "01-intro", "# First intro");
+    writeManifest([{ folder: "does-not-exist", sequence: 1 }]);
+    const outFile = path.join(root, "seed-content.out.ts");
+
+    await expect(runGenerator({ sourceDir: root, outFile })).rejects.toThrow(/does-not-exist/);
+    expect(existsSync(outFile)).toBe(false);
+  });
+
+  test("WHEN the manifest is malformed THEN generation fails without falling back", async () => {
+    writeLesson("first-course", "1-first-module", "01-intro", "# First intro");
+    writeFileSync(path.join(root, "courses.manifest.json"), "{ not json");
+    const outFile = path.join(root, "seed-content.out.ts");
+
+    await expect(runGenerator({ sourceDir: root, outFile })).rejects.toThrow(/not valid JSON/);
+    expect(existsSync(outFile)).toBe(false);
+  });
+
+  test("WHEN the seed is rendered THEN it exports seedContentCourses and no singular course", async () => {
+    writeLesson("first-course", "1-first-module", "01-intro", "# First intro");
+    writeManifest([{ folder: "first-course", sequence: 1 }]);
+    const outFile = path.join(root, "seed-content.out.ts");
+
+    await runGenerator({ sourceDir: root, outFile });
+
+    const written = readFileSync(outFile, "utf8");
+    expect(written).toContain("export const seedContentCourses");
+    expect(written).not.toContain("export const seedContentCourse ");
+    expect(written).not.toContain("SEED_CONTENT_COURSE_ID");
   });
 });

@@ -122,6 +122,80 @@ describe("normalizeContentDisk", () => {
     expect(existsSync(path.join(root, "test-course/intro/lesson.mp4"))).toBe(true);
   });
 
+  test("WHEN the content root holds the manifests THEN neither is renamed nor recorded", () => {
+    // Arrange — both are generator inputs living at the content root, not content.
+    mkfile("first-course/1 Intro/lesson.mp4");
+    mkfile(
+      "courses.manifest.json",
+      JSON.stringify({ version: 1, courses: [{ folder: "first-course", sequence: 1 }] }),
+    );
+    mkfile("rename-manifest.json", JSON.stringify({ version: 1, entries: [] }));
+
+    // Act
+    const result = normalizeContentDisk({ rootDir: root, apply: true });
+
+    // Assert
+    expect(existsSync(path.join(root, "courses.manifest.json"))).toBe(true);
+    expect(existsSync(path.join(root, "courses-manifest.json"))).toBe(false);
+    expect(result.renames.map((r) => r.from)).not.toContain("courses.manifest.json");
+    expect(result.renames.map((r) => r.from)).not.toContain("rename-manifest.json");
+  });
+
+  test("WHEN a course declares slug overrides THEN they apply inside its folder", () => {
+    // Arrange
+    mkfile("first-course/1 Day#1/lesson.mp4");
+    mkfile(
+      "courses.manifest.json",
+      JSON.stringify({
+        version: 1,
+        courses: [
+          { folder: "first-course", sequence: 1, slugOverrides: { "1 Day#1": "1-day-01" } },
+        ],
+      }),
+    );
+
+    // Act
+    normalizeContentDisk({ rootDir: root, apply: true });
+
+    // Assert
+    expect(existsSync(path.join(root, "first-course", "1-day-01", "lesson.mp4"))).toBe(true);
+  });
+
+  test("WHEN a course's overrides name a folder in another course THEN they do not apply", () => {
+    // Arrange — each course carries its own map; the same raw name in a
+    // sibling course must fall back to automatic slugification.
+    mkfile("first-course/1 Day#1/lesson.mp4");
+    mkfile("second-course/1 Day#1/lesson.mp4");
+    mkfile(
+      "courses.manifest.json",
+      JSON.stringify({
+        version: 1,
+        courses: [
+          { folder: "first-course", sequence: 1, slugOverrides: { "1 Day#1": "1-day-01" } },
+          { folder: "second-course", sequence: 2 },
+        ],
+      }),
+    );
+
+    // Act
+    normalizeContentDisk({ rootDir: root, apply: true });
+
+    // Assert
+    expect(existsSync(path.join(root, "first-course", "1-day-01"))).toBe(true);
+    expect(existsSync(path.join(root, "second-course", "1-day-1"))).toBe(true);
+  });
+
+  test("WHEN there is no manifest THEN automatic slugification alone applies", () => {
+    // Arrange
+    mkfile("first-course/1 Day#1/lesson.mp4");
+
+    // Act
+    normalizeContentDisk({ rootDir: root, apply: true });
+
+    // Assert
+    expect(existsSync(path.join(root, "first-course", "1-day-1", "lesson.mp4"))).toBe(true);
+  });
+
   test("WHEN a hidden/system file is present THEN it is skipped, not renamed", () => {
     // Arrange
     mkfile("test-course/1 First Module/.DS_Store");

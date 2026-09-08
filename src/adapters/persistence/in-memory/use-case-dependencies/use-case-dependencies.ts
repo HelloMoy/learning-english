@@ -1,6 +1,5 @@
-import path from "node:path";
-
-import { LocalFilesystemBlobStore } from "@/adapters/persistence/blob-store/local-filesystem-blob-store/local-filesystem-blob-store";
+import type { BlobStore } from "@/adapters/persistence/blob-store/blob-store";
+import { contentBlobStoreFromEnv } from "@/adapters/persistence/blob-store/create-content-blob-store/create-content-blob-store";
 import { CompositeLessonRepository } from "@/adapters/persistence/composite/composite-lesson-repository/composite-lesson-repository";
 import { CompositeResourceRepository } from "@/adapters/persistence/composite/composite-resource-repository/composite-resource-repository";
 import { InMemoryCourseRepository } from "@/adapters/persistence/in-memory/in-memory-course-repository/in-memory-course-repository";
@@ -16,7 +15,7 @@ import {
   seedResources,
 } from "@/adapters/persistence/in-memory/seed/seed";
 import {
-  seedContentCourse,
+  seedContentCourses,
   seedContentLessonRows,
   seedContentModules,
   seedContentNotesKeys,
@@ -110,30 +109,14 @@ export function getCoursePlatformDeps(): CoursePlatformDeps {
 }
 
 /**
- * Default public URL prefix for course content. Chosen to preserve the
- * pre-configuration behaviour exactly: before `CONTENT_BASE_URL` existed
- * this literal was hardcoded here and in the seed generator.
- */
-const DEFAULT_CONTENT_BASE_URL = "/local-filesystem-lesson";
-
-/** Default filesystem root the local driver reads bytes from. */
-const DEFAULT_CONTENT_LOCAL_ROOT = "public/local-filesystem-lesson";
-
-/**
- * Builds the `BlobStore` from configuration.
+ * Builds the `BlobStore` from the location manifest.
  *
- * Read per call rather than at module load, mirroring
- * `isCourseContentSeedEnabled()` — a developer can repoint content in dev
- * without restarting the Node process. `CONTENT_BASE_URL` is deliberately
- * NOT `NEXT_PUBLIC_`: resolution happens in Server Components and the
- * resolved URLs reach the client as plain props. A client that needs a
- * fresh (or signed) URL should ask the server rather than rebuild one.
+ * Delegates to {@link contentBlobStoreFromEnv} so the signing endpoint at
+ * `/api/content` resolves keys through exactly the same configuration this
+ * graph does.
  */
-function buildBlobStore(): LocalFilesystemBlobStore {
-  return new LocalFilesystemBlobStore({
-    baseUrl: process.env.CONTENT_BASE_URL ?? DEFAULT_CONTENT_BASE_URL,
-    localRoot: path.resolve(process.env.CONTENT_LOCAL_ROOT ?? DEFAULT_CONTENT_LOCAL_ROOT),
-  });
+function buildBlobStore(): BlobStore {
+  return contentBlobStoreFromEnv();
 }
 
 /**
@@ -176,7 +159,7 @@ function assembleCatalog(withContentSeed: boolean): CoursePlatformDeps {
   }
 
   return assemble({
-    coursesRepo: new InMemoryCourseRepository([seedCourse, seedContentCourse]),
+    coursesRepo: new InMemoryCourseRepository([seedCourse, ...seedContentCourses]),
     modulesRepo: new InMemoryModuleRepository([...seedModules, ...seedContentModules]),
     lessonsRepo: new CompositeLessonRepository([
       a1Lessons,

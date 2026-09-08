@@ -8,7 +8,8 @@
  * The transformations are intentionally simple — no Unicode tables, no
  * locale-aware transliteration beyond common Spanish characters. If a
  * folder name does not normalize cleanly (e.g., the author wants a
- * specific slug), list it in `scripts/slug-overrides.ts` instead.
+ * specific slug), list it under that course's `slugOverrides` in the
+ * content root's `courses.manifest.json` instead.
  *
  * Idempotency: `slugify(slugify(x)) === slugify(x)`. Run the output back
  * through `slugify` and it MUST not change.

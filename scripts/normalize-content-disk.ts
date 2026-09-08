@@ -1,6 +1,7 @@
-import { readdirSync, renameSync, statSync, writeFileSync } from "node:fs";
+import { readdirSync, renameSync, statSync, writeFileSync, type Dirent } from "node:fs";
 import path from "node:path";
 
+import { COURSES_MANIFEST_FILE, loadCoursesManifest } from "./courses-manifest/courses-manifest.ts";
 import { normalizeFileName, resolveSlug, toPosix } from "./resolve-slug.ts";
 
 /**
@@ -18,7 +19,14 @@ import { normalizeFileName, resolveSlug, toPosix } from "./resolve-slug.ts";
  *  - Collision-guarded: if two distinct entries in one directory normalize
  *    to the same slug, it throws WITHOUT renaming anything in that directory.
  *  - Case-only renames go through a temp name (safe on case-insensitive FS).
- *  - Hidden/system entries (dotfiles like `.DS_Store`) are skipped.
+ *  - Hidden/system entries (dotfiles like `.DS_Store`) are skipped, as are
+ *    the two manifests at the content root — both are generator inputs, not
+ *    content.
+ *  - Slug overrides come from the `courses.manifest.json` entry of whichever
+ *    course folder the entry being renamed sits inside. The course folders
+ *    themselves, and every entry outside a declared one, are slugified
+ *    automatically: a course folder's name is what the manifest keys on, so
+ *    letting a course rename its own folder would make its own entry stale.
  */
 
 const MANIFEST_FILE = "rename-manifest.json";
@@ -33,12 +41,18 @@ export type NormalizeResult = {
   applied: boolean;
 };
 
-function targetName(name: string, isDir: boolean): string {
-  return isDir ? resolveSlug(name) : normalizeFileName(name);
+/** Slug overrides declared by one course, keyed by raw on-disk name. */
+type SlugOverrides = Record<string, string>;
+
+/** The empty map, for entries that belong to no declared course. */
+const NO_OVERRIDES: SlugOverrides = {};
+
+function targetName(name: string, isDir: boolean, overrides: SlugOverrides): string {
+  return isDir ? resolveSlug(name, overrides) : normalizeFileName(name);
 }
 
 function isHidden(name: string): boolean {
-  return name.startsWith(".") || name === MANIFEST_FILE;
+  return name.startsWith(".") || name === MANIFEST_FILE || name === COURSES_MANIFEST_FILE;
 }
 
 /**
@@ -61,58 +75,96 @@ function renameOnDisk(oldAbs: string, newAbs: string): void {
 }
 
 /**
- * Recursively normalizes `dirAbs`. Processes each child fully (recurse, then
- * rename the child itself) so renames happen bottom-up and never invalidate
- * a not-yet-processed path. Collects rename entries into `renames`.
+ * One directory being normalized, plus the slug rules that govern its
+ * contents. `originalRel` is empty exactly at the content root, which is how
+ * the walk knows its children are course folders.
  */
-function normalizeDir(
-  dirAbs: string,
-  originalRelPrefix: string,
-  slugRelPrefix: string,
-  apply: boolean,
-  renames: RenameEntry[],
-): void {
-  const dirents = readdirSync(dirAbs, { withFileTypes: true }).filter((d) => !isHidden(d.name));
+type DirectoryScope = {
+  absPath: string;
+  originalRel: string;
+  slugRel: string;
+  overrides: SlugOverrides;
+};
 
-  // Collision guard: two distinct names normalizing to the same slug cannot
-  // coexist. Abort before mutating anything in this directory.
-  const byTarget = new Map<string, string[]>();
-  for (const d of dirents) {
-    const t = targetName(d.name, d.isDirectory());
-    const arr = byTarget.get(t) ?? [];
-    arr.push(d.name);
-    byTarget.set(t, arr);
-  }
-  const collisions = [...byTarget.entries()].filter(([, sources]) => sources.length > 1);
-  if (collisions.length > 0) {
-    const detail = collisions
-      .map(([t, sources]) => `  "${t}" ⇐ ${sources.map((s) => `"${s}"`).join(", ")}`)
-      .join("\n");
-    throw new Error(
-      `Slug collision in "${dirAbs || "."}" — distinct names normalize to the same slug:\n${detail}`,
-    );
-  }
+/** Everything the walk accumulates or consults, independent of position. */
+type NormalizeRun = {
+  apply: boolean;
+  renames: RenameEntry[];
+  overridesByCourseFolder: Map<string, SlugOverrides>;
+};
 
-  for (const d of dirents) {
-    const isDir = d.isDirectory();
-    const slugName = targetName(d.name, isDir);
-    const childOldAbs = path.join(dirAbs, d.name);
-    const originalRel = joinPosix(originalRelPrefix, d.name);
-    const slugRel = joinPosix(slugRelPrefix, slugName);
+/**
+ * Recursively normalizes `scope.absPath`. Processes each child fully (recurse,
+ * then rename the child itself) so renames happen bottom-up and never
+ * invalidate a not-yet-processed path. Collects rename entries into `run`.
+ */
+function normalizeDir(scope: DirectoryScope, run: NormalizeRun): void {
+  const dirents = readdirSync(scope.absPath, { withFileTypes: true }).filter(
+    (d) => !isHidden(d.name),
+  );
+  const isContentRoot = scope.originalRel === "";
+  // A course folder is renamed by automatic slugification; its own overrides
+  // govern only what lives inside it.
+  const rulesHere = isContentRoot ? NO_OVERRIDES : scope.overrides;
+
+  assertNoCollisions(dirents, scope.absPath, rulesHere);
+
+  for (const dirent of dirents) {
+    const isDir = dirent.isDirectory();
+    const slugName = targetName(dirent.name, isDir, rulesHere);
+    const childOldAbs = path.join(scope.absPath, dirent.name);
+    const originalRel = joinPosix(scope.originalRel, dirent.name);
+    const slugRel = joinPosix(scope.slugRel, slugName);
 
     if (isDir) {
       // Recurse using the CURRENT (old) directory path; its future slug path
       // is the prefix for descendants.
-      normalizeDir(childOldAbs, originalRel, slugRel, apply, renames);
+      normalizeDir(
+        {
+          absPath: childOldAbs,
+          originalRel,
+          slugRel,
+          overrides: isContentRoot
+            ? (run.overridesByCourseFolder.get(dirent.name) ?? NO_OVERRIDES)
+            : scope.overrides,
+        },
+        run,
+      );
     }
 
     if (originalRel !== slugRel) {
-      renames.push({ from: originalRel, to: slugRel });
-      if (apply) {
-        renameOnDisk(childOldAbs, path.join(dirAbs, slugName));
+      run.renames.push({ from: originalRel, to: slugRel });
+      if (run.apply) {
+        renameOnDisk(childOldAbs, path.join(scope.absPath, slugName));
       }
     }
   }
+}
+
+/**
+ * Two distinct names normalizing to the same slug cannot coexist. Aborts
+ * before anything in this directory is mutated.
+ */
+function assertNoCollisions(
+  dirents: ReadonlyArray<Dirent>,
+  dirAbs: string,
+  overrides: SlugOverrides,
+): void {
+  const sourcesByTarget = new Map<string, string[]>();
+  for (const dirent of dirents) {
+    const target = targetName(dirent.name, dirent.isDirectory(), overrides);
+    sourcesByTarget.set(target, [...(sourcesByTarget.get(target) ?? []), dirent.name]);
+  }
+
+  const collisions = [...sourcesByTarget.entries()].filter(([, sources]) => sources.length > 1);
+  if (collisions.length === 0) return;
+
+  const detail = collisions
+    .map(([target, sources]) => `  "${target}" ⇐ ${sources.map((s) => `"${s}"`).join(", ")}`)
+    .join("\n");
+  throw new Error(
+    `Slug collision in "${dirAbs || "."}" — distinct names normalize to the same slug:\n${detail}`,
+  );
 }
 
 function joinPosix(prefix: string, name: string): string {
@@ -129,7 +181,10 @@ export function normalizeContentDisk(args: { rootDir: string; apply?: boolean })
   }
 
   const renames: RenameEntry[] = [];
-  normalizeDir(rootDir, "", "", apply, renames);
+  normalizeDir(
+    { absPath: rootDir, originalRel: "", slugRel: "", overrides: NO_OVERRIDES },
+    { apply, renames, overridesByCourseFolder: readOverridesByCourseFolder(rootDir) },
+  );
 
   let manifestPath: string | null = null;
   if (apply) {
@@ -138,6 +193,16 @@ export function normalizeContentDisk(args: { rootDir: string; apply?: boolean })
   }
 
   return { renames, manifestPath, applied: apply };
+}
+
+/**
+ * Slug overrides per course folder, or an empty map when the content root has
+ * no `courses.manifest.json` — in which case automatic slugification alone
+ * applies, which is the pre-manifest behaviour.
+ */
+function readOverridesByCourseFolder(rootDir: string): Map<string, SlugOverrides> {
+  const courses = loadCoursesManifest(rootDir) ?? [];
+  return new Map(courses.map((course) => [course.folder, course.slugOverrides]));
 }
 
 // ── CLI ──────────────────────────────────────────────────────────────────

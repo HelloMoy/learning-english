@@ -1,5 +1,5 @@
 import {
-  SEED_CONTENT_COURSE_ID,
+  seedContentCourses,
   seedContentLessonRows,
   seedContentModules,
 } from "@/adapters/persistence/in-memory/seed/seed-content";
@@ -178,7 +178,7 @@ test.describe("Course catalog — course id guard", () => {
     // The course id is a deterministic uuidv5 derived from the slug.
     // This guards against an accidental regeneration that flips the
     // id and breaks the Storybook stories / E2E URLs above.
-    expect(SEED_CONTENT_COURSE_ID).toMatch(
+    expect(seedContentCourses[0]!.id).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
     );
   });

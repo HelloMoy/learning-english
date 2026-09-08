@@ -1,6 +1,6 @@
 import { seedCourse, seedModules } from "@/adapters/persistence/in-memory/seed/seed";
 import {
-  seedContentCourse,
+  seedContentCourses,
   seedContentLessonRows,
   seedContentModules,
 } from "@/adapters/persistence/in-memory/seed/seed-content";
@@ -20,6 +20,7 @@ import { expect, test } from "@playwright/test";
  * Ids and titles are imported from the seeds so a regeneration keeps these
  * in sync rather than silently drifting.
  */
+const contentCourse = seedContentCourses[0]!;
 const CONTENT_MODULE = seedContentModules[0]!;
 const CONTENT_LESSON = seedContentLessonRows.find(
   (lesson) => lesson.moduleId === CONTENT_MODULE.id,
@@ -38,7 +39,7 @@ test.describe("Home — ladder of levels", () => {
     const cards = page.getByTestId("course-level-card");
     await expect(cards).toHaveCount(2);
     await expect(cards.nth(0)).toContainText(seedCourse.title);
-    await expect(cards.nth(1)).toContainText(seedContentCourse.title);
+    await expect(cards.nth(1)).toContainText(contentCourse.title);
   });
 
   test("WHEN the home is visited THEN the courses section announces itself", async ({ page }) => {
@@ -92,12 +93,7 @@ test.describe("Home — continue watching", () => {
   test("WHEN a lesson has been opened THEN the home offers it back and Resume returns to it", async ({
     page,
   }) => {
-    const lessonPath = lessonUrl(
-      "en",
-      seedContentCourse.slug,
-      CONTENT_MODULE.slug,
-      CONTENT_LESSON.id,
-    );
+    const lessonPath = lessonUrl("en", contentCourse.slug, CONTENT_MODULE.slug, CONTENT_LESSON.id);
 
     await page.goto(lessonPath);
     // The record is written on mount; the heading proves the page rendered.
@@ -109,7 +105,7 @@ test.describe("Home — continue watching", () => {
     await expect(panel).toBeVisible();
     await expect(panel).toContainText(CONTENT_LESSON.title);
     await expect(panel.getByTestId("continue-watching-breadcrumb")).toContainText(
-      seedContentCourse.title,
+      contentCourse.title,
     );
 
     await panel.getByTestId("continue-watching-resume").click();
@@ -119,9 +115,7 @@ test.describe("Home — continue watching", () => {
   test("WHEN a lesson has been opened THEN its course is the one marked in progress", async ({
     page,
   }) => {
-    await page.goto(
-      lessonUrl("en", seedContentCourse.slug, CONTENT_MODULE.slug, CONTENT_LESSON.id),
-    );
+    await page.goto(lessonUrl("en", contentCourse.slug, CONTENT_MODULE.slug, CONTENT_LESSON.id));
     await expect(page.getByRole("heading", { name: CONTENT_LESSON.title })).toBeVisible();
 
     await page.goto("/en");
@@ -138,9 +132,7 @@ test.describe("Home — continue watching", () => {
   }) => {
     const a1Lesson = "22222222-2222-4222-8222-222222222220";
 
-    await page.goto(
-      lessonUrl("en", seedContentCourse.slug, CONTENT_MODULE.slug, CONTENT_LESSON.id),
-    );
+    await page.goto(lessonUrl("en", contentCourse.slug, CONTENT_MODULE.slug, CONTENT_LESSON.id));
     await expect(page.getByRole("heading", { name: CONTENT_LESSON.title })).toBeVisible();
 
     await page.goto(lessonUrl("en", seedCourse.slug, A1_MODULE.slug, a1Lesson));
