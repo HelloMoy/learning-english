@@ -1,54 +1,39 @@
+import path from "node:path";
+
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
+import { contentImageRemotePatterns } from "./src/adapters/persistence/blob-store/content-image-patterns/content-image-patterns";
+import {
+  CONTENT_LOCATIONS_FILE,
+  loadContentLocations,
+} from "./src/adapters/persistence/blob-store/content-locations/content-locations";
+
 /**
  * Course posters are rendered through `next/image`, which refuses any remote
- * host not declared here. Pointing `CONTENT_BASE_URL` at a bucket or CDN
- * therefore has to widen the image allowlist too, or every lesson page 500s
- * with "Invalid src prop … hostname is not configured".
+ * host not declared here. Placing content in a bucket therefore has to widen
+ * the image allowlist too, or every lesson page 500s with "Invalid src prop …
+ * hostname is not configured".
  *
- * Deriving the pattern from the same variable that builds the BlobStore keeps
- * the promise honest: repointing content storage stays a configuration
- * change, not a code change.
+ * Deriving the patterns from the same manifest that routes the content keeps
+ * the promise honest: moving an asset stays a configuration change, not a code
+ * change. One pattern per PUBLIC store; signed stores contribute none, because
+ * their posters come from the app's own origin through `/api/content`.
  *
- * Unset, or set to a site-relative prefix (the default
- * `/local-filesystem-lesson`), yields no remote pattern at all — images are
- * served from the app's own origin exactly as before.
- *
- * Caveat: unlike `buildBlobStore()`, which reads the variable per call, this
- * is evaluated once when the config loads. Flipping `CONTENT_BASE_URL` to a
- * new HOST in a running dev server repoints the URLs but not this allowlist —
- * restart the server after such a change.
+ * Caveat: unlike `contentBlobStoreFromEnv()`, which reads the manifest per
+ * call, this is evaluated once when the config loads. Editing
+ * `content-locations.json` in a running dev server repoints URLs but not this
+ * allowlist — restart the server after such a change.
  */
-function contentImageRemotePatterns(): NonNullable<NextConfig["images"]>["remotePatterns"] {
-  const base = process.env.CONTENT_BASE_URL;
-  if (!base) return [];
-
-  let parsed: URL;
-  try {
-    parsed = new URL(base);
-  } catch {
-    // Site-relative prefix — same origin, nothing to allowlist.
-    return [];
-  }
-  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return [];
-
-  return [
-    {
-      protocol: parsed.protocol === "https:" ? "https" : "http",
-      hostname: parsed.hostname,
-      ...(parsed.port ? { port: parsed.port } : {}),
-      // Scope the allowlist to the configured prefix rather than the whole
-      // host, so this does not quietly become "any image from that domain".
-      pathname: `${parsed.pathname.replace(/\/+$/, "")}/**`,
-    },
-  ];
+function imageRemotePatterns(): NonNullable<NextConfig["images"]>["remotePatterns"] {
+  const manifestPath = path.resolve(process.env.CONTENT_LOCATIONS_PATH ?? CONTENT_LOCATIONS_FILE);
+  return contentImageRemotePatterns(loadContentLocations(manifestPath));
 }
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
   images: {
-    remotePatterns: contentImageRemotePatterns(),
+    remotePatterns: imageRemotePatterns(),
   },
 };
 

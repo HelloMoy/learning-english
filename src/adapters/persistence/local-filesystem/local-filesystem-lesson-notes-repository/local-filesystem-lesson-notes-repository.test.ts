@@ -105,3 +105,101 @@ describe("LocalFilesystemLessonNotesRepository", () => {
     await expect(repo.byLesson(lessonIdOther)).resolves.toBeNull();
   });
 });
+
+describe("LocalFilesystemLessonNotesRepository — caching", () => {
+  const lessonId = LessonId.parse("00000000-0000-4000-8000-000000000001");
+  const otherLessonId = LessonId.parse("00000000-0000-4000-8000-000000000002");
+  const notesKey = "course/welcome/readme.md";
+  const otherKey = "course/farewell/readme.md";
+
+  /** A store that counts reads, standing in for a bucket round trip. */
+  function countingStore() {
+    const reads: string[] = [];
+    return {
+      reads,
+      blobStore: {
+        url: (key: string) => `/content/${key}`,
+        exists: async () => true,
+        readText: async (key: string) => {
+          reads.push(key);
+          return `# ${key}`;
+        },
+      },
+    };
+  }
+
+  const rowFor = (id: string, key: string): ResourceRow => ({
+    id: `11111111-1111-4111-8111-11111111111${key.length % 10}`,
+    lessonId: id,
+    title: "Notes",
+    url: key,
+    kind: "other",
+  });
+
+  it("reads a lesson's notes once however many times they are viewed", async () => {
+    // Against the local driver this is a disk read; against a bucket it is a
+    // network round trip on every lesson view, which is what the cache is for.
+    const store = countingStore();
+    const repo = new LocalFilesystemLessonNotesRepository({
+      notesKeys: { [lessonId]: notesKey },
+      resourceRows: [rowFor(lessonId, notesKey)],
+      blobStore: store.blobStore,
+    });
+
+    await repo.byLesson(lessonId);
+    await repo.byLesson(lessonId);
+    await repo.byLesson(lessonId);
+
+    expect(store.reads).toEqual([notesKey]);
+  });
+
+  it("keeps different keys apart rather than serving one from the other", async () => {
+    const store = countingStore();
+    const repo = new LocalFilesystemLessonNotesRepository({
+      notesKeys: { [lessonId]: notesKey, [otherLessonId]: otherKey },
+      resourceRows: [rowFor(lessonId, notesKey), rowFor(otherLessonId, otherKey)],
+      blobStore: store.blobStore,
+    });
+
+    const first = await repo.byLesson(lessonId);
+    const second = await repo.byLesson(otherLessonId);
+
+    expect(first?.markdown).toBe(`# ${notesKey}`);
+    expect(second?.markdown).toBe(`# ${otherKey}`);
+    expect(store.reads).toEqual([notesKey, otherKey]);
+  });
+
+  it("caches by content key, so two lessons sharing notes cost one read", async () => {
+    const store = countingStore();
+    const repo = new LocalFilesystemLessonNotesRepository({
+      notesKeys: { [lessonId]: notesKey, [otherLessonId]: notesKey },
+      resourceRows: [rowFor(lessonId, notesKey), rowFor(otherLessonId, notesKey)],
+      blobStore: store.blobStore,
+    });
+
+    await repo.byLesson(lessonId);
+    await repo.byLesson(otherLessonId);
+
+    expect(store.reads).toEqual([notesKey]);
+  });
+
+  it("does not cache a failed read, so a transient error is retried", async () => {
+    let attempt = 0;
+    const repo = new LocalFilesystemLessonNotesRepository({
+      notesKeys: { [lessonId]: notesKey },
+      resourceRows: [rowFor(lessonId, notesKey)],
+      blobStore: {
+        url: (key: string) => `/content/${key}`,
+        exists: async () => true,
+        readText: async () => {
+          attempt += 1;
+          if (attempt === 1) throw new Error("network blip");
+          return "# recovered";
+        },
+      },
+    });
+
+    await expect(repo.byLesson(lessonId)).rejects.toThrow("network blip");
+    await expect(repo.byLesson(lessonId)).resolves.toMatchObject({ markdown: "# recovered" });
+  });
+});
