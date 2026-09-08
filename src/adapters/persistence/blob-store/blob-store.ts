@@ -41,3 +41,51 @@ export interface BlobStore {
    */
   readText(key: string): Promise<string>;
 }
+
+/**
+ * A store whose objects are private and reachable only through a time-limited
+ * signed URL.
+ *
+ * @remarks
+ * Deliberately NOT part of {@link BlobStore}. Signing is asynchronous, and
+ * `BlobStore.url` is synchronous because it runs while domain entities are
+ * being constructed. Only the signing endpoint needs a signed URL, and it can
+ * afford to await one; keeping the two interfaces separate is what stops
+ * `async` from spreading into every adapter.
+ */
+export interface SignedUrlSource {
+  /**
+   * Returns a URL that grants temporary read access to the object.
+   *
+   * @param objectPath - Path within this store, prefix already applied
+   * @param ttlSeconds - How long the URL stays valid
+   */
+  signedUrl(objectPath: string, ttlSeconds: number): Promise<string>;
+}
+
+/** Whether a store can mint signed URLs. */
+export function isSignedUrlSource(store: unknown): store is SignedUrlSource {
+  return typeof (store as SignedUrlSource | null)?.signedUrl === "function";
+}
+
+/**
+ * A store whose objects can be copied in and out and removed.
+ *
+ * @remarks
+ * Deliberately NOT part of {@link BlobStore}. The application only ever reads
+ * content; writing exists for one caller, `scripts/move-content.ts`, and
+ * keeping it off the read interface means no request path can reach it.
+ */
+export interface TransferableBlobStore {
+  /** Reads an object's raw bytes, for copying it to another store. */
+  readBytes(objectPath: string): Promise<Uint8Array>;
+  /** Writes an object's raw bytes, creating or replacing it. */
+  write(objectPath: string, body: Uint8Array): Promise<void>;
+  /** Removes an object. Used only after a verified copy. */
+  remove(objectPath: string): Promise<void>;
+}
+
+/** Whether a store can copy objects in and out. */
+export function isTransferable(store: unknown): store is TransferableBlobStore {
+  return typeof (store as TransferableBlobStore | null)?.readBytes === "function";
+}
