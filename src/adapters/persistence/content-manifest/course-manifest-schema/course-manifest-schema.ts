@@ -124,6 +124,16 @@ export const CourseManifest = z.object({
     .length(2)
     .regex(/^[a-z]{2}$/, "ISO 639-1 lower-case"),
   sequence: z.number().int().positive(),
+  /**
+   * Whether the course is still being written. A draft course is withheld from
+   * the served catalog in environments that hide drafts — see
+   * `visibleCourseManifests`.
+   *
+   * Absent means published, so a manifest written before drafts existed keeps
+   * its meaning untouched. Publishing a draft is deleting this line: no code
+   * changes, and the course is served everywhere.
+   */
+  draft: z.boolean().default(false),
   modules: z.array(ManifestModule).min(1),
 });
 

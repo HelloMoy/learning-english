@@ -100,6 +100,27 @@ describe("parseCourseManifests", () => {
     });
   });
 
+  describe("GIVEN a course declaring whether it is a draft", () => {
+    test("WHEN `draft` is absent THEN the course is published", () => {
+      const [course] = parseCourseManifests([courseManifest()]);
+
+      expect(course!.draft).toBe(false);
+    });
+
+    test("WHEN `draft` is true THEN it survives the parse", () => {
+      const [course] = parseCourseManifests([courseManifest({ draft: true })]);
+
+      expect(course!.draft).toBe(true);
+    });
+
+    test("WHEN `draft` is not a boolean THEN it is rejected naming the course", () => {
+      const manifest = courseManifest({ draft: "yes", slug: "half-written-course" });
+
+      expect(() => parseCourseManifests([manifest])).toThrow(InvalidCourseManifestError);
+      expect(() => parseCourseManifests([manifest])).toThrow(/half-written-course/);
+    });
+  });
+
   describe("GIVEN two courses colliding on the ladder", () => {
     test("WHEN two manifests share a slug THEN it is rejected naming both", () => {
       const manifests = [
