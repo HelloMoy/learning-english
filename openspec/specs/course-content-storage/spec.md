@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Define how course content (videos, PDFs, thumbnails, supplementary markdown) is resolved to URLs at runtime, and how the seed data that drives the lesson/resource repositories is generated from a content source. The `BlobStore` abstraction decouples lesson/resource adapters from the underlying storage backend so the application can target a local filesystem in development and an S3-compatible bucket in production without changes to the domain or to the lesson/resource adapters.
+Define how course content (videos, PDFs, thumbnails, supplementary markdown) is resolved to URLs at runtime, and how the catalog that drives the lesson/resource repositories is declared. The `BlobStore` abstraction decouples lesson/resource adapters from the underlying storage backend so the application can target a local filesystem in development and an S3-compatible bucket in production without changes to the domain or to the lesson/resource adapters.
 
 This spec captures WHAT the storage layer must do. The domain entities and ports (`LessonRepository`, `ResourceRepository`, `BlobStore`) are defined in `openspec/specs/course-platform-domain/spec.md`; this spec is the storage-adapter counterpart.
 ## Requirements
@@ -18,7 +18,7 @@ A "content key" is an opaque, store-agnostic identifier such as `advanced-interm
 
 The `BlobStore` interface is a driven-adapter primitive. It MUST NOT live under `src/domain/ports/` and MUST NOT be imported by anything under `src/domain/**` (the `architecture-boundaries` spec continues to hold).
 
-URL resolution SHALL happen exactly once, at read time, inside the lesson and resource adapters. No other layer — not the generator, not the seed, not the UI — SHALL concatenate a base URL onto a content key. A content key SHALL NOT appear in any value handed to the domain: the adapters resolve keys before constructing entities, so `VideoLesson.source`, `VideoLesson.poster` and `Resource.url` are always fully-formed URLs or site-relative paths by the time a domain schema parses them.
+URL resolution SHALL happen exactly once, at read time, inside the lesson and resource adapters. No other layer — not the manifests, not the UI — SHALL concatenate a base URL onto a content key. A content key SHALL NOT appear in any value handed to the domain: the adapters resolve keys before constructing entities, so `VideoLesson.source`, `VideoLesson.poster` and `Resource.url` are always fully-formed URLs or site-relative paths by the time a domain schema parses them.
 
 A seed value that is ALREADY an absolute `http(s)` URL is not a content key and SHALL bypass `BlobStore` entirely rather than being resolved through it. This is the one exception to single-point resolution, and it is what lets a lesson be served by a third party (a `lessonVideoSources` entry pointing at YouTube) while every other asset in the same lesson stays keyed. Passing such a value to `BlobStore.url()` would prepend the store's base and produce a nonsense URL, so the exception is a correctness requirement, not a convenience.
 
@@ -32,10 +32,10 @@ A seed value that is ALREADY an absolute `http(s)` URL is not a content key and 
 - **WHEN** `LocalFilesystemResourceRepository` builds a `Resource.url` for a PDF whose key is `advanced-intermediate-course/5-sound-natural-intonation/03-falling-intonation.pdf`
 - **THEN** the resulting `url` value is exactly what `blobStore.url(key)` returns
 
-#### Scenario: Swapping the BlobStore changes every content URL without regenerating the seed
+#### Scenario: Swapping the BlobStore changes every content URL without touching the manifests
 
-- **WHEN** the same `seed-content.ts` is used to build the adapters twice, once with a `BlobStore` whose `url(key)` returns `/local-filesystem-lesson/<key>` and once with one returning `https://cdn.example.com/<key>`
-- **THEN** every `VideoLesson.source`, `VideoLesson.poster` and `Resource.url` read from the second set of adapters carries the `https://cdn.example.com/` prefix, and no file on disk was regenerated
+- **WHEN** the same lesson rows are used to build the adapters twice, once with a `BlobStore` whose `url(key)` returns `/local-filesystem-lesson/<key>` and once with one returning `https://cdn.example.com/<key>`
+- **THEN** every `VideoLesson.source`, `VideoLesson.poster` and `Resource.url` read from the second set of adapters carries the `https://cdn.example.com/` prefix, and no manifest was edited
 
 #### Scenario: An absolute URL in the seed bypasses the store
 
@@ -65,191 +65,57 @@ The `baseUrl` and `localRoot` MUST be passed separately to prevent the footgun o
 - **WHEN** the file at `localRoot/key` does not exist
 - **THEN** `await exists(key)` returns `false`
 
-### Requirement: Course metadata is declared in an untracked content manifest
-
-The system SHALL read course declarations from a manifest at
-`public/local-filesystem-lesson/courses.manifest.json`. The manifest is the single
-place where everything that cannot be inferred from the content tree is declared.
-
-The manifest SHALL be a JSON document of the shape:
-
-```jsonc
-{
-  "version": 1,
-  "courses": [
-    {
-      "folder": "advanced-intermediate-course",  // required: directory under the content root
-      "slug": "advanced-intermediate-course",    // optional: defaults to slugify(folder)
-      "title": "Advanced Intermediate Course",   // optional: defaults to humanize(slug)
-      "description": "…",                        // optional: defaults to the generated sentence
-      "language": "en",                          // optional: defaults to "en"
-      "sequence": 2,                             // required: position in the home ladder
-      "slugOverrides": { "1 Day#1": "1-day-01" },
-      "titleFromNotesModules": ["3-contractions-reductions"],
-      "moduleTitleOverrides": { "3-contractions-reductions": "Contractions & Reductions" },
-      "lessonTitleOverrides": { "3-contractions-reductions/6-i-d": "I’d …" }
-    }
-  ]
-}
-```
-
-`slugOverrides` is keyed by the RAW on-disk name; `titleFromNotesModules` lists
-module slugs; `moduleTitleOverrides` is keyed by module slug; `lessonTitleOverrides`
-is keyed by `moduleSlug/lessonSlug` relative to the course, because scoping each
-override map inside its course entry makes a cross-course key collision unrepresentable.
-
-The manifest SHALL be untracked by git. `public/local-filesystem-lesson/` is
-already ignored in full, so no new `.gitignore` rule is required; a comment SHALL
-be added there recording that the manifest is deliberately covered by it. The
-manifest describes ~15 GB of untracked content and is only meaningful on a machine
-that has it, so the two are present and absent together.
-
-The manifest SHALL be optional. When the file is absent, the generator SHALL behave
-exactly as it did before this change: one course, taken from the first folder under
-the content root, with a slug-derived title, a generated description, `language:
-"en"`, and `sequence: 2`.
-
-The manifest SHALL be validated with a Zod schema before use. A manifest that is
-malformed JSON, fails the schema, names a `folder` that does not exist under the
-content root, or declares two courses with the same `slug` or the same `sequence`
-SHALL abort generation with a non-zero exit status and a message naming the
-offending entry, WITHOUT writing a partial `seed-content.ts`. A malformed manifest
-SHALL NOT silently fall back to the no-manifest defaults — a present-but-wrong
-manifest is an error, an absent one is a default.
-
-#### Scenario: A new course is added without touching any code
-
-- **WHEN** a developer drops a new course folder under the content root in the canonical
-  shape, adds an entry naming that folder with a `sequence` of `3` to
-  `courses.manifest.json`, and runs `pnpm generate:content-seed`
-- **THEN** `seed-content.ts` contains that course, its modules, lessons and
-  resources, and no file under `scripts/` was edited
-
-#### Scenario: An absent manifest reproduces the pre-change output
-
-- **WHEN** the generator runs against a content root with no `courses.manifest.json`
-- **THEN** it emits exactly one course, from the first folder, with the slug-derived
-  title, the generated description, `language: "en"` and `sequence: 2`
-
-#### Scenario: Declared metadata overrides every derived default
-
-- **WHEN** a course entry declares `title`, `description`, `language` and `sequence`
-- **THEN** the emitted `Course` carries those four values verbatim, not the derived ones
-
-#### Scenario: A manifest naming a missing folder fails loudly
-
-- **WHEN** a course entry names `folder: "does-not-exist"`
-- **THEN** the generator exits non-zero, names that folder, and leaves the existing
-  `seed-content.ts` untouched
-
-#### Scenario: Malformed JSON is an error, not a fallback
-
-- **WHEN** `courses.manifest.json` exists but is not valid JSON, or omits a required
-  field such as `sequence`
-- **THEN** the generator exits non-zero with a message identifying the problem and
-  does NOT fall back to the no-manifest defaults
-
-#### Scenario: Two courses claiming the same ladder position fail loudly
-
-- **WHEN** two course entries declare the same `sequence`, or the same `slug`
-- **THEN** the generator exits non-zero and names both entries
-
-#### Scenario: The manifest is not tracked by git
-
-- **WHEN** a developer creates `public/local-filesystem-lesson/courses.manifest.json`
-  and runs `git status`
-- **THEN** the file is not listed as untracked-and-addable content, because the
-  content root is already ignored in full
-
 ### Requirement: A lesson's video source may be declared as an external URL
 
-`courses.manifest.json` SHALL support an optional per-course `lessonVideoSources`
-table mapping `moduleSlug/lessonSlug` to an absolute `http(s)` URL. When a lesson
-has an entry, the generator SHALL emit that URL as the lesson's `source` instead
-of the content key derived from the `.mp4` on disk.
+The manifest SHALL support declaring a lesson's `source` as an absolute `http(s)`
+URL rather than a content key, for lessons whose video is served by someone else
+— the Basic Course's lectures stream from YouTube.
 
-A key SHALL be a two-segment `moduleSlug/lessonSlug` pair, validated the same way
-`lessonTitleOverrides` keys are: a bare lesson slug is ambiguous across modules,
-and a course-prefixed key could name a course other than the entry's own. A value
-that is not an absolute `http(s)` URL SHALL be rejected — a content key written
-here would silently resolve against the local store and defeat the field.
+A value that is neither an absolute `http(s)` URL nor a well-formed content key
+SHALL be rejected.
 
-The table SHALL affect `source` only. `poster`, `Resource.url` and lesson notes
-keep their content keys and their existing resolution, so a lesson served from
-YouTube still carries a locally-stored thumbnail and locally-stored resources.
+A declared external source SHALL affect `source` only. `poster`,
+`Resource.url` and lesson notes keep their content keys and their existing
+resolution, so a lesson served from YouTube still carries a locally-stored
+thumbnail and locally-stored resources.
 
-An absent table, or an absent entry, SHALL leave the lesson's derived content key
-untouched, so a manifest that declares no `lessonVideoSources` produces a
-byte-identical seed.
+A lesson whose `source` is an external URL SHALL NOT require a local video file
+to exist. Its `durationSeconds` is declared in the manifest like every other
+lesson's, so the local `.mp4` may be deleted without changing what the
+application serves. This replaces the previous rule, under which the on-disk
+`.mp4` remained the source of `durationSeconds` via `ffprobe` and therefore could
+not be removed.
 
-Declaring an entry SHALL NOT require removing the lesson's local video file. The
-on-disk `.mp4` remains the source of `durationSeconds`, which the generator reads
-with `ffprobe` and which the domain requires.
+#### Scenario: A declared lesson serves its external URL
 
-#### Scenario: A declared lesson emits its external URL
+- **WHEN** the manifest declares lesson `2-vowels/1-the-vowel-sound-schwa` with
+  `source` `https://www.youtube.com/embed/27WXXMFimvE`
+- **THEN** that lesson is served with exactly that `source`, and its `poster` is
+  still the content key resolved through `BlobStore`
 
-- **WHEN** the manifest declares `lessonVideoSources` entry `2-vowels/1-the-vowel-sound-schwa` → `https://www.youtube.com/embed/27WXXMFimvE` and the generator runs
-- **THEN** that lesson's row in `seed-content.ts` has `source` equal to `https://www.youtube.com/embed/27WXXMFimvE`, and its `poster` is still the content key derived from the lesson folder's image
+#### Scenario: A lesson keeping a content key is unaffected
 
-#### Scenario: An undeclared lesson keeps its content key
+- **WHEN** a lesson declares a `source` that is a content key rather than a URL
+- **THEN** the key resolves through `BlobStore` exactly as it does today
 
-- **WHEN** a course declares no `lessonVideoSources`, or declares a table with no entry for a given lesson, and the generator runs
-- **THEN** every lesson in that course carries the content key derived from its on-disk `.mp4`, exactly as before
+#### Scenario: Deleting a hosted lesson's local video changes nothing
 
-#### Scenario: A declared lesson still reports the local file's duration
+- **WHEN** every `.mp4` under the Basic Course is deleted and the app is restarted
+- **THEN** all 48 lessons still serve their YouTube `source`, their declared
+  duration and their locally-stored poster
 
-- **WHEN** a lesson has a `lessonVideoSources` entry and its `.mp4` is still on disk
-- **THEN** the emitted row's `durationSeconds` is the duration `ffprobe` reports for that local file
+#### Scenario: A value that is neither a URL nor a valid key is rejected
 
-#### Scenario: A malformed key is rejected
-
-- **WHEN** the manifest declares a `lessonVideoSources` key that is not a two-segment `moduleSlug/lessonSlug` pair, such as `1-the-vowel-sound-schwa` or `basic-course/2-vowels/1-the-vowel-sound-schwa`
-- **THEN** parsing the manifest fails with a message naming the offending key and the shape a key must have
-
-#### Scenario: A value that is not an absolute URL is rejected
-
-- **WHEN** the manifest declares a `lessonVideoSources` value that is a content key or a site-relative path rather than an absolute `http(s)` URL
-- **THEN** parsing the manifest fails with a message naming the offending entry
-
-### Requirement: A tracked example manifest is the template and the reviewed record
-
-The repository SHALL commit `scripts/courses.manifest.example.json`: a complete,
-schema-valid manifest carrying the real current values for the shipped course,
-including every slug override, notes-heading module and lesson-title override that
-`scripts/slug-overrides.ts`, `scripts/title-from-notes-modules.ts` and
-`scripts/title-overrides.ts` held before this change.
-
-The example SHALL be a working manifest, not a stub: copying it to
-`public/local-filesystem-lesson/courses.manifest.json` on a machine that has the
-content SHALL regenerate the committed `seed-content.ts` byte-for-byte.
-
-A test SHALL assert that the example file parses against the manifest schema, so
-the committed template cannot drift out of shape.
-
-This mirrors the repository's existing `.env` / `.env.example` split: the live file
-carries machine-local truth and stays untracked, the example is the one artifact a
-fresh clone needs in order to know what the live file must contain.
-
-#### Scenario: A fresh clone learns the manifest's shape
-
-- **WHEN** a developer clones the repo, obtains the content root out of band, and
-  copies `scripts/courses.manifest.example.json` to
-  `public/local-filesystem-lesson/courses.manifest.json`
-- **THEN** `pnpm generate:content-seed` succeeds and produces no diff against the
-  committed `seed-content.ts`
-
-#### Scenario: The example manifest is schema-checked in CI
-
-- **WHEN** `pnpm test:run` executes
-- **THEN** a test parses `scripts/courses.manifest.example.json` with the manifest
-  schema and fails if it no longer validates
+- **WHEN** the manifest declares a `source` that is an empty string or a
+  site-relative path such as `/videos/x.mp4`
+- **THEN** validation fails with a message naming the offending lesson
 
 ### Requirement: Asset placement is declared in a runtime location manifest
 
 The system SHALL read asset placement from a tracked JSON manifest,
 `content-locations.json`, that declares which store answers for which content
 key. It is read at runtime when the dependency graph is built, NOT at build
-time, so moving an asset never regenerates `seed-content.ts`.
+time, so moving an asset never touches the course manifests.
 
 The manifest SHALL have the shape:
 
@@ -305,7 +171,7 @@ because that is what a bulk migration does.
 Absent an `assets` entry, a store's `pathPrefix` SHALL be prepended to the key to
 form the object path inside that store. The content key SHALL NOT be redefined
 by a move: the key is identity, the object path is placement, and conflating
-them would break the guarantee that a move leaves `seed-content.ts` untouched.
+them would break the guarantee that a move leaves the course manifests untouched.
 That is exactly why an asset whose path diverges is declared here rather than by
 rewriting its key.
 
@@ -328,7 +194,7 @@ behaviour.
 - **WHEN** the operator adds a `routes` entry mapping the prefix
   `advanced-intermediate-course/8-everyday-english/` to the `s3-video` store
 - **THEN** every key under that prefix resolves through `s3-video`, every other
-  key is unaffected, and `seed-content.ts` is unchanged on disk
+  key is unaffected, and the course manifests are unchanged on disk
 
 #### Scenario: A single asset is moved with one override
 
@@ -354,7 +220,7 @@ behaviour.
 - **WHEN** the key `course/module/lesson/video.mp4` routes to a store whose
   `pathPrefix` is `v1/`
 - **THEN** the object fetched from that store is `v1/course/module/lesson/video.mp4`,
-  and the key recorded in `seed-content.ts` is still `course/module/lesson/video.mp4`
+  and the key recorded in the manifest is still `course/module/lesson/video.mp4`
 
 #### Scenario: A route naming an undeclared store fails loudly at boot
 
@@ -407,7 +273,7 @@ behaviour.
 ### Requirement: Every asset's placement can be materialized into the manifest
 
 The system SHALL provide `pnpm materialize:content-assets`, which writes every
-content key in `seed-content.ts` into the manifest's `assets` block with the
+content key in the course manifests into the location manifest's `assets` block with the
 store and object path that key currently resolves to.
 
 This exists so that an exhaustive manifest — every asset's placement written
@@ -446,26 +312,6 @@ run, and the system's behaviour is identical either way.
 - **WHEN** an `assets` entry declares an `objectPath` that the key would not
   produce, and the command runs
 - **THEN** that entry keeps its declared `objectPath`
-
-### Requirement: Declared assets are checked against the seed
-
-`pnpm verify:content` SHALL additionally report every `assets` entry whose key is
-absent from `seed-content.ts`, and SHALL exit non-zero when there is one.
-
-An exhaustive `assets` block goes stale the moment content is renamed or removed
-and the seed is regenerated. Without this check the manifest would accumulate
-entries for keys nothing asks for any more, and a reader could no longer tell
-which placements are real.
-
-#### Scenario: A stale asset entry is named
-
-- **WHEN** the manifest declares an `assets` entry for a key the seed no longer contains
-- **THEN** `pnpm verify:content` exits non-zero and names that key as stale
-
-#### Scenario: A manifest matching the seed passes
-
-- **WHEN** every `assets` entry names a key the seed contains, and every key resolves
-- **THEN** `pnpm verify:content` exits zero
 
 ### Requirement: RoutingBlobStore resolves each key through the store it routes to
 
@@ -561,7 +407,7 @@ The script SHALL NOT rewrite the manifest before the destination verifies, so an
 interrupted move leaves the manifest pointing at bytes that are still present.
 
 The system SHALL provide `pnpm verify:content`, which walks every content key in
-`seed-content.ts` — every `source`, `poster`, `Resource.url` and notes key — and
+the course manifests — every `source`, `poster`, `Resource.url` and notes key — and
 calls `exists()` on the routed store, failing non-zero and naming every key that
 does not resolve.
 
@@ -618,87 +464,42 @@ regenerated, so the cache MAY be held for the process lifetime.
 - **THEN** the driver performs one object read, and the second call is served
   from cache
 
-### Requirement: Content seed is generated at build time, not at runtime
-
-The system SHALL provide a build-time script `scripts/generate-course-content-seed.ts` that:
-
-- Reads `public/local-filesystem-lesson/courses.manifest.json` when present and walks the folder named by EACH course entry, in `sequence` order. With no manifest, it walks the single first folder under the content root, as before.
-- Emits `src/adapters/persistence/in-memory/seed/seed-content.ts` containing `seedContentCourses`, `seedContentModules`, `seedContentLessonRows`, and `seedContentResourceRows`, PLUS the original pre-normalization names (see "Generated seed preserves the original pre-normalization names"). The module, lesson and resource exports aggregate across every course; each row already carries the `courseId` or `moduleId` that owns it, so no consumer needs a per-course export.
-- Emits `seedContentCourses` and `seedContentModules` as parsed domain entities, because neither carries a content key. Emits lessons and resources as **raw rows** — plain objects whose `source`, `poster` and `url` fields hold content KEYS, not URLs — because a bare key does not satisfy `urlOrRelativePath()` and therefore cannot be parsed into a domain entity until an adapter has resolved it.
-- Computes slugs for every folder using (a) the `slugOverrides` map of the owning course's manifest entry if present, otherwise (b) automatic kebab-case ASCII normalization.
-- Slugifies EVERY path segment of each content key — the course, module, and lesson folder names AND the media/resource file basenames — using the same override + normalization logic, so the emitted key is kebab-case ASCII end to end.
-- Extracts `durationSeconds` for each `.mp4` via `ffprobe`. If `ffprobe` is not on `PATH`, the script exits with a non-zero status and a message instructing the developer to install it.
-- Emits content KEYS for every `VideoLesson.source`, `VideoLesson.poster` and `Resource.url`. The generator SHALL NOT resolve keys to URLs and SHALL NOT contain a base-URL literal; the public URL prefix is not knowable at generation time because it is a deployment concern.
-- Validates every emitted key via `BlobStore.exists(key)` and fails non-zero without a partial write if any key is unresolved (see "Generator validates that every emitted key resolves on disk"). The generator MAY construct a `BlobStore` for this existence check alone; it MUST NOT use it to bake URLs into the output.
-
-The generator SHALL NOT silently discard a course folder. Every folder under the content root is either declared in the manifest and emitted, or absent from it and skipped; when a manifest is present and an undeclared folder exists, the generator SHALL report the skipped folder by name on stderr and continue with exit status zero, because an undeclared folder is a staging area, not an error.
-
-The generated file MUST be committed to git. The script MAY be re-run by hand (`pnpm generate:content-seed`) when content is added or removed; CI does not run it.
-
-#### Scenario: A new lesson is added by dropping files in the content folder
-
-- **WHEN** a developer adds a new folder under `public/local-filesystem-lesson/<course>/<new-lesson>/` containing `lesson.mp4` and `notes.pdf`, then runs the normalization step and `pnpm generate:content-seed`
-- **THEN** `seed-content.ts` contains a new video lesson row with a stable slug and a new resource row for the PDF, both with fully-slugified keys that resolve on disk, and both visible in the git diff
-
-#### Scenario: Two declared courses are both emitted
-
-- **WHEN** the manifest declares two course entries and both folders exist under the content root
-- **THEN** `seedContentCourses` holds both courses in `sequence` order, and `seedContentModules`, `seedContentLessonRows` and `seedContentResourceRows` each hold the union of both courses' rows
-
-#### Scenario: An undeclared folder is skipped with a named warning
-
-- **WHEN** a manifest is present and a folder exists under the content root that no course entry names
-- **THEN** the generator names that folder on stderr, emits nothing for it, and exits zero
-
-#### Scenario: The generated seed contains no base-URL prefix
-
-- **WHEN** `pnpm generate:content-seed` completes
-- **THEN** no `source`, `poster` or `url` value in `seed-content.ts` begins with `/local-filesystem-lesson` or any other base-URL prefix — each is a bare content key beginning with the course slug
-
-#### Scenario: A folder name with special characters gets a clean slug
-
-- **WHEN** the script encounters folder `"5 Sound Natural: American Intonation Essentials"`
-- **THEN** the generated module slug is `"5-sound-natural-intonation-essentials"` (automatic normalization) UNLESS an entry in the owning course's `slugOverrides` maps the raw name to a different slug
-
-#### Scenario: A media file basename is slugified into the key
-
-- **WHEN** a lesson folder contains `"Aprende Inglés Americano con Fluidez desde Cero.mp4"`
-- **THEN** the emitted `source` key ends in `"aprende-ingles-americano-con-fluidez-desde-cero.mp4"`, and the same slug is the file's name on disk after normalization
-
-#### Scenario: A duplicate `.mp4` filename inside the same section still produces unique keys
-
-- **WHEN** two lesson folders in the same section each contain a file that slugifies to `aprende-ingles-americano-con-fluidez-desde-cero.mp4`
-- **THEN** the generated keys are different because each lesson key includes the lesson slug, not the bare filename
-
-#### Scenario: Missing ffprobe fails loudly
-
-- **WHEN** the developer runs `pnpm generate:content-seed` and `ffprobe` is not on `PATH`
-- **THEN** the script exits non-zero with stderr "ffprobe not found; install ffmpeg or set FFPROBE_PATH" and does not write a partial `seed-content.ts`
-
 ### Requirement: Lesson-vs-Resource discrimination uses file presence, not folder name
 
-The script SHALL classify each lesson folder as follows:
+The manifest sync command SHALL classify each lesson folder as follows:
 
 - If the folder contains an `.mp4` file, the lesson is `kind: "video"` with `source` set to the video's content KEY.
 - If the folder contains a `readme.md` AND no `.mp4`, the lesson is `kind: "reading"` with `body` set to the file's contents.
-- If the folder contains BOTH an `.mp4` and a `readme.md`, the lesson is `kind: "video"` and the `readme.md` is emitted as a resource row `{ kind: "other", title: "<lesson-title> notes", url: <readme-key> }`.
-- Any other file (PDF, DOCX, image) in a lesson folder becomes a resource row whose `kind` is derived from the file extension: `.pdf` → `"pdf"`, `.pptx`/`.key` → `"slides"`, anything else → `"other"`.
-- The first `.jpeg`/`.jpg`/`.png` in a video lesson folder becomes the row's `poster` KEY. Subsequent images are ignored for poster purposes (they are not surfaced in v1).
+- If the folder contains BOTH an `.mp4` and a `readme.md`, the lesson is `kind: "video"` and the `readme.md` becomes its `notesKey` and a resource entry `{ kind: "other", title: "<lesson-title> notes", url: <readme-key> }`.
+- Any other file (PDF, DOCX, image) in a lesson folder becomes a resource entry whose `kind` is derived from the file extension: `.pdf` → `"pdf"`, `.pptx`/`.key` → `"slides"`, anything else → `"other"`.
+- The first `.jpeg`/`.jpg`/`.png` in a video lesson folder becomes the entry's `poster` KEY. Subsequent images are ignored for poster purposes (they are not surfaced in v1).
+
+These rules SHALL apply only to lessons the manifests do not already describe.
+They PROPOSE an entry; they never decide what the application serves, and they
+never revise a declaration. A lesson whose folder no longer matches its
+declaration keeps the declaration.
 
 #### Scenario: A video lesson with a PDF and a thumbnail
 
-- **WHEN** a lesson folder contains `video.mp4`, `thumbnail.jpeg`, and `handout.pdf`
-- **THEN** the generator emits a video lesson row with `source` set to the video key and `poster` set to the thumbnail key, AND a resource row `{ kind: "pdf", title: "handout", url: <pdf-key> }`
+- **WHEN** an undescribed lesson folder contains `video.mp4`, `thumbnail.jpeg`, and `handout.pdf`
+- **THEN** the sync command appends a video lesson entry with `source` set to the video key and `poster` set to the thumbnail key, AND a resource entry `{ kind: "pdf", title: "handout", url: <pdf-key> }`
 
 #### Scenario: A reading-only lesson with a readme and a docx
 
-- **WHEN** a lesson folder contains `notes.md` (no video) and `exercise.docx`
-- **THEN** the generator emits a reading lesson row with `body` set to the markdown contents, AND a resource row `{ kind: "other", title: "exercise", url: <docx-key> }`
+- **WHEN** an undescribed lesson folder contains `notes.md` (no video) and `exercise.docx`
+- **THEN** the sync command appends a reading lesson entry with `body` set to the markdown contents, AND a resource entry `{ kind: "other", title: "exercise", url: <docx-key> }`
 
 #### Scenario: A bimodal lesson (video + readme) collapses the readme into a resource
 
-- **WHEN** a lesson folder contains both `lesson.mp4` and `notes.md`
-- **THEN** the generator emits a video lesson row (NOT a new bimodal kind) AND a resource row `{ kind: "other", title: "<lesson-title> notes", url: <notes-key> }`
+- **WHEN** an undescribed lesson folder contains both `lesson.mp4` and `notes.md`
+- **THEN** the sync command appends a video lesson entry (NOT a new bimodal kind) AND a resource entry `{ kind: "other", title: "<lesson-title> notes", url: <notes-key> }`
+
+#### Scenario: An already-declared lesson is not reclassified
+
+- **WHEN** a lesson the manifests declare as `video` with a YouTube `source` has no
+  `.mp4` on disk at all
+- **THEN** the sync command leaves it untouched, because classification applies only
+  to folders no declaration covers
 
 ### Requirement: Lesson and resource adapters resolve content keys at read time
 
@@ -741,7 +542,7 @@ The same `BlobStore` instance SHALL be shared by the lesson, resource and notes
 adapters within one dependency-graph build, so the three can never disagree about
 where content lives.
 
-Repointing content storage SHALL NOT require regenerating `seed-content.ts`.
+Repointing content storage SHALL NOT require editing the course manifests.
 
 #### Scenario: Default boot preserves today's URLs
 
@@ -755,7 +556,7 @@ Repointing content storage SHALL NOT require regenerating `seed-content.ts`.
 - **WHEN** the manifest declares one public store with
   `publicUrl: "https://cdn.example.com/course-content"` as the default
 - **THEN** every rendered video, poster and resource URL begins with
-  `https://cdn.example.com/course-content/`, and `seed-content.ts` is unchanged
+  `https://cdn.example.com/course-content/`, and the course manifests are unchanged
   on disk
 
 ### Requirement: The notes adapter matches its resource by key, not by resolved URL
@@ -823,77 +624,11 @@ server repoints URLs but not this allowlist; the server must be restarted.
 - **THEN** `images.remotePatterns` is empty and image handling is unchanged from
   before this capability existed
 
-### Requirement: Lesson titles come from the notes heading for allowlisted modules
-
-The generator SHALL derive a lesson's title from the first Markdown `#` heading of that lesson's `readme.md`, but only for modules named in that course's `titleFromNotesModules` allowlist in the manifest. For every module not in that allowlist, the title SHALL continue to be derived from the lesson slug, unchanged.
-
-The allowlist SHALL be per-module, not per-lesson, and SHALL live under the owning course's manifest entry, so enabling a module is a single visible edit scoped to the course it belongs to.
-
-The heading SHALL be adopted only when it carries information the slug could not: if the heading equals the slug-derived title ignoring case, the slug-derived title SHALL be kept. A lesson whose `readme.md` is absent, or whose `readme.md` has no `#` heading, SHALL keep the slug-derived title.
-
-The generator SHALL additionally consult the owning course's `lessonTitleOverrides` table, keyed by the `moduleSlug/lessonSlug` path within that course. An override SHALL take precedence over both the heading and the slug, and SHALL apply whether or not its module is in the allowlist — it is already a per-lesson reviewed decision. The override table exists for lessons whose real name cannot be recovered automatically, such as a lesson with no `readme.md` at all.
-
-The resolved title SHALL be applied once and used for both the lesson and its notes Resource, so the two can never disagree.
-
-When a title is adopted from a heading, apostrophes SHALL be normalized to `’` (U+2019), so a module reads consistently regardless of which character its author typed. No other normalization SHALL be applied — not case, not punctuation spacing, not `&`/`and`. Override values SHALL be written correctly rather than normalized; a test SHALL fail an override value containing `'` (U+0027).
-
-These rules SHALL apply to both video and reading lessons.
-
-Reading the heading SHALL NOT change how lessons are classified, how slugs, sequences, ids, posters or resources are derived, or the contents of the notes Resource.
-
-#### Scenario: A heading recovers notation the slug lost
-- **WHEN** a lesson in an allowlisted module sits in a folder slugged `4-fast` and its `readme.md` opens with `# Fast /æ/`
-- **THEN** the emitted lesson's title is `Fast /æ/`, not `Fast`
-
-#### Scenario: Sibling folders that slugged identically become distinguishable
-- **WHEN** several lessons in an allowlisted module occupy folders that all slug to the same human name, and each `readme.md` opens with a different heading
-- **THEN** each emitted lesson carries its own heading as its title, so no two rows in the module display the same name
-
-#### Scenario: A module outside the allowlist is untouched
-- **WHEN** a lesson in a module absent from the allowlist has a `readme.md` whose heading differs from the slug-derived title
-- **THEN** the emitted title is the slug-derived one, and the generated seed for that module is unchanged
-
-#### Scenario: An allowlist entry applies only to its own course
-- **WHEN** two courses each contain a module whose slug is `1-intro`, and only one course's manifest entry allowlists `1-intro`
-- **THEN** only that course's module adopts its headings, and the other course's module keeps slug-derived titles
-
-#### Scenario: A heading that differs only in case is not adopted
-- **WHEN** a lesson in an allowlisted module has the slug-derived title `Intro` and its `readme.md` opens with `# INTRO`
-- **THEN** the emitted title remains `Intro`, because capitalization is not information the slug lost
-
-#### Scenario: A lesson with no heading keeps the slug-derived title
-- **WHEN** a lesson in an allowlisted module has no `readme.md`, or has one with no `#` heading
-- **THEN** the emitted title is the slug-derived one and no error is raised
-
-#### Scenario: An override supplies a title no automatic source can produce
-- **WHEN** a lesson has no `readme.md`, so neither a heading nor anything but the mangled slug is available, and the manifest's `lessonTitleOverrides` has an entry for its `moduleSlug/lessonSlug`
-- **THEN** the emitted title is the override value
-
-#### Scenario: An override outranks a heading
-- **WHEN** a lesson in an allowlisted module has both a `readme.md` heading and an override entry
-- **THEN** the override value wins, because it is the more specific reviewed decision
-
-#### Scenario: The override reaches the notes Resource too
-- **WHEN** an overridden lesson also emits a notes Resource
-- **THEN** that Resource is titled from the same resolved title, so the lesson and its notes never show different names
-
-#### Scenario: Apostrophes in an adopted heading are normalized
-- **WHEN** one lesson's heading uses `'` (U+0027) and a sibling's uses `’` (U+2019)
-- **THEN** both emitted titles use `’`, so the module does not mix the two characters
-
-#### Scenario: Normalization does not reach beyond apostrophes
-- **WHEN** an adopted heading contains mixed case, an ampersand, or irregular spacing around punctuation
-- **THEN** those are emitted unchanged — only the apostrophe character is normalized
-
-#### Scenario: Lesson identity survives a title change
-- **WHEN** the generator is re-run after enabling a module or adding an override, and titles change
-- **THEN** every lesson's id, slug, sequence, `source` and `poster` are unchanged, because ids are derived from the course, module and lesson slugs and never from the title
-
 ### Requirement: On-disk content layout is normalized to match slug keys
 
-The system SHALL provide a build-time normalization step that renames every folder AND every media/resource file under `public/local-filesystem-lesson/` to its kebab-case slug form, using the SAME slug resolution as the seed generator (the owning course's `slugOverrides` map from `courses.manifest.json` first, then `scripts/slug.ts` automatic normalization). When no manifest is present, or when the entry being renamed sits outside any declared course folder, automatic normalization alone applies. After normalization, the physical path of each asset (relative to the content root) SHALL be byte-for-byte equal to the content key the generator emits, so `blobStore.url(key)` resolves against Next.js `/public`.
+The system SHALL provide a build-time normalization step that renames every folder AND every media/resource file under `public/local-filesystem-lesson/` to its kebab-case slug form, using the SAME slug resolution as the manifest sync command (`scripts/slug.ts` automatic normalization, with any explicit override the caller passes). After normalization, the physical path of each asset (relative to the content root) SHALL be byte-for-byte equal to the content key the manifests declare, so `blobStore.url(key)` resolves against Next.js `/public`.
 
-The normalization step SHALL NOT rename `courses.manifest.json` or `rename-manifest.json`; both are generator inputs living at the content root, not content.
+The normalization step SHALL NOT rename `rename-manifest.json`; it is tooling state living at the content root, not content.
 
 Normalization SHALL be idempotent (`slugify(slugify(x)) === slugify(x)`), so re-running it against an already-normalized tree makes no changes. If two distinct raw names within the same parent directory normalize to the same slug, the step SHALL abort with a non-zero status and name the colliding entries, without performing a partial rename of that directory.
 
@@ -907,10 +642,10 @@ Normalization SHALL be idempotent (`slugify(slugify(x)) === slugify(x)`), so re-
 - **WHEN** normalization encounters the file `"Aprende Inglés Americano con Fluidez desde Cero.mp4"`
 - **THEN** it is renamed on disk to `"aprende-ingles-americano-con-fluidez-desde-cero.mp4"` (extension preserved, stem slugified)
 
-#### Scenario: The manifests at the content root are never renamed
+#### Scenario: Tooling state at the content root is never renamed
 
-- **WHEN** normalization runs against a content root holding `courses.manifest.json` and `rename-manifest.json`
-- **THEN** both keep their exact filenames and neither appears in the rename manifest's entries
+- **WHEN** normalization runs against a content root holding `rename-manifest.json`
+- **THEN** it keeps its exact filename and does not appear in the rename manifest's entries
 
 #### Scenario: Re-running normalization on an already-normalized tree is a no-op
 
@@ -921,45 +656,6 @@ Normalization SHALL be idempotent (`slugify(slugify(x)) === slugify(x)`), so re-
 
 - **WHEN** two sibling folders `"Intro"` and `"intro!"` both normalize to `"intro"`
 - **THEN** the step exits non-zero, reports both colliding raw names, and leaves that directory unchanged
-
-### Requirement: Generated seed preserves the original pre-normalization names
-
-The generated `src/adapters/persistence/in-memory/seed/seed-content.ts` SHALL record, for every course, module, lesson, and resource, the ORIGINAL raw name exactly as it appeared on disk before normalization (folder name for course/module/lesson; file basename for media and resources). The slug→original mapping SHALL be recoverable from the seed alone, so the human-readable source names survive the rename and remain queryable without re-reading the disk.
-
-Because the rename destroys the original names on disk and the generator runs after normalization, the original names SHALL be sourced from the `rename-manifest.json` written by the normalization step (`originalRelativePath → slugRelativePath`). When no manifest entry exists for an item (e.g. content already normalized with no recorded history), the generator SHALL fall back to the item's current on-disk name and MUST NOT fail generation on that account.
-
-The original-name data MUST be emitted by the generator (not hand-authored) and committed alongside the rest of the seed.
-
-#### Scenario: A module entry carries its original folder name
-
-- **WHEN** the module folder `"8 Everyday English Phrases PART 2 Master Them!"` is normalized to slug `"8-everyday-english-phrases-part-2-master-them"`
-- **THEN** the generated seed exposes, for that module, the original name `"8 Everyday English Phrases PART 2 Master Them!"` keyed to its slug/id
-
-#### Scenario: A resource entry carries its original filename
-
-- **WHEN** a PDF `"Vowel Chart (v2).pdf"` is normalized to `"vowel-chart-v2.pdf"`
-- **THEN** the generated seed exposes, for that resource, the original filename `"Vowel Chart (v2).pdf"`
-
-### Requirement: Generator validates that every emitted key resolves on disk
-
-`scripts/generate-course-content-seed.ts` SHALL call `BlobStore.exists(key)` for every content key it emits (`VideoLesson.source`, `VideoLesson.poster`, and each `Resource.url` key). If any key does not resolve to a file under the content root, the generator SHALL exit non-zero with a message naming the offending key(s) and SHALL NOT write a partial `seed-content.ts`. This closes the slug↔disk drift that previously shipped silently.
-
-An emitted `source` that is an absolute `http(s)` URL is not a content key and SHALL be excluded from this check — there is no file under the content root for it to resolve to, and checking it would fail every declared external source. Every other emitted key for the same lesson, its `poster` included, SHALL still be checked.
-
-#### Scenario: All emitted keys resolve
-
-- **WHEN** every folder and file under the content root has been normalized and the generator runs
-- **THEN** every `exists(key)` returns `true`, and `seed-content.ts` is written
-
-#### Scenario: An unresolved key fails the generation loudly
-
-- **WHEN** the generator emits a key whose file is missing on disk (e.g., disk not yet normalized)
-- **THEN** the generator exits non-zero, names the unresolved key, and does not overwrite the existing `seed-content.ts`
-
-#### Scenario: A declared external source is not checked against disk
-
-- **WHEN** a lesson's `source` is emitted as `https://www.youtube.com/embed/27WXXMFimvE` and the generator runs its validation pass
-- **THEN** no `exists` call is made for that value, the lesson's `poster` key is still checked, and generation succeeds
 
 ### Requirement: Lesson notes bodies carry explicit language sections
 
@@ -989,12 +685,12 @@ level-2 heading, so a monolingual lesson is explicit rather than merely ambiguou
 #### Scenario: Reformatting a notes body leaves the title heading untouched
 
 - **WHEN** a lesson's `readme.md` body is restructured into language sections
-- **THEN** the file's first `#` heading is unchanged byte-for-byte, so lesson-title derivation for allowlisted modules and the generated `seed-content.ts` are unaffected
+- **THEN** the file's first `#` heading is unchanged byte-for-byte, so the title the sync command would propose for a new lesson is unaffected
 
 ### Requirement: A course tree has one canonical on-disk shape
 
 Every declared course SHALL present the same shape under the content root, so the
-generator walks one layout and only one:
+sync command walks one layout and only one:
 
 ```
 <content-root>/<course-folder>/<module-folder>/<lesson-folder>/
@@ -1012,8 +708,8 @@ be recovered from its slug SHALL carry that title as the first `#` heading of th
 
 Course content that arrives in a different shape — an extra grouping level, a lesson's
 files loose at module level, notes under another filename, resources in a subfolder —
-SHALL be migrated to this shape before the course is declared in `courses.manifest.json`.
-The generator SHALL NOT be taught to recognize alternative shapes, and the manifest SHALL
+SHALL be migrated to this shape before the course is declared in `src/content/<slug>.json`.
+The sync command SHALL NOT be taught to recognize alternative shapes, and the manifests SHALL
 NOT gain fields describing them: one contract keeps every course's content keys derivable
 from its path, and a second shape would double the surface every future content change is
 verified against.
@@ -1022,7 +718,7 @@ verified against.
 
 - **WHEN** an imported course nests lesson folders under `<module>/<group>/<lesson>/`
 - **THEN** each `<group>` is promoted to a sibling module of `<module>` before the course
-  is declared, and the generator's walk is unchanged
+  is declared, and the sync command's walk is unchanged
 
 #### Scenario: A lesson's files loose at module level are wrapped in a lesson folder
 
@@ -1035,7 +731,7 @@ verified against.
 
 - **WHEN** an imported lesson folder holds its PDFs under `<lesson>/resources/`
 - **THEN** those files are moved into `<lesson>/` before the course is declared, and the
-  generator emits one resource row per file exactly as it does for any other course
+  sync command proposes one resource entry per file exactly as it does for any other course
 
 #### Scenario: Notes under another filename are renamed
 
@@ -1085,60 +781,242 @@ rename folders the plan still refers to by their raw names.
 - **WHEN** the step runs with a plan naming one course folder, and the content root holds others
 - **THEN** only the named folder is touched
 
-### Requirement: Module titles may be overridden per course
+### Requirement: The course catalog is declared in tracked per-course manifests
 
-A course entry in `courses.manifest.json` SHALL be able to declare `moduleTitleOverrides`, a
-table of hand-written module titles that the generator SHALL prefer over the derived one.
+The system SHALL read the complete course catalog from one manifest per course at
+`src/content/<course-slug>.json`, enumerated by an index module at
+`src/content/courses.ts`. Together these manifests are the single source of truth
+for the catalog: every course, module, lesson and resource the application serves
+is declared there. Nothing about the catalog SHALL be inferred from the content
+tree at build or run time.
 
-The generator derives a module's title with `humanize(moduleSlug)`, which strips accents and
-title-cases every word. That is adequate for English module names and wrong for any other
-language: `Ejercicios para dominar el ritmo en Inglés` becomes `Ejercicios Para Dominar El
-Ritmo En Ingles`.
+One course SHALL be one file. A course's manifest SHALL be editable without
+touching any other course's, so that the file is both the unit of editing and the
+unit of merge conflict.
 
-The table SHALL be keyed by **module slug** — not course-prefixed, because the course is already the entry
-the table lives under. An override SHALL take precedence over the derived title. A module with
-no entry SHALL keep the derived title, so an absent entry stays a deliberate acceptance of the
-automatic value rather than an oversight.
+The manifests SHALL live outside `public/`, so they are neither served at a public
+URL nor dependent on the multi-gigabyte content tree being present on the machine.
 
-Override values SHALL be validated, not repaired, on the same terms as `lessonTitleOverrides`:
-a value SHALL be non-empty, SHALL be trimmed, and SHALL NOT contain the straight apostrophe
-`'` (U+0027). A key naming a module the course does not hold SHALL NOT be silently ignored.
+The manifests SHALL live under `src/`, where the project's existing `@/*` path
+alias already resolves them. No new path alias SHALL be introduced: the alias is
+declared independently in `tsconfig.json` and `vitest.config.ts`, and a second one
+would be two places to keep in sync for no gain.
 
-Overriding a title SHALL NOT change the module's slug, id, sequence, or any content key: ids
-derive from the course and module slugs, never from the title.
+The manifests SHALL be tracked by git. A fresh clone SHALL obtain a working
+catalog from the repository alone, without the content bytes.
 
-#### Scenario: An accented Spanish module title survives
+A manifest SHALL declare, for every lesson, the fields the domain's `Lesson`
+requires and that were previously derived from the filesystem: `id`, `slug`,
+`title`, `kind`, `sequence`, `source`, `durationSeconds`, and `poster` when one
+exists. It SHALL likewise declare every resource with its `id`, `lessonId`,
+`title`, `url` and `kind`.
 
-- **WHEN** a course entry maps `4-ejercicios-para-dominar-el-ritmo-en-ingles` to
-  `Ejercicios para dominar el ritmo en Inglés`
-- **THEN** the emitted module's title is that string verbatim, not the `humanize`-derived one
+A lesson's `source` and `poster`, and a resource's `url`, SHALL each be either a
+content key resolved through `BlobStore` or an absolute `http(s)` URL used
+verbatim. Which one it is SHALL be decided by the value's own shape, exactly as
+it is today.
 
-#### Scenario: A module with no override keeps the derived title
+Every manifest SHALL be validated against a Zod schema. A manifest that is
+malformed JSON or fails the schema SHALL fail loudly rather than fall back to any
+default. Because `slug` and `sequence` must be unique across the whole ladder,
+that check SHALL run over the full set after each file is parsed. There SHALL NOT
+be a no-manifest fallback: the manifests are required, and an absent one is an
+error.
 
-- **WHEN** a course declares `moduleTitleOverrides` for one of its modules
-- **THEN** every other module of that course is emitted with its `humanize(slug)` title, unchanged
+#### Scenario: A fresh clone serves the catalog without the content tree
 
-#### Scenario: An override applies only to its own course
+- **WHEN** a developer clones the repository, installs dependencies, and starts
+  the app without ever obtaining the content root
+- **THEN** the catalog renders every course, module and lesson declared under
+  `src/content/`, and only the locally-stored assets 404
 
-- **WHEN** two courses each hold a module slugged `1-intro` and only one declares an override for it
-- **THEN** only that course's module adopts the override
+#### Scenario: The manifests are tracked by git
 
-#### Scenario: A straight apostrophe in an override is rejected
+- **WHEN** a developer clones the repository and runs `git ls-files src/content/`
+- **THEN** one `.json` manifest per course is listed, alongside the index module
 
-- **WHEN** a `moduleTitleOverrides` value contains `'` (U+0027)
-- **THEN** the manifest fails validation, naming the offending key, and generation aborts
+#### Scenario: The manifests are not served publicly
 
-#### Scenario: Module identity survives a title override
+- **WHEN** the app is running and a client requests
+  `/local-filesystem-lesson/courses.manifest.json` or `/content/basic-course.json`
+- **THEN** the request 404s, because the manifests live outside `public/`
 
-- **WHEN** the generator is re-run after adding a module title override
-- **THEN** that module's id, slug and sequence are unchanged, and no lesson or resource key moves
+#### Scenario: One course is edited without touching another
 
-### Requirement: The generated content seed is the whole catalog
+- **WHEN** a developer changes a lesson title in `src/content/basic-course.json`
+- **THEN** `src/content/advanced-intermediate-course.json` is byte-identical, and
+  the change touches exactly one manifest file
+
+#### Scenario: A lesson declares its own duration
+
+- **WHEN** a manifest declares a lesson with `durationSeconds: 663` and no
+  `.mp4` exists anywhere under the content root for that lesson
+- **THEN** the lesson is served as a video lesson reporting 663 seconds, and no
+  filesystem access is attempted to determine its duration
+
+#### Scenario: A missing manifest is an error, not a default
+
+- **WHEN** a manifest named by `src/content/courses.ts` is absent or is not valid
+  JSON
+- **THEN** the failure is surfaced with a message identifying the problem, and
+  the application does NOT fall back to a derived or empty catalog
+
+#### Scenario: Two courses claiming the same ladder position fail loudly
+
+- **WHEN** two manifests declare the same `sequence`, or the same `slug`
+- **THEN** validation fails and names both files
+
+### Requirement: The application reads the catalog without a code-generation step
+
+The adapters SHALL consume the manifests directly. The repository SHALL NOT
+contain a generated TypeScript catalog, and there SHALL NOT be a command whose
+job is to turn content into application code.
+
+The manifests SHALL be consumed by static import, so their data is resolved at
+build time and lands in the server bundle. Reading the catalog SHALL NOT touch
+the filesystem at run time and SHALL NOT cost anything per request. The catalog
+SHALL NOT be shipped to the client: the pages that read it are Server
+Components, which send only the lesson they rendered.
+
+Adding a course SHALL mean adding its manifest and one import line to
+`src/content/courses.ts`. Static import cannot enumerate a directory, so the index
+is explicit by necessity; it SHALL contain nothing but those imports and the
+exported list.
+
+The rows handed to `resolveLessonRow` and `resolveResourceRow` SHALL keep their
+current shape, so `BlobStore` remains the single point of URL resolution and the
+adapters below it are unchanged.
+
+#### Scenario: No generated catalog remains in the repository
+
+- **WHEN** a developer searches the repository for a generated seed module or a
+  `generate:content-seed` script
+- **THEN** neither exists, and no source file imports a generated catalog
+
+#### Scenario: Serving a lesson touches no filesystem for catalog data
+
+- **WHEN** a lesson page renders
+- **THEN** the lesson's identity, title, source, duration and poster come from
+  the imported manifest, and the only filesystem access is for the asset bytes
+  themselves
+
+#### Scenario: Editing a manifest changes the catalog
+
+- **WHEN** a developer edits a lesson's `title` in `src/content/basic-course.json`
+  and reloads the app
+- **THEN** the new title renders, with no generation command run in between
+
+### Requirement: A maintenance command appends undescribed lessons without overwriting declarations
+
+The system SHALL provide a command that scans the content tree and appends to a
+course's manifest only those lessons and resources it does not already describe.
+It exists so that adding a lesson does not require hand-writing a UUIDv5.
+
+The command SHALL NOT overwrite, reorder or remove any existing manifest entry,
+in any course's file. A hand-edited title, source or duration SHALL survive every
+subsequent run. The manifest, not the command's output, is the source of truth.
+
+The command SHALL derive a new lesson's `id` with the same UUIDv5 scheme used
+today, so an entry it appends is indistinguishable from one migrated from the
+previous generator.
+
+When a lesson folder holds no video file, the command SHALL append the lesson
+with a `durationSeconds` of `null` and report it, rather than guessing a
+duration or skipping the lesson silently.
+
+#### Scenario: A new lesson folder is appended
+
+- **WHEN** a developer drops a new lesson folder into a declared module and runs
+  the maintenance command
+- **THEN** the manifest gains an entry for that lesson with its derived id, slug,
+  title, source key and duration, and every pre-existing entry is byte-identical
+
+#### Scenario: A hand-edited entry survives the command
+
+- **WHEN** a developer overrides a lesson's `title` and `source` by hand, then
+  runs the maintenance command
+- **THEN** both edited values are still present and unchanged afterwards
+
+#### Scenario: A lesson with no local video is reported, not guessed
+
+- **WHEN** the command encounters a lesson folder with a `readme.md` but no video
+  file
+- **THEN** it appends the lesson with `durationSeconds: null` and reports it as
+  needing a declared duration
+
+### Requirement: Lesson identity is preserved across the migration
+
+Lesson and resource ids SHALL be migrated into the manifest byte-for-byte from
+the catalog they replace.
+
+Saved progress and playback positions are keyed by lesson id in
+`browser-local-storage`. A changed id silently discards a learner's history, so
+the migration SHALL be verified id-by-id against the previous catalog before that
+catalog is deleted.
+
+#### Scenario: Every migrated id matches the previous catalog
+
+- **WHEN** the migrated manifest is compared against the catalog it replaces
+- **THEN** the set of course, module, lesson and resource ids is identical, with
+  no additions, removals or changes
+
+#### Scenario: A learner's progress survives the migration
+
+- **WHEN** a learner who had completed lessons and saved playback positions loads
+  the app after the migration
+- **THEN** the same lessons read as complete and the same positions resume
+
+### Requirement: Video bytes are never tracked by git
+
+The repository SHALL refuse to track video files under the content root,
+whichever course they belong to. This SHALL hold independently of which parts of
+the content tree are tracked, so that un-ignoring a course's text assets cannot
+pull gigabytes of video into the repository.
+
+The Basic Course's non-video assets — lesson notes, posters and PDFs — SHALL be
+tracked, because they are the part of its content tree that cannot be
+regenerated and are small enough to version.
+
+#### Scenario: A video file under a tracked course is still ignored
+
+- **WHEN** a `.mp4` sits inside the Basic Course's tracked content folder and a
+  developer runs `git status`
+- **THEN** the video is not listed as addable content
+
+#### Scenario: The Basic Course's text assets are tracked
+
+- **WHEN** a developer clones the repository
+- **THEN** the Basic Course's `readme.md`, `thumbnail.jpeg` and PDF files are
+  present, and its video files are not
+
+### Requirement: Declared assets are checked against the catalog
+
+`pnpm verify:content` SHALL additionally report every `assets` entry whose key is
+absent from the course manifests, and SHALL exit non-zero when there is one.
+
+An exhaustive `assets` block goes stale the moment content is renamed or removed
+and the manifests are edited. Without this check the location manifest would
+accumulate entries for keys nothing asks for any more, and a reader could no
+longer tell which placements are real.
+
+#### Scenario: A stale asset entry is named
+
+- **WHEN** the location manifest declares an `assets` entry for a key the course
+  manifests no longer contain
+- **THEN** `pnpm verify:content` exits non-zero and names that key as stale
+
+#### Scenario: A location manifest matching the catalog passes
+
+- **WHEN** every `assets` entry names a key the course manifests contain, and every
+  key resolves
+- **THEN** `pnpm verify:content` exits zero
+
+### Requirement: The declared catalog is the whole catalog
 
 `src/adapters/persistence/in-memory/use-case-dependencies/use-case-dependencies.ts` SHALL
-build the catalog from `seed-content.ts` alone. There SHALL be no hand-written course seed
-and no configuration that selects between seed sources: the courses the manifest declares
-are the courses the application serves.
+build the catalog from the course manifests alone. There SHALL be no hand-written course
+seed and no configuration that selects between catalog sources: the courses the manifests
+declare are the courses the application serves.
 
 The lesson and resource ports SHALL bind directly to `LocalFilesystemLessonRepository` and
 `LocalFilesystemResourceRepository`. No composite adapter SHALL sit between a port and its
@@ -1146,38 +1024,24 @@ single source — an indirection that fans one read out over one delegate hides 
 without buying anything back. Should a second content source return, the composite is a
 change to make then, not machinery to keep unused now.
 
-Catalog order SHALL come from `Course.sequence`, which each course declares in
-`courses.manifest.json`. The ladder therefore has exactly as many rungs as the manifest has
-entries, and moving a course between rungs is a manifest edit and a regeneration.
+Catalog order SHALL come from `Course.sequence`, which each course declares in its own
+manifest. The ladder therefore has exactly as many rungs as there are manifests, and moving
+a course between rungs is a one-line manifest edit.
 
 Booting without the content root SHALL fail visibly through the assets it cannot serve,
 never by silently substituting different courses. A developer who has not obtained the
-content sees the declared courses with unresolvable media, which names the real problem —
-the earlier fallback answered a missing content root with a catalog of placeholder
-material, which does not.
+content sees the declared courses with unresolvable media, which names the real problem.
+Lessons whose `source` is an external URL play regardless, because they need nothing from
+the content root.
 
 #### Scenario: The catalog holds exactly the declared courses
 
-- **WHEN** `getCoursePlatformDeps()` is called
-- **THEN** `courses.listAvailable()` returns exactly the courses in `seedContentCourses`, in
-  `Course.sequence` order, and no other
+- **WHEN** the app boots
+- **THEN** it serves exactly the courses the manifests under `src/content/` declare, in
+  `sequence` order, with no placeholder or fallback course
 
-#### Scenario: No environment variable selects a seed source
+#### Scenario: A clone without the content root still serves the catalog
 
-- **WHEN** the application boots with no `USE_COURSE_CONTENT_SEED` set, and again with it
-  set to any value
-- **THEN** the catalog is identical in both cases, because no code reads that variable
-
-#### Scenario: A lesson resolves through the adapter that owns it
-
-- **WHEN** `LessonRepository.byId` is called with an id from the content seed
-- **THEN** the lesson comes back with its content keys resolved through the `BlobStore`, and
-  an id belonging to no course returns `null`
-
-#### Scenario: Ladder position follows the manifest
-
-- **WHEN** a course's `sequence` is changed in `courses.manifest.json` and the seed is
-  regenerated
-- **THEN** the home ladder renders that course at its new rung, and no other course's id,
-  slug, title or content key changes
-
+- **WHEN** a developer clones the repository and starts the app without the content root
+- **THEN** every course, module and lesson renders, locally-stored assets 404, and lessons
+  served by an external URL still play
