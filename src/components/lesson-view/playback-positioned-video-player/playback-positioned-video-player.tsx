@@ -22,6 +22,12 @@ import { LessonVideoResumeOverlay } from "../lesson-video-resume-overlay/lesson-
  * - `useResumeOnFirstPlay` decides whether, and when, to offer the saved
  *   position — on the learner's **first play**, never on mount. Landing on a
  *   lesson prompts nothing; a learner who came for the notes is not stopped.
+ *   It hangs off `onPlaying`, not `onPlay`: the offer holds the player by
+ *   pausing it, and a provider driving a third-party embed stalls for good if
+ *   that pause lands while its initial play request is still in flight.
+ *   `onPlay` keeps the two things that are about the learner's *intent* to
+ *   watch — the write gate and the gold-cover callback — which are right to
+ *   fire a beat before the first frame.
  * - `usePersistPlaybackPosition` owns the write cadence (debounced
  *   `time-update`, immediate `pause`/`seeking`/`ended`, flush on unmount and
  *   `beforeunload`) and the gate that keeps a cold load from overwriting a
@@ -113,9 +119,9 @@ export function PlaybackPositionedVideoPlayer({
       keyDisabled={isOfferOpen}
       onPlay={() => {
         persistence.openWriteGate();
-        resume.handlePlay();
         onPlaybackStart?.();
       }}
+      onPlaying={resume.handlePlaybackStarted}
       onPause={persistence.handleImmediateWrite}
       onSeeking={persistence.handleImmediateWrite}
       onEnded={persistence.handleImmediateWrite}

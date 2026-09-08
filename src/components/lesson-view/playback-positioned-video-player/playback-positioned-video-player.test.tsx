@@ -55,6 +55,16 @@ function renderPlayer({
   return { ...view, lessonId, playerRef };
 }
 
+/**
+ * The rendered player, or a failed test. `vi.spyOn` needs a real object, and a
+ * `null` ref means the render itself is broken — worth failing loudly on.
+ */
+function playerOf(playerRef: { current: MediaPlayerInstance | null }): MediaPlayerInstance {
+  const player = playerRef.current;
+  if (player === null) throw new Error("The player did not render");
+  return player;
+}
+
 /** `emitPlayerEvent` wrapped in `act`, since every event here changes state. */
 const emit = (player: MediaPlayerInstance | null, type: string, detail: unknown = null) => {
   act(() => {
@@ -99,7 +109,7 @@ afterEach(() => {
 
 describe("PlaybackPositionedVideoPlayer", () => {
   describe("GIVEN the learner has only just arrived", () => {
-    test("WHEN a resumable position is stored THEN nothing is offered until they press play", async () => {
+    test("WHEN a resumable position is stored THEN nothing is offered until playback begins", async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
       mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
 
@@ -126,14 +136,49 @@ describe("PlaybackPositionedVideoPlayer", () => {
     });
   });
 
-  describe("GIVEN the learner presses play", () => {
+  describe("GIVEN the play request has been issued but playback has not begun", () => {
+    test("WHEN the player emits play THEN it is not held and no overlay appears", async () => {
+      const lessonId = LessonId.parse(faker.string.uuid());
+      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
+
+      const { playerRef } = renderPlayer({ lessonId });
+      await settle();
+      const pause = vi.spyOn(playerOf(playerRef), "pause");
+
+      emit(playerRef.current, "play");
+      await settle();
+
+      // Holding here is what kills a provider driving a third-party embed: the
+      // pause lands while the initial play request is still in flight, gets
+      // swallowed, and the lesson never plays again — design.md §D1.
+      expect(pause).not.toHaveBeenCalled();
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+
+    test("WHEN playback then begins THEN the player is held and the overlay appears", async () => {
+      const lessonId = LessonId.parse(faker.string.uuid());
+      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
+
+      const { playerRef } = renderPlayer({ lessonId });
+      await settle();
+      const pause = vi.spyOn(playerOf(playerRef), "pause");
+
+      emit(playerRef.current, "play");
+      emit(playerRef.current, "playing");
+
+      expect(await screen.findByRole("dialog")).toHaveTextContent("03:00");
+      expect(pause).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("GIVEN playback begins", () => {
     test("WHEN a resumable position is stored THEN the overlay appears inside the player", async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
       mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
 
       const { playerRef } = renderPlayer({ lessonId });
       await settle();
-      emit(playerRef.current, "play");
+      emit(playerRef.current, "playing");
 
       const overlay = await screen.findByRole("dialog");
       expect(overlay).toHaveTextContent("03:00");
@@ -152,7 +197,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
         source: "https://www.youtube.com/embed/yY7RWGUbqng?si=nB8s",
       });
       await settle();
-      emit(playerRef.current, "play");
+      emit(playerRef.current, "playing");
 
       const overlay = await screen.findByRole("dialog");
       expect(overlay).toHaveTextContent("03:00");
@@ -165,7 +210,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
 
       const { playerRef } = renderPlayer({ lessonId });
       await settle();
-      emit(playerRef.current, "play");
+      emit(playerRef.current, "playing");
       await screen.findByRole("dialog");
 
       // Otherwise `Space` on the Resume button would both press it and toggle
@@ -183,7 +228,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
 
       const { playerRef } = renderPlayer({ lessonId });
       await settle();
-      emit(playerRef.current, "play");
+      emit(playerRef.current, "playing");
       await settle();
 
       expect(screen.queryByRole("dialog")).toBeNull();
@@ -195,7 +240,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
 
       const { playerRef } = renderPlayer({ lessonId, durationSeconds: 0 });
       await settle();
-      emit(playerRef.current, "play");
+      emit(playerRef.current, "playing");
       await settle();
 
       expect(screen.queryByRole("dialog")).toBeNull();
@@ -209,7 +254,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
 
       const rendered = renderPlayer({ lessonId });
       await settle();
-      emit(rendered.playerRef.current, "play");
+      emit(rendered.playerRef.current, "playing");
       await screen.findByRole("dialog");
 
       return rendered;
@@ -261,13 +306,13 @@ describe("PlaybackPositionedVideoPlayer", () => {
       expect(playerRef.current?.$props.keyDisabled()).toBe(false);
     });
 
-    test("WHEN the learner plays again THEN the overlay is not offered twice", async () => {
+    test("WHEN playback begins again THEN the overlay is not offered twice", async () => {
       const user = userEvent.setup();
       const { playerRef } = await openOverlay();
 
       await user.click(screen.getByRole("button", { name: "resumeCta" }));
       await settle();
-      emit(playerRef.current, "play");
+      emit(playerRef.current, "playing");
       await settle();
 
       expect(screen.queryByRole("dialog")).toBeNull();

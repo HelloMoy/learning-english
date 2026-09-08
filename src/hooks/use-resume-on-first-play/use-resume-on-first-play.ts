@@ -27,7 +27,7 @@ export type ResumablePlayer = {
  */
 export type ResumeOnFirstPlay = {
   offeredSeconds: number | null;
-  handlePlay: () => void;
+  handlePlaybackStarted: () => void;
   resumeFromSavedPosition: () => void;
   restartFromBeginning: () => void;
 };
@@ -36,18 +36,29 @@ export type ResumeOnFirstPlay = {
  * The "offer to resume on the first play" rule, with no player library in it.
  *
  * @remarks
- * The offer is made **once per mount**, and only in response to the learner's
- * first play. Landing on a lesson prompts nothing: the learner may have come
- * for the notes. When they do press play, and the saved position clears
- * `isPositionResumable`, the player is paused and the position is offered.
+ * The offer is made **once per mount**, and only once the learner's first
+ * play has actually begun. Landing on a lesson prompts nothing: the learner
+ * may have come for the notes. When playback starts, and the saved position
+ * clears `isPositionResumable`, the player is paused and the position is
+ * offered.
  *
- * Every answer ends with the video **playing**, because a play request is
+ * **The hold happens on playback start, not on the play request**, and the
+ * distinction is the whole reason this hook has a `handlePlaybackStarted`
+ * rather than a `handlePlay`. A provider that drives a third-party embed can
+ * swallow a pause issued while its initial play request is still in flight
+ * and stall there for good — never emitting `pause`, never reaching
+ * `playing`, ignoring every later seek and play. Waiting for playback to
+ * begin puts the pause outside that window for every provider, at the cost of
+ * a few milliseconds of video. See design.md §D1 of
+ * `fix-youtube-resume-stuck-buffering`.
+ *
+ * Every answer ends with the video **playing**, because playback starting is
  * what opened the overlay. Resuming seeks to the saved position; restarting —
  * which is also where dismissal lands — seeks to `0`. Either way the offer is
  * spent and later plays go straight through.
  *
  * The saved position is read asynchronously by the caller, so it may arrive
- * after the first play. It is not offered retroactively: interrupting a
+ * after playback has started. It is not offered retroactively: interrupting a
  * learner who is already watching is worse than skipping the offer.
  *
  * @param savedPositionSeconds - The stored position, or `null` while unread or absent
@@ -59,7 +70,7 @@ export type ResumeOnFirstPlay = {
  * ```tsx
  * const resume = useResumeOnFirstPlay({ savedPositionSeconds, durationSeconds, player });
  *
- * <MediaPlayer onPlay={resume.handlePlay}>
+ * <MediaPlayer onPlaying={resume.handlePlaybackStarted}>
  *   {resume.offeredSeconds !== null ? (
  *     <LessonVideoResumeOverlay
  *       positionSeconds={resume.offeredSeconds}
@@ -80,9 +91,10 @@ export function useResumeOnFirstPlay({
   player: ResumablePlayer;
 }): ResumeOnFirstPlay {
   const [offeredSeconds, setOfferedSeconds] = useState<number | null>(null);
-  // A ref, not state: `handlePlay` runs from a media event and must observe
-  // the flip in the same tick. As state, a second `play` arriving before the
-  // re-render would still see an unspent offer and pause the video again.
+  // A ref, not state: `handlePlaybackStarted` runs from a media event and must
+  // observe the flip in the same tick. As state, a second `playing` arriving
+  // before the re-render would still see an unspent offer and pause the video
+  // again.
   const isOfferSpentRef = useRef(false);
 
   const spendOfferAndPlayFrom = useCallback(
@@ -94,7 +106,7 @@ export function useResumeOnFirstPlay({
     [player],
   );
 
-  const handlePlay = useCallback(() => {
+  const handlePlaybackStarted = useCallback(() => {
     if (isOfferSpentRef.current) return;
     isOfferSpentRef.current = true;
     if (!isPositionResumable(savedPositionSeconds, durationSeconds)) return;
@@ -113,5 +125,5 @@ export function useResumeOnFirstPlay({
     spendOfferAndPlayFrom(0);
   }, [offeredSeconds, spendOfferAndPlayFrom]);
 
-  return { offeredSeconds, handlePlay, resumeFromSavedPosition, restartFromBeginning };
+  return { offeredSeconds, handlePlaybackStarted, resumeFromSavedPosition, restartFromBeginning };
 }

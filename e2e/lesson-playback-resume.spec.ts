@@ -332,3 +332,95 @@ test.describe("Lesson playback-position resume cycle", () => {
     });
   });
 });
+
+/**
+ * The same cycle, on a lesson served by YouTube.
+ *
+ * @remarks
+ * The suite above drives an `HTMLVideoElement`, so it only ever exercised the
+ * self-hosted provider — which is how a bug that killed resume on every Basic
+ * Course lesson shipped green. Answering the overlay left the YouTube provider
+ * buffering forever: it had been paused while its initial play request was
+ * still in flight, and from there it ignored every seek and play. See
+ * `openspec/changes/fix-youtube-resume-stuck-buffering/design.md`.
+ *
+ * A YouTube lesson has no `<video>` to read, so playback is observed through
+ * the player's own `data-*` state — the same surface
+ * `hosted-lesson-playback.spec.ts` asserts on.
+ */
+const YOUTUBE_COURSE_SLUG = "basic-course";
+
+const YOUTUBE_LESSON = contentCatalog.lessonRows
+  .filter(
+    (lesson): lesson is VideoLesson =>
+      lesson.kind === "video" && /^https?:/.test(lesson.source) && lesson.durationSeconds > 120,
+  )
+  .sort((a, b) => b.durationSeconds - a.durationSeconds)[0]!;
+
+const YOUTUBE_MODULE = modulesOfCourse(YOUTUBE_COURSE_SLUG).find(
+  (courseModule) => courseModule.id === YOUTUBE_LESSON.moduleId,
+)!;
+
+const YOUTUBE_STORAGE_KEY = `learning-english:playback:${YOUTUBE_LESSON.id}`;
+
+/** Comfortably past the 30s floor, and far from the end of any lecture. */
+const YOUTUBE_RESUMABLE_SECONDS = 60;
+
+/** Where the seeded position sits on the seek slider's 0-100 scale. */
+const seededPercent = (YOUTUBE_RESUMABLE_SECONDS / YOUTUBE_LESSON.durationSeconds) * 100;
+
+/** Whether the player reports frames actually rolling. */
+const isPlaying = (page: Page): Promise<boolean> =>
+  playerRegion(page).evaluate((element) => element.hasAttribute("data-playing"));
+
+/**
+ * How far through the lesson the player is, as a percentage.
+ *
+ * The seek slider publishes it as `aria-valuenow`, which is the only place a
+ * YouTube lesson exposes its position to the page — there is no `<video>` to
+ * read `currentTime` from.
+ */
+const percentWatched = (page: Page): Promise<number> =>
+  playerRegion(page)
+    .locator('[role="slider"][aria-label*="Seek" i]')
+    .evaluate((element) => Number.parseFloat(element.getAttribute("aria-valuenow") ?? "0"));
+
+test.describe("Lesson playback-position resume cycle, on a YouTube lesson", () => {
+  test("WHEN the learner resumes THEN the video plays on past the saved position", async ({
+    page,
+    context,
+  }) => {
+    await clearStorageFor(context);
+    await context.addInitScript(
+      ([key, value]) => {
+        try {
+          window.localStorage.setItem(key, value);
+        } catch {
+          // ignore
+        }
+      },
+      [YOUTUBE_STORAGE_KEY, String(YOUTUBE_RESUMABLE_SECONDS)],
+    );
+
+    await page.goto(
+      `/en/courses/${YOUTUBE_COURSE_SLUG}/modules/${YOUTUBE_MODULE.slug}/lessons/${YOUTUBE_LESSON.id}`,
+    );
+    await expect(playerRegion(page)).toBeVisible();
+    await expect
+      .poll(async () => playerRegion(page).getAttribute("data-can-play"), {
+        timeout: 30_000,
+      })
+      .not.toBeNull();
+
+    await pressPlay(page);
+    await expect(resumeOverlay(page)).toBeVisible({ timeout: 30_000 });
+    await page.getByRole("button", { name: /^resume/i }).click();
+
+    // Before the fix the player settled on buffering at 0s and stayed there
+    // for good — no reload, no recovery, on either answer.
+    await expect.poll(() => isPlaying(page), { timeout: 30_000 }).toBe(true);
+    await expect
+      .poll(() => percentWatched(page), { timeout: 30_000 })
+      .toBeGreaterThan(seededPercent);
+  });
+});
