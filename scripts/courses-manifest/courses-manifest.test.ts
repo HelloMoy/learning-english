@@ -305,14 +305,14 @@ describe("courses.manifest.example.json", () => {
       folder: "basic-course",
       title: "Basic Course",
       language: "en",
-      sequence: 2,
+      sequence: 1,
     });
     expect(courses[1]).toMatchObject({
       folder: "advanced-intermediate-course",
       title: "Advanced Intermediate Course",
       description: "Course content generated from public/local-filesystem-lesson.",
       language: "en",
-      sequence: 3,
+      sequence: 2,
     });
   });
 });

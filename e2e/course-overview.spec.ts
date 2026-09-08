@@ -1,6 +1,6 @@
-import { seedContentModules } from "@/adapters/persistence/in-memory/seed/seed-content";
-
 import { expect, test } from "@playwright/test";
+
+import { modulesOfCourse } from "./content-seed-fixtures";
 
 /**
  * E2E coverage for the course overview's module showcase (capabilities:
@@ -13,8 +13,9 @@ import { expect, test } from "@playwright/test";
  * jsdom is perfectly happy with and a learner sees as an empty box.
  */
 const COURSE_SLUG = "advanced-intermediate-course";
-const MODULE_COUNT = seedContentModules.length;
-const FIRST_MODULE = [...seedContentModules].sort((a, b) => a.sequence - b.sequence)[0]!;
+const MODULES = modulesOfCourse(COURSE_SLUG);
+const MODULE_COUNT = MODULES.length;
+const FIRST_MODULE = MODULES[0]!;
 
 function courseUrl(locale: string): string {
   return `/${locale}/courses/${COURSE_SLUG}`;

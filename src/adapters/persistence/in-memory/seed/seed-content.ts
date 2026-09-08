@@ -29,7 +29,7 @@ const _seedContentCourseRaw = [
     language: "en",
     lessonCount: 48,
     moduleCount: 5,
-    sequence: 2,
+    sequence: 1,
   },
   {
     id: "6361a41b-29e4-5679-8207-445797ed8fa7",
@@ -39,7 +39,7 @@ const _seedContentCourseRaw = [
     language: "en",
     lessonCount: 107,
     moduleCount: 10,
-    sequence: 3,
+    sequence: 2,
   },
 ];
 

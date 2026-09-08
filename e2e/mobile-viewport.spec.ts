@@ -1,9 +1,8 @@
-import {
-  seedContentLessonRows,
-  seedContentModules,
-} from "@/adapters/persistence/in-memory/seed/seed-content";
+import { seedContentLessonRows } from "@/adapters/persistence/in-memory/seed/seed-content";
 
 import { expect, Page, test } from "@playwright/test";
+
+import { moduleOfCourse, modulesOfCourse } from "./content-seed-fixtures";
 
 /**
  * E2E coverage for the `responsive-viewport-fit` capability, plus the
@@ -19,13 +18,14 @@ import { expect, Page, test } from "@playwright/test";
  * three configured browser projects as they are.
  */
 const COURSE_SLUG = "advanced-intermediate-course";
-const FIRST_MODULE = seedContentModules[0]!;
+const FIRST_MODULE = modulesOfCourse(COURSE_SLUG)[0]!;
 const FIRST_LESSON = seedContentLessonRows.find((lesson) => lesson.moduleId === FIRST_MODULE.id)!;
 
 /** The largest module: 16 rows whose titles all begin "Exercise N Pronunciation Step By Step Lesson". */
-const SHARED_PREFIX_MODULE = seedContentModules.find(
-  (module) => module.slug === "10-the-practice-zone-sharpen-your-skills",
-)!;
+const SHARED_PREFIX_MODULE = moduleOfCourse(
+  COURSE_SLUG,
+  "10-the-practice-zone-sharpen-your-skills",
+);
 
 const LOCALES = ["en", "es", "pt"] as const;
 

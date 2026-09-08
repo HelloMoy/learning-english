@@ -630,7 +630,7 @@ The script SHALL classify each lesson folder as follows:
 
 `LocalFilesystemLessonRepository` and `LocalFilesystemResourceRepository` SHALL accept raw seed rows and a `BlobStore` in their constructors. For every row they return, they SHALL resolve the key-bearing fields through `BlobStore.url(key)` and THEN parse the result with the domain schema (`Lesson.parse` / `Resource.parse`), so a row that resolves to an invalid URL is rejected at the adapter boundary rather than reaching the UI.
 
-These two adapters SHALL be the ones wired for the content seed. The pass-through `InMemoryLessonRepository` and `InMemoryResourceRepository` continue to serve the A1 hardcoded seed, which carries no keys.
+These two adapters SHALL be the ones wired for the content seed, and — because the content seed is the whole catalog — the only lesson and resource adapters the dependency graph builds.
 
 Resolution SHALL be applied to `VideoLesson.source`, `VideoLesson.poster` (when present) and `Resource.url`. A `ReadingLesson` row has no key-bearing field and SHALL be parsed unchanged.
 
@@ -638,21 +638,6 @@ Resolution SHALL be applied to `VideoLesson.source`, `VideoLesson.poster` (when 
 
 - **WHEN** `LocalFilesystemLessonRepository` is constructed with a row whose `source` is the key `course/module/lesson/video.mp4` and a `BlobStore` returning `https://cdn.example.com/<key>`, and `byId` is called for that lesson
 - **THEN** the returned `VideoLesson` has `source` equal to `https://cdn.example.com/course/module/lesson/video.mp4` and is a fully parsed domain entity
-
-#### Scenario: An absent poster stays absent
-
-- **WHEN** a video lesson row has no `poster` field
-- **THEN** the returned `VideoLesson` has no `poster`, and `BlobStore.url` is not called for it
-
-#### Scenario: A reading lesson row needs no resolution
-
-- **WHEN** `LocalFilesystemLessonRepository` returns a `ReadingLesson` row
-- **THEN** the row is parsed unchanged and `BlobStore.url` is not called for it
-
-#### Scenario: A row that resolves to an invalid URL is rejected at the adapter
-
-- **WHEN** a row's key resolves through a misconfigured `BlobStore` to a value that is neither an absolute http(s) URL nor a site-relative path
-- **THEN** the adapter throws the schema's validation error rather than returning a malformed entity
 
 ### Requirement: The BlobStore driver is selected by configuration
 
@@ -822,36 +807,6 @@ Reading the heading SHALL NOT change how lessons are classified, how slugs, sequ
 #### Scenario: Lesson identity survives a title change
 - **WHEN** the generator is re-run after enabling a module or adding an override, and titles change
 - **THEN** every lesson's id, slug, sequence, `source` and `poster` are unchanged, because ids are derived from the course, module and lesson slugs and never from the title
-
-### Requirement: The content seed is opt-in via env var
-
-`src/adapters/persistence/in-memory/use-case-dependencies/use-case-dependencies.ts` SHALL include the filesystem-backed course from `seed-content.ts` in the dependency graph only when the environment variable `USE_COURSE_CONTENT_SEED` is set to `"1"`. When unset or set to any other value, the catalog holds the A1 hardcoded seed (`seed.ts`) alone.
-
-The flag is **additive**: when set, the filesystem-backed course JOINS the A1 course in one catalog rather than replacing it, and the two are ordered by `Course.sequence`. The A1 course is never removed from the catalog by configuration — the flag only decides whether content that needs a large local content root is present.
-
-Because the two seeds are backed by different adapters (in-memory entities and content rows resolved through a `BlobStore`), the lesson and resource ports SHALL be bound to composite adapters that fan out over both. Every read remains filtered by `courseId`, so a delegate that owns none of a course's content contributes nothing.
-
-The default behaviour (A1 seed alone) MUST NOT change as a side effect of this change landing — only an explicit opt-in adds the second course.
-
-#### Scenario: Default dev boot still uses the A1 seed alone
-
-- **WHEN** a developer runs `pnpm dev` without setting `USE_COURSE_CONTENT_SEED`
-- **THEN** `getCoursePlatformDeps()` returns a graph whose catalog holds exactly the `seed.ts` course, identical to pre-change behaviour
-
-#### Scenario: Opt-in boot serves both courses
-
-- **WHEN** a developer runs `USE_COURSE_CONTENT_SEED=1 pnpm dev`
-- **THEN** `getCoursePlatformDeps()` returns a graph whose catalog holds both the A1 course and the "Advanced Intermediate Course", in `Course.sequence` order, and the home lists both
-
-#### Scenario: Each course's lessons resolve through the adapter that owns them
-
-- **WHEN** lessons are listed for the A1 course and for the filesystem-backed course under the opt-in flag
-- **THEN** the A1 course's lessons come back with their literal URLs unchanged, and the filesystem-backed course's lessons come back with their content keys resolved through the `BlobStore`
-
-#### Scenario: A lesson id is resolved by whichever delegate owns it
-
-- **WHEN** `LessonRepository.byId` is called with an id belonging to either seed
-- **THEN** the composite returns that lesson, and returns `null` for an id belonging to neither
 
 ### Requirement: On-disk content layout is normalized to match slug keys
 
@@ -1089,4 +1044,52 @@ derive from the course and module slugs, never from the title.
 
 - **WHEN** the generator is re-run after adding a module title override
 - **THEN** that module's id, slug and sequence are unchanged, and no lesson or resource key moves
+
+### Requirement: The generated content seed is the whole catalog
+
+`src/adapters/persistence/in-memory/use-case-dependencies/use-case-dependencies.ts` SHALL
+build the catalog from `seed-content.ts` alone. There SHALL be no hand-written course seed
+and no configuration that selects between seed sources: the courses the manifest declares
+are the courses the application serves.
+
+The lesson and resource ports SHALL bind directly to `LocalFilesystemLessonRepository` and
+`LocalFilesystemResourceRepository`. No composite adapter SHALL sit between a port and its
+single source — an indirection that fans one read out over one delegate hides the wiring
+without buying anything back. Should a second content source return, the composite is a
+change to make then, not machinery to keep unused now.
+
+Catalog order SHALL come from `Course.sequence`, which each course declares in
+`courses.manifest.json`. The ladder therefore has exactly as many rungs as the manifest has
+entries, and moving a course between rungs is a manifest edit and a regeneration.
+
+Booting without the content root SHALL fail visibly through the assets it cannot serve,
+never by silently substituting different courses. A developer who has not obtained the
+content sees the declared courses with unresolvable media, which names the real problem —
+the earlier fallback answered a missing content root with a catalog of placeholder
+material, which does not.
+
+#### Scenario: The catalog holds exactly the declared courses
+
+- **WHEN** `getCoursePlatformDeps()` is called
+- **THEN** `courses.listAvailable()` returns exactly the courses in `seedContentCourses`, in
+  `Course.sequence` order, and no other
+
+#### Scenario: No environment variable selects a seed source
+
+- **WHEN** the application boots with no `USE_COURSE_CONTENT_SEED` set, and again with it
+  set to any value
+- **THEN** the catalog is identical in both cases, because no code reads that variable
+
+#### Scenario: A lesson resolves through the adapter that owns it
+
+- **WHEN** `LessonRepository.byId` is called with an id from the content seed
+- **THEN** the lesson comes back with its content keys resolved through the `BlobStore`, and
+  an id belonging to no course returns `null`
+
+#### Scenario: Ladder position follows the manifest
+
+- **WHEN** a course's `sequence` is changed in `courses.manifest.json` and the seed is
+  regenerated
+- **THEN** the home ladder renders that course at its new rung, and no other course's id,
+  slug, title or content key changes
 

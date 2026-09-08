@@ -7,9 +7,7 @@ The `lesson-view-polish` capability captures a set of cross-cutting UX fixes for
 Related capabilities carry their own deltas: dynamic metadata and error-state recovery lives in `lesson-page`; the `next-themes` runtime acknowledgement lives in `architecture-boundaries`.
 
 The ubiquitous language is `GLOSSARY.md`.
-
 ## Requirements
-
 ### Requirement: The Lesson Page sets a per-page `<title>`
 
 The application SHALL set the document `<title>` to a string derived from the route's resolved data:
@@ -22,8 +20,8 @@ The application SHALL set the document `<title>` to a string derived from the ro
 - **THEN** the document `<title>` is `"Learn English"` (or `"Aprende inglés"` / `"Aprenda inglês"` respectively)
 
 #### Scenario: Lesson route sets the lesson title
-- **WHEN** a user visits `/en/courses/english-a1-pronunciation/modules/vowels-and-video-intro/lessons/22222222-2222-4222-8222-222222222220` and the lesson resolves
-- **THEN** the document `<title>` is `"Vowels: short vs. long"` (the lesson's title)
+- **WHEN** a user visits `/en/courses/basic-course/modules/1-introduction/lessons/0b06e639-efda-596d-8676-1e6e33410803` and the lesson resolves
+- **THEN** the document `<title>` is `"Introduction"` (the lesson's title)
 
 #### Scenario: Lesson route with an error sets a fallback title
 - **WHEN** a user visits `/en/courses/does-not-exist/...` and the use case resolves to `course-not-found`
@@ -60,3 +58,4 @@ The application SHALL keep `next-themes` as its theme provider. The React 19 con
 #### Scenario: The warning does not break any route
 - **WHEN** a user visits any route in the application with the browser DevTools console open
 - **THEN** the page renders correctly and remains fully interactive despite the warning; navigation, theme toggling, and lesson-page flows all function as specified
+

@@ -7,7 +7,7 @@
       "title": "Basic Course",
       "description": "American pronunciation from the ground up: vowel and consonant sounds, rhythm drills, and fluency practice.",
       "language": "en",
-      "sequence": 2,
+      "sequence": 1,
       "slugOverrides": {
         "1 The Vowel Sound: ə (El más importante)": "1-the-vowel-sound-schwa",
         "2 The Vowel Sound ɪ (e corta)": "2-the-vowel-sound-ih",
@@ -54,7 +54,7 @@
       "title": "Advanced Intermediate Course",
       "description": "Course content generated from public/local-filesystem-lesson.",
       "language": "en",
-      "sequence": 3,
+      "sequence": 2,
       "slugOverrides": {},
       "titleFromNotesModules": [
         "2-advanced-vowel-pronunciation-in-american-english",

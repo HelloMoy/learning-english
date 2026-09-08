@@ -1,19 +1,17 @@
-import {
-  seedContentCourses,
-  seedContentLessonRows,
-  seedContentModules,
-} from "@/adapters/persistence/in-memory/seed/seed-content";
+import { seedContentLessonRows } from "@/adapters/persistence/in-memory/seed/seed-content";
 
 import { expect, test } from "@playwright/test";
+
+import { courseBySlug, modulesOfCourse } from "./content-seed-fixtures";
 
 /**
  * E2E coverage for the Course Catalog → Course Overview → Module Overview
  * → Lesson Page flow (capability: `course-catalog-navigation`).
  *
- * The test boots `pnpm dev` with the existing dev server. The current
- * `.env` sets `USE_COURSE_CONTENT_SEED=1`, so the content-seed course
- * is the one the catalog serves. The IDs are imported from the
- * generated seed module so a future regenerate keeps these in sync.
+ * The test boots `pnpm dev` with the existing dev server. The generated
+ * content seed is the whole catalog, so the course under test is simply
+ * one of the declared ones. The IDs are imported from the generated seed
+ * module so a future regenerate keeps these in sync.
  *
  * The tests intentionally do NOT stream the lesson video: they only
  * verify the video element's `src` attribute, which is the same path
@@ -21,7 +19,7 @@ import { expect, test } from "@playwright/test";
  * serves via HTTP range).
  */
 const COURSE_SLUG = "advanced-intermediate-course";
-const FIRST_MODULE = seedContentModules[0]!;
+const FIRST_MODULE = modulesOfCourse(COURSE_SLUG)[0]!;
 const FIRST_LESSON = seedContentLessonRows.find((lesson) => lesson.moduleId === FIRST_MODULE.id)!;
 const SECOND_LESSON = seedContentLessonRows.find(
   (lesson) => lesson.moduleId === FIRST_MODULE.id && lesson.sequence === 2,
@@ -178,7 +176,7 @@ test.describe("Course catalog — course id guard", () => {
     // The course id is a deterministic uuidv5 derived from the slug.
     // This guards against an accidental regeneration that flips the
     // id and breaks the Storybook stories / E2E URLs above.
-    expect(seedContentCourses[0]!.id).toMatch(
+    expect(courseBySlug(COURSE_SLUG).id).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
     );
   });
