@@ -2,9 +2,10 @@
 
 import { Eyebrow } from "@/components/eyebrow/eyebrow";
 import type { LessonId } from "@/domain/entities/ids/ids";
-import type { Lesson } from "@/domain/entities/lesson/lesson";
+import type { Lesson, VideoLesson } from "@/domain/entities/lesson/lesson";
 import type { Resource } from "@/domain/entities/resource/resource";
 import type { LessonView as LessonViewData } from "@/domain/use-cases/find-lesson-for-view/find-lesson-for-view";
+import { youtubeVideoIdFrom } from "@/lib/youtube-source/youtube-source";
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -24,10 +25,15 @@ import { UpNextCard } from "../up-next-card/up-next-card";
  * appropriately (video → PlaybackPositionedVideoPlayer; reading → body).
  *
  * The gold title block over the player is **cover art**, not a watermark:
- * it renders only while the lesson has no `poster` (nothing else covers the
- * black idle frame) and playback has not started. The first `play` retires
- * it for the session, so the speaker's mouth — the content of a
- * pronunciation lesson — is never obstructed mid-video.
+ * it renders only while the player has no thumbnail of its own to show and
+ * playback has not started. The first `play` retires it for the session, so
+ * the speaker's mouth — the content of a pronunciation lesson — is never
+ * obstructed mid-video.
+ *
+ * "No thumbnail of its own" is deliberately not the same as "no `poster`".
+ * A YouTube lesson usually carries no `poster` field, yet its provider paints
+ * a thumbnail anyway, and covering that with a gold headline is the very
+ * watermark this cover exists to avoid.
  */
 export function LessonView({
   view,
@@ -104,7 +110,7 @@ export function LessonView({
                 durationSeconds={lesson.durationSeconds}
                 onPlaybackStart={() => setPlaybackStarted(true)}
               />
-              {lesson.poster === undefined && !playbackStarted ? (
+              {!playerShowsOwnThumbnail(lesson) && !playbackStarted ? (
                 <div
                   className="pointer-events-none absolute inset-x-0 top-0 z-10 p-6 sm:p-8"
                   style={{
@@ -158,4 +164,21 @@ export function LessonView({
       </aside>
     </div>
   );
+}
+
+/**
+ * Whether the player already paints something over its idle frame, making the
+ * gold title cover unnecessary.
+ *
+ * @remarks
+ * Two independent sources of a thumbnail, which is why this is a predicate and
+ * not a field check: the lesson's own `poster`, and — for a YouTube lesson —
+ * the thumbnail its provider discovers on its own. Only when neither applies is
+ * the idle frame black and the cover the page's only cover art.
+ *
+ * @param lesson - The video lesson being rendered
+ * @returns `true` when a thumbnail is already covering the frame
+ */
+function playerShowsOwnThumbnail(lesson: VideoLesson): boolean {
+  return lesson.poster !== undefined || youtubeVideoIdFrom(lesson.source) !== undefined;
 }

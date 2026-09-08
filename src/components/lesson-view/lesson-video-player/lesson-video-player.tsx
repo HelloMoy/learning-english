@@ -4,6 +4,8 @@ import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 import "./lesson-video-player.css";
 
+import { youtubeVideoIdFrom } from "@/lib/youtube-source/youtube-source";
+
 import { MediaPlayer, MediaProvider, Poster, type MediaPlayerInstance } from "@vidstack/react";
 import { defaultLayoutIcons, DefaultVideoLayout } from "@vidstack/react/player/layouts/default";
 import { useTranslations } from "next-intl";
@@ -31,13 +33,32 @@ import { buildVideoPlayerTranslations } from "./video-player-translations";
  * otherwise builds `"Video Player - <title>"` in English, which would be the
  * one control name on the page that no locale file can reach.
  *
+ * **The `src` is derived from `source`, not passed through.** A lesson's video
+ * is either a file this project hosts or a video published on YouTube, and the
+ * two need different providers. `youtubeVideoIdFrom` decides which; a YouTube
+ * link becomes Vidstack's `youtube/<id>` provider form, everything else stays a
+ * direct `video/mp4` source. Declaring `type: "video/mp4"` for a YouTube link —
+ * which is what every lesson used to get — makes the provider read a watch page
+ * as a byte stream and the lesson shows a dead player.
+ *
+ * Routing YouTube through the library's provider rather than a hand-written
+ * `<iframe>` is what keeps the rest of this file true for both kinds of lesson.
+ * The provider drives a YouTube iframe through its IFrame API and exposes it
+ * behind the same `MediaPlayerInstance`, so `currentTime`, `seekTo` and the
+ * media events keep working — which is what the resume overlay and the position
+ * persistence are built on. A bare embed would strand both: its `start=`
+ * parameter can say where to begin, but nothing can read back where the learner
+ * stopped.
+ *
  * Three of the player's defaults are wrong for this app and are overridden
  * here rather than worked around by callers:
  *
  * - **The poster is drawn explicitly.** The Default Layout renders no `Poster`
- *   of its own, so a lesson with a perfectly good thumbnail would show a black
- *   idle frame. It belongs inside `<MediaProvider>`, which is the outlet the
- *   provider paints behind the video.
+ *   of its own, so a self-hosted lesson with a perfectly good thumbnail would
+ *   show a black idle frame. It belongs inside `<MediaProvider>`, which is the
+ *   outlet the provider paints behind the video. A YouTube lesson needs none —
+ *   the provider finds its own thumbnail — so an absent `poster` there means
+ *   "already covered", not "show black".
  * - **The color scheme follows the app, not the OS.** Vidstack defaults to
  *   `system`; this app has its own toggle that ignores the OS, so the chrome
  *   would sit in light mode inside a dark page.
@@ -50,7 +71,8 @@ import { buildVideoPlayerTranslations } from "./video-player-translations";
  * from this layout and none are wired up here; adding one is a change to this
  * file, not a change of player.
  *
- * @param source - The lesson's video URL
+ * @param source - The lesson's video URL: a project-hosted file, or a YouTube
+ *                 link in any of its forms
  * @param poster - The lesson's thumbnail, when it has one
  * @param title - The lesson title, shown by the layout and used in the label
  * @param ariaLabel - Localized accessible name for the player region
@@ -89,7 +111,7 @@ export function LessonVideoPlayer({
     <MediaPlayer
       ref={ref}
       className="aspect-video w-full bg-black"
-      src={{ src: source, type: "video/mp4" }}
+      src={playerSourceFrom(source)}
       poster={poster}
       title={title}
       ariaLabel={ariaLabel}
@@ -116,4 +138,22 @@ export function LessonVideoPlayer({
       {children}
     </MediaPlayer>
   );
+}
+
+/**
+ * Turns a lesson's `source` into the source descriptor its provider needs.
+ *
+ * @remarks
+ * Kept out of the JSX so the choice of provider reads as a decision with a
+ * name, rather than as a conditional buried among a dozen player props.
+ *
+ * @param source - The lesson's video URL
+ * @returns Vidstack's `youtube/<id>` provider form for a YouTube link, and a
+ *          direct `video/mp4` source descriptor for everything else
+ */
+function playerSourceFrom(source: string): ComponentProps<typeof MediaPlayer>["src"] {
+  const youtubeVideoId = youtubeVideoIdFrom(source);
+  return youtubeVideoId === undefined
+    ? { src: source, type: "video/mp4" }
+    : `youtube/${youtubeVideoId}`;
 }

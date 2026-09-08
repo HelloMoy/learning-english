@@ -10,6 +10,12 @@ import { LessonVideoPlayer } from "./lesson-video-player";
 const SAMPLE_SOURCE = "https://files.vidstack.io/sprite-fight/720p.mp4";
 const SAMPLE_POSTER = "https://files.vidstack.io/sprite-fight/poster.webp";
 
+/**
+ * A lecture the project does not host. The component recognizes the link and
+ * hands the player Vidstack's YouTube provider instead of an MP4 source.
+ */
+const SAMPLE_YOUTUBE_SOURCE = "https://www.youtube.com/embed/yY7RWGUbqng?si=nB8sjE4SQJoB0Itv";
+
 const meta = {
   title: "LessonView/LessonVideoPlayer",
   component: LessonVideoPlayer,
@@ -65,4 +71,23 @@ export const WithResumeOverlay: Story = {
       />
     ),
   },
+};
+
+/**
+ * A YouTube-hosted lecture. The chrome is the app's own Default Layout, not
+ * YouTube's player — the provider drives a YouTube iframe underneath but every
+ * control, tooltip and menu entry still comes from `Components.VideoPlayer`.
+ *
+ * No `poster` is set on purpose: the provider discovers YouTube's own
+ * thumbnail, which is why an absent `poster` on such a lesson does not mean a
+ * black idle frame.
+ */
+export const YouTubeSource: Story = {
+  args: { source: SAMPLE_YOUTUBE_SOURCE, title: "The vowel sound ʊ" },
+};
+
+/** The same YouTube lecture with the layout's controls in Spanish. */
+export const YouTubeSourceInSpanish: Story = {
+  parameters: { locale: "es" },
+  args: { source: SAMPLE_YOUTUBE_SOURCE, title: "El sonido vocálico ʊ" },
 };

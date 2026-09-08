@@ -38,13 +38,14 @@ const RESUMABLE_SECONDS = 180;
 function renderPlayer({
   lessonId = LessonId.parse(faker.string.uuid()),
   durationSeconds = DURATION_SECONDS,
-}: { lessonId?: LessonId; durationSeconds?: number } = {}) {
+  source = "/videos/lesson.mp4",
+}: { lessonId?: LessonId; durationSeconds?: number; source?: string } = {}) {
   const playerRef = { current: null as MediaPlayerInstance | null };
 
   const view = render(
     <PlaybackPositionedVideoPlayer
       lessonId={lessonId}
-      source="/videos/lesson.mp4"
+      source={source}
       title="Long vs short vowels"
       durationSeconds={durationSeconds}
       ref={playerRef}
@@ -131,6 +132,25 @@ describe("PlaybackPositionedVideoPlayer", () => {
       mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
 
       const { playerRef } = renderPlayer({ lessonId });
+      await settle();
+      emit(playerRef.current, "play");
+
+      const overlay = await screen.findByRole("dialog");
+      expect(overlay).toHaveTextContent("03:00");
+      expect(screen.getByRole("region")).toContainElement(overlay);
+    });
+
+    test("WHEN the lesson is hosted on YouTube THEN the same overlay is offered", async () => {
+      // The point of routing YouTube through the Vidstack provider instead of
+      // a bare iframe: this composition must not fork. A YouTube lecture keeps
+      // the same overlay, in the same place, on the same event.
+      const lessonId = LessonId.parse(faker.string.uuid());
+      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
+
+      const { playerRef } = renderPlayer({
+        lessonId,
+        source: "https://www.youtube.com/embed/yY7RWGUbqng?si=nB8s",
+      });
       await settle();
       emit(playerRef.current, "play");
 
