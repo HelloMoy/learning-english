@@ -188,9 +188,18 @@ labelled as a dialog for assistive technology (`role="dialog"` with an accessibl
 and description) and SHALL move keyboard focus to its primary action when it appears,
 so a keyboard or screen-reader user reaches the choice without hunting for it.
 
-The overlay SHALL be shown only in response to the learner's **first play request**,
-never on mount. On that first play request the player SHALL be paused, the overlay
-SHALL appear, and playback SHALL wait for the learner's answer.
+The overlay SHALL be shown only in response to the learner's **first play**, never on
+mount. The player SHALL be held at the moment the provider reports that **playback has
+begun** — the `playing` event — and SHALL NOT be held at the moment the play request is
+issued. On that hold the overlay SHALL appear and playback SHALL wait for the learner's
+answer.
+
+The offer SHALL NOT pause a provider whose initial play request is still in flight. A
+provider driving a third-party embed can swallow such a pause and stall permanently —
+never emitting `pause`, never reaching `playing`, and ignoring every later seek and play
+request — which leaves the learner on a dead player that only a page reload clears. This
+holds for every provider the player can drive, so the player SHALL apply one rule to all
+of them and SHALL NOT branch on which provider is in use.
 
 The threshold decision SHALL be made by a pure, separately testable predicate so the
 player can gate on it without importing overlay or component code.
@@ -215,8 +224,13 @@ player can gate on it without importing overlay or component code.
 - **THEN** no resume surface is present anywhere in the document, and the rest of the
   page is fully interactive
 
-#### Scenario: The first play opens the overlay inside the player
-- **WHEN** the learner presses play on a lesson whose stored position is `180` seconds
+#### Scenario: The play request alone does not hold the player
+- **WHEN** the player emits `play` for a lesson whose stored position is `180` seconds
+  and whose duration is 600 seconds, and playback has not yet begun
+- **THEN** the player is not paused and no overlay appears
+
+#### Scenario: The first playback start opens the overlay inside the player
+- **WHEN** the player emits `playing` on a lesson whose stored position is `180` seconds
   and whose duration is 600 seconds
 - **THEN** playback pauses, an overlay appears **within the player's bounds** showing
   "Resume from 03:00" and a "Restart from beginning" alternative, the page behind the
@@ -230,6 +244,12 @@ player can gate on it without importing overlay or component code.
 #### Scenario: Restart plays from the top
 - **WHEN** the overlay is open and the learner activates "Restart from beginning"
 - **THEN** the overlay disappears, `currentTime` is `0`, and the video is playing
+
+#### Scenario: A YouTube lesson resumes and keeps playing
+- **WHEN** the learner has a stored position mid-way through a lesson whose source is a
+  YouTube link, presses play, and activates "Resume"
+- **THEN** the player reports playing rather than buffering, and playback advances past
+  the stored position
 
 #### Scenario: The overlay is offered at most once per mount
 - **WHEN** the learner answers or dismisses the overlay and then pauses and plays the
