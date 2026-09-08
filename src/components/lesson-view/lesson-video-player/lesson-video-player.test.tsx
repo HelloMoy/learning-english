@@ -85,6 +85,52 @@ describe("LessonVideoPlayer", () => {
     });
   });
 
+  describe("GIVEN a lesson whose video lives on YouTube", () => {
+    const VIDEO_ID = "yY7RWGUbqng";
+
+    test("WHEN the source is a YouTube link THEN the player is given the YouTube provider", () => {
+      // `youtube/<id>` is Vidstack's own provider form. Handing it the link
+      // as an MP4 source, which is what every lesson used to get, makes the
+      // provider try to read a watch page as a byte stream.
+      const ref = createRef<MediaPlayerInstance>();
+
+      renderPlayer(
+        { source: `https://www.youtube.com/embed/${VIDEO_ID}?si=nB8sjE4SQJoB0Itv` },
+        ref,
+      );
+
+      expect(ref.current?.state.sources).toEqual([
+        { src: `youtube/${VIDEO_ID}`, type: "video/youtube" },
+      ]);
+    });
+
+    test("WHEN the source is not a YouTube link THEN it is still given as a direct video source", () => {
+      const source = "/videos/" + faker.system.fileName({ extensionCount: 0 }) + ".mp4";
+      const ref = createRef<MediaPlayerInstance>();
+
+      renderPlayer({ source }, ref);
+
+      expect(ref.current?.state.sources).toEqual([{ src: source, type: "video/mp4" }]);
+    });
+
+    test("WHEN a YouTube lesson has no poster THEN none is painted over the provider's own", () => {
+      // The YouTube provider discovers its own thumbnail, so the black idle
+      // frame that makes an explicit `Poster` necessary for a self-hosted
+      // lesson never happens here.
+      const { container } = renderPlayer({ source: `https://youtu.be/${VIDEO_ID}` });
+
+      expect(container.querySelector(".vds-poster")).toBeNull();
+    });
+
+    test("WHEN a YouTube lesson has a poster THEN the lesson's own thumbnail still wins", () => {
+      const poster = "/thumbnails/lecture.jpg";
+
+      const { container } = renderPlayer({ source: `https://youtu.be/${VIDEO_ID}`, poster });
+
+      expect(container.querySelector(".vds-poster")).not.toBeNull();
+    });
+  });
+
   describe("GIVEN the lesson's poster", () => {
     test("WHEN a poster is provided THEN the player receives it", () => {
       const poster = "/thumbnails/" + faker.system.fileName({ extensionCount: 0 }) + ".jpg";

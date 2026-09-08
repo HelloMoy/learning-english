@@ -20,7 +20,7 @@ vi.mock("next-intl", () => ({
 const mockUseTranslations = vi.mocked(useTranslations);
 
 const fixtures = (
-  options: { poster?: string } = {},
+  options: { poster?: string; source?: string } = {},
 ): {
   view: LessonViewData;
 } => {
@@ -51,7 +51,7 @@ const fixtures = (
     sequence: 1,
     title: "Lecture title",
     description: "Lecture description",
-    source: faker.internet.url(),
+    source: options.source ?? faker.internet.url(),
     durationSeconds: 600,
     ...(options.poster === undefined ? {} : { poster: options.poster }),
   });
@@ -163,6 +163,24 @@ describe("LessonView", () => {
     );
     // The thumbnail is the cover; painting titles over it would be the
     // watermark this change exists to remove.
+    expect(screen.queryByRole("heading", { name: "Module" })).toBeNull();
+    expect(screen.getByRole("region", { name: "videoPlayerLabel" })).toBeInTheDocument();
+  });
+
+  test("a YouTube video lesson with no poster never shows the title cover", () => {
+    // The `poster` field is absent, but the frame is not black: the YouTube
+    // provider paints its own thumbnail. Keying the cover on `poster` alone
+    // would drop the gold headline on top of it.
+    const { view } = fixtures({ source: "https://www.youtube.com/embed/yY7RWGUbqng?si=nB8s" });
+    render(
+      <LessonView
+        view={view}
+        notes={null}
+        notesResource={null}
+        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+      />,
+    );
+
     expect(screen.queryByRole("heading", { name: "Module" })).toBeNull();
     expect(screen.getByRole("region", { name: "videoPlayerLabel" })).toBeInTheDocument();
   });
