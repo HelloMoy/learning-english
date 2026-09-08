@@ -1,11 +1,14 @@
 import { describe, expect, test } from "vitest";
 
+import { seedContentLessonRows } from "../../src/adapters/persistence/in-memory/seed/seed-content";
 import { allContentKeys } from "./content-keys";
 
 describe("allContentKeys", () => {
   const keys = allContentKeys();
 
-  test("WHEN the seed is walked THEN every video source is included", () => {
+  test("WHEN the seed is walked THEN every key-sourced video is included", () => {
+    // Not "every video source": one whose source is a URL is served by someone
+    // else and is deliberately absent — see the hosted-lesson test below.
     expect(keys.some((key) => key.endsWith(".mp4"))).toBe(true);
   });
 
@@ -20,6 +23,21 @@ describe("allContentKeys", () => {
     for (const key of keys) {
       expect(key.startsWith("/")).toBe(false);
       expect(key).not.toMatch(/^https?:/);
+    }
+  });
+
+  test("WHEN a lesson's video is hosted elsewhere THEN its poster is still inventoried", () => {
+    // The exclusion is per value, not per lesson: the video left the store,
+    // its thumbnail did not. No assertion that hosted lessons exist — emptying
+    // `lessonVideoSources` is the documented rollback and must stay green.
+    const hosted = seedContentLessonRows.filter(
+      (row) => row.kind === "video" && /^https?:/.test(row.source),
+    );
+
+    for (const lesson of hosted) {
+      if (lesson.kind !== "video") continue;
+      expect(keys).not.toContain(lesson.source);
+      if (lesson.poster) expect(keys).toContain(lesson.poster);
     }
   });
 

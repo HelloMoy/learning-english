@@ -16,6 +16,12 @@ const moduleId = faker.string.uuid();
 const lessonId = faker.string.uuid();
 
 /**
+ * Hardcoded, not faked: the behavior under test is tied to the exact shape of
+ * the value — that it already carries a scheme and host.
+ */
+const YOUTUBE_SOURCE = "https://www.youtube.com/embed/yY7RWGUbqng";
+
+/**
  * A hand-written fake rather than a mock: assertions then read as "the
  * prefix arrived" instead of "the spy was called with". `keysAsked` exists
  * only for the two cases that must prove `url` was NOT consulted.
@@ -86,6 +92,36 @@ describe("resolveLessonRow", () => {
     expect(store.keysAsked).toEqual(["course/module/lesson/video.mp4"]);
   });
 
+  test("passes a source that is already an absolute URL through without consulting the store", () => {
+    const store = fakeBlobStore();
+
+    const lesson = resolveLessonRow(videoRow({ source: YOUTUBE_SOURCE }), store);
+
+    if (lesson.kind !== "video") throw new Error("unreachable");
+    // Resolving it would prepend the store's base and yield
+    // "https://test.example/https://www.youtube.com/...", which parses fine
+    // and then plays nothing.
+    expect(lesson.source).toBe(YOUTUBE_SOURCE);
+    expect(store.keysAsked).toEqual([]);
+  });
+
+  test("resolves the poster key of a lesson whose video is hosted elsewhere", () => {
+    const store = fakeBlobStore();
+    const posterKey = "basic-course/2-vowels/3-the-vowel-sound-uu/thumb.jpeg";
+
+    const lesson = resolveLessonRow(
+      videoRow({ source: YOUTUBE_SOURCE, poster: posterKey } as Partial<LessonRow>),
+      store,
+    );
+
+    if (lesson.kind !== "video") throw new Error("unreachable");
+    // Only `source` is exempt: the lesson's own thumbnail is still a content
+    // key and still belongs to the store.
+    expect(lesson.source).toBe(YOUTUBE_SOURCE);
+    expect(lesson.poster).toBe(`https://test.example/${posterKey}`);
+    expect(store.keysAsked).toEqual([posterKey]);
+  });
+
   test("passes a reading row through without consulting the store", () => {
     const store = fakeBlobStore();
     const body = faker.lorem.paragraph();
@@ -137,6 +173,18 @@ describe("resolveResourceRow", () => {
 
     expect(resource.url).toBe("https://test.example/course/module/lesson/handout.pdf");
     expect(resource.kind).toBe("pdf");
+  });
+
+  test("passes a url that is already absolute through without consulting the store", () => {
+    // Same rule as a lesson's source, and stated the same way: what decides
+    // is the value's shape, not which field or which row it came from.
+    const store = fakeBlobStore();
+    const externalHandout = "https://example.com/handouts/vowel-chart.pdf";
+
+    const resource = resolveResourceRow({ ...resourceRow(), url: externalHandout }, store);
+
+    expect(resource.url).toBe(externalHandout);
+    expect(store.keysAsked).toEqual([]);
   });
 
   test("throws when the resolved value is not a URL or site-relative path", () => {

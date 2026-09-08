@@ -2,7 +2,10 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { seedContentCourses } from "@/adapters/persistence/in-memory/seed/seed-content";
+import {
+  seedContentCourses,
+  seedContentLessonRows,
+} from "@/adapters/persistence/in-memory/seed/seed-content";
 import { LessonId } from "@/domain/entities/ids/ids";
 
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
@@ -35,12 +38,27 @@ const restore = (name: string, original: string | undefined): void => {
   }
 };
 
-/** First video lesson of the content seed, read through the real deps graph. */
+/**
+ * A seed video lesson whose `source` is still a content key, and its course.
+ *
+ * @remarks
+ * Found in the seed rather than assumed to be the first course's first lesson.
+ * A lesson served by YouTube bypasses the BlobStore by design, so it can
+ * demonstrate nothing about key→URL resolution — which is the whole subject of
+ * the content-locations suite below.
+ */
+const keyedVideo = seedContentLessonRows.find(
+  (row): row is Extract<typeof row, { kind: "video" }> =>
+    row.kind === "video" && !/^https?:/.test(row.source),
+)!;
+const keyedVideoCourse = seedContentCourses.find((course) => course.id === keyedVideo.courseId)!;
+
+/** That lesson's source, resolved through the real deps graph. */
 const firstContentVideoSource = async (): Promise<string> => {
   const deps = getCoursePlatformDeps();
-  const lessons = await deps.lessons.listByCourse(contentCourse.id);
-  const video = lessons.find((l) => l.kind === "video");
-  if (video?.kind !== "video") throw new Error("content seed has no video lesson");
+  const lessons = await deps.lessons.listByCourse(keyedVideoCourse.id);
+  const video = lessons.find((lesson) => lesson.id === keyedVideo.id);
+  if (video?.kind !== "video") throw new Error("content seed has no key-sourced video lesson");
   return video.source;
 };
 
@@ -192,14 +210,14 @@ describe("getCoursePlatformDeps", () => {
     test("WHEN a route covers one prefix THEN only its keys move and the rest stay local", async () => {
       // Arrange — a partial migration: one course's assets served elsewhere
       // while everything outside that prefix is untouched.
-      const other = seedContentCourses[1]!;
+      const other = seedContentCourses.find((course) => course.id !== keyedVideoCourse.id)!;
       useLocationManifest({
         stores: {
           local: { driver: "local" },
           cdn: { driver: "local", baseUrl: "https://cdn.example.com/migrated" },
         },
         default: "local",
-        routes: [{ prefix: contentCourse.slug, store: "cdn" }],
+        routes: [{ prefix: keyedVideoCourse.slug, store: "cdn" }],
       });
 
       // Act
@@ -210,7 +228,10 @@ describe("getCoursePlatformDeps", () => {
 
       // Assert
       expect(source.startsWith("https://cdn.example.com/migrated/")).toBe(true);
-      expect(otherVideo?.kind === "video" && otherVideo.source).toMatch(
+      // Asserted on the poster, not the source: the other course's videos are
+      // served by YouTube and never reach a store at all, while their posters
+      // are still content keys and must stay on the default one.
+      expect(otherVideo?.kind === "video" && otherVideo.poster).toMatch(
         /^\/local-filesystem-lesson\//,
       );
     });

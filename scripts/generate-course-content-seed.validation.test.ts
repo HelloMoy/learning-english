@@ -40,6 +40,34 @@ describe("runGenerator — exists() validation", () => {
     expect(existsSync(outFile)).toBe(false);
   });
 
+  test("WHEN a course declares external video sources THEN an unresolved key still fails generation", async () => {
+    // Guards the exemption from widening into "this course skips validation".
+    const lessonDir = path.join(root, "test-course", "1 First Module", "01 Intro");
+    mkdirSync(lessonDir, { recursive: true });
+    writeFileSync(path.join(lessonDir, "readme.md"), "# Intro body");
+    writeFileSync(path.join(lessonDir, "handout.pdf"), "fake-pdf");
+    writeFileSync(
+      path.join(root, "courses.manifest.json"),
+      JSON.stringify({
+        version: 1,
+        courses: [
+          {
+            folder: "test-course",
+            sequence: 1,
+            lessonVideoSources: {
+              "1-first-module/01-intro": "https://www.youtube.com/embed/yY7RWGUbqng",
+            },
+          },
+        ],
+      }),
+    );
+
+    await expect(runGenerator({ sourceDir: root, outFile })).rejects.toThrow(
+      /do not resolve on disk/,
+    );
+    expect(existsSync(outFile)).toBe(false);
+  });
+
   test("WHEN all folders ARE normalized THEN every key resolves and the seed is written", async () => {
     // Arrange — slug folder + slug file names.
     const lessonDir = path.join(root, "test-course", "1-first-module", "01-intro");

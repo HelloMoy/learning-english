@@ -99,6 +99,7 @@ describe("resolveCourseDeclaration", () => {
     expect(course.lessonTitleOverrides).toEqual({});
     expect(course.moduleTitleOverrides).toEqual({});
     expect(course.titleFromNotesModules.size).toBe(0);
+    expect(course.lessonVideoSources).toEqual({});
   });
 
   test("WHEN override maps are declared THEN they are carried through", () => {
@@ -108,6 +109,9 @@ describe("resolveCourseDeclaration", () => {
       titleFromNotesModules: ["3-contractions-reductions"],
       moduleTitleOverrides: { "3-contractions-reductions": "Contractions & Reductions" },
       lessonTitleOverrides: { "3-contractions-reductions/6-i-d": "I’d, you’d, we’d" },
+      lessonVideoSources: {
+        "3-contractions-reductions/6-i-d": "https://www.youtube.com/embed/yY7RWGUbqng",
+      },
     };
     const [parsed] = parseCoursesManifest(manifestText(declaration)).courses;
 
@@ -119,6 +123,9 @@ describe("resolveCourseDeclaration", () => {
       "Contractions & Reductions",
     );
     expect(course.lessonTitleOverrides["3-contractions-reductions/6-i-d"]).toBe("I’d, you’d, we’d");
+    expect(course.lessonVideoSources["3-contractions-reductions/6-i-d"]).toBe(
+      "https://www.youtube.com/embed/yY7RWGUbqng",
+    );
   });
 });
 
@@ -280,6 +287,68 @@ describe("moduleTitleOverrides — table invariants", () => {
     const text = textWithOverride("advanced-course/3-contractions", "Contractions");
 
     expect(() => parseCoursesManifest(text)).toThrow(/module slug/);
+  });
+});
+
+describe("lessonVideoSources — table invariants", () => {
+  const YOUTUBE_EMBED = "https://www.youtube.com/embed/yY7RWGUbqng";
+
+  function textWithSource(key: string, value: string): string {
+    return manifestText({ ...minimalCourse(), lessonVideoSources: { [key]: value } });
+  }
+
+  test("WHEN a lesson declares an external video URL THEN it is parsed", () => {
+    const text = textWithSource("2-vowels/3-the-vowel-sound-uu", YOUTUBE_EMBED);
+
+    const [course] = parseCoursesManifest(text).courses;
+
+    expect(course?.lessonVideoSources).toEqual({
+      "2-vowels/3-the-vowel-sound-uu": YOUTUBE_EMBED,
+    });
+  });
+
+  test("WHEN a key is a bare lesson slug THEN it is rejected", () => {
+    // Same reasoning as lessonTitleOverrides: "1-intro" exists in most
+    // modules, so a bare key would repoint every one of them at once.
+    const text = textWithSource("3-the-vowel-sound-uu", YOUTUBE_EMBED);
+
+    expect(() => parseCoursesManifest(text)).toThrow(/moduleSlug\/lessonSlug/);
+  });
+
+  test("WHEN a key still carries the course segment THEN it is rejected", () => {
+    const text = textWithSource("basic-course/2-vowels/3-the-vowel-sound-uu", YOUTUBE_EMBED);
+
+    expect(() => parseCoursesManifest(text)).toThrow(/moduleSlug\/lessonSlug/);
+  });
+
+  test("WHEN a value is a content key THEN it is rejected", () => {
+    // The whole point of the field is to escape the content store. A key
+    // written here would resolve against the local store and play the very
+    // file the entry exists to replace — silently.
+    const text = textWithSource(
+      "2-vowels/3-the-vowel-sound-uu",
+      "basic-course/2-vowels/3-the-vowel-sound-uu/the-vowel-sound.mp4",
+    );
+
+    expect(() => parseCoursesManifest(text)).toThrow(/absolute http\(s\) URL/);
+  });
+
+  test("WHEN a value is a site-relative path THEN it is rejected", () => {
+    const text = textWithSource("2-vowels/3-the-vowel-sound-uu", "/local-filesystem-lesson/x.mp4");
+
+    expect(() => parseCoursesManifest(text)).toThrow(/absolute http\(s\) URL/);
+  });
+
+  test("WHEN a value uses a scheme other than http(s) THEN it is rejected", () => {
+    const text = textWithSource("2-vowels/3-the-vowel-sound-uu", "ftp://example.com/video.mp4");
+
+    expect(() => parseCoursesManifest(text)).toThrow(/absolute http\(s\) URL/);
+  });
+
+  test("WHEN a value is a plain http URL THEN it is accepted", () => {
+    const text = textWithSource("2-vowels/3-the-vowel-sound-uu", "http://example.com/video.mp4");
+
+    expect(() => parseCoursesManifest(text)).not.toThrow();
   });
 });
 

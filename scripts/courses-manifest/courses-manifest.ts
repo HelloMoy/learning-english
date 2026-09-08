@@ -3,6 +3,7 @@ import path from "node:path";
 
 import { z } from "zod";
 
+import { isAbsoluteHttpUrl } from "../../src/domain/entities/url-or-path/url-or-path";
 import { humanize } from "../discriminate-lesson";
 import { toPosix } from "../resolve-slug";
 import { slugify } from "../slug";
@@ -36,17 +37,31 @@ const ReviewedTitle = z
  */
 const LessonTitleOverrides = z
   .record(z.string().min(1), ReviewedTitle)
-  .superRefine((table, ctx) => {
-    for (const key of Object.keys(table)) {
-      if (key.split("/").length !== 2) {
-        ctx.addIssue({
-          code: "custom",
-          path: [key],
-          message: `"${key}" must be a moduleSlug/lessonSlug pair`,
-        });
-      }
+  .superRefine(assertLessonKeyShape);
+
+/**
+ * Fails every key in a lesson-keyed table that is not a `moduleSlug/lessonSlug`
+ * pair.
+ *
+ * @remarks
+ * Shared by each table the manifest keys by lesson, so they cannot drift into
+ * disagreeing about what a key looks like or reporting it differently.
+ *
+ * Checked here rather than on the record's key schema because Zod reports a
+ * key-schema failure as the opaque "Invalid key in record", which tells the
+ * author nothing about what a key should look like.
+ */
+function assertLessonKeyShape(table: Record<string, unknown>, ctx: z.RefinementCtx): void {
+  for (const key of Object.keys(table)) {
+    if (key.split("/").length !== 2) {
+      ctx.addIssue({
+        code: "custom",
+        path: [key],
+        message: `"${key}" must be a moduleSlug/lessonSlug pair`,
+      });
     }
-  });
+  }
+}
 
 /**
  * Module-title overrides for one course, keyed by module slug.
@@ -74,6 +89,37 @@ const ModuleTitleOverrides = z
       }
     }
   });
+
+/**
+ * Video sources for one course, keyed by `moduleSlug/lessonSlug`.
+ *
+ * @remarks
+ * An entry declares that a lesson's video is served by someone else — the
+ * Basic Course's lectures are published on YouTube — so the generator emits
+ * this URL instead of the content key it would derive from the `.mp4` on disk.
+ *
+ * The table names `source` and nothing else. A lesson listed here keeps its
+ * poster, its resources and its notes as content keys, resolved through the
+ * store exactly as before.
+ */
+/**
+ * A video URL served by someone other than the content store.
+ *
+ * @remarks
+ * Validated with the domain's own {@link isAbsoluteHttpUrl} rather than a
+ * local rule, so a value this table accepts is one `VideoLesson.source` will
+ * also accept. A content key or site-relative path written here would be
+ * resolved against the local store and quietly play the very file the entry
+ * exists to replace, so both are rejected at authoring time.
+ */
+const ExternalVideoUrl = z
+  .string()
+  .min(1)
+  .refine(isAbsoluteHttpUrl, "must be an absolute http(s) URL");
+
+const LessonVideoSources = z
+  .record(z.string().min(1), ExternalVideoUrl)
+  .superRefine(assertLessonKeyShape);
 
 /**
  * Declaration of one course, exactly as written in `courses.manifest.json`.
@@ -150,6 +196,14 @@ export const CourseDeclaration = z.object({
    * `readme.md`, its heading stays ignored until the entry is deleted.
    */
   lessonTitleOverrides: LessonTitleOverrides.optional(),
+  /**
+   * `moduleSlug/lessonSlug` → the URL that lesson's video is served from.
+   *
+   * An absent entry leaves the lesson's derived content key untouched, so a
+   * course that declares nothing here generates exactly the seed it did
+   * before. See {@link LessonVideoSources}.
+   */
+  lessonVideoSources: LessonVideoSources.optional(),
 });
 
 export type CourseDeclaration = z.infer<typeof CourseDeclaration>;
@@ -214,6 +268,7 @@ export type ResolvedCourse = {
   titleFromNotesModules: ReadonlySet<string>;
   moduleTitleOverrides: Record<string, string>;
   lessonTitleOverrides: Record<string, string>;
+  lessonVideoSources: Record<string, string>;
 };
 
 /**
@@ -244,6 +299,7 @@ export function resolveCourseDeclaration(
     titleFromNotesModules: new Set(declaration.titleFromNotesModules ?? []),
     moduleTitleOverrides: declaration.moduleTitleOverrides ?? {},
     lessonTitleOverrides: declaration.lessonTitleOverrides ?? {},
+    lessonVideoSources: declaration.lessonVideoSources ?? {},
   };
 }
 
