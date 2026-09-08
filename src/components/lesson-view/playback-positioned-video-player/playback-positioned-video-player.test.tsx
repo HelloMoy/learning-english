@@ -150,7 +150,8 @@ describe("PlaybackPositionedVideoPlayer", () => {
 
       // Holding here is what kills a provider driving a third-party embed: the
       // pause lands while the initial play request is still in flight, gets
-      // swallowed, and the lesson never plays again — design.md §D1.
+      // swallowed, and the lesson never plays again — see §D1 of
+      // `fix-youtube-resume-stuck-buffering`, not this feature's own design.md.
       expect(pause).not.toHaveBeenCalled();
       expect(screen.queryByRole("dialog")).toBeNull();
     });
