@@ -97,6 +97,7 @@ describe("resolveCourseDeclaration", () => {
 
     expect(course.slugOverrides).toEqual({});
     expect(course.lessonTitleOverrides).toEqual({});
+    expect(course.moduleTitleOverrides).toEqual({});
     expect(course.titleFromNotesModules.size).toBe(0);
   });
 
@@ -105,6 +106,7 @@ describe("resolveCourseDeclaration", () => {
       ...minimalCourse(),
       slugOverrides: { "1 Day#1": "1-day-01" },
       titleFromNotesModules: ["3-contractions-reductions"],
+      moduleTitleOverrides: { "3-contractions-reductions": "Contractions & Reductions" },
       lessonTitleOverrides: { "3-contractions-reductions/6-i-d": "I’d, you’d, we’d" },
     };
     const [parsed] = parseCoursesManifest(manifestText(declaration)).courses;
@@ -113,6 +115,9 @@ describe("resolveCourseDeclaration", () => {
 
     expect(course.slugOverrides).toEqual({ "1 Day#1": "1-day-01" });
     expect(course.titleFromNotesModules.has("3-contractions-reductions")).toBe(true);
+    expect(course.moduleTitleOverrides["3-contractions-reductions"]).toBe(
+      "Contractions & Reductions",
+    );
     expect(course.lessonTitleOverrides["3-contractions-reductions/6-i-d"]).toBe("I’d, you’d, we’d");
   });
 });
@@ -240,6 +245,44 @@ describe("lessonTitleOverrides — table invariants", () => {
   });
 });
 
+describe("moduleTitleOverrides — table invariants", () => {
+  function textWithOverride(key: string, value: string): string {
+    return manifestText({ ...minimalCourse(), moduleTitleOverrides: { [key]: value } });
+  }
+
+  test("WHEN a value restores accents humanize would strip THEN it is accepted", () => {
+    const text = textWithOverride("4-ejercicios-de-ritmo", "Ejercicios para dominar el ritmo");
+
+    expect(() => parseCoursesManifest(text)).not.toThrow();
+  });
+
+  test("WHEN a value uses the straight apostrophe THEN it is rejected", () => {
+    const text = textWithOverride("3-contractions", "Let's Contract");
+
+    expect(() => parseCoursesManifest(text)).toThrow(/U\+2019/);
+  });
+
+  test("WHEN a value is not trimmed THEN it is rejected", () => {
+    const text = textWithOverride("3-contractions", "  Padded  ");
+
+    expect(() => parseCoursesManifest(text)).toThrow(/trimmed/);
+  });
+
+  test("WHEN a key carries a lesson segment THEN it is rejected", () => {
+    // The table names modules; a two-segment key is a lessonTitleOverrides
+    // entry written into the wrong table, and would silently never match.
+    const text = textWithOverride("3-contractions/6-i-d", "I’d");
+
+    expect(() => parseCoursesManifest(text)).toThrow(/module slug/);
+  });
+
+  test("WHEN a key still carries the course segment THEN it is rejected", () => {
+    const text = textWithOverride("advanced-course/3-contractions", "Contractions");
+
+    expect(() => parseCoursesManifest(text)).toThrow(/module slug/);
+  });
+});
+
 describe("courses.manifest.example.json", () => {
   test("WHEN the tracked template is parsed THEN it satisfies the schema", () => {
     // The live manifest is untracked, so this file is the only record in git
@@ -249,15 +292,23 @@ describe("courses.manifest.example.json", () => {
     expect(() => parseCoursesManifest(text)).not.toThrow();
   });
 
-  test("WHEN the template is resolved THEN it declares the shipped course", () => {
+  test("WHEN the template is resolved THEN it declares the shipped courses in ladder order", () => {
     const text = readFileSync(path.join("scripts", "courses.manifest.example.json"), "utf8");
 
     const courses = resolveCoursesManifest(text, "public/local-filesystem-lesson");
 
-    expect(courses).toHaveLength(1);
+    expect(courses.map((course) => course.slug)).toEqual([
+      "basic-course",
+      "advanced-intermediate-course",
+    ]);
     expect(courses[0]).toMatchObject({
+      folder: "basic-course",
+      title: "Basic Course",
+      language: "en",
+      sequence: 1,
+    });
+    expect(courses[1]).toMatchObject({
       folder: "advanced-intermediate-course",
-      slug: "advanced-intermediate-course",
       title: "Advanced Intermediate Course",
       description: "Course content generated from public/local-filesystem-lesson.",
       language: "en",

@@ -1,19 +1,16 @@
-import {
-  seedContentLessonRows,
-  seedContentModules,
-} from "@/adapters/persistence/in-memory/seed/seed-content";
+import { seedContentLessonRows } from "@/adapters/persistence/in-memory/seed/seed-content";
 import type { VideoLesson } from "@/domain/entities/lesson/lesson";
 
 import { expect, test, type BrowserContext, type Locator, type Page } from "@playwright/test";
+
+import { modulesOfCourse } from "./content-seed-fixtures";
 
 /**
  * E2E tests for the playback-position resume cycle (capability:
  * `playback-position`).
  *
- * Targets the content seed, not the A1 seed: `playwright.config.ts` boots
- * the webServer with `USE_COURSE_CONTENT_SEED=1`, so the A1 course is not
- * served and its URLs render "We couldn't find this course."
- * `course-catalog.spec.ts` resolves its fixtures the same way.
+ * Fixtures come from the generated content seed, which is the whole
+ * catalog. `course-catalog.spec.ts` resolves its fixtures the same way.
  *
  * The lesson is picked as the longest video in the first module so the
  * 30s-from-start and 10s-from-end thresholds both have room, and the
@@ -42,7 +39,7 @@ import { expect, test, type BrowserContext, type Locator, type Page } from "@pla
  */
 
 const COURSE_SLUG = "advanced-intermediate-course";
-const MODULE = seedContentModules[0]!;
+const MODULE = modulesOfCourse(COURSE_SLUG)[0]!;
 const LESSON = seedContentLessonRows
   .filter(
     (lesson): lesson is VideoLesson => lesson.moduleId === MODULE.id && lesson.kind === "video",

@@ -254,15 +254,15 @@ vitest is the supported runtime. If `tsx` is added to `package.json`
 later, the script will run via `pnpm tsx scripts/generate-course-content-seed.ts`
 without changes.
 
-## Environment variable: `USE_COURSE_CONTENT_SEED`
+## The generated seed is the catalog
 
-Set `USE_COURSE_CONTENT_SEED=1` before booting the app to use the
-generator's output instead of the A1 hardcoded seed:
+`seed-content.ts` is the only course source the app has. There is no env var
+selecting between seeds and no hand-written course to fall back on: the courses
+`courses.manifest.json` declares are the courses `pnpm dev` serves, in
+`Course.sequence` order.
 
-```bash
-USE_COURSE_CONTENT_SEED=1 pnpm dev
-```
-
-Default behaviour (env var unset) is the A1 seed — tests, Storybook, and
-local dev boot continue to work without any change. Only the literal string
-`"1"` activates the content seed; `"true"`, `"yes"`, etc. do not.
+That makes the content root a prerequisite, not an option. A machine without it
+boots the real catalog with media that does not resolve — which names the actual
+problem. Obtain the content root out of band, copy
+`scripts/courses.manifest.example.json` to
+`public/local-filesystem-lesson/courses.manifest.json`, and regenerate.

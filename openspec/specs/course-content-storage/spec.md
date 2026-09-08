@@ -79,6 +79,7 @@ The manifest SHALL be a JSON document of the shape:
       "sequence": 2,                             // required: position in the home ladder
       "slugOverrides": { "1 Day#1": "1-day-01" },
       "titleFromNotesModules": ["3-contractions-reductions"],
+      "moduleTitleOverrides": { "3-contractions-reductions": "Contractions & Reductions" },
       "lessonTitleOverrides": { "3-contractions-reductions/6-i-d": "I’d …" }
     }
   ]
@@ -86,9 +87,9 @@ The manifest SHALL be a JSON document of the shape:
 ```
 
 `slugOverrides` is keyed by the RAW on-disk name; `titleFromNotesModules` lists
-module slugs; `lessonTitleOverrides` is keyed by `moduleSlug/lessonSlug` relative
-to the course, because scoping each override map inside its course entry makes a
-cross-course key collision unrepresentable.
+module slugs; `moduleTitleOverrides` is keyed by module slug; `lessonTitleOverrides`
+is keyed by `moduleSlug/lessonSlug` relative to the course, because scoping each
+override map inside its course entry makes a cross-course key collision unrepresentable.
 
 The manifest SHALL be untracked by git. `public/local-filesystem-lesson/` is
 already ignored in full, so no new `.gitignore` rule is required; a comment SHALL
@@ -111,9 +112,9 @@ manifest is an error, an absent one is a default.
 
 #### Scenario: A new course is added without touching any code
 
-- **WHEN** a developer drops a new course folder under the content root, adds an
-  entry naming that folder with a `sequence` of `3` to `courses.manifest.json`,
-  and runs `pnpm generate:content-seed`
+- **WHEN** a developer drops a new course folder under the content root in the canonical
+  shape, adds an entry naming that folder with a `sequence` of `3` to
+  `courses.manifest.json`, and runs `pnpm generate:content-seed`
 - **THEN** `seed-content.ts` contains that course, its modules, lessons and
   resources, and no file under `scripts/` was edited
 
@@ -629,7 +630,7 @@ The script SHALL classify each lesson folder as follows:
 
 `LocalFilesystemLessonRepository` and `LocalFilesystemResourceRepository` SHALL accept raw seed rows and a `BlobStore` in their constructors. For every row they return, they SHALL resolve the key-bearing fields through `BlobStore.url(key)` and THEN parse the result with the domain schema (`Lesson.parse` / `Resource.parse`), so a row that resolves to an invalid URL is rejected at the adapter boundary rather than reaching the UI.
 
-These two adapters SHALL be the ones wired for the content seed. The pass-through `InMemoryLessonRepository` and `InMemoryResourceRepository` continue to serve the A1 hardcoded seed, which carries no keys.
+These two adapters SHALL be the ones wired for the content seed, and — because the content seed is the whole catalog — the only lesson and resource adapters the dependency graph builds.
 
 Resolution SHALL be applied to `VideoLesson.source`, `VideoLesson.poster` (when present) and `Resource.url`. A `ReadingLesson` row has no key-bearing field and SHALL be parsed unchanged.
 
@@ -637,21 +638,6 @@ Resolution SHALL be applied to `VideoLesson.source`, `VideoLesson.poster` (when 
 
 - **WHEN** `LocalFilesystemLessonRepository` is constructed with a row whose `source` is the key `course/module/lesson/video.mp4` and a `BlobStore` returning `https://cdn.example.com/<key>`, and `byId` is called for that lesson
 - **THEN** the returned `VideoLesson` has `source` equal to `https://cdn.example.com/course/module/lesson/video.mp4` and is a fully parsed domain entity
-
-#### Scenario: An absent poster stays absent
-
-- **WHEN** a video lesson row has no `poster` field
-- **THEN** the returned `VideoLesson` has no `poster`, and `BlobStore.url` is not called for it
-
-#### Scenario: A reading lesson row needs no resolution
-
-- **WHEN** `LocalFilesystemLessonRepository` returns a `ReadingLesson` row
-- **THEN** the row is parsed unchanged and `BlobStore.url` is not called for it
-
-#### Scenario: A row that resolves to an invalid URL is rejected at the adapter
-
-- **WHEN** a row's key resolves through a misconfigured `BlobStore` to a value that is neither an absolute http(s) URL nor a site-relative path
-- **THEN** the adapter throws the schema's validation error rather than returning a malformed entity
 
 ### Requirement: The BlobStore driver is selected by configuration
 
@@ -822,36 +808,6 @@ Reading the heading SHALL NOT change how lessons are classified, how slugs, sequ
 - **WHEN** the generator is re-run after enabling a module or adding an override, and titles change
 - **THEN** every lesson's id, slug, sequence, `source` and `poster` are unchanged, because ids are derived from the course, module and lesson slugs and never from the title
 
-### Requirement: The content seed is opt-in via env var
-
-`src/adapters/persistence/in-memory/use-case-dependencies/use-case-dependencies.ts` SHALL include the filesystem-backed course from `seed-content.ts` in the dependency graph only when the environment variable `USE_COURSE_CONTENT_SEED` is set to `"1"`. When unset or set to any other value, the catalog holds the A1 hardcoded seed (`seed.ts`) alone.
-
-The flag is **additive**: when set, the filesystem-backed course JOINS the A1 course in one catalog rather than replacing it, and the two are ordered by `Course.sequence`. The A1 course is never removed from the catalog by configuration — the flag only decides whether content that needs a large local content root is present.
-
-Because the two seeds are backed by different adapters (in-memory entities and content rows resolved through a `BlobStore`), the lesson and resource ports SHALL be bound to composite adapters that fan out over both. Every read remains filtered by `courseId`, so a delegate that owns none of a course's content contributes nothing.
-
-The default behaviour (A1 seed alone) MUST NOT change as a side effect of this change landing — only an explicit opt-in adds the second course.
-
-#### Scenario: Default dev boot still uses the A1 seed alone
-
-- **WHEN** a developer runs `pnpm dev` without setting `USE_COURSE_CONTENT_SEED`
-- **THEN** `getCoursePlatformDeps()` returns a graph whose catalog holds exactly the `seed.ts` course, identical to pre-change behaviour
-
-#### Scenario: Opt-in boot serves both courses
-
-- **WHEN** a developer runs `USE_COURSE_CONTENT_SEED=1 pnpm dev`
-- **THEN** `getCoursePlatformDeps()` returns a graph whose catalog holds both the A1 course and the "Advanced Intermediate Course", in `Course.sequence` order, and the home lists both
-
-#### Scenario: Each course's lessons resolve through the adapter that owns them
-
-- **WHEN** lessons are listed for the A1 course and for the filesystem-backed course under the opt-in flag
-- **THEN** the A1 course's lessons come back with their literal URLs unchanged, and the filesystem-backed course's lessons come back with their content keys resolved through the `BlobStore`
-
-#### Scenario: A lesson id is resolved by whichever delegate owns it
-
-- **WHEN** `LessonRepository.byId` is called with an id belonging to either seed
-- **THEN** the composite returns that lesson, and returns `null` for an id belonging to neither
-
 ### Requirement: On-disk content layout is normalized to match slug keys
 
 The system SHALL provide a build-time normalization step that renames every folder AND every media/resource file under `public/local-filesystem-lesson/` to its kebab-case slug form, using the SAME slug resolution as the seed generator (the owning course's `slugOverrides` map from `courses.manifest.json` first, then `scripts/slug.ts` automatic normalization). When no manifest is present, or when the entry being renamed sits outside any declared course folder, automatic normalization alone applies. After normalization, the physical path of each asset (relative to the content root) SHALL be byte-for-byte equal to the content key the generator emits, so `blobStore.url(key)` resolves against Next.js `/public`.
@@ -946,4 +902,194 @@ level-2 heading, so a monolingual lesson is explicit rather than merely ambiguou
 
 - **WHEN** a lesson's `readme.md` body is restructured into language sections
 - **THEN** the file's first `#` heading is unchanged byte-for-byte, so lesson-title derivation for allowlisted modules and the generated `seed-content.ts` are unaffected
+
+### Requirement: A course tree has one canonical on-disk shape
+
+Every declared course SHALL present the same shape under the content root, so the
+generator walks one layout and only one:
+
+```
+<content-root>/<course-folder>/<module-folder>/<lesson-folder>/
+    <video>.mp4            — optional; its presence makes the lesson a video lesson
+    <poster>.jpeg          — optional; the first image becomes the poster
+    readme.md              — optional; the lesson's notes, opening with a `#` heading
+    <resource>.pdf         — zero or more; resources sit beside the media, never below it
+```
+
+Exactly three folder levels separate the content root from a lesson's files. A module
+folder SHALL contain lesson folders and nothing else that the walk depends on; a lesson
+folder SHALL hold its media, poster, notes and resources as **direct children**, with no
+intervening subfolder. Notes SHALL be named `readme.md`, and a lesson whose title cannot
+be recovered from its slug SHALL carry that title as the first `#` heading of that file.
+
+Course content that arrives in a different shape — an extra grouping level, a lesson's
+files loose at module level, notes under another filename, resources in a subfolder —
+SHALL be migrated to this shape before the course is declared in `courses.manifest.json`.
+The generator SHALL NOT be taught to recognize alternative shapes, and the manifest SHALL
+NOT gain fields describing them: one contract keeps every course's content keys derivable
+from its path, and a second shape would double the surface every future content change is
+verified against.
+
+#### Scenario: A grouping level between module and lesson is flattened, not accommodated
+
+- **WHEN** an imported course nests lesson folders under `<module>/<group>/<lesson>/`
+- **THEN** each `<group>` is promoted to a sibling module of `<module>` before the course
+  is declared, and the generator's walk is unchanged
+
+#### Scenario: A lesson's files loose at module level are wrapped in a lesson folder
+
+- **WHEN** an imported module folder holds `lesson.mp4` and `thumbnail.jpeg` as direct
+  children, with no lesson folder around them
+- **THEN** those files are moved into a lesson folder inside that module before the course
+  is declared, so the module holds lesson folders only
+
+#### Scenario: Resources in a subfolder are hoisted beside the media
+
+- **WHEN** an imported lesson folder holds its PDFs under `<lesson>/resources/`
+- **THEN** those files are moved into `<lesson>/` before the course is declared, and the
+  generator emits one resource row per file exactly as it does for any other course
+
+#### Scenario: Notes under another filename are renamed
+
+- **WHEN** an imported lesson carries its notes as `description.md`
+- **THEN** the file is renamed `readme.md` before the course is declared, so the notes are
+  emitted as inline notes and a notes Resource rather than as an unnamed `other` resource
+
+### Requirement: Reshaping an imported course tree is a dry-runnable, plan-driven step
+
+The system SHALL provide `scripts/reshape-course-tree.ts`, a build-time step that brings
+one imported course folder to the canonical shape defined above. It SHALL:
+
+- Take a declarative plan naming the course folder and the moves it needs — module
+  promotions with their new ladder positions, lesson folders to create around loose files,
+  subfolders to hoist, and the notes filename to adopt. A course with no plan SHALL be left
+  untouched, so running the step can never disturb a course that is already canonical.
+- Default to a **dry run** that prints the `old → new` plan and mutates nothing. Renames
+  SHALL happen only under `--apply`, mirroring `normalize-content-disk.ts`.
+- Move files with `rename`, never copy, so a multi-gigabyte tree is reshaped without
+  duplicating a byte.
+- Be **idempotent**: re-running it against an already-reshaped tree SHALL make no changes
+  and exit zero.
+- Abort with a non-zero status, before mutating anything in the affected directory, when a
+  move would overwrite an existing entry or when two sources would land on one target.
+
+Reshaping SHALL run BEFORE `normalize-content-disk.ts`: the reshape decides where a folder
+lives, normalization decides what it is called. Running them in the other order would
+rename folders the plan still refers to by their raw names.
+
+#### Scenario: A dry run mutates nothing
+
+- **WHEN** the step runs without `--apply`
+- **THEN** it prints every move it would make and no file or folder on disk has changed
+
+#### Scenario: Re-running after a completed reshape is a no-op
+
+- **WHEN** the step runs a second time with `--apply` against a tree it has already reshaped
+- **THEN** it reports nothing to move and exits zero
+
+#### Scenario: A colliding move aborts before touching the directory
+
+- **WHEN** a planned move would land on a path that already exists
+- **THEN** the step exits non-zero naming both paths, and no move in that directory is performed
+
+#### Scenario: An undeclared course folder is not reshaped
+
+- **WHEN** the step runs with a plan naming one course folder, and the content root holds others
+- **THEN** only the named folder is touched
+
+### Requirement: Module titles may be overridden per course
+
+A course entry in `courses.manifest.json` SHALL be able to declare `moduleTitleOverrides`, a
+table of hand-written module titles that the generator SHALL prefer over the derived one.
+
+The generator derives a module's title with `humanize(moduleSlug)`, which strips accents and
+title-cases every word. That is adequate for English module names and wrong for any other
+language: `Ejercicios para dominar el ritmo en Inglés` becomes `Ejercicios Para Dominar El
+Ritmo En Ingles`.
+
+The table SHALL be keyed by **module slug** — not course-prefixed, because the course is already the entry
+the table lives under. An override SHALL take precedence over the derived title. A module with
+no entry SHALL keep the derived title, so an absent entry stays a deliberate acceptance of the
+automatic value rather than an oversight.
+
+Override values SHALL be validated, not repaired, on the same terms as `lessonTitleOverrides`:
+a value SHALL be non-empty, SHALL be trimmed, and SHALL NOT contain the straight apostrophe
+`'` (U+0027). A key naming a module the course does not hold SHALL NOT be silently ignored.
+
+Overriding a title SHALL NOT change the module's slug, id, sequence, or any content key: ids
+derive from the course and module slugs, never from the title.
+
+#### Scenario: An accented Spanish module title survives
+
+- **WHEN** a course entry maps `4-ejercicios-para-dominar-el-ritmo-en-ingles` to
+  `Ejercicios para dominar el ritmo en Inglés`
+- **THEN** the emitted module's title is that string verbatim, not the `humanize`-derived one
+
+#### Scenario: A module with no override keeps the derived title
+
+- **WHEN** a course declares `moduleTitleOverrides` for one of its modules
+- **THEN** every other module of that course is emitted with its `humanize(slug)` title, unchanged
+
+#### Scenario: An override applies only to its own course
+
+- **WHEN** two courses each hold a module slugged `1-intro` and only one declares an override for it
+- **THEN** only that course's module adopts the override
+
+#### Scenario: A straight apostrophe in an override is rejected
+
+- **WHEN** a `moduleTitleOverrides` value contains `'` (U+0027)
+- **THEN** the manifest fails validation, naming the offending key, and generation aborts
+
+#### Scenario: Module identity survives a title override
+
+- **WHEN** the generator is re-run after adding a module title override
+- **THEN** that module's id, slug and sequence are unchanged, and no lesson or resource key moves
+
+### Requirement: The generated content seed is the whole catalog
+
+`src/adapters/persistence/in-memory/use-case-dependencies/use-case-dependencies.ts` SHALL
+build the catalog from `seed-content.ts` alone. There SHALL be no hand-written course seed
+and no configuration that selects between seed sources: the courses the manifest declares
+are the courses the application serves.
+
+The lesson and resource ports SHALL bind directly to `LocalFilesystemLessonRepository` and
+`LocalFilesystemResourceRepository`. No composite adapter SHALL sit between a port and its
+single source — an indirection that fans one read out over one delegate hides the wiring
+without buying anything back. Should a second content source return, the composite is a
+change to make then, not machinery to keep unused now.
+
+Catalog order SHALL come from `Course.sequence`, which each course declares in
+`courses.manifest.json`. The ladder therefore has exactly as many rungs as the manifest has
+entries, and moving a course between rungs is a manifest edit and a regeneration.
+
+Booting without the content root SHALL fail visibly through the assets it cannot serve,
+never by silently substituting different courses. A developer who has not obtained the
+content sees the declared courses with unresolvable media, which names the real problem —
+the earlier fallback answered a missing content root with a catalog of placeholder
+material, which does not.
+
+#### Scenario: The catalog holds exactly the declared courses
+
+- **WHEN** `getCoursePlatformDeps()` is called
+- **THEN** `courses.listAvailable()` returns exactly the courses in `seedContentCourses`, in
+  `Course.sequence` order, and no other
+
+#### Scenario: No environment variable selects a seed source
+
+- **WHEN** the application boots with no `USE_COURSE_CONTENT_SEED` set, and again with it
+  set to any value
+- **THEN** the catalog is identical in both cases, because no code reads that variable
+
+#### Scenario: A lesson resolves through the adapter that owns it
+
+- **WHEN** `LessonRepository.byId` is called with an id from the content seed
+- **THEN** the lesson comes back with its content keys resolved through the `BlobStore`, and
+  an id belonging to no course returns `null`
+
+#### Scenario: Ladder position follows the manifest
+
+- **WHEN** a course's `sequence` is changed in `courses.manifest.json` and the seed is
+  regenerated
+- **THEN** the home ladder renders that course at its new rung, and no other course's id,
+  slug, title or content key changes
 

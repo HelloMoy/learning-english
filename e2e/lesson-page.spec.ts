@@ -1,18 +1,17 @@
 import {
   seedContentLessonRows,
-  seedContentModules,
   seedContentResourceRows,
 } from "@/adapters/persistence/in-memory/seed/seed-content";
 
 import { expect, test } from "@playwright/test";
 
+import { modulesOfCourse } from "./content-seed-fixtures";
+
 /**
  * E2E tests for the Lesson Page (capability: `lesson-page`).
  *
- * Fixtures come from the **content seed**, because `playwright.config.ts`
- * boots the webServer with `USE_COURSE_CONTENT_SEED=1` — the A1 seed in
- * `seed.ts` is not served there, so its URLs render "We couldn't find this
- * course." `course-catalog.spec.ts` resolves its fixtures the same way.
+ * Fixtures come from the **content seed**, which is the whole catalog.
+ * `course-catalog.spec.ts` resolves its fixtures the same way.
  *
  * Everything is derived from the generated seed module (slugs, ids, titles,
  * resource names) rather than hardcoded, so regenerating the seed keeps the
@@ -42,7 +41,7 @@ const bySequence = <T extends { sequence: number }>(items: ReadonlyArray<T>): T[
  */
 const contentUrl = (key: string): string => `/local-filesystem-lesson/${key}`;
 
-const MODULES = bySequence(seedContentModules);
+const MODULES = modulesOfCourse(COURSE_SLUG);
 const MODULE_A = MODULES[0]!;
 const MODULE_B = MODULES[1]!;
 const LAST_MODULE = MODULES[MODULES.length - 1]!;

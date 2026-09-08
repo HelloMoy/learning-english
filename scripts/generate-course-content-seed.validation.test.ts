@@ -338,6 +338,60 @@ describe("buildSeed — courses manifest", () => {
     expect(seed.lessonRows[0]?.title).toBe("Fast — the reviewed name");
   });
 
+  test("WHEN a module title override is declared THEN it outranks the humanized slug", async () => {
+    writeLesson("first-course", "4-ejercicios-de-ritmo", "1-intro", "# Intro");
+    writeLesson("first-course", "5-fluidez", "1-intro", "# Intro");
+    writeManifest([
+      {
+        folder: "first-course",
+        sequence: 1,
+        moduleTitleOverrides: { "4-ejercicios-de-ritmo": "Ejercicios para dominar el ritmo" },
+      },
+    ]);
+
+    const seed = await buildSeed(root);
+
+    const titleOf = (slug: string): string | undefined =>
+      seed.modules.find((module) => module.slug === slug)?.title;
+    expect(titleOf("4-ejercicios-de-ritmo")).toBe("Ejercicios para dominar el ritmo");
+    expect(titleOf("5-fluidez")).toBe("Fluidez");
+  });
+
+  test("WHEN a module title override is declared THEN identity and keys are unchanged", async () => {
+    writeLesson("first-course", "4-ejercicios-de-ritmo", "1-intro", "# Intro");
+    writeManifest([{ folder: "first-course", sequence: 1 }]);
+    const before = await buildSeed(root);
+
+    writeManifest([
+      {
+        folder: "first-course",
+        sequence: 1,
+        moduleTitleOverrides: { "4-ejercicios-de-ritmo": "Ejercicios para dominar el ritmo" },
+      },
+    ]);
+    const after = await buildSeed(root);
+
+    expect(after.modules[0]?.id).toBe(before.modules[0]?.id);
+    expect(after.modules[0]?.slug).toBe(before.modules[0]?.slug);
+    expect(after.modules[0]?.sequence).toBe(before.modules[0]?.sequence);
+    expect(after.keys).toEqual(before.keys);
+  });
+
+  test("WHEN a module title override names no module THEN generation fails naming the key", async () => {
+    // A typo in a module slug would otherwise leave the ugly derived title in
+    // place with no signal that the entry did nothing.
+    writeLesson("first-course", "4-ejercicios-de-ritmo", "1-intro", "# Intro");
+    writeManifest([
+      {
+        folder: "first-course",
+        sequence: 1,
+        moduleTitleOverrides: { "4-ejercicios-de-rithmo": "Ejercicios" },
+      },
+    ]);
+
+    await expect(buildSeed(root)).rejects.toThrow(/4-ejercicios-de-rithmo/);
+  });
+
   test("WHEN the manifest declares a missing folder THEN generation fails without writing", async () => {
     writeLesson("first-course", "1-first-module", "01-intro", "# First intro");
     writeManifest([{ folder: "does-not-exist", sequence: 1 }]);

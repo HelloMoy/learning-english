@@ -1,4 +1,3 @@
-import { seedCourse, seedModules } from "@/adapters/persistence/in-memory/seed/seed";
 import {
   seedContentCourses,
   seedContentLessonRows,
@@ -13,19 +12,37 @@ import { expect, test } from "@playwright/test";
  *
  * These are the two things only a browser can show. Every component is
  * covered in isolation by Vitest + RTL; what is left is the pair of
- * integrations those cannot reach: the two-course catalog actually booting
- * under `USE_COURSE_CONTENT_SEED=1` (the dev server Playwright starts sets
- * it), and the `localStorage` round trip surviving a real navigation.
+ * integrations those cannot reach: the declared catalog actually booting,
+ * and the `localStorage` round trip surviving a real navigation.
  *
- * Ids and titles are imported from the seeds so a regeneration keeps these
- * in sync rather than silently drifting.
+ * Everything is derived from the generated seed — course count, titles,
+ * ordinals, module previews — so declaring a course in the manifest moves
+ * this suite with it instead of breaking it.
  */
-const contentCourse = seedContentCourses[0]!;
-const CONTENT_MODULE = seedContentModules[0]!;
-const CONTENT_LESSON = seedContentLessonRows.find(
-  (lesson) => lesson.moduleId === CONTENT_MODULE.id,
-)!;
-const A1_MODULE = seedModules[0]!;
+const COURSES = seedContentCourses;
+const FIRST_COURSE = COURSES[0]!;
+const SECOND_COURSE = COURSES[1]!;
+
+/** Modules of one course, in the order the ladder card previews them. */
+const modulesOf = (courseId: string) =>
+  seedContentModules
+    .filter((module) => module.courseId === courseId)
+    .sort((a, b) => a.sequence - b.sequence);
+
+/** The first lesson of a course's first module — the one a card links into. */
+const firstLessonOf = (courseId: string) => {
+  const module_ = modulesOf(courseId)[0]!;
+  const lesson = seedContentLessonRows
+    .filter((row) => row.moduleId === module_.id)
+    .sort((a, b) => a.sequence - b.sequence)[0]!;
+  return { module: module_, lesson };
+};
+
+const FIRST = firstLessonOf(FIRST_COURSE.id);
+const SECOND = firstLessonOf(SECOND_COURSE.id);
+
+/** The ladder card previews three modules and counts the rest. */
+const PREVIEWED_MODULES = 3;
 
 const lessonUrl = (locale: string, courseSlug: string, moduleSlug: string, lessonId: string) =>
   `/${locale}/courses/${courseSlug}/modules/${moduleSlug}/lessons/${lessonId}`;
@@ -37,35 +54,44 @@ test.describe("Home — ladder of levels", () => {
     await page.goto("/en");
 
     const cards = page.getByTestId("course-level-card");
-    await expect(cards).toHaveCount(2);
-    await expect(cards.nth(0)).toContainText(seedCourse.title);
-    await expect(cards.nth(1)).toContainText(contentCourse.title);
+    await expect(cards).toHaveCount(COURSES.length);
+    for (const [index, course] of COURSES.entries()) {
+      await expect(cards.nth(index)).toContainText(course.title);
+    }
   });
 
   test("WHEN the home is visited THEN the courses section announces itself", async ({ page }) => {
     await page.goto("/en");
 
     await expect(page.getByText("Available courses")).toBeVisible();
-    await expect(page.getByRole("heading", { name: "2 levels, in order" })).toBeVisible();
-    await expect(page.getByText("2 courses")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: `${COURSES.length} levels, in order` }),
+    ).toBeVisible();
+    await expect(page.getByText(`${COURSES.length} courses`)).toBeVisible();
   });
 
   test("WHEN the home is visited THEN each card carries its level ordinal", async ({ page }) => {
     await page.goto("/en");
 
     const ordinals = page.getByTestId("course-level-ordinal");
-    await expect(ordinals.nth(0)).toHaveText("Level 1");
-    await expect(ordinals.nth(1)).toHaveText("Level 2");
+    for (const [index] of COURSES.entries()) {
+      await expect(ordinals.nth(index)).toHaveText(`Level ${index + 1}`);
+    }
   });
 
-  test("WHEN the catalog holds ten modules THEN the card previews some and counts the rest", async ({
+  test("WHEN a course holds more modules than the card previews THEN it counts the rest", async ({
     page,
   }) => {
+    const modules = modulesOf(SECOND_COURSE.id);
+    expect(modules.length).toBeGreaterThan(PREVIEWED_MODULES);
+
     await page.goto("/en");
 
-    const advancedCard = page.getByTestId("course-level-card").nth(1);
-    await expect(advancedCard.getByTestId("course-level-more")).toHaveText("+7 more");
-    await expect(advancedCard).toContainText(CONTENT_MODULE.title);
+    const card = page.getByTestId("course-level-card").nth(1);
+    await expect(card.getByTestId("course-level-more")).toHaveText(
+      `+${modules.length - PREVIEWED_MODULES} more`,
+    );
+    await expect(card).toContainText(modules[0]!.title);
   });
 
   test("WHEN the home is visited in /es THEN the ladder copy is localized", async ({ page }) => {
@@ -93,30 +119,30 @@ test.describe("Home — continue watching", () => {
   test("WHEN a lesson has been opened THEN the home offers it back and Resume returns to it", async ({
     page,
   }) => {
-    const lessonPath = lessonUrl("en", contentCourse.slug, CONTENT_MODULE.slug, CONTENT_LESSON.id);
+    const lessonPath = lessonUrl("en", FIRST_COURSE.slug, FIRST.module.slug, FIRST.lesson.id);
 
     await page.goto(lessonPath);
     // The record is written on mount; the heading proves the page rendered.
-    await expect(page.getByRole("heading", { name: CONTENT_LESSON.title })).toBeVisible();
+    await expect(page.getByRole("heading", { name: FIRST.lesson.title })).toBeVisible();
 
     await page.goto("/en");
 
     const panel = page.getByTestId("continue-watching");
     await expect(panel).toBeVisible();
-    await expect(panel).toContainText(CONTENT_LESSON.title);
+    await expect(panel).toContainText(FIRST.lesson.title);
     await expect(panel.getByTestId("continue-watching-breadcrumb")).toContainText(
-      contentCourse.title,
+      FIRST_COURSE.title,
     );
 
     await panel.getByTestId("continue-watching-resume").click();
-    await expect(page).toHaveURL(new RegExp(`${CONTENT_LESSON.id}$`));
+    await expect(page).toHaveURL(new RegExp(`${FIRST.lesson.id}$`));
   });
 
   test("WHEN a lesson has been opened THEN its course is the one marked in progress", async ({
     page,
   }) => {
-    await page.goto(lessonUrl("en", contentCourse.slug, CONTENT_MODULE.slug, CONTENT_LESSON.id));
-    await expect(page.getByRole("heading", { name: CONTENT_LESSON.title })).toBeVisible();
+    await page.goto(lessonUrl("en", SECOND_COURSE.slug, SECOND.module.slug, SECOND.lesson.id));
+    await expect(page.getByRole("heading", { name: SECOND.lesson.title })).toBeVisible();
 
     await page.goto("/en");
 
@@ -130,19 +156,17 @@ test.describe("Home — continue watching", () => {
   test("WHEN a second lesson is opened THEN the home offers the more recent one", async ({
     page,
   }) => {
-    const a1Lesson = "22222222-2222-4222-8222-222222222220";
+    await page.goto(lessonUrl("en", SECOND_COURSE.slug, SECOND.module.slug, SECOND.lesson.id));
+    await expect(page.getByRole("heading", { name: SECOND.lesson.title })).toBeVisible();
 
-    await page.goto(lessonUrl("en", contentCourse.slug, CONTENT_MODULE.slug, CONTENT_LESSON.id));
-    await expect(page.getByRole("heading", { name: CONTENT_LESSON.title })).toBeVisible();
-
-    await page.goto(lessonUrl("en", seedCourse.slug, A1_MODULE.slug, a1Lesson));
-    await expect(page.getByRole("heading", { name: "Vowels: short vs. long" })).toBeVisible();
+    await page.goto(lessonUrl("en", FIRST_COURSE.slug, FIRST.module.slug, FIRST.lesson.id));
+    await expect(page.getByRole("heading", { name: FIRST.lesson.title })).toBeVisible();
 
     await page.goto("/en");
 
     const panel = page.getByTestId("continue-watching");
-    await expect(panel).toContainText("Vowels: short vs. long");
-    await expect(panel).not.toContainText(CONTENT_LESSON.title);
+    await expect(panel).toContainText(FIRST.lesson.title);
+    await expect(panel).not.toContainText(SECOND.lesson.title);
     await expect(page.getByTestId("course-level-card").nth(0)).toHaveAttribute(
       "data-state",
       "in-progress",

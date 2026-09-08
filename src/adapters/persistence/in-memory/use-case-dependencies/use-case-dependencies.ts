@@ -1,19 +1,9 @@
 import type { BlobStore } from "@/adapters/persistence/blob-store/blob-store";
 import { contentBlobStoreFromEnv } from "@/adapters/persistence/blob-store/create-content-blob-store/create-content-blob-store";
-import { CompositeLessonRepository } from "@/adapters/persistence/composite/composite-lesson-repository/composite-lesson-repository";
-import { CompositeResourceRepository } from "@/adapters/persistence/composite/composite-resource-repository/composite-resource-repository";
 import { InMemoryCourseRepository } from "@/adapters/persistence/in-memory/in-memory-course-repository/in-memory-course-repository";
-import { InMemoryLessonRepository } from "@/adapters/persistence/in-memory/in-memory-lesson-repository/in-memory-lesson-repository";
 import { InMemoryModuleRepository } from "@/adapters/persistence/in-memory/in-memory-module-repository/in-memory-module-repository";
 import { InMemoryPlaybackPositionRepository } from "@/adapters/persistence/in-memory/in-memory-playback-position-repository/in-memory-playback-position-repository";
 import { InMemoryProgressTracker } from "@/adapters/persistence/in-memory/in-memory-progress-tracker/in-memory-progress-tracker";
-import { InMemoryResourceRepository } from "@/adapters/persistence/in-memory/in-memory-resource-repository/in-memory-resource-repository";
-import {
-  seedCourse,
-  seedLessons,
-  seedModules,
-  seedResources,
-} from "@/adapters/persistence/in-memory/seed/seed";
 import {
   seedContentCourses,
   seedContentLessonRows,
@@ -75,28 +65,18 @@ export type CoursePlatformDeps = {
 };
 
 /**
- * Reads the `USE_COURSE_CONTENT_SEED` environment variable on each call
- * (not at module load). When set to `"1"`, `getCoursePlatformDeps` builds
- * the dependency graph from `seed-content.ts` (the generator's output
- * for the filesystem-backed course). Otherwise the A1 hardcoded seed is
- * used.
+ * Builds a `CoursePlatformDeps` from the generated content seed.
  *
- * Reading on every call lets developers flip the env var in dev without
- * restarting the Node process. The default is the A1 seed so existing
- * tests, Storybook and local dev boot continue to work without any
- * env-var change.
- */
-export const isCourseContentSeedEnabled = (): boolean =>
-  process.env.USE_COURSE_CONTENT_SEED === "1";
-
-/**
- * Build a `CoursePlatformDeps` backed by the production in-memory seed.
+ * @remarks
  * The page calls this; Storybook can call it too. When persistence arrives,
  * this factory is replaced by a request-scoped one (e.g. a hook named
  * `useCoursePlatformDeps`); the seed itself stays.
  *
- * Seed source is chosen at call time from `USE_COURSE_CONTENT_SEED` so the
- * env var can be flipped in dev without restarting the Node process.
+ * The courses `courses.manifest.json` declares are the courses the catalog
+ * holds — there is no configuration that selects between seed sources, and no
+ * hand-written course to fall back to. A machine without the content root
+ * therefore boots the real catalog with unresolvable media, which names the
+ * actual problem rather than hiding it behind placeholder courses.
  *
  * The `positions` adapter is a fresh ephemeral in-memory store — adequate
  * for SSR, Storybook and tests, and the only implementation this factory
@@ -105,7 +85,7 @@ export const isCourseContentSeedEnabled = (): boolean =>
  * the `usePlaybackPosition` hook, because this factory is server-only.
  */
 export function getCoursePlatformDeps(): CoursePlatformDeps {
-  return assembleCatalog(isCourseContentSeedEnabled());
+  return assembleCatalog();
 }
 
 /**
@@ -120,55 +100,28 @@ function buildBlobStore(): BlobStore {
 }
 
 /**
- * Assembles the whole catalog, with or without the filesystem-backed course.
+ * Assembles the catalog from the generated content seed.
  *
- * The A1 seed is always present: its URLs are literals under `public/`, so it
- * costs nothing and never depends on a large local content root. The
- * generated course JOINS it when `USE_COURSE_CONTENT_SEED=1` — the flag
- * decides whether that content is available, never whether the A1 course is
- * removed.
- *
- * The two seeds are backed by different storage models, and neither adapter
- * is taught about the other: courses and modules are plain arrays that the
- * in-memory adapters already filter by `courseId`, while lessons and
- * resources go through composites that fan out over one delegate per seed.
+ * @remarks
+ * Courses and modules are plain arrays the in-memory adapters filter by
+ * `courseId`. Lessons and resources go through the local-filesystem adapters,
+ * bound directly: one source needs no composite fanning a read out over a
+ * single delegate.
  *
  * One `BlobStore` instance is shared by the lesson, resource and notes
- * adapters so the three can never disagree about where content lives. The
- * notes adapter needs no composite: the A1 seed has no Markdown notes, so
- * the content seed's key map answers `null` for its lessons already.
+ * adapters so the three can never disagree about where content lives.
  */
-function assembleCatalog(withContentSeed: boolean): CoursePlatformDeps {
+function assembleCatalog(): CoursePlatformDeps {
   const blobStore = buildBlobStore();
 
-  const a1Lessons = new InMemoryLessonRepository(seedLessons);
-  const a1Resources = new InMemoryResourceRepository(seedResources);
-
-  if (!withContentSeed) {
-    return assemble({
-      coursesRepo: new InMemoryCourseRepository([seedCourse]),
-      modulesRepo: new InMemoryModuleRepository(seedModules),
-      lessonsRepo: a1Lessons,
-      resourcesRepo: a1Resources,
-      notesRepo: new LocalFilesystemLessonNotesRepository({
-        notesKeys: {},
-        resourceRows: [],
-        blobStore,
-      }),
-    });
-  }
-
   return assemble({
-    coursesRepo: new InMemoryCourseRepository([seedCourse, ...seedContentCourses]),
-    modulesRepo: new InMemoryModuleRepository([...seedModules, ...seedContentModules]),
-    lessonsRepo: new CompositeLessonRepository([
-      a1Lessons,
-      new LocalFilesystemLessonRepository({ rows: seedContentLessonRows, blobStore }),
-    ]),
-    resourcesRepo: new CompositeResourceRepository([
-      a1Resources,
-      new LocalFilesystemResourceRepository({ rows: seedContentResourceRows, blobStore }),
-    ]),
+    coursesRepo: new InMemoryCourseRepository([...seedContentCourses]),
+    modulesRepo: new InMemoryModuleRepository([...seedContentModules]),
+    lessonsRepo: new LocalFilesystemLessonRepository({ rows: seedContentLessonRows, blobStore }),
+    resourcesRepo: new LocalFilesystemResourceRepository({
+      rows: seedContentResourceRows,
+      blobStore,
+    }),
     notesRepo: new LocalFilesystemLessonNotesRepository({
       notesKeys: seedContentNotesKeys,
       resourceRows: seedContentResourceRows,

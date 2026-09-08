@@ -1,21 +1,20 @@
-import {
-  seedContentLessonRows,
-  seedContentModules,
-} from "@/adapters/persistence/in-memory/seed/seed-content";
+import { seedContentLessonRows } from "@/adapters/persistence/in-memory/seed/seed-content";
 
 import { expect, test } from "@playwright/test";
 
+import { moduleOfCourse, modulesOfCourse } from "./content-seed-fixtures";
+
 /**
  * E2E coverage for the Immersion Cinema chrome and lesson UI (capabilities:
- * `cinema-home`, `cinema-lesson-view`). Uses the content seed — the course
- * the running dev server serves with `USE_COURSE_CONTENT_SEED=1`.
+ * `cinema-home`, `cinema-lesson-view`). Fixtures come from the generated
+ * content seed, which is the only catalog the app serves.
  */
 const COURSE_SLUG = "advanced-intermediate-course";
-const FIRST_MODULE = seedContentModules[0]!;
+const FIRST_MODULE = modulesOfCourse(COURSE_SLUG)[0]!;
 const FIRST_LESSON = seedContentLessonRows.find((lesson) => lesson.moduleId === FIRST_MODULE.id)!;
 
 // A module whose intro lesson carries bilingual notes (drives the tabs).
-const NOTES_MODULE = seedContentModules.find((m) => m.slug === "3-contractions-reductions")!;
+const NOTES_MODULE = moduleOfCourse(COURSE_SLUG, "3-contractions-reductions");
 const NOTES_LESSON = seedContentLessonRows
   .filter((lesson) => lesson.moduleId === NOTES_MODULE.id)
   .sort((a, b) => a.sequence - b.sequence)[0]!;

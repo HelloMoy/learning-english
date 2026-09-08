@@ -7,15 +7,13 @@ The `lesson-page` capability is the first user-facing product surface of the cou
 This spec captures WHAT the page must do, not HOW it is implemented. The components are described in terms of their observable behavior. The page is a driving adapter over the `course-platform-domain` capability; the domain contracts are defined in `openspec/specs/course-platform-domain/spec.md`.
 
 The ubiquitous language is `GLOSSARY.md`. All new component names and UI labels MUST use the terms defined there.
-
 ## Requirements
-
 ### Requirement: The Lesson Page is reachable by a locale-aware route
 
 The application SHALL expose the Lesson Page at the route shape `/[locale]/courses/[courseSlug]/modules/[moduleSlug]/lessons/[lessonId]`. The route SHALL be navigable from anywhere in the application via the existing locale-aware `<Link>` from `@/i18n/navigation`.
 
 #### Scenario: A valid route renders the Lesson Page
-- **WHEN** a user visits `/en/courses/english-a1-pronunciation/modules/vowels-and-video-intro/lessons/22222222-2222-4222-8222-222222222220` for a course, module, and lesson that exist
+- **WHEN** a user visits `/en/courses/basic-course/modules/1-introduction/lessons/0b06e639-efda-596d-8676-1e6e33410803` for a course, module, and lesson that exist
 - **THEN** the page renders with the Outline (left), the native video Player (center), the Resources and Up next cards (right), and the Mark as complete button (footer)
 
 #### Scenario: A locale segment that is not configured renders a not-found state
@@ -266,3 +264,4 @@ The `<LessonPageError>` component's recovery affordance SHALL route the learner 
 #### Scenario: Clicking the home affordance lands on a 200 page
 - **WHEN** the user clicks the "Go home" affordance
 - **THEN** the destination page returns HTTP 200 (no 404)
+
