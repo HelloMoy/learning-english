@@ -5,6 +5,7 @@
   "description": "Course content generated from public/local-filesystem-lesson.",
   "language": "en",
   "sequence": 2,
+  "draft": true,
   "modules": [
     {
       "id": "2d0d3f73-6afe-579b-8db7-517d76e65fce",

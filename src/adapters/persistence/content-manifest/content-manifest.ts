@@ -3,6 +3,7 @@ import {
   flattenCourseManifests,
   type FlattenedCatalog,
 } from "@/adapters/persistence/content-manifest/flatten-course-manifests/flatten-course-manifests";
+import { visibleCourseManifests } from "@/adapters/persistence/content-manifest/visible-course-manifests/visible-course-manifests";
 import { courseManifests } from "@/content/courses";
 
 /**
@@ -20,10 +21,15 @@ import { courseManifests } from "@/content/courses";
  * an undefined field. That is deliberate: the manifests are edited by hand, so
  * the guard belongs at the point of use, not only in CI.
  *
+ * A course that declares itself a draft is withheld here, before the flatten,
+ * whenever the environment hides drafts — see {@link visibleCourseManifests}.
+ * Every course the catalog does serve is validated first, so a draft manifest
+ * still has to be well-formed to be withheld rather than to fail.
+ *
  * @throws {@link InvalidCourseManifestError} at import time when a manifest is
  *         not servable
  * @category Content manifest
  */
 export const contentCatalog: FlattenedCatalog = flattenCourseManifests(
-  parseCourseManifests(courseManifests),
+  visibleCourseManifests(parseCourseManifests(courseManifests)),
 );
