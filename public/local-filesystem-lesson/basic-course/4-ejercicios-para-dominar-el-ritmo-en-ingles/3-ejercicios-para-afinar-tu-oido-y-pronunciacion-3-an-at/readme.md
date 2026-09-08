@@ -1,7 +1,37 @@
 # Ejercicios para afinar tu oído y pronunciación 3 "AN-AT"
 
-🎙️ Pronunciación en inglés americano: æn y æt
-¡Aprende a pronunciar los sonidos “æn” y “æt” como un nativo! 🎧 Practica palabras como man, plan, cat, hat y mejora tu acento en inglés americano.
+## 🇪🇸 Español
 
-🎙️ American English Pronunciation: æn & æt
-Learn how to pronounce the sounds “æn” and “æt” like a native! 🎧 Practice words like man, plan, cat, hat and improve your American accent. Perfect for English learners!
+### Tercer ejercicio: las combinaciones _æn_ y _æt_
+
+Aquí ya no trabajas sonidos sueltos sino **combinaciones**: la /æ/ seguida de /n/ y la /æ/ seguida de /t/. Son dos terminaciones muy frecuentes, y cada una obliga a la vocal a comportarse de forma distinta — delante de la /n/ se nasaliza y se alarga, delante de la /t/ se corta.
+
+**Qué vas a practicar**
+
+- 👄 **Vocal:** mantener la /æ/ abierta en las dos combinaciones.
+- 👃 **Ante /n/:** el aire pasa a la nariz y la vocal se alarga.
+- ✂️ **Ante /t/:** la vocal se corta y la /t/ final no se suelta.
+
+**Practica con:** _man_ · _plan_ · _can_ — _cat_ · _hat_ · _that_
+
+> ⚠️ **El error típico en español:** cerrar la /æ/ hacia la _a_ española en cuanto llega la consonante. La vocal tiene que aguantar abierta hasta el final.
+
+**Al terminar vas a poder:** pronunciar _æn_ y _æt_ con la vocal abierta y la consonante final correcta.
+
+## 🇺🇸 English
+
+### Third exercise: the _æn_ and _æt_ combinations
+
+Here you're no longer working on isolated sounds but on **combinations**: /æ/ followed by /n/, and /æ/ followed by /t/. These are two very frequent endings, and each makes the vowel behave differently — before /n/ it nasalizes and lengthens, before /t/ it gets cut short.
+
+**What you'll practice**
+
+- 👄 **Vowel:** keep the /æ/ open in both combinations.
+- 👃 **Before /n/:** air moves to the nose and the vowel lengthens.
+- ✂️ **Before /t/:** the vowel shortens and the final /t/ isn't released.
+
+**Practice with:** _man_ · _plan_ · _can_ — _cat_ · _hat_ · _that_
+
+> ⚠️ **The typical Spanish-speaker mistake:** closing the /æ/ toward a Spanish _a_ the moment the consonant arrives. The vowel has to stay open all the way through.
+
+**By the end you'll be able to:** pronounce _æn_ and _æt_ with an open vowel and the right final consonant.

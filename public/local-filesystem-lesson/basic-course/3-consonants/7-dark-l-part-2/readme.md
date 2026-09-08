@@ -1,5 +1,37 @@
 # Dark /L/ Part 2
 
-🌟 En la Parte 2 de esta lección, profundizamos en la pronunciación de la “L oscura” en inglés americano. Practicarás cómo se usa en el habla conectada, cómo se combina con vocales y consonantes, y aprenderás a evitar errores comunes. 🧠 Con ejemplos y repetición guiada, empezarás a crear la memoria muscular necesaria para sonar natural y fluido. 💪🎙️
+## 🇪🇸 Español
 
-🌟 In Part 2 of this lesson, we go deeper into the pronunciation of the Dark L in American English. You’ll practice it in connected speech, see how it blends with vowels and consonants, and learn to avoid common mistakes. 🧠 With examples and guided repetition, you’ll start building the muscle memory needed to sound natural and fluent. 💪🎙️
+### La L oscura en el habla conectada
+
+Saber producir la L oscura aislada es la mitad del trabajo. La otra mitad es usarla **dentro de una frase**, donde se une a la vocal siguiente, se combina con otras consonantes y muchas veces se acerca tanto a una /u/ que casi desaparece. Esta parte se gana con repetición, no con teoría.
+
+**Cómo se produce**
+
+- 👄 **Boca:** relajada; no fuerces la mandíbula al enlazar palabras.
+- 👅 **Lengua:** mantén la parte trasera elevada durante toda la unión entre palabras.
+- 🔊 **Voz:** sonora y continua — la L no corta la frase, la enlaza.
+
+**Lo oyes en:** _feel it_ · _call him_ · _all of us_ · _well done_ · _help me_
+
+> ⚠️ **El error típico en español:** soltar la lengua entre palabra y palabra y volver a la _l_ clara española. Eso rompe el enlace y devuelve el ritmo entrecortado.
+
+**Al terminar vas a poder:** mantener la L oscura al enlazar palabras y ganar la memoria muscular para hacerlo sin pensar.
+
+## 🇺🇸 English
+
+### The Dark L in connected speech
+
+Being able to produce the dark L in isolation is half the work. The other half is using it **inside a sentence**, where it links to the following vowel, blends with other consonants and often comes so close to a /u/ that it nearly disappears. This part is won by repetition, not by theory.
+
+**How it's made**
+
+- 👄 **Mouth:** relaxed; don't force your jaw when linking words.
+- 👅 **Tongue:** keep the back raised across the whole join between words.
+- 🔊 **Voice:** voiced and continuous — the L doesn't cut the phrase, it links it.
+
+**You hear it in:** _feel it_ · _call him_ · _all of us_ · _well done_ · _help me_
+
+> ⚠️ **The typical Spanish-speaker mistake:** releasing the tongue between words and falling back on the light Spanish _l_. That breaks the link and brings the choppy rhythm right back.
+
+**By the end you'll be able to:** hold the dark L across word boundaries and build the muscle memory to do it without thinking.

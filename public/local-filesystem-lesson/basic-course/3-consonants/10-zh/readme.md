@@ -1,5 +1,37 @@
 # /ʒ/
 
-🔊 El sonido /ʒ/ es una consonante sonora que se produce al hacer vibrar las cuerdas vocales mientras se expulsa aire por un espacio estrecho — parecido al sonido /ʃ/, pero con voz. Aparece en palabras como measure, vision y genre. Es un sonido suave, elegante y refinado. 😌
+## 🇪🇸 Español
 
-🔊 The /ʒ/ sound is a voiced consonant made by vibrating your vocal cords while pushing air through a narrow space — similar to /ʃ/ but with voice. You’ll hear it in words like measure, vision, and genre. It’s soft, smooth, and a bit fancy. 😌
+### La /ʒ/: la /ʃ/ con voz
+
+La /ʒ/ se produce exactamente igual que la /ʃ/, pero **con las cuerdas vocales vibrando**. Es un sonido suave y poco frecuente, y casi nunca aparece al principio de palabra. Si ya controlas la /ʃ/, sólo tienes que añadirle voz.
+
+**Cómo se produce**
+
+- 👄 **Boca:** labios ligeramente redondeados, igual que en la /ʃ/.
+- 👅 **Lengua:** cerca del paladar, con un canal estrecho para el aire.
+- 🔊 **Voz:** **sonora** — con la mano en la garganta debes notar la vibración.
+
+**Lo oyes en:** _measure_ · _vision_ · _genre_ · _usual_ · _garage_
+
+> ⚠️ **El error típico en español:** quitarle la voz y dejarla en /ʃ/, o convertirla en la _y_ española. _Vision_ no es _vishion_ ni _viyion_.
+
+**Al terminar vas a poder:** añadir vibración a la /ʃ/ y reconocer la /ʒ/ en el interior de las palabras.
+
+## 🇺🇸 English
+
+### The /ʒ/: the /ʃ/ with voice
+
+The /ʒ/ is made exactly like /ʃ/, but **with the vocal cords vibrating**. It's a soft, fairly rare sound, and it almost never appears at the start of a word. If you've got /ʃ/ under control, all you need to add is voice.
+
+**How it's made**
+
+- 👄 **Mouth:** lips slightly rounded, just as for /ʃ/.
+- 👅 **Tongue:** close to the palate, with a narrow channel for the air.
+- 🔊 **Voice:** **voiced** — with a hand on your throat you should feel the vibration.
+
+**You hear it in:** _measure_ · _vision_ · _genre_ · _usual_ · _garage_
+
+> ⚠️ **The typical Spanish-speaker mistake:** dropping the voice and leaving a /ʃ/, or turning it into the Spanish _y_. _Vision_ is neither _vishion_ nor _viyion_.
+
+**By the end you'll be able to:** add vibration to the /ʃ/ and recognize the /ʒ/ inside words.

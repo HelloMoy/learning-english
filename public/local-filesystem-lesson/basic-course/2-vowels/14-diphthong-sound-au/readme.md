@@ -1,5 +1,37 @@
 # Diphthong Sound /aʊ/
 
-🎧 En este video vas a practicar el diptongo /aʊ/ en inglés americano. Aprenderás cómo mover la boca y la lengua para pronunciarlo de forma natural y fluida, como los hablantes nativos. Dominar este sonido te ayudará a mejorar tu pronunciación en palabras comunes como house, flower y down.
+## 🇪🇸 Español
 
-🎧 In this video, you’ll practice the diphthong /aʊ/ in American English. You’ll learn how to move your mouth and tongue to pronounce it naturally and fluently, just like native speakers. Mastering this sound will help you improve your pronunciation in common words like house, flower, and down.
+### El diptongo /aʊ/: de la _a_ abierta a la /ʊ/ redondeada
+
+El /aʊ/ empieza igual que el /aɪ/ — boca bien abierta — pero se desliza hacia atrás redondeando los labios. Es el sonido de sorpresa: _wow_. Aparece en palabras muy frecuentes, así que se nota mucho cuando se pronuncia plano.
+
+**Cómo se produce**
+
+- 👄 **Boca:** abierta al empezar, labios que se **redondean** al terminar.
+- 👅 **Lengua:** baja y central al empezar, retrocede y sube al final.
+- 🔊 **Voz:** sonora y larga, con el peso en la primera parte.
+
+**Lo oyes en:** _house_ · _flower_ · _down_ · _now_ · _about_
+
+> ⚠️ **El error típico en español:** no redondear los labios al final, con lo que el diptongo se queda a medias y _now_ se acerca a _na_.
+
+**Al terminar vas a poder:** completar el movimiento hasta el redondeo final en palabras como _house_ y _down_.
+
+## 🇺🇸 English
+
+### The /aʊ/ diphthong: from an open _a_ into a rounded /ʊ/
+
+The /aʊ/ starts just like /aɪ/ — mouth wide open — but glides backward while your lips round. It's the sound of surprise: _wow_. It shows up in very frequent words, so it's obvious when it comes out flat.
+
+**How it's made**
+
+- 👄 **Mouth:** open at the start, lips **rounding** by the end.
+- 👅 **Tongue:** low and central at the start, pulling back and up at the end.
+- 🔊 **Voice:** voiced and long, with the weight on the first part.
+
+**You hear it in:** _house_ · _flower_ · _down_ · _now_ · _about_
+
+> ⚠️ **The typical Spanish-speaker mistake:** not rounding the lips at the end, which leaves the diphthong half finished and pushes _now_ toward _na_.
+
+**By the end you'll be able to:** complete the movement all the way to the final rounding in words like _house_ and _down_.

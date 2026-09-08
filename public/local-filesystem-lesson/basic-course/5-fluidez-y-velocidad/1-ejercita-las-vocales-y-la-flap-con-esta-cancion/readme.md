@@ -1,5 +1,37 @@
 # Ejercita las Vocales y la Flap con esta canción
 
-Mejora tu fluidez con ejercicios específicos para la lengua. En este curso, practicarás el sonido flap y los sonidos vocálicos para perfeccionar tu pronunciación, flexibilidad y fluidez al hablar. ¡Entrena tu lengua para un inglés más claro y natural!
+## 🇪🇸 Español
 
-Boost your fluency with targeted tongue exercises! This course focuses on practicing the flap sound and vowel sounds to improve your pronunciation, flexibility, and speech flow. Strengthen your tongue movements for clearer, more natural English!"
+### Vocales y flap a velocidad real, con una canción
+
+Todo lo que has practicado por separado —vocales, flap, ritmo— aquí se junta y se pone a velocidad real. Una canción es el mejor gimnasio para la lengua: el tempo es fijo, la letra se repite y no puedes pararte a pensar. Es entrenamiento de agilidad, no de teoría.
+
+**Qué vas a practicar**
+
+- 👅 **Flap:** localizar cada _t_ entre vocales y convertirla en golpe rápido.
+- 🎵 **Vocales:** mantenerlas abiertas y largas aunque el tempo empuje.
+- ⏩ **Velocidad:** empezar a media velocidad y subir hasta el tempo original.
+
+**Practica con:** la canción completa · un verso repetido · el mismo verso a media velocidad
+
+> ⚠️ **El error típico en español:** acelerar antes de que los sonidos estén bien. La velocidad no arregla la pronunciación: la esconde, y luego se queda así.
+
+**Al terminar vas a poder:** encadenar vocales y flap a velocidad natural sin perder la calidad de cada sonido.
+
+## 🇺🇸 English
+
+### Vowels and the flap at real speed, with a song
+
+Everything you've practiced separately — vowels, flap, rhythm — comes together here at real speed. A song is the best gym there is for your tongue: the tempo is fixed, the lyrics repeat, and you can't stop to think. This is agility training, not theory.
+
+**What you'll practice**
+
+- 👅 **Flap:** spot every _t_ between vowels and turn it into a quick tap.
+- 🎵 **Vowels:** keep them open and long even when the tempo pushes.
+- ⏩ **Speed:** start at half speed and work up to the original tempo.
+
+**Practice with:** the full song · one repeated verse · the same verse at half speed
+
+> ⚠️ **The typical Spanish-speaker mistake:** speeding up before the sounds are right. Speed doesn't fix pronunciation — it hides it, and then it stays that way.
+
+**By the end you'll be able to:** chain vowels and flaps at natural speed without losing the quality of each sound.

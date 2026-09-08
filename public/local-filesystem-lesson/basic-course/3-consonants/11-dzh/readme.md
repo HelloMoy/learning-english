@@ -1,5 +1,37 @@
 # /dʒ/
 
-🔊 El sonido /dʒ/ es una consonante africada que comienza como una /d/ y se libera en el sonido /ʒ/. Lo escuchas en palabras como jump, juice y jungle. Es un sonido sonoro, fuerte y con un toque rápido y enérgico — ¡como un “dʒ”! 🚀
+## 🇪🇸 Español
 
-🔊 The /dʒ/ sound is an affricate consonant that starts like a /d/ and releases into the /ʒ/ sound. You’ll hear it in words like jump, juice, and jungle. It’s voiced, strong, and feels like a quick “dʒ” sound — clear and bouncy! 🚀
+### La /dʒ/: una /d/ que se abre en /ʒ/
+
+La /dʒ/ es la africada **sonora**: empieza con un cierre como el de la /d/ y se libera en la /ʒ/. Es la pareja con voz de /tʃ/. En español no existe, y es la que hace que la _j_ inglesa nos cueste tanto.
+
+**Cómo se produce**
+
+- 👄 **Boca:** labios ligeramente redondeados.
+- 👅 **Lengua:** cierra contra el alveolo y libera hacia el paladar.
+- 🔊 **Voz:** **sonora** desde el primer instante — la vibración empieza con el cierre.
+
+**Lo oyes en:** _jump_ · _juice_ · _jungle_ · _bridge_ · _age_
+
+> ⚠️ **El error típico en español:** pronunciarla como la _y_ española o como la _j_ de _jamón_. _Jungle_ no empieza ni por _yungle_ ni por _hungle_.
+
+**Al terminar vas a poder:** producir el cierre con voz y separar _jump_ de _chump_ y de _young_.
+
+## 🇺🇸 English
+
+### The /dʒ/: a /d/ opening into /ʒ/
+
+The /dʒ/ is the **voiced** affricate: it starts with a closure like a /d/ and releases into /ʒ/. It's the voiced partner of /tʃ/. Spanish has no such sound, which is why the English _j_ is so hard for us.
+
+**How it's made**
+
+- 👄 **Mouth:** lips slightly rounded.
+- 👅 **Tongue:** closes against the alveolar ridge and releases toward the palate.
+- 🔊 **Voice:** **voiced** from the very first instant — the vibration starts with the closure.
+
+**You hear it in:** _jump_ · _juice_ · _jungle_ · _bridge_ · _age_
+
+> ⚠️ **The typical Spanish-speaker mistake:** pronouncing it as the Spanish _y_, or as the _j_ in _jamón_. _Jungle_ starts with neither _yungle_ nor _hungle_.
+
+**By the end you'll be able to:** make the closure voiced, and keep _jump_ apart from _chump_ and from _young_.

@@ -1,5 +1,37 @@
 # The Vowel Sound /u/
 
-El sonido vocálico /u/ (como en food) es un sonido largo y redondeado. Para pronunciarlo, redondea los labios como si fueras a silbar, empuja la lengua hacia atrás y arriba dentro de la boca, y mantén el sonido de forma estable y continua. En esta lección, aprenderás a reconocer este sonido, sentir la posición correcta de la boca y practicarlo con palabras comunes en inglés.
+## 🇪🇸 Español
 
-The vowel sound /uː/ (as in food) is a long, rounded sound. To pronounce it, round your lips like you're going to whistle, push your tongue high and back in your mouth, and keep the sound steady and smooth. In this lesson, you'll learn to recognize this sound, feel the correct mouth position, and practice it with common English words.
+### La /u/: larga, redondeada y sostenida
+
+La /u/ es una vocal larga y muy redondeada. Es la versión tensa de /ʊ/, y la diferencia entre las dos es de duración y de tensión, no de posición. En inglés la /u/ dura bastante más que nuestra _u_.
+
+**Cómo se produce**
+
+- 👄 **Boca:** labios muy redondeados y adelantados, como para silbar.
+- 👅 **Lengua:** atrás y muy alta, cerca del paladar blando.
+- 🔊 **Voz:** sonora, larga y estable — el sonido no se mueve.
+
+**Lo oyes en:** _food_ · _blue_ · _school_ · _move_ · _two_
+
+> ⚠️ **El error típico en español:** acortarla como la _u_ española y acabar diciendo /ʊ/: _fool_ suena a _full_ y _pool_ a _pull_.
+
+**Al terminar vas a poder:** sostener la /u/ el tiempo suficiente para distinguirla siempre de /ʊ/.
+
+## 🇺🇸 English
+
+### The /u/: long, rounded and held
+
+The /u/ is a long, heavily rounded vowel. It's the tense version of /ʊ/, and the difference between them is length and tension, not position. In English, /u/ lasts considerably longer than a Spanish _u_.
+
+**How it's made**
+
+- 👄 **Mouth:** lips tightly rounded and pushed forward, as if to whistle.
+- 👅 **Tongue:** back and very high, close to the soft palate.
+- 🔊 **Voice:** voiced, long and steady — the sound doesn't move.
+
+**You hear it in:** _food_ · _blue_ · _school_ · _move_ · _two_
+
+> ⚠️ **The typical Spanish-speaker mistake:** clipping it like a Spanish _u_ and landing on /ʊ/ instead: _fool_ comes out as _full_, _pool_ as _pull_.
+
+**By the end you'll be able to:** hold the /u/ long enough that it never collapses into /ʊ/.

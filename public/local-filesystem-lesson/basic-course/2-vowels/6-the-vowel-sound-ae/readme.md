@@ -1,5 +1,37 @@
 # The vowel sound /æ/ (a ligada)
 
-El sonido æ, conocido como la "A ligada", es un sonido vocálico común en el inglés americano. Es una mezcla del sonido de la "a" y el sonido de la "e". Puedes escucharlo en palabras como "cat" (gato), "bat" (murciélago) o "man" (hombre). Este sonido es importante porque se encuentra en muchas palabras cotidianas y contribuye a una pronunciación clara y precisa en inglés americano. Dominar el sonido æ mejora tu fluidez, ya que ayuda a que tu habla suene más natural y similar a la de un hablante nativo, especialmente en contextos informales o conversacionale.
+## 🇪🇸 Español
 
-The æ sound, often called the "A ligada" in Spanish, is a vowel sound commonly used in American English. It's a blend of the "a" sound and the "e" sound. You can hear it in words like "cat", "bat", or "man". This sound is important because it’s found in many everyday words and contributes to clear and accurate American English pronunciation. Mastering the æ sound helps improve your fluency, as it can make your speech sound more natural and native-like, especially in casual, conversational contexts
+### La /æ/: la _a_ ligada, entre nuestra _a_ y nuestra _e_
+
+La /æ/ es una vocal abierta y frontal que en español no existe. Suena como una mezcla de _a_ y _e_, y es más larga y más abierta de lo que un hispanohablante espera. Aparece en muchísimas palabras del día a día, así que acertarla cambia de inmediato cómo te suena el inglés.
+
+**Cómo se produce**
+
+- 👄 **Boca:** muy abierta, mandíbula baja y labios estirados hacia los lados.
+- 👅 **Lengua:** adelante y baja, empujando hacia los dientes de abajo.
+- 🔊 **Voz:** sonora y **larga** — dura más que la _a_ española.
+
+**Lo oyes en:** _cat_ · _bat_ · _man_ · _have_ · _bad_
+
+> ⚠️ **El error típico en español:** sustituirla por la _a_ española, más cerrada y más corta. Así _cat_ se acerca a _cot_, _bad_ a _bed_ y _man_ a _men_.
+
+**Al terminar vas a poder:** abrir y alargar la /æ/ lo suficiente para separar _cat / cot_ y _bad / bed_.
+
+## 🇺🇸 English
+
+### The /æ/: the linked _a_, between Spanish _a_ and _e_
+
+The /æ/ is an open, front vowel that Spanish doesn't have. It sounds like a blend of _a_ and _e_, and it's longer and more open than a Spanish speaker expects. It shows up in a huge number of everyday words, so getting it right changes how your English sounds immediately.
+
+**How it's made**
+
+- 👄 **Mouth:** wide open, jaw low, lips spread out to the sides.
+- 👅 **Tongue:** forward and low, pushing toward your bottom teeth.
+- 🔊 **Voice:** voiced and **long** — it lasts longer than a Spanish _a_.
+
+**You hear it in:** _cat_ · _bat_ · _man_ · _have_ · _bad_
+
+> ⚠️ **The typical Spanish-speaker mistake:** substituting the Spanish _a_, which is more closed and much shorter. That pushes _cat_ toward _cot_, _bad_ toward _bed_ and _man_ toward _men_.
+
+**By the end you'll be able to:** open and lengthen the /æ/ enough to keep _cat / cot_ and _bad / bed_ apart.
