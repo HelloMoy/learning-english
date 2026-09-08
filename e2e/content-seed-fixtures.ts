@@ -1,8 +1,4 @@
-import {
-  seedContentCourses,
-  seedContentLessonRows,
-  seedContentModules,
-} from "@/adapters/persistence/in-memory/seed/seed-content";
+import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 import type { LessonRow } from "@/adapters/persistence/local-filesystem/resolve-content-row/resolve-content-row";
 import type { Course } from "@/domain/entities/course/course";
 import type { Module } from "@/domain/entities/module/module";
@@ -11,17 +7,17 @@ import type { Module } from "@/domain/entities/module/module";
  * Seed lookups scoped to one course, for specs that target a specific one.
  *
  * @remarks
- * `seedContentModules` and `seedContentLessonRows` hold the union of every
+ * `contentCatalog.modules` and `contentCatalog.lessonRows` hold the union of every
  * declared course's rows — each row carries the `courseId` or `moduleId` that
  * owns it, and no consumer gets a per-course export. A spec that pins a course
- * slug and then reads `seedContentModules[0]`, or counts `.length`, is reading
+ * slug and then reads `contentCatalog.modules[0]`, or counts `.length`, is reading
  * across courses: correct while one course was declared, wrong the moment a
  * second one is. These helpers are what keep the two in step.
  */
 
 /** The declared course with this slug. */
 export function courseBySlug(slug: string): Course {
-  const course = seedContentCourses.find((candidate) => candidate.slug === slug);
+  const course = contentCatalog.courses.find((candidate) => candidate.slug === slug);
   if (!course) throw new Error(`No course declared with slug "${slug}"`);
   return course;
 }
@@ -29,14 +25,14 @@ export function courseBySlug(slug: string): Course {
 /** That course's modules, in the order the UI lists them. */
 export function modulesOfCourse(slug: string): Module[] {
   const course = courseBySlug(slug);
-  return seedContentModules
+  return contentCatalog.modules
     .filter((module) => module.courseId === course.id)
     .sort((a, b) => a.sequence - b.sequence);
 }
 
 /** One module's lessons, in the order the UI lists them. */
 export function lessonsOfModule(moduleId: string): LessonRow[] {
-  return seedContentLessonRows
+  return contentCatalog.lessonRows
     .filter((lesson) => lesson.moduleId === moduleId)
     .sort((a, b) => a.sequence - b.sequence);
 }

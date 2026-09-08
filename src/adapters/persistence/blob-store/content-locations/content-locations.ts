@@ -129,7 +129,7 @@ const ContentRoute = z.object({
  * @remarks
  * Read at RUNTIME when the dependency graph is built, never at build time.
  * Moving an asset rewrites this file and nothing else — in particular it never
- * regenerates `seed-content.ts`, because a content key is identity and does not
+ * rewrites the course manifests, because a content key is identity and does not
  * change when its bytes do.
  *
  * Credentials never appear here. Bucket names, regions and CDN URLs are not
@@ -265,7 +265,7 @@ function assertPublicStoresHaveUrls(manifest: ContentLocations): void {
  * A prefix matches on path boundaries, not as a substring, so `course/` never
  * captures `coursework/`.
  *
- * @param key - The content key, exactly as it appears in the seed
+ * @param key - The content key, exactly as it appears in the manifest
  * @param manifest - The parsed location manifest
  * @returns The name of the store that owns this key
  */
@@ -298,7 +298,7 @@ function matchesPrefix(key: string, prefix: string): boolean {
  * @remarks
  * The key is identity and never changes when an asset moves; the object path
  * is placement and may. Keeping them separate is what lets a bucket reorganise
- * without rewriting `seed-content.ts`.
+ * without rewriting the course manifests.
  *
  * @param key - The content key
  * @param store - The store the key routes to

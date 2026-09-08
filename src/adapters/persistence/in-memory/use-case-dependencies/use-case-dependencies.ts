@@ -1,16 +1,10 @@
 import type { BlobStore } from "@/adapters/persistence/blob-store/blob-store";
 import { contentBlobStoreFromEnv } from "@/adapters/persistence/blob-store/create-content-blob-store/create-content-blob-store";
+import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 import { InMemoryCourseRepository } from "@/adapters/persistence/in-memory/in-memory-course-repository/in-memory-course-repository";
 import { InMemoryModuleRepository } from "@/adapters/persistence/in-memory/in-memory-module-repository/in-memory-module-repository";
 import { InMemoryPlaybackPositionRepository } from "@/adapters/persistence/in-memory/in-memory-playback-position-repository/in-memory-playback-position-repository";
 import { InMemoryProgressTracker } from "@/adapters/persistence/in-memory/in-memory-progress-tracker/in-memory-progress-tracker";
-import {
-  seedContentCourses,
-  seedContentLessonRows,
-  seedContentModules,
-  seedContentNotesKeys,
-  seedContentResourceRows,
-} from "@/adapters/persistence/in-memory/seed/seed-content";
 import { LocalFilesystemLessonNotesRepository } from "@/adapters/persistence/local-filesystem/local-filesystem-lesson-notes-repository/local-filesystem-lesson-notes-repository";
 import { LocalFilesystemLessonRepository } from "@/adapters/persistence/local-filesystem/local-filesystem-lesson-repository/local-filesystem-lesson-repository";
 import { LocalFilesystemResourceRepository } from "@/adapters/persistence/local-filesystem/local-filesystem-resource-repository/local-filesystem-resource-repository";
@@ -100,7 +94,7 @@ function buildBlobStore(): BlobStore {
 }
 
 /**
- * Assembles the catalog from the generated content seed.
+ * Assembles the catalog from the tracked course manifests.
  *
  * @remarks
  * Courses and modules are plain arrays the in-memory adapters filter by
@@ -113,18 +107,16 @@ function buildBlobStore(): BlobStore {
  */
 function assembleCatalog(): CoursePlatformDeps {
   const blobStore = buildBlobStore();
+  const { courses, modules, lessonRows, resourceRows, notesKeys } = contentCatalog;
 
   return assemble({
-    coursesRepo: new InMemoryCourseRepository([...seedContentCourses]),
-    modulesRepo: new InMemoryModuleRepository([...seedContentModules]),
-    lessonsRepo: new LocalFilesystemLessonRepository({ rows: seedContentLessonRows, blobStore }),
-    resourcesRepo: new LocalFilesystemResourceRepository({
-      rows: seedContentResourceRows,
-      blobStore,
-    }),
+    coursesRepo: new InMemoryCourseRepository([...courses]),
+    modulesRepo: new InMemoryModuleRepository([...modules]),
+    lessonsRepo: new LocalFilesystemLessonRepository({ rows: lessonRows, blobStore }),
+    resourcesRepo: new LocalFilesystemResourceRepository({ rows: resourceRows, blobStore }),
     notesRepo: new LocalFilesystemLessonNotesRepository({
-      notesKeys: seedContentNotesKeys,
-      resourceRows: seedContentResourceRows,
+      notesKeys,
+      resourceRows,
       blobStore,
     }),
   });

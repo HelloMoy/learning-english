@@ -1,4 +1,4 @@
-import { seedContentLessonRows } from "@/adapters/persistence/in-memory/seed/seed-content";
+import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
 import { expect, Page, test } from "@playwright/test";
 
@@ -19,7 +19,9 @@ import { moduleOfCourse, modulesOfCourse } from "./content-seed-fixtures";
  */
 const COURSE_SLUG = "advanced-intermediate-course";
 const FIRST_MODULE = modulesOfCourse(COURSE_SLUG)[0]!;
-const FIRST_LESSON = seedContentLessonRows.find((lesson) => lesson.moduleId === FIRST_MODULE.id)!;
+const FIRST_LESSON = contentCatalog.lessonRows.find(
+  (lesson) => lesson.moduleId === FIRST_MODULE.id,
+)!;
 
 /** The largest module: 16 rows whose titles all begin "Exercise N Pronunciation Step By Step Lesson". */
 const SHARED_PREFIX_MODULE = moduleOfCourse(

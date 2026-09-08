@@ -1,0 +1,1250 @@
+{
+  "id": "a0cf4018-5475-5f12-9363-efedaa8782b8",
+  "slug": "basic-course",
+  "title": "Basic Course",
+  "description": "American pronunciation from the ground up: vowel and consonant sounds, rhythm drills, and fluency practice.",
+  "language": "en",
+  "sequence": 1,
+  "modules": [
+    {
+      "id": "d19cbe0b-d7d6-593c-8b7c-811e364bbf15",
+      "slug": "1-introduction",
+      "title": "Introduction",
+      "sequence": 1,
+      "lessons": [
+        {
+          "id": "0b06e639-efda-596d-8676-1e6e33410803",
+          "slug": "1-introduction",
+          "sequence": 1,
+          "title": "Introduction",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/VZVwBdAGjBE",
+          "durationSeconds": 491,
+          "poster": "basic-course/1-introduction/1-introduction/thumbnail.jpeg",
+          "notesKey": "basic-course/1-introduction/1-introduction/readme.md",
+          "resources": [
+            {
+              "id": "15333693-7e56-5b38-92a8-5f896f1446e5",
+              "title": "Introduction Notes",
+              "url": "basic-course/1-introduction/1-introduction/readme.md",
+              "kind": "other"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "b7029577-0f28-5a5f-9ada-ffee1ef1bf5b",
+      "slug": "2-vowels",
+      "title": "Vowels",
+      "sequence": 2,
+      "lessons": [
+        {
+          "id": "c460d8c1-4511-5f35-a2a4-a0e701393e30",
+          "slug": "1-the-vowel-sound-schwa",
+          "sequence": 1,
+          "title": "The Vowel Sound: /ə/ (El más importante)",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/27WXXMFimvE",
+          "durationSeconds": 663,
+          "poster": "basic-course/2-vowels/1-the-vowel-sound-schwa/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/1-the-vowel-sound-schwa/readme.md",
+          "resources": [
+            {
+              "id": "27c72b4f-3f36-540e-aa3a-f836abdaafd8",
+              "title": "Schwa Pronunciation Exercise",
+              "url": "basic-course/2-vowels/1-the-vowel-sound-schwa/schwa-pronunciation-exercise.pdf",
+              "kind": "pdf"
+            },
+            {
+              "id": "246f5d3d-07bc-508e-af52-9d4279bea657",
+              "title": "The Vowel Sound: /ə/ (El más importante) Notes",
+              "url": "basic-course/2-vowels/1-the-vowel-sound-schwa/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "9c953cb2-3d69-5922-845b-50803a6f4bf7",
+          "slug": "2-the-vowel-sound-ih",
+          "sequence": 2,
+          "title": "The Vowel Sound /ɪ/ (e corta)",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/fBPmq9din_0",
+          "durationSeconds": 535,
+          "poster": "basic-course/2-vowels/2-the-vowel-sound-ih/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/2-the-vowel-sound-ih/readme.md",
+          "resources": [
+            {
+              "id": "3ec69e97-d01e-5d36-a1fd-b22ff7931667",
+              "title": "Short I Pronunciation Practice",
+              "url": "basic-course/2-vowels/2-the-vowel-sound-ih/short-i-pronunciation-practice.pdf",
+              "kind": "pdf"
+            },
+            {
+              "id": "c7b5ed3f-12c7-522e-a19a-a945e128a6d5",
+              "title": "The Vowel Sound /ɪ/ (e corta) Notes",
+              "url": "basic-course/2-vowels/2-the-vowel-sound-ih/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "e0c10776-3901-5889-b218-98a05770bd61",
+          "slug": "3-the-vowel-sound-uu",
+          "sequence": 3,
+          "title": "The Vowel Sound /ʊ/ (o corta)",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/yY7RWGUbqng",
+          "durationSeconds": 444,
+          "poster": "basic-course/2-vowels/3-the-vowel-sound-uu/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/3-the-vowel-sound-uu/readme.md",
+          "resources": [
+            {
+              "id": "0db705fb-a5fa-5d8c-a42c-6eb547c5ff6d",
+              "title": "The Vowel Sound /ʊ/ (o corta) Notes",
+              "url": "basic-course/2-vowels/3-the-vowel-sound-uu/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "68efbe8f-4077-575e-a7ce-ba0b978520d4",
+              "title": "Vowel Sound Practice Bilingual",
+              "url": "basic-course/2-vowels/3-the-vowel-sound-uu/vowel-sound-practice-bilingual.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "b6aac68e-c8a4-54f0-97b2-2e2718da3bdc",
+          "slug": "4-schwa-or-strut",
+          "sequence": 4,
+          "title": "Schwa /ə/ or Strut /ʌ/ ?",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/66yHmJEcNsk",
+          "durationSeconds": 555,
+          "poster": "basic-course/2-vowels/4-schwa-or-strut/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/4-schwa-or-strut/readme.md",
+          "resources": [
+            {
+              "id": "23b30478-2c22-5fb5-bfb5-ef173f456914",
+              "title": "Schwa /ə/ or Strut /ʌ/ ? Notes",
+              "url": "basic-course/2-vowels/4-schwa-or-strut/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "4ee718a8-7d80-5ecc-855e-916e979c4c9a",
+          "slug": "5-the-weak-vowel-merger",
+          "sequence": 5,
+          "title": "The weak-vowel merger",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/6qkj8V7SPII",
+          "durationSeconds": 1210,
+          "poster": "basic-course/2-vowels/5-the-weak-vowel-merger/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/5-the-weak-vowel-merger/readme.md",
+          "resources": [
+            {
+              "id": "f9403b06-ba41-5b17-b6de-6e9da3d31a5f",
+              "title": "The weak-vowel merger Notes",
+              "url": "basic-course/2-vowels/5-the-weak-vowel-merger/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "b65b3140-7a35-5d76-b339-a7809d99c8fc",
+              "title": "Weak Vowel Merger",
+              "url": "basic-course/2-vowels/5-the-weak-vowel-merger/weak-vowel-merger.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "16fc2272-0118-5596-ac26-42f66bb103af",
+          "slug": "6-the-vowel-sound-ae",
+          "sequence": 6,
+          "title": "The vowel sound /æ/ (a ligada)",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/wT19UwJVoAU",
+          "durationSeconds": 656,
+          "poster": "basic-course/2-vowels/6-the-vowel-sound-ae/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/6-the-vowel-sound-ae/readme.md",
+          "resources": [
+            {
+              "id": "3530aa4a-3674-53b6-b892-1eb42ee7f263",
+              "title": "Sound Pronunciation Exercise",
+              "url": "basic-course/2-vowels/6-the-vowel-sound-ae/sound-pronunciation-exercise.pdf",
+              "kind": "pdf"
+            },
+            {
+              "id": "6dd16ae4-5b0c-5c90-91cd-6dec19a6d8b3",
+              "title": "The vowel sound /æ/ (a ligada) Notes",
+              "url": "basic-course/2-vowels/6-the-vowel-sound-ae/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "d89c04e3-9e15-5226-8316-c78295a2c522",
+          "slug": "7-the-vowel-sound-ah",
+          "sequence": 7,
+          "title": "The vowel sound /ɑ/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/ZxOTYbNppeM",
+          "durationSeconds": 423,
+          "poster": "basic-course/2-vowels/7-the-vowel-sound-ah/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/7-the-vowel-sound-ah/readme.md",
+          "resources": [
+            {
+              "id": "3aac4beb-7feb-5061-809c-d8fa199a2a3e",
+              "title": "The vowel sound /ɑ/ Notes",
+              "url": "basic-course/2-vowels/7-the-vowel-sound-ah/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "d3e63943-a6fa-5290-b7b4-2b2b3575c10d",
+              "title": "Vowel Sound As In Father Practice",
+              "url": "basic-course/2-vowels/7-the-vowel-sound-ah/vowel-sound-as-in-father-practice.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "2f00a104-7377-50fe-9f36-9389c7c47728",
+          "slug": "8-the-vowel-sound-aw",
+          "sequence": 8,
+          "title": "The Vowel sound /ɔ/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/so09dhP-B_g",
+          "durationSeconds": 435,
+          "poster": "basic-course/2-vowels/8-the-vowel-sound-aw/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/8-the-vowel-sound-aw/readme.md",
+          "resources": [
+            {
+              "id": "32b93abb-1d1b-583b-ad11-218b5e4282c4",
+              "title": "The Vowel sound /ɔ/ Notes",
+              "url": "basic-course/2-vowels/8-the-vowel-sound-aw/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "5b47cf5d-8bfd-5c76-8999-0096c35c6c31",
+              "title": "Vowel Pronunciation Bilingual",
+              "url": "basic-course/2-vowels/8-the-vowel-sound-aw/vowel-pronunciation-bilingual.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "64dce12f-5c13-5973-b37c-a1133ef37edd",
+          "slug": "9-the-cot-caught-merger",
+          "sequence": 9,
+          "title": "The cot–caught merger!",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/Dj08qb_D0pU",
+          "durationSeconds": 602,
+          "poster": "basic-course/2-vowels/9-the-cot-caught-merger/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/9-the-cot-caught-merger/readme.md",
+          "resources": [
+            {
+              "id": "2b032244-4e64-509c-a763-2369505d85ec",
+              "title": "Cot Caught Merger Practice Document",
+              "url": "basic-course/2-vowels/9-the-cot-caught-merger/cot-caught-merger-practice-document.pdf",
+              "kind": "pdf"
+            },
+            {
+              "id": "26e1a49f-fc6d-53f6-bd98-d938a41f8dfb",
+              "title": "The cot–caught merger! Notes",
+              "url": "basic-course/2-vowels/9-the-cot-caught-merger/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "8d0af465-2017-5dc4-ad27-a5fb83563ee7",
+          "slug": "10-the-vowel-sound-eh",
+          "sequence": 10,
+          "title": "The Vowel Sound /ɛ/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/El-uM6MGW7c",
+          "durationSeconds": 538,
+          "poster": "basic-course/2-vowels/10-the-vowel-sound-eh/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/10-the-vowel-sound-eh/readme.md",
+          "resources": [
+            {
+              "id": "78ac2de2-c63e-5903-8855-4a28c0c9799c",
+              "title": "The Vowel Sound /ɛ/ Notes",
+              "url": "basic-course/2-vowels/10-the-vowel-sound-eh/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "d500fda5-4dd7-5ade-98fd-b8487b9757de",
+              "title": "Vowel Sound Practice Document",
+              "url": "basic-course/2-vowels/10-the-vowel-sound-eh/vowel-sound-practice-document.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "ef68b9e8-2279-5242-ac7b-0ad410c3b21c",
+          "slug": "11-the-vowel-sound-u",
+          "sequence": 11,
+          "title": "The Vowel Sound /u/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/uECyt4UBjD4",
+          "durationSeconds": 526,
+          "poster": "basic-course/2-vowels/11-the-vowel-sound-u/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/11-the-vowel-sound-u/readme.md",
+          "resources": [
+            {
+              "id": "3a1b0b4a-8561-5720-b1c1-f02be291159b",
+              "title": "Practice Vowel U Food With Instructions",
+              "url": "basic-course/2-vowels/11-the-vowel-sound-u/practice-vowel-u-food-with-instructions.pdf",
+              "kind": "pdf"
+            },
+            {
+              "id": "4f28e2be-fa86-5b9b-bb87-b46e9d66b43a",
+              "title": "The Vowel Sound /u/ Notes",
+              "url": "basic-course/2-vowels/11-the-vowel-sound-u/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "d6cdb287-2efe-5cad-99ae-c7cc009a478f",
+          "slug": "12-the-vowel-sound-i",
+          "sequence": 12,
+          "title": "The vowel sound /i/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/USOSvQpaGRU",
+          "durationSeconds": 567,
+          "poster": "basic-course/2-vowels/12-the-vowel-sound-i/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/12-the-vowel-sound-i/readme.md",
+          "resources": [
+            {
+              "id": "4ce150c8-99a7-55e6-9d16-cd861313bd12",
+              "title": "Practice Vowel I As In Seen Please",
+              "url": "basic-course/2-vowels/12-the-vowel-sound-i/practice-vowel-i-as-in-seen-please.pdf",
+              "kind": "pdf"
+            },
+            {
+              "id": "294fa363-d80b-5130-884f-00fb30943049",
+              "title": "The vowel sound /i/ Notes",
+              "url": "basic-course/2-vowels/12-the-vowel-sound-i/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "940a3b61-4917-54d7-81b8-b65fb04263f4",
+          "slug": "13-diphthong-sound-ai",
+          "sequence": 13,
+          "title": "Diphthong Sound /aɪ/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/RZjWtUy2mqM",
+          "durationSeconds": 432,
+          "poster": "basic-course/2-vowels/13-diphthong-sound-ai/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/13-diphthong-sound-ai/readme.md",
+          "resources": [
+            {
+              "id": "3966cf33-980d-52ab-b714-35d8466d2911",
+              "title": "Diphthong A Pronunciation Bilingual With Translations",
+              "url": "basic-course/2-vowels/13-diphthong-sound-ai/diphthong-a-pronunciation-bilingual-with-translations.pdf",
+              "kind": "pdf"
+            },
+            {
+              "id": "5d5f1d10-5ad0-5e3e-95c4-c37417c6b716",
+              "title": "Diphthong Sound /aɪ/ Notes",
+              "url": "basic-course/2-vowels/13-diphthong-sound-ai/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "244ab77c-f970-583b-b89b-2b5037b42e63",
+          "slug": "14-diphthong-sound-au",
+          "sequence": 14,
+          "title": "Diphthong Sound /aʊ/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/j1l1Duj43Ik",
+          "durationSeconds": 792,
+          "poster": "basic-course/2-vowels/14-diphthong-sound-au/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/14-diphthong-sound-au/readme.md",
+          "resources": [
+            {
+              "id": "52056a4a-ee6b-5b57-b145-254abf7f2487",
+              "title": "Diphthong Au Pronunciation Bilingual With Translations",
+              "url": "basic-course/2-vowels/14-diphthong-sound-au/diphthong-au-pronunciation-bilingual-with-translations.pdf",
+              "kind": "pdf"
+            },
+            {
+              "id": "acd1b7c1-9d6c-576d-a464-a12b1f09ec10",
+              "title": "Diphthong Sound /aʊ/ Notes",
+              "url": "basic-course/2-vowels/14-diphthong-sound-au/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "6ddfd8f0-a2a1-5a19-b637-d0851019cf01",
+          "slug": "15-diphthong-sound-oi",
+          "sequence": 15,
+          "title": "Diphthong Sound /ɔɪ/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/J4t-4KDMi14",
+          "durationSeconds": 472,
+          "poster": "basic-course/2-vowels/15-diphthong-sound-oi/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/15-diphthong-sound-oi/readme.md",
+          "resources": [
+            {
+              "id": "2f4852eb-4a14-5f87-8633-99ca3a70fd94",
+              "title": "Diphthong Oi Pronunciation Bilingual With Translations",
+              "url": "basic-course/2-vowels/15-diphthong-sound-oi/diphthong-oi-pronunciation-bilingual-with-translations.pdf",
+              "kind": "pdf"
+            },
+            {
+              "id": "2df47bda-2794-5675-9661-0f46ee89a7d3",
+              "title": "Diphthong Sound /ɔɪ/ Notes",
+              "url": "basic-course/2-vowels/15-diphthong-sound-oi/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "aeb0e757-21ec-57f4-acf7-7c3e47ec6c8e",
+          "slug": "16-diphthong-sound-ei",
+          "sequence": 16,
+          "title": "Diphthong Sound /eɪ/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/N8ed4FTl25I",
+          "durationSeconds": 375,
+          "poster": "basic-course/2-vowels/16-diphthong-sound-ei/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/16-diphthong-sound-ei/readme.md",
+          "resources": [
+            {
+              "id": "6dd4bbff-4e2e-5b3b-b2c0-e41f460bd585",
+              "title": "Diphthong Ei Pronunciation Bilingual With Translations",
+              "url": "basic-course/2-vowels/16-diphthong-sound-ei/diphthong-ei-pronunciation-bilingual-with-translations.pdf",
+              "kind": "pdf"
+            },
+            {
+              "id": "e7932b27-711c-562c-b56d-05ca1b7fe561",
+              "title": "Diphthong Sound /eɪ/ Notes",
+              "url": "basic-course/2-vowels/16-diphthong-sound-ei/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "2d395ba1-e5f2-5bf2-a6ee-b368203b652e",
+          "slug": "17-diphthong-sound-ou",
+          "sequence": 17,
+          "title": "Diphthong Sound /ɔʊ/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/NCm6WSP10Io",
+          "durationSeconds": 300,
+          "poster": "basic-course/2-vowels/17-diphthong-sound-ou/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/17-diphthong-sound-ou/readme.md",
+          "resources": [
+            {
+              "id": "b5d3e9b7-46d3-535c-93fb-a55f124ce724",
+              "title": "Diphthong Ou Pronunciation Bilingual With Translations",
+              "url": "basic-course/2-vowels/17-diphthong-sound-ou/diphthong-ou-pronunciation-bilingual-with-translations.pdf",
+              "kind": "pdf"
+            },
+            {
+              "id": "a4818bd8-0986-550f-895f-646f76be25f6",
+              "title": "Diphthong Sound /ɔʊ/ Notes",
+              "url": "basic-course/2-vowels/17-diphthong-sound-ou/readme.md",
+              "kind": "other"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d8b0585c-5ca5-524d-bc4e-5ffefa277ef0",
+      "slug": "3-consonants",
+      "title": "Consonants",
+      "sequence": 3,
+      "lessons": [
+        {
+          "id": "fd123f0d-cbbb-5050-9a88-4c2834395297",
+          "slug": "1-activar-las-cuerdas-vocales",
+          "sequence": 1,
+          "title": "Ejercicio para activar las cuerdas vocales",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/P8i91JfMeD4",
+          "durationSeconds": 1324,
+          "poster": "basic-course/3-consonants/1-activar-las-cuerdas-vocales/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/1-activar-las-cuerdas-vocales/readme.md",
+          "resources": [
+            {
+              "id": "7cf73aa8-3bd9-541b-8e02-064639617718",
+              "title": "Ejercicio para activar las cuerdas vocales Notes",
+              "url": "basic-course/3-consonants/1-activar-las-cuerdas-vocales/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "2df5842d-8ab5-5416-8d6c-cd2c15eda601",
+          "slug": "2-consonantes-plosivas-y-de-parada",
+          "sequence": 2,
+          "title": "Consonantes Plosivas y de Parada",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/8OTK3DWHu14",
+          "durationSeconds": 1801,
+          "poster": "basic-course/3-consonants/2-consonantes-plosivas-y-de-parada/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/2-consonantes-plosivas-y-de-parada/readme.md",
+          "resources": [
+            {
+              "id": "9a74be65-142d-512c-b679-16156ae3d991",
+              "title": "Consonantes Plosivas y de Parada Notes",
+              "url": "basic-course/3-consonants/2-consonantes-plosivas-y-de-parada/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "46252622-f277-5cfc-90f2-30bfd748d2dc",
+          "slug": "3-r",
+          "sequence": 3,
+          "title": "/r/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/AyL7pQ0E7ao",
+          "durationSeconds": 800,
+          "poster": "basic-course/3-consonants/3-r/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/3-r/readme.md",
+          "resources": [
+            {
+              "id": "56e8d62f-90ed-53f4-b062-a6ba95cbdca0",
+              "title": "/r/ Notes",
+              "url": "basic-course/3-consonants/3-r/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "f210c792-79e8-50d9-b1a3-9ca80540b585",
+              "title": "R Sound Pronunciation Bilingual Practice",
+              "url": "basic-course/3-consonants/3-r/r-sound-pronunciation-bilingual-practice.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "5054d615-512a-5e12-9bca-5599e7357af3",
+          "slug": "4-flap",
+          "sequence": 4,
+          "title": "/Flap/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/ZTJUES25ZbU",
+          "durationSeconds": 787,
+          "poster": "basic-course/3-consonants/4-flap/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/4-flap/readme.md",
+          "resources": [
+            {
+              "id": "44a08c5f-cc06-5162-8568-5d4f455f7c4c",
+              "title": "/Flap/ Notes",
+              "url": "basic-course/3-consonants/4-flap/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "6132f647-3461-5871-925b-5efa11df3bb2",
+              "title": "Flap Practice",
+              "url": "basic-course/3-consonants/4-flap/flap-practice.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "faaf4b82-b253-581a-bf35-0fbbaa76df15",
+          "slug": "5-vocales-roticas",
+          "sequence": 5,
+          "title": "Vocales Róticas",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/vyLqhN8PM18",
+          "durationSeconds": 2299,
+          "poster": "basic-course/3-consonants/5-vocales-roticas/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/5-vocales-roticas/readme.md",
+          "resources": [
+            {
+              "id": "cea924c0-efd2-54ee-9688-0a588c49d4d8",
+              "title": "R Vowel Combinations Pronunciation Practice With Instructions",
+              "url": "basic-course/3-consonants/5-vocales-roticas/r-vowel-combinations-pronunciation-practice-with-instructions.pdf",
+              "kind": "pdf"
+            },
+            {
+              "id": "3a0c4654-8436-59a7-8273-1f832684fc63",
+              "title": "Vocales Róticas Notes",
+              "url": "basic-course/3-consonants/5-vocales-roticas/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "f52bbebf-a5b9-5b2c-baba-8da355a02234",
+          "slug": "6-dark-l-part-1",
+          "sequence": 6,
+          "title": "Dark /L/ Part 1",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/3mHHyU5CrEM",
+          "durationSeconds": 1180,
+          "poster": "basic-course/3-consonants/6-dark-l-part-1/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/6-dark-l-part-1/readme.md",
+          "resources": [
+            {
+              "id": "3a802b90-43fb-51f8-822e-97af077d164e",
+              "title": "Dark /L/ Part 1 Notes",
+              "url": "basic-course/3-consonants/6-dark-l-part-1/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "b07da19d-ba55-5a90-9bea-db386c8f9f3e",
+              "title": "L Sound Pronunciation Practice 1",
+              "url": "basic-course/3-consonants/6-dark-l-part-1/l-sound-pronunciation-practice-1.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "c8685d0e-70a4-5c07-8086-8018e4a4946d",
+          "slug": "7-dark-l-part-2",
+          "sequence": 7,
+          "title": "Dark /L/ Part 2",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/H87deXqLODY",
+          "durationSeconds": 2122,
+          "poster": "basic-course/3-consonants/7-dark-l-part-2/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/7-dark-l-part-2/readme.md",
+          "resources": [
+            {
+              "id": "3bd9c9e5-a9f3-5ceb-b329-7522580d44a3",
+              "title": "Dark /L/ Part 2 Notes",
+              "url": "basic-course/3-consonants/7-dark-l-part-2/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "725ce40a-b45e-5738-8ed3-91fa7fd051c6",
+          "slug": "8-sh",
+          "sequence": 8,
+          "title": "/ʃ/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/mpuds4RgM08",
+          "durationSeconds": 538,
+          "poster": "basic-course/3-consonants/8-sh/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/8-sh/readme.md",
+          "resources": [
+            {
+              "id": "95ac6b2b-1638-50ad-b2ba-28d79e3f14ee",
+              "title": "/ʃ/ Notes",
+              "url": "basic-course/3-consonants/8-sh/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "9c104b79-9f0a-5a80-bbf8-76d487930702",
+              "title": "How To Pronounce The",
+              "url": "basic-course/3-consonants/8-sh/how-to-pronounce-the.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "66c68186-52cc-58f5-a00f-0124ba4b424b",
+          "slug": "9-ch",
+          "sequence": 9,
+          "title": "/tʃ/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/6Z0duxlJN3Y",
+          "durationSeconds": 500,
+          "poster": "basic-course/3-consonants/9-ch/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/9-ch/readme.md",
+          "resources": [
+            {
+              "id": "8bf7faf3-eac9-5007-9dd9-3eb03b0217fc",
+              "title": "/tʃ/ Notes",
+              "url": "basic-course/3-consonants/9-ch/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "958724a0-4f15-5f1a-b436-65d4cec1a1e5",
+              "title": "Practice T",
+              "url": "basic-course/3-consonants/9-ch/practice-t.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "14dbcd2e-8f73-592a-a66c-1838c786bf67",
+          "slug": "10-zh",
+          "sequence": 10,
+          "title": "/ʒ/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/1qe7haFUY7E",
+          "durationSeconds": 250,
+          "poster": "basic-course/3-consonants/10-zh/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/10-zh/readme.md",
+          "resources": [
+            {
+              "id": "8d6a36a3-a39f-5143-9e15-8dc06f9da07e",
+              "title": "/ʒ/ Notes",
+              "url": "basic-course/3-consonants/10-zh/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "4739ceb7-ba21-5b34-ad8f-e81146a2ffdf",
+              "title": "How To Pronounce The",
+              "url": "basic-course/3-consonants/10-zh/how-to-pronounce-the.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "e3cff857-ac98-5d59-b56f-e4d4a0d78c21",
+          "slug": "11-dzh",
+          "sequence": 11,
+          "title": "/dʒ/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/aAA1m5ML_FE",
+          "durationSeconds": 448,
+          "poster": "basic-course/3-consonants/11-dzh/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/11-dzh/readme.md",
+          "resources": [
+            {
+              "id": "538cef92-4f4b-5852-b31d-59b09fc06498",
+              "title": "/dʒ/ Notes",
+              "url": "basic-course/3-consonants/11-dzh/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "6db64e2e-49e5-5be0-bc5a-6fd5d7a7300f",
+              "title": "How To Pronounce The D",
+              "url": "basic-course/3-consonants/11-dzh/how-to-pronounce-the-d.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "872ddffd-ba15-5fdc-b485-c1c2d05c0ca8",
+          "slug": "12-th-voiceless",
+          "sequence": 12,
+          "title": "/θ/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/Sbs9lLbvB-c",
+          "durationSeconds": 335,
+          "poster": "basic-course/3-consonants/12-th-voiceless/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/12-th-voiceless/readme.md",
+          "resources": [
+            {
+              "id": "03ce7ab1-b594-53e1-b079-11f89670f319",
+              "title": "/θ/ Notes",
+              "url": "basic-course/3-consonants/12-th-voiceless/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "538b3bf4-a8d4-529f-bac6-f8d32055935a",
+              "title": "How To Pronounce The Consonant",
+              "url": "basic-course/3-consonants/12-th-voiceless/how-to-pronounce-the-consonant.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "b35b9970-f4ac-56a2-9583-a95dab254e16",
+          "slug": "13-th-voiced",
+          "sequence": 13,
+          "title": "/ð/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/jOF2i5teTfs",
+          "durationSeconds": 373,
+          "poster": "basic-course/3-consonants/13-th-voiced/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/13-th-voiced/readme.md",
+          "resources": [
+            {
+              "id": "9b8dbf66-c72d-5eb3-9f50-ef4bd23b9dae",
+              "title": "/ð/ Notes",
+              "url": "basic-course/3-consonants/13-th-voiced/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "3e03050a-16f5-5b92-87c4-7085e920c3e5",
+              "title": "How To Pronounce The Sound",
+              "url": "basic-course/3-consonants/13-th-voiced/how-to-pronounce-the-sound.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "398c2fb0-6fdf-5aa0-b0df-36e8ac159db1",
+          "slug": "14-interdental-d-t",
+          "sequence": 14,
+          "title": "Interdental /d̪/ & /t̪/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/z2AzCf_THc4",
+          "durationSeconds": 654,
+          "poster": "basic-course/3-consonants/14-interdental-d-t/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/14-interdental-d-t/readme.md",
+          "resources": [
+            {
+              "id": "47f80dc0-5a3f-5117-9530-395768a2b51f",
+              "title": "Interdental /d̪/ & /t̪/ Notes",
+              "url": "basic-course/3-consonants/14-interdental-d-t/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "6cfa689b-b8d2-5874-8676-e08701d95842",
+              "title": "Interdental T D Practice",
+              "url": "basic-course/3-consonants/14-interdental-d-t/interdental-t-d-practice.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "3d037bf8-4e31-54ab-ba35-94a3aa58b756",
+          "slug": "15-s",
+          "sequence": 15,
+          "title": "/s/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/ZZLK8BIekvw",
+          "durationSeconds": 448,
+          "poster": "basic-course/3-consonants/15-s/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/15-s/readme.md",
+          "resources": [
+            {
+              "id": "c5f1b11a-509f-5961-a233-dfab79a5201d",
+              "title": "/s/ Notes",
+              "url": "basic-course/3-consonants/15-s/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "0f56b218-12fd-512f-99e3-a92465186e51",
+              "title": "How To Pronounce The S",
+              "url": "basic-course/3-consonants/15-s/how-to-pronounce-the-s.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "96a232d2-44d3-5495-b0b5-260f2db5931a",
+          "slug": "16-z",
+          "sequence": 16,
+          "title": "/z/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/JiZnJuA2SQ4",
+          "durationSeconds": 418,
+          "poster": "basic-course/3-consonants/16-z/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/16-z/readme.md",
+          "resources": [
+            {
+              "id": "c91b87b9-1f31-50ba-a098-6e22db808645",
+              "title": "/z/ Notes",
+              "url": "basic-course/3-consonants/16-z/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "e3a69ccb-d813-538b-9275-33ffc4ac3c63",
+              "title": "Z Sound Pronunciation Practice",
+              "url": "basic-course/3-consonants/16-z/z-sound-pronunciation-practice.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "c9124bb2-b434-50b7-9644-ddee642e74b0",
+          "slug": "17-f",
+          "sequence": 17,
+          "title": "/f/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/EIqEyviucq8",
+          "durationSeconds": 543,
+          "poster": "basic-course/3-consonants/17-f/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/17-f/readme.md",
+          "resources": [
+            {
+              "id": "eb20f4b0-e35a-5fc9-ada9-b213428a4cb0",
+              "title": "/f/ Notes",
+              "url": "basic-course/3-consonants/17-f/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "2176a5db-3333-5ea2-9860-d4017853b539",
+              "title": "F Consonant Practice",
+              "url": "basic-course/3-consonants/17-f/f-consonant-practice.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "d20db130-22b4-59bd-8a42-b5c8b12635f2",
+          "slug": "18-v",
+          "sequence": 18,
+          "title": "/v/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/2Iloonq0XJ0",
+          "durationSeconds": 524,
+          "poster": "basic-course/3-consonants/18-v/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/18-v/readme.md",
+          "resources": [
+            {
+              "id": "f5bc8aaf-67b6-563a-a284-17e2ce76d709",
+              "title": "/v/ Notes",
+              "url": "basic-course/3-consonants/18-v/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "5271e727-7454-5d53-b435-ffb148395e5d",
+              "title": "V Consonant Practice",
+              "url": "basic-course/3-consonants/18-v/v-consonant-practice.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "c725084d-1bcc-5e13-bb94-47e4c78dc2e1",
+          "slug": "19-n",
+          "sequence": 19,
+          "title": "/n/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/zFGKmVKleyQ",
+          "durationSeconds": 517,
+          "poster": "basic-course/3-consonants/19-n/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/19-n/readme.md",
+          "resources": [
+            {
+              "id": "4587ad72-f65c-5f15-8899-cabc8b58055c",
+              "title": "/n/ Notes",
+              "url": "basic-course/3-consonants/19-n/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "b30b2afa-00b3-5d05-bdc4-425c70a49e5e",
+              "title": "N Sound Pronunciation Exercise",
+              "url": "basic-course/3-consonants/19-n/n-sound-pronunciation-exercise.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "6cfa8f32-74a5-50a6-9cdf-0a76d526a043",
+          "slug": "20-m",
+          "sequence": 20,
+          "title": "/m/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/Us7UtMWzQY4",
+          "durationSeconds": 531,
+          "poster": "basic-course/3-consonants/20-m/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/20-m/readme.md",
+          "resources": [
+            {
+              "id": "37601a16-ada3-5d18-91eb-05f091cd73c1",
+              "title": "/m/ Notes",
+              "url": "basic-course/3-consonants/20-m/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "bf567c1f-5673-5796-9181-b92daeffe7e3",
+              "title": "M Sound Pronunciation Exercise",
+              "url": "basic-course/3-consonants/20-m/m-sound-pronunciation-exercise.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "d5491e3b-bb3f-5eb4-9a08-f68889fc5e54",
+          "slug": "21-ng",
+          "sequence": 21,
+          "title": "/ŋ/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/q_rv_7mopKU",
+          "durationSeconds": 660,
+          "poster": "basic-course/3-consonants/21-ng/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/21-ng/readme.md",
+          "resources": [
+            {
+              "id": "3ceba15d-1618-5028-9dce-690c1586f802",
+              "title": "/ŋ/ Notes",
+              "url": "basic-course/3-consonants/21-ng/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "4ba366bc-8fc1-5b9a-987d-ac876e88b48a",
+              "title": "Ng Sound Pronunciation Exercise",
+              "url": "basic-course/3-consonants/21-ng/ng-sound-pronunciation-exercise.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "5d53f114-134f-53d0-a69d-c6b7de62e88e",
+          "slug": "22-w",
+          "sequence": 22,
+          "title": "/w/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/h3GXjpkRaiE",
+          "durationSeconds": 639,
+          "poster": "basic-course/3-consonants/22-w/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/22-w/readme.md",
+          "resources": [
+            {
+              "id": "c3d8fe2b-c22a-5e8f-b0f7-ccdf5876adb7",
+              "title": "/w/ Notes",
+              "url": "basic-course/3-consonants/22-w/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "f9936e5c-e34d-5369-90e2-d0894545bdec",
+              "title": "W Practice Consonant",
+              "url": "basic-course/3-consonants/22-w/w-practice-consonant.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "2037b67d-6d57-5a35-b067-74432c0c6500",
+          "slug": "23-j",
+          "sequence": 23,
+          "title": "/j/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/6V3Qq-hNP0g",
+          "durationSeconds": 382,
+          "poster": "basic-course/3-consonants/23-j/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/23-j/readme.md",
+          "resources": [
+            {
+              "id": "1a072116-2e5e-5f33-a2a9-a72342195a3f",
+              "title": "/j/ Notes",
+              "url": "basic-course/3-consonants/23-j/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "c0c65829-991e-5657-808e-ef4414a0bb45",
+              "title": "Y Pronunciation Exercise",
+              "url": "basic-course/3-consonants/23-j/y-pronunciation-exercise.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "0badd2c7-e683-56cc-a7fa-b4c6e27d5b25",
+          "slug": "24-h",
+          "sequence": 24,
+          "title": "/H/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/ThWJ0-ZW9kA",
+          "durationSeconds": 724,
+          "poster": "basic-course/3-consonants/24-h/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/24-h/readme.md",
+          "resources": [
+            {
+              "id": "0c86fc0b-6e4a-5317-b6e2-58a766d49ac1",
+              "title": "/H/ Notes",
+              "url": "basic-course/3-consonants/24-h/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "10ad4ce7-564e-5cc4-8ca1-a30ebb9be432",
+              "title": "H Pronunciation Practice",
+              "url": "basic-course/3-consonants/24-h/h-pronunciation-practice.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "dade1cf6-d458-5c77-b1ab-3d852963d5c0",
+          "slug": "25-x",
+          "sequence": 25,
+          "title": "/X/",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/8P3_0rQ4U8c",
+          "durationSeconds": 680,
+          "poster": "basic-course/3-consonants/25-x/thumbnail.jpeg",
+          "notesKey": "basic-course/3-consonants/25-x/readme.md",
+          "resources": [
+            {
+              "id": "83456642-db4e-5ee8-b90c-252c0a76e456",
+              "title": "/X/ Notes",
+              "url": "basic-course/3-consonants/25-x/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "eedf3c64-f48e-5088-a1cf-8e73e2271767",
+              "title": "X Pronunciation Practice",
+              "url": "basic-course/3-consonants/25-x/x-pronunciation-practice.pdf",
+              "kind": "pdf"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "42730479-e34a-5705-9343-eda180a14eb3",
+      "slug": "4-ejercicios-para-dominar-el-ritmo-en-ingles",
+      "title": "Ejercicios para dominar el ritmo en Inglés",
+      "sequence": 4,
+      "lessons": [
+        {
+          "id": "f9e2ae3e-95a7-5c00-86f9-2ee8f172980f",
+          "slug": "1-afina-tu-oido-y-pronunciacion",
+          "sequence": 1,
+          "title": "Afina tu oído y pronunciación",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/_WeimLUmGWQ",
+          "durationSeconds": 1136,
+          "poster": "basic-course/4-ejercicios-para-dominar-el-ritmo-en-ingles/1-afina-tu-oido-y-pronunciacion/thumbnail.jpeg",
+          "notesKey": "basic-course/4-ejercicios-para-dominar-el-ritmo-en-ingles/1-afina-tu-oido-y-pronunciacion/readme.md",
+          "resources": [
+            {
+              "id": "c852d4cd-6455-51a4-a923-266af6d2e836",
+              "title": "Afina tu oído y pronunciación Notes",
+              "url": "basic-course/4-ejercicios-para-dominar-el-ritmo-en-ingles/1-afina-tu-oido-y-pronunciacion/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "63ef37ad-806e-58c3-bfbd-3713e31c9fbb",
+          "slug": "2-ejercicios-para-afinar-tu-oido-y-pronunciacion-2",
+          "sequence": 2,
+          "title": "Ejercicios para afinar tu oído y pronunciación 2",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/A1WqymoK_8E",
+          "durationSeconds": 3580,
+          "poster": "basic-course/4-ejercicios-para-dominar-el-ritmo-en-ingles/2-ejercicios-para-afinar-tu-oido-y-pronunciacion-2/thumbnail.jpeg",
+          "notesKey": "basic-course/4-ejercicios-para-dominar-el-ritmo-en-ingles/2-ejercicios-para-afinar-tu-oido-y-pronunciacion-2/readme.md",
+          "resources": [
+            {
+              "id": "4093e99b-d0fa-5bd2-8fb9-15157f347109",
+              "title": "Book1",
+              "url": "basic-course/4-ejercicios-para-dominar-el-ritmo-en-ingles/2-ejercicios-para-afinar-tu-oido-y-pronunciacion-2/book1.pdf",
+              "kind": "pdf"
+            },
+            {
+              "id": "0254d734-d3c0-5d43-a83a-362c222f86a6",
+              "title": "Ejercicios para afinar tu oído y pronunciación 2 Notes",
+              "url": "basic-course/4-ejercicios-para-dominar-el-ritmo-en-ingles/2-ejercicios-para-afinar-tu-oido-y-pronunciacion-2/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "a93520fd-ae33-5575-ad74-8bdf9f63a3be",
+          "slug": "3-ejercicios-para-afinar-tu-oido-y-pronunciacion-3-an-at",
+          "sequence": 3,
+          "title": "Ejercicios para afinar tu oído y pronunciación 3 \"AN-AT\"",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/rj5Jcs5IfRM",
+          "durationSeconds": 1223,
+          "poster": "basic-course/4-ejercicios-para-dominar-el-ritmo-en-ingles/3-ejercicios-para-afinar-tu-oido-y-pronunciacion-3-an-at/thumbnail.jpeg",
+          "notesKey": "basic-course/4-ejercicios-para-dominar-el-ritmo-en-ingles/3-ejercicios-para-afinar-tu-oido-y-pronunciacion-3-an-at/readme.md",
+          "resources": [
+            {
+              "id": "24fd4c49-a00e-5367-a77a-28c592f3acaf",
+              "title": "Ejercicios para afinar tu oído y pronunciación 3 \"AN-AT\" Notes",
+              "url": "basic-course/4-ejercicios-para-dominar-el-ritmo-en-ingles/3-ejercicios-para-afinar-tu-oido-y-pronunciacion-3-an-at/readme.md",
+              "kind": "other"
+            },
+            {
+              "id": "064e400d-2ac3-5489-bb0e-f46730223cf4",
+              "title": "Short Pronunciation Practice Worksheet",
+              "url": "basic-course/4-ejercicios-para-dominar-el-ritmo-en-ingles/3-ejercicios-para-afinar-tu-oido-y-pronunciacion-3-an-at/short-pronunciation-practice-worksheet.pdf",
+              "kind": "pdf"
+            }
+          ]
+        },
+        {
+          "id": "f6d3303a-922f-538e-854e-cbf545eac578",
+          "slug": "4-como-pronunciar-cualquier-palabra-en-ingles",
+          "sequence": 4,
+          "title": "Cómo pronunciar cualquier palabra en Inglés!",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/-t8pCBluoPc",
+          "durationSeconds": 928,
+          "poster": "basic-course/4-ejercicios-para-dominar-el-ritmo-en-ingles/4-como-pronunciar-cualquier-palabra-en-ingles/thumbnail.jpeg",
+          "notesKey": "basic-course/4-ejercicios-para-dominar-el-ritmo-en-ingles/4-como-pronunciar-cualquier-palabra-en-ingles/readme.md",
+          "resources": [
+            {
+              "id": "516360e8-b0d1-594a-87ab-0a757162464f",
+              "title": "Cómo pronunciar cualquier palabra en Inglés! Notes",
+              "url": "basic-course/4-ejercicios-para-dominar-el-ritmo-en-ingles/4-como-pronunciar-cualquier-palabra-en-ingles/readme.md",
+              "kind": "other"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3404f9d1-1a93-5618-b510-cc5f7a18afdc",
+      "slug": "5-fluidez-y-velocidad",
+      "title": "Fluidez y Velocidad",
+      "sequence": 5,
+      "lessons": [
+        {
+          "id": "2383716f-d302-5b2a-aef9-5c282be26b29",
+          "slug": "1-ejercita-las-vocales-y-la-flap-con-esta-cancion",
+          "sequence": 1,
+          "title": "Ejercita las Vocales y la Flap con esta canción",
+          "kind": "video",
+          "description": "Video lesson. The full description lives in the linked notes (Resource below).",
+          "source": "https://www.youtube.com/embed/ribqlx8YM0o",
+          "durationSeconds": 1408,
+          "poster": "basic-course/5-fluidez-y-velocidad/1-ejercita-las-vocales-y-la-flap-con-esta-cancion/thumbnail.jpeg",
+          "notesKey": "basic-course/5-fluidez-y-velocidad/1-ejercita-las-vocales-y-la-flap-con-esta-cancion/readme.md",
+          "resources": [
+            {
+              "id": "4ac6dae1-8c03-5664-af64-d1c39afb583d",
+              "title": "Ejercita las Vocales y la Flap con esta canción Notes",
+              "url": "basic-course/5-fluidez-y-velocidad/1-ejercita-las-vocales-y-la-flap-con-esta-cancion/readme.md",
+              "kind": "other"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

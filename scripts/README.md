@@ -1,8 +1,11 @@
 # scripts/
 
-Build-time tooling that lives outside `src/` — content seed generators, slug
-utilities, ad-hoc migration scripts. Each script is standalone and has its
-own tests colocated (`scripts/*.test.ts`).
+Build-time tooling that lives outside `src/` — manifest maintenance, slug
+utilities, content placement and migration. Each script is standalone and has
+its own tests colocated (`scripts/*.test.ts`).
+
+There is **no seed generator**. The catalog is declared, not generated: see
+`src/content/` below.
 
 ## `slug.ts` — folder-name → URL slug
 
@@ -21,88 +24,118 @@ slugify("Contractions & Reductions"); // → "contractions-reductions"
 slugify("Day#7"); // → "day-7"
 ```
 
-## `courses.manifest.json` — the one place a course is declared
+## `src/content/` — the one place a course is declared
 
-Everything about a course that the content tree cannot express is declared in
-`public/local-filesystem-lesson/courses.manifest.json`: its identity, its place
-in the home ladder, and its per-folder corrections. Adding a course is "drop the
-folder, add an entry, regenerate" — no `.ts` file changes.
+The catalog is declared, in full, in one tracked manifest per course:
+`src/content/<course-slug>.json`, enumerated by `src/content/courses.ts`.
+Every course, module, lesson and resource the app serves is written there.
+Nothing is inferred from the content tree at build or run time.
 
 ```jsonc
 {
-  "version": 1,
-  "courses": [
+  "id": "a0cf4018-…", // UUIDv5, stable: it keys saved progress
+  "slug": "basic-course",
+  "title": "Basic Course",
+  "description": "…",
+  "language": "en",
+  "sequence": 1, // rung of the home ladder, unique across courses
+  "modules": [
     {
-      "folder": "advanced-intermediate-course", // required: directory under the content root
-      "sequence": 2, // required: rung of the home ladder, unique
-      "slug": "advanced-intermediate-course", // optional: defaults to slugify(folder)
-      "title": "Advanced Intermediate Course", // optional: defaults to humanize(slug)
-      "description": "…", // optional: defaults to a generated sentence
-      "language": "en", // optional: defaults to "en"
-
-      // Raw on-disk folder name → slug, when the automatic one is wrong.
-      "slugOverrides": { "1 Day#1": "1-day-01" },
-
-      // Module slugs whose lesson titles come from each readme.md heading.
-      "titleFromNotesModules": ["3-contractions-reductions"],
-
-      // moduleSlug/lessonSlug → title, for lessons no automatic source names.
-      "lessonTitleOverrides": { "3-contractions-reductions/6-i-d": "I’d, you’d, we’d" },
+      "id": "b7029577-…",
+      "slug": "2-vowels",
+      "title": "Vowels",
+      "sequence": 1,
+      "lessons": [
+        {
+          "id": "c460d8c1-…",
+          "slug": "1-the-vowel-sound-schwa", // the on-disk folder name
+          "sequence": 1,
+          "title": "The Vowel Sound: /ə/",
+          "kind": "video",
+          "description": "…",
+          // A content key resolved by BlobStore, or an absolute URL used as-is.
+          "source": "https://www.youtube.com/embed/27WXXMFimvE",
+          "durationSeconds": 663,
+          "poster": "basic-course/2-vowels/1-the-vowel-sound-schwa/thumbnail.jpeg",
+          "notesKey": "basic-course/2-vowels/1-the-vowel-sound-schwa/readme.md",
+          "resources": [{ "id": "…", "title": "…", "url": "…", "kind": "pdf" }],
+        },
+      ],
     },
   ],
 }
 ```
 
-The schema, and the reasoning behind each override field, live in
-`scripts/courses-manifest/courses-manifest.ts`.
+The schema lives in
+`src/adapters/persistence/content-manifest/course-manifest-schema/`, and the
+adapter that loads and flattens it in
+`src/adapters/persistence/content-manifest/`.
 
-### The live manifest is untracked; the example is not
+`lessonCount` and `moduleCount` are deliberately absent — they are derived from
+the nesting, so they cannot drift. So are `courseId` / `moduleId` / `lessonId`
+on nested rows: position in the tree already says what they are.
 
-`public/local-filesystem-lesson/` is gitignored in full, so the live manifest is
-too. It describes ~15 GB of untracked content and is only meaningful on a machine
-that has it — the two are present and absent together.
+### One file per course, tracked in git
 
-`scripts/courses.manifest.example.json` is the tracked template AND the record of
-the current course's reviewed values. It is a working manifest, not a stub:
+The manifests are tracked, so a fresh clone gets a working catalog without the
+multi-gigabyte content tree. One course is one file, which makes the file both
+the unit of editing and the unit of merge conflict.
+
+They live under `src/` because the existing `@/*` alias resolves there. A
+`@content/*` alias would have to be declared twice — `tsconfig.json` and
+`vitest.config.ts` each declare it — for no gain.
+
+**Where review happens.** In the manifest itself. It is the artifact, so its
+diff is the change: a retitled lesson is a one-line diff on the line that says
+the title.
+
+### Behaviour when a manifest is absent or wrong
+
+There is no fallback. A manifest that is missing, malformed, or fails the schema
+raises `InvalidCourseManifestError` when the catalog is first imported, naming
+the offending lesson by slug. A present-but-wrong manifest is an error, never a
+silent default.
+
+`durationSeconds` is the one field with no recovery: the domain requires it, and
+for a lesson whose video is hosted elsewhere there is nothing local to probe.
+`null` is representable in the file and rejected by the schema, which turns "I
+forgot the duration" into a named error rather than a zero-length progress bar.
+
+## `sync-course-manifest/` — append what disk has and the manifest lacks
 
 ```bash
-cp scripts/courses.manifest.example.json public/local-filesystem-lesson/courses.manifest.json
+pnpm sync:manifest
 ```
 
-on a machine with the content regenerates `seed-content.ts` with an empty diff.
-This mirrors the repo's `.env` / `.env.example` split.
+Walks the content tree and appends to each course's manifest only the lessons
+and modules it does not already describe, deriving ids with the same UUIDv5
+scheme. It exists so that adding a lesson does not mean hand-writing a UUID.
 
-**Where review happens.** The manifest is not reviewable as a diff. What _is_
-reviewable is the committed `seed-content.ts`: every title and slug the manifest
-produces lands there, so a reviewer still sees each change. Update the example
-manifest in the same commit whenever you change the live one.
+**It is not a generator.** It never overwrites, reorders or removes an existing
+entry — a hand-edited title or a YouTube `source` survives every run. Identity
+is the lesson's id: an already-declared lesson is skipped entirely, not
+reconciled. A lesson folder with no video is appended with `durationSeconds:
+null` and reported, so the run tells you what to fill in.
 
-### Behaviour when the manifest is absent or wrong
-
-- **Absent** — the generator emits one course from the first top-level folder with
-  every field derived. This is exactly the pre-manifest behaviour, so a content
-  root that has not been configured still works.
-- **Malformed, or naming a folder that is not on disk** — generation aborts
-  non-zero without writing. A present-but-wrong manifest is an error, never a
-  silent fallback to the defaults.
-- **A folder no entry names** — reported on stderr and skipped, exit zero. An
-  undeclared folder is a staging area, not a mistake.
+`discriminate-lesson.ts` encodes the on-disk conventions this command reads
+(`.mp4` → video, `readme.md` → notes or reading body, `.pdf` → resource). It no
+longer decides what the app serves.
 
 ## `content-locations.json` — where each asset lives
 
 The **second** manifest, and not to be confused with the first. They answer to
 different actors on different clocks:
 
-|                | `courses.manifest.json`       | `content-locations.json`        |
-| -------------- | ----------------------------- | ------------------------------- |
-| Read           | build time, by the generator  | **runtime**, by the app         |
-| Declares       | what a course **is**          | where each blob **lives**       |
-| Tracked in git | no (sits in the content root) | **yes** (repo root)             |
-| On change      | regenerate the seed           | nothing — next boot picks it up |
+|                | `src/content/<course>.json` | `content-locations.json`        |
+| -------------- | --------------------------- | ------------------------------- |
+| Read           | build time, by the app      | **runtime**, by the app         |
+| Declares       | what a course **is**        | where each blob **lives**       |
+| Tracked in git | **yes** (under `src/`)      | **yes** (repo root)             |
+| On change      | nothing — it IS the catalog | nothing — next boot picks it up |
 
-**A content key never changes when its asset moves.** The seed holds opaque
+**A content key never changes when its asset moves.** The manifests hold opaque
 keys; only the store that resolves them changes. That is why a migration
-touches no lesson row and never regenerates `seed-content.ts`.
+touches no lesson row and no manifest.
 
 ```jsonc
 {
@@ -171,7 +204,7 @@ To have every asset's placement written down rather than inferred:
 pnpm materialize:content-assets
 ```
 
-It writes one `assets` entry per key in `seed-content.ts`, each recording the
+It writes one `assets` entry per key in the course manifests, each recording the
 store and object path that key **already** resolved to — so it changes no URL.
 It is idempotent (a no-op run rewrites the file byte-for-byte) and preserves any
 `objectPath` you declared by hand.
@@ -179,8 +212,8 @@ It is idempotent (a no-op run rewrites the file byte-for-byte) and preserves any
 This is opt-in. Without it the manifest stays an exception list, which is the
 lighter thing to maintain. With it, `pnpm verify:content` additionally reports
 any `assets` entry whose key the seed no longer has — an exhaustive block goes
-stale as soon as content is renamed, so re-run materialize after regenerating
-the seed.
+stale as soon as content is renamed, so re-run materialize after the manifests
+change.
 
 **Credentials never go here** — this file is tracked. Bucket names, regions and
 CDN URLs are not secrets; access keys come from the environment
@@ -206,7 +239,7 @@ pnpm move:content --to s3-video --select advanced-intermediate-course/8-everyday
 Then check the whole inventory against the routed stores:
 
 ```bash
-pnpm verify:content   # walks every key in seed-content.ts, exits non-zero naming any that miss
+pnpm verify:content   # walks every key in the manifests, exits non-zero naming any that miss
 ```
 
 ### Private stores
@@ -228,41 +261,13 @@ manifest, scoped to each store's path prefix. Signed stores contribute nothing �
 their posters come from the app's own origin. The config is evaluated once at
 load, so restart the dev server after editing the manifest.
 
-## `generate-course-content-seed.ts` — seed generator
+## The manifests are the catalog
 
-Walks every course folder `courses.manifest.json` declares, infers lessons
-and resources from file presence (`.mp4` → video, `.md` → reading body,
-`.pdf` → resource), extracts `durationSeconds` from each `.mp4` via
-`ffprobe`, and emits `src/adapters/persistence/in-memory/seed/seed-content.ts`
-with a `seedContentCourses` array.
+`src/content/` is the only course source the app has. There is no env var
+selecting between catalogs and no hand-written course to fall back on: the
+courses declared there are the courses `pnpm dev` serves, in `sequence` order.
 
-### How to regenerate the seed
-
-The canonical way is via vitest (handles the TS + `@/...` aliases natively):
-
-```bash
-pnpm vitest run scripts/regenerate-content-seed.test.ts
-```
-
-The test is gated by `describe.skipIf(!existsSync(REAL_CONTENT))`, so
-it's a no-op on machines without the real content folder and runs the
-generator when it is present.
-
-A bare `node --experimental-strip-types scripts/generate-course-content-seed.ts`
-path was attempted but hits a zod 4 `@zod/source` condition mismatch —
-vitest is the supported runtime. If `tsx` is added to `package.json`
-later, the script will run via `pnpm tsx scripts/generate-course-content-seed.ts`
-without changes.
-
-## The generated seed is the catalog
-
-`seed-content.ts` is the only course source the app has. There is no env var
-selecting between seeds and no hand-written course to fall back on: the courses
-`courses.manifest.json` declares are the courses `pnpm dev` serves, in
-`Course.sequence` order.
-
-That makes the content root a prerequisite, not an option. A machine without it
-boots the real catalog with media that does not resolve — which names the actual
-problem. Obtain the content root out of band, copy
-`scripts/courses.manifest.example.json` to
-`public/local-filesystem-lesson/courses.manifest.json`, and regenerate.
+Because the manifests are tracked, a fresh clone serves the full catalog
+immediately. What it will not have is the media: the content root is obtained
+out of band, and without it every locally-stored asset 404s while the catalog
+itself renders. Lessons served from YouTube play regardless.

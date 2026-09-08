@@ -8,13 +8,13 @@ import type { Lesson } from "@/domain/entities/lesson/lesson";
 import type { LessonRepository } from "@/domain/ports/lesson-repository/lesson-repository";
 
 /**
- * Driven adapter: `LessonRepository` backed by generated seed rows whose
+ * Driven adapter: `LessonRepository` backed by declared manifest rows whose
  * content keys are resolved through a `BlobStore` on every read.
  *
  * Rows are stored in insertion order and hold opaque content KEYS in
- * `source` and `poster`. Resolution happens at read time, not at seed-gen
+ * `source` and `poster`. Resolution happens at read time, not when the
  * time, so repointing storage (local folder → S3/R2 bucket) is a change of
- * `BlobStore` driver rather than a regeneration of `seed-content.ts`. It is
+ * `BlobStore` driver rather than an edit to the course manifests. It is
  * also what makes per-request signed URLs possible: a signed URL expires and
  * therefore cannot be baked into a committed file.
  *
