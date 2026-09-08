@@ -288,3 +288,102 @@ describe.skipIf(!FFMPEG_AVAILABLE)("buildSeed (integration)", () => {
     }
   });
 });
+
+describe.skipIf(!FFMPEG_AVAILABLE)("buildSeed — a lesson whose video is hosted elsewhere", () => {
+  const root = mkdtempSync(path.join(tmpdir(), "seed-gen-hosted-"));
+  const courseDir = path.join(root, "test-course");
+  const YOUTUBE_SOURCE = "https://www.youtube.com/embed/yY7RWGUbqng";
+  /** The one lesson the manifest points at YouTube. "02 Local" is the control. */
+  const HOSTED_KEY = "1-vowels/01-hosted";
+
+  beforeAll(async () => {
+    for (const lesson of ["01 Hosted", "02 Local"]) {
+      const lessonDir = path.join(courseDir, "1 Vowels", lesson);
+      mkdirSync(lessonDir, { recursive: true });
+      await execFileAsync(
+        "ffmpeg",
+        [
+          "-y",
+          "-f",
+          "lavfi",
+          "-i",
+          "color=c=blue:s=64x64:d=1",
+          "-pix_fmt",
+          "yuv420p",
+          path.join(lessonDir, "lesson.mp4"),
+        ],
+        { timeout: 30_000 },
+      );
+    }
+    // The hosted lesson keeps a local thumbnail: the point of the change is
+    // that only `source` moves.
+    writeFileSync(path.join(courseDir, "1 Vowels", "01 Hosted", "thumbnail.jpeg"), "fake-jpeg");
+    writeFileSync(
+      path.join(root, "courses.manifest.json"),
+      JSON.stringify({
+        version: 1,
+        courses: [
+          {
+            folder: "test-course",
+            sequence: 1,
+            lessonVideoSources: { [HOSTED_KEY]: YOUTUBE_SOURCE },
+          },
+        ],
+      }),
+    );
+  }, 90_000);
+
+  afterAll(() => rmSync(root, { recursive: true, force: true }));
+
+  const videoRowTitled = (
+    seed: Awaited<ReturnType<typeof buildSeed>>,
+    fragment: string,
+  ): Extract<LessonRow, { kind: "video" }> | undefined =>
+    seed.lessonRows.find(
+      (l): l is Extract<LessonRow, { kind: "video" }> =>
+        l.kind === "video" && l.title.includes(fragment),
+    );
+
+  test("THEN the declared lesson emits the external URL as its source", async () => {
+    const seed = await buildSeed(root);
+
+    expect(videoRowTitled(seed, "Hosted")?.source).toBe(YOUTUBE_SOURCE);
+  });
+
+  test("AND the undeclared lesson still emits its content key", async () => {
+    const seed = await buildSeed(root);
+
+    expect(videoRowTitled(seed, "Local")?.source).toMatch(/^test-course\/.*lesson\.mp4$/);
+  });
+
+  test("AND the declared lesson keeps its poster as a content key", async () => {
+    const seed = await buildSeed(root);
+
+    expect(videoRowTitled(seed, "Hosted")?.poster).toMatch(/^test-course\/.*thumbnail\.jpeg$/);
+  });
+
+  test("AND the declared lesson still reports the local file's duration", async () => {
+    // ffprobe reads the .mp4 that is still on disk; YouTube supplies nothing
+    // at generation time, and `durationSeconds` is required by the entity.
+    const seed = await buildSeed(root);
+
+    expect(videoRowTitled(seed, "Hosted")?.durationSeconds).toBeGreaterThan(0);
+  });
+
+  test("AND the external URL is not queued for on-disk key validation", async () => {
+    // `seed.keys` is what the generator later checks with exists(); a URL has
+    // no file under the content root and would fail every declared source.
+    const seed = await buildSeed(root);
+
+    expect(seed.keys).not.toContain(YOUTUBE_SOURCE);
+    expect(seed.keys.some((k) => k.endsWith("01-hosted/thumbnail.jpeg"))).toBe(true);
+  });
+
+  test("AND the undeclared lesson's video key is still queued for validation", async () => {
+    // The exemption is per VALUE, not per course: declaring one lesson hosted
+    // must not switch off on-disk validation for its siblings.
+    const seed = await buildSeed(root);
+
+    expect(seed.keys.some((k) => k.endsWith("02-local/lesson.mp4"))).toBe(true);
+  });
+});

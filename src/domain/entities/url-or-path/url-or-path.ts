@@ -17,7 +17,24 @@ export const urlOrRelativePath = () =>
       "Must be an absolute http(s) URL or a site-relative path beginning with '/'",
     );
 
-const isAbsoluteHttpUrl = (value: string): boolean => {
+/**
+ * Whether a string is a fully-qualified `http:` or `https:` URL.
+ *
+ * @remarks
+ * Exported because callers outside the domain need to ask the SAME question
+ * the boundary asks. A content key is resolved through the store, but a value
+ * that is already an absolute URL — a lesson served by YouTube — must be left
+ * alone; resolving it would prepend the store's base and produce nonsense.
+ * A second, private definition of "absolute URL" could drift from this one and
+ * let a value pass the bypass yet fail {@link urlOrRelativePath}.
+ *
+ * Narrower than {@link urlOrRelativePath}: a site-relative path such as
+ * `/local-filesystem-lesson/x.mp4` is a valid value there and is `false` here.
+ *
+ * @param value - The string to test
+ * @returns `true` for an absolute http(s) URL, `false` for anything else
+ */
+export const isAbsoluteHttpUrl = (value: string): boolean => {
   try {
     const parsed = new URL(value);
     return parsed.protocol === "http:" || parsed.protocol === "https:";

@@ -1,6 +1,7 @@
 import type { BlobStore } from "@/adapters/persistence/blob-store/blob-store";
 import { Lesson, ReadingLesson, VideoLesson } from "@/domain/entities/lesson/lesson";
 import { Resource } from "@/domain/entities/resource/resource";
+import { isAbsoluteHttpUrl } from "@/domain/entities/url-or-path/url-or-path";
 
 import type { z } from "zod";
 
@@ -41,6 +42,9 @@ export type ResourceRow = Omit<z.input<typeof Resource>, "url"> & {
  * than reaching a `src` attribute in the UI.
  *
  * Both functions are pure and synchronous — `BlobStore.url` is string work.
+ *
+ * The one exception is a value that is ALREADY a URL: see
+ * {@link resolveContentValue}.
  */
 export function resolveLessonRow(row: LessonRow, blobStore: BlobStore): Lesson {
   // Discriminate on `kind`, mirroring the domain's own discriminated union,
@@ -54,13 +58,37 @@ export function resolveLessonRow(row: LessonRow, blobStore: BlobStore): Lesson {
   const { poster, ...rest } = row;
   return Lesson.parse({
     ...rest,
-    source: blobStore.url(row.source),
+    source: resolveContentValue(row.source, blobStore),
     // An absent poster stays absent. Resolving `undefined` would yield
     // `<base>/undefined`, which satisfies urlOrRelativePath() and then 404s.
-    ...(poster === undefined ? {} : { poster: blobStore.url(poster) }),
+    ...(poster === undefined ? {} : { poster: resolveContentValue(poster, blobStore) }),
   });
 }
 
 export function resolveResourceRow(row: ResourceRow, blobStore: BlobStore): Resource {
-  return Resource.parse({ ...row, url: blobStore.url(row.url) });
+  return Resource.parse({ ...row, url: resolveContentValue(row.url, blobStore) });
+}
+
+/**
+ * Turns a content key into a URL, leaving a value that is already one alone.
+ *
+ * @remarks
+ * A row's field holds a content key in the ordinary case, but it may instead
+ * hold a URL the content store knows nothing about — the Basic Course's
+ * lectures are served by YouTube. Passing that to `BlobStore.url()` would
+ * prepend the store's base and produce `<base>/https://www.youtube.com/...`,
+ * which still satisfies `urlOrRelativePath()` and then plays nothing.
+ *
+ * What decides is the value's own shape, never the field or the row it came
+ * from, so `source`, `poster` and `Resource.url` cannot drift into disagreeing
+ * about what counts as a key. `isAbsoluteHttpUrl` is the domain's own
+ * predicate — the same one that decides whether the parsed entity will accept
+ * the result.
+ *
+ * @param value - A content key, or a URL that needs no resolution
+ * @param blobStore - The store consulted only when `value` is a key
+ * @returns The resolved URL, or `value` unchanged when it was already absolute
+ */
+function resolveContentValue(value: string, blobStore: BlobStore): string {
+  return isAbsoluteHttpUrl(value) ? value : blobStore.url(value);
 }

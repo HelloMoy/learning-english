@@ -11,6 +11,7 @@ import {
 } from "../src/adapters/persistence/local-filesystem/resolve-content-row/resolve-content-row.ts";
 import { Course } from "../src/domain/entities/course/course.ts";
 import { Module } from "../src/domain/entities/module/module.ts";
+import { isAbsoluteHttpUrl } from "../src/domain/entities/url-or-path/url-or-path.ts";
 import {
   COURSES_MANIFEST_FILE,
   loadCoursesManifest,
@@ -431,12 +432,19 @@ async function appendLesson(
     title,
     lessonDir,
     fullKey,
+    // An entry says this lesson's video is served by someone else, so the key
+    // derived from the .mp4 on disk is not what the lesson should point at.
+    // Absent — the ordinary case — nothing about the row changes.
+    declaredVideoSource: course.lessonVideoSources[`${moduleSlug}/${lessonSlug}`],
   });
   resolveLessonRow(row, context.validationStore);
   context.seed.lessonRows.push(row);
 
   if (row.kind === "video") {
-    context.seed.keys.push(row.source);
+    // `seed.keys` is what the generator later checks with exists(). A declared
+    // external source has no file under the content root, so checking it would
+    // fail every hosted lesson. The poster is still a key and is still checked.
+    if (!isAbsoluteHttpUrl(row.source)) context.seed.keys.push(row.source);
     if (row.poster) context.seed.keys.push(row.poster);
   }
   if (classified.kind === "video" && classified.readmeKey) {
@@ -459,9 +467,20 @@ async function buildLessonRow(args: {
   title: string;
   lessonDir: string;
   fullKey: (lessonRelativeKey: string) => string;
+  /** External URL for this lesson's video, when the manifest declares one. */
+  declaredVideoSource: string | undefined;
 }): Promise<LessonRow> {
-  const { classified, lessonId, courseId, moduleId, lessonSequence, title, lessonDir, fullKey } =
-    args;
+  const {
+    classified,
+    lessonId,
+    courseId,
+    moduleId,
+    lessonSequence,
+    title,
+    lessonDir,
+    fullKey,
+    declaredVideoSource,
+  } = args;
   const common = {
     id: lessonId,
     courseId,
@@ -479,7 +498,7 @@ async function buildLessonRow(args: {
     kind: "video",
     ...common,
     description: classified.description,
-    source: fullKey(classified.videoKey),
+    source: declaredVideoSource ?? fullKey(classified.videoKey),
     durationSeconds: await probeDurationSeconds(path.join(lessonDir, classified.videoFileName)),
     ...(posterKey ? { poster: posterKey } : {}),
   };
