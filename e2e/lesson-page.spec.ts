@@ -102,10 +102,9 @@ test.describe("Lesson Page — happy path", () => {
     // accessible name of "Course outline".
     await expect(page.getByRole("navigation", { name: /course outline/i })).toBeVisible();
 
-    // Native video player renders with the lesson source.
-    const video = page.locator("video");
-    await expect(video).toBeVisible();
-    await expect(video).toHaveAttribute("controls", "");
+    // The Vidstack player renders as a labelled region with its own chrome;
+    // the provider's `<video>` is an implementation detail behind it.
+    await expect(page.getByRole("region", { name: /video player/i })).toBeVisible();
 
     // Resources card lists the seed resource attached to this lesson.
     await expect(page.getByRole("region", { name: /resources/i })).toBeVisible();

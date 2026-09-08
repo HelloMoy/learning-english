@@ -66,12 +66,13 @@
       "markComplete": "Marcar como concluída",
       "markedComplete": "Concluída"
     },
-    "LessonVideoResumeModal": {
+    "LessonVideoResumeOverlay": {
       "dialogLabel": "Retomar reprodução",
       "description": "Você parou de assistir no meio. Continue de onde parou ou comece de novo desde o início.",
       "resumeCta": "Retomar",
       "restartCta": "Reiniciar do começo",
-      "resumeFrom": "Retomar de {seconds}"
+      "resumeFrom": "Retomar de {seconds}",
+      "dismissLabel": "Dispensar e começar do início"
     },
     "LessonList": {
       "currentLessonAria": "Aula atual"
@@ -79,9 +80,67 @@
     "Outline": {
       "title": "Conteúdo do curso"
     },
-    "NativeVideoPlayer": {
+    "LessonVideoPlayer": {
       "playbackRate": "Velocidade de reprodução",
       "videoPlayerLabel": "Reprodutor de vídeo da aula"
+    },
+    "VideoPlayer": {
+      "announcements": "Anúncios",
+      "accessibility": "Acessibilidade",
+      "airplay": "AirPlay",
+      "audio": "Áudio",
+      "auto": "Automático",
+      "boost": "Reforço",
+      "captions": "Legendas",
+      "caption-styles": "Estilos de legenda",
+      "captions-look-like-this": "As legendas ficam assim",
+      "chapters": "Capítulos",
+      "closed-captions-off": "Legendas desativadas",
+      "closed-captions-on": "Legendas ativadas",
+      "connected": "Conectado",
+      "continue": "Continuar",
+      "connecting": "Conectando",
+      "default": "Padrão",
+      "disabled": "Desativado",
+      "disconnected": "Desconectado",
+      "display-background": "Fundo da tela",
+      "download": "Baixar",
+      "enter-fullscreen": "Tela cheia",
+      "enter-pip": "Ativar picture-in-picture",
+      "exit-fullscreen": "Sair da tela cheia",
+      "exit-pip": "Sair do picture-in-picture",
+      "font": "Fonte",
+      "family": "Família",
+      "fullscreen": "Tela cheia",
+      "google-cast": "Google Cast",
+      "keyboard-animations": "Animações de teclado",
+      "live": "AO VIVO",
+      "loop": "Repetir",
+      "mute": "Silenciar",
+      "normal": "Normal",
+      "off": "Desativado",
+      "pause": "Pausar",
+      "play": "Reproduzir",
+      "playback": "Reprodução",
+      "pip": "Picture-in-picture",
+      "quality": "Qualidade",
+      "replay": "Reproduzir de novo",
+      "reset": "Redefinir",
+      "seek-backward": "Retroceder",
+      "seek-forward": "Avançar",
+      "seek": "Buscar",
+      "settings": "Configurações",
+      "skip-to-live": "Ir para o ao vivo",
+      "speed": "Velocidade",
+      "size": "Tamanho",
+      "color": "Cor",
+      "opacity": "Opacidade",
+      "shadow": "Sombra",
+      "text": "Texto",
+      "text-background": "Fundo do texto",
+      "track": "Faixa",
+      "unmute": "Ativar som",
+      "volume": "Volume"
     },
     "LessonPage": {
       "errorCourseNotFound": "Não encontramos este curso.",

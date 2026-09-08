@@ -66,12 +66,13 @@
       "markComplete": "Mark as complete",
       "markedComplete": "Marked complete"
     },
-    "LessonVideoResumeModal": {
+    "LessonVideoResumeOverlay": {
       "dialogLabel": "Resume playback",
       "description": "You stopped watching partway through. Pick up where you left off, or start again from the beginning.",
       "resumeCta": "Resume",
       "restartCta": "Restart from beginning",
-      "resumeFrom": "Resume from {seconds}"
+      "resumeFrom": "Resume from {seconds}",
+      "dismissLabel": "Dismiss and start from the beginning"
     },
     "LessonList": {
       "currentLessonAria": "Current lesson"
@@ -79,9 +80,67 @@
     "Outline": {
       "title": "Course outline"
     },
-    "NativeVideoPlayer": {
+    "LessonVideoPlayer": {
       "playbackRate": "Playback speed",
       "videoPlayerLabel": "Lecture video player"
+    },
+    "VideoPlayer": {
+      "announcements": "Announcements",
+      "accessibility": "Accessibility",
+      "airplay": "AirPlay",
+      "audio": "Audio",
+      "auto": "Auto",
+      "boost": "Boost",
+      "captions": "Captions",
+      "caption-styles": "Caption Styles",
+      "captions-look-like-this": "Captions look like this",
+      "chapters": "Chapters",
+      "closed-captions-off": "Closed-Captions Off",
+      "closed-captions-on": "Closed-Captions On",
+      "connected": "Connected",
+      "continue": "Continue",
+      "connecting": "Connecting",
+      "default": "Default",
+      "disabled": "Disabled",
+      "disconnected": "Disconnected",
+      "display-background": "Display Background",
+      "download": "Download",
+      "enter-fullscreen": "Enter Fullscreen",
+      "enter-pip": "Enter PiP",
+      "exit-fullscreen": "Exit Fullscreen",
+      "exit-pip": "Exit PiP",
+      "font": "Font",
+      "family": "Family",
+      "fullscreen": "Fullscreen",
+      "google-cast": "Google Cast",
+      "keyboard-animations": "Keyboard Animations",
+      "live": "LIVE",
+      "loop": "Loop",
+      "mute": "Mute",
+      "normal": "Normal",
+      "off": "Off",
+      "pause": "Pause",
+      "play": "Play",
+      "playback": "Playback",
+      "pip": "PiP",
+      "quality": "Quality",
+      "replay": "Replay",
+      "reset": "Reset",
+      "seek-backward": "Seek Backward",
+      "seek-forward": "Seek Forward",
+      "seek": "Seek",
+      "settings": "Settings",
+      "skip-to-live": "Skip To Live",
+      "speed": "Speed",
+      "size": "Size",
+      "color": "Color",
+      "opacity": "Opacity",
+      "shadow": "Shadow",
+      "text": "Text",
+      "text-background": "Text Background",
+      "track": "Track",
+      "unmute": "Unmute",
+      "volume": "Volume"
     },
     "LessonPage": {
       "errorCourseNotFound": "We couldn't find this course.",

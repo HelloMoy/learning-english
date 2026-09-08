@@ -66,12 +66,13 @@
       "markComplete": "Marcar como completada",
       "markedComplete": "Completada"
     },
-    "LessonVideoResumeModal": {
+    "LessonVideoResumeOverlay": {
       "dialogLabel": "Reanudar reproducción",
       "description": "Dejaste de ver la lección a medias. Continúa donde lo dejaste o empieza de nuevo desde el principio.",
       "resumeCta": "Reanudar",
       "restartCta": "Reiniciar desde el principio",
-      "resumeFrom": "Reanudar desde {seconds}"
+      "resumeFrom": "Reanudar desde {seconds}",
+      "dismissLabel": "Descartar y empezar desde el principio"
     },
     "LessonList": {
       "currentLessonAria": "Lección actual"
@@ -79,9 +80,67 @@
     "Outline": {
       "title": "Contenido del curso"
     },
-    "NativeVideoPlayer": {
+    "LessonVideoPlayer": {
       "playbackRate": "Velocidad de reproducción",
       "videoPlayerLabel": "Reproductor de video de la lección"
+    },
+    "VideoPlayer": {
+      "announcements": "Anuncios",
+      "accessibility": "Accesibilidad",
+      "airplay": "AirPlay",
+      "audio": "Audio",
+      "auto": "Automático",
+      "boost": "Amplificación",
+      "captions": "Subtítulos",
+      "caption-styles": "Estilos de subtítulos",
+      "captions-look-like-this": "Los subtítulos se ven así",
+      "chapters": "Capítulos",
+      "closed-captions-off": "Subtítulos desactivados",
+      "closed-captions-on": "Subtítulos activados",
+      "connected": "Conectado",
+      "continue": "Continuar",
+      "connecting": "Conectando",
+      "default": "Predeterminado",
+      "disabled": "Desactivado",
+      "disconnected": "Desconectado",
+      "display-background": "Fondo de pantalla",
+      "download": "Descargar",
+      "enter-fullscreen": "Pantalla completa",
+      "enter-pip": "Activar imagen en imagen",
+      "exit-fullscreen": "Salir de pantalla completa",
+      "exit-pip": "Salir de imagen en imagen",
+      "font": "Fuente",
+      "family": "Familia",
+      "fullscreen": "Pantalla completa",
+      "google-cast": "Google Cast",
+      "keyboard-animations": "Animaciones de teclado",
+      "live": "EN VIVO",
+      "loop": "Repetir",
+      "mute": "Silenciar",
+      "normal": "Normal",
+      "off": "Desactivado",
+      "pause": "Pausar",
+      "play": "Reproducir",
+      "playback": "Reproducción",
+      "pip": "Imagen en imagen",
+      "quality": "Calidad",
+      "replay": "Volver a reproducir",
+      "reset": "Restablecer",
+      "seek-backward": "Retroceder",
+      "seek-forward": "Avanzar",
+      "seek": "Buscar",
+      "settings": "Ajustes",
+      "skip-to-live": "Ir al directo",
+      "speed": "Velocidad",
+      "size": "Tamaño",
+      "color": "Color",
+      "opacity": "Opacidad",
+      "shadow": "Sombra",
+      "text": "Texto",
+      "text-background": "Fondo del texto",
+      "track": "Pista",
+      "unmute": "Activar sonido",
+      "volume": "Volumen"
     },
     "LessonPage": {
       "errorCourseNotFound": "No encontramos este curso.",

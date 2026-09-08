@@ -4,9 +4,10 @@ import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
 import { Resource } from "@/domain/entities/resource/resource";
 import type { LessonView as LessonViewData } from "@/domain/use-cases/find-lesson-for-view/find-lesson-for-view";
+import { emitPlayerEvent, findPlayerIn } from "@/test-setup/stubs/vidstack-player";
 
 import { faker } from "@faker-js/faker";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -129,7 +130,7 @@ describe("LessonView", () => {
 
     // Assert
     expect(screen.getByText("Reading body content.")).toBeInTheDocument();
-    expect(document.querySelector("video")).toBeNull();
+    expect(screen.queryByRole("region", { name: "videoPlayerLabel" })).toBeNull();
   });
 
   test("a poster-less video lesson shows the title cover over the idle player", () => {
@@ -145,7 +146,7 @@ describe("LessonView", () => {
     // Without a poster the frame is black, so the cover is the only cover
     // art the page has. Its headline is the module title.
     expect(screen.getByRole("heading", { name: "Module" })).toBeInTheDocument();
-    expect(document.querySelector("video")).not.toBeNull();
+    expect(screen.getByRole("region", { name: "videoPlayerLabel" })).toBeInTheDocument();
     // The current lesson is marked in the outline.
     expect(document.querySelector('[aria-current="page"]')).not.toBeNull();
   });
@@ -163,7 +164,7 @@ describe("LessonView", () => {
     // The thumbnail is the cover; painting titles over it would be the
     // watermark this change exists to remove.
     expect(screen.queryByRole("heading", { name: "Module" })).toBeNull();
-    expect(document.querySelector("video")).toHaveAttribute("poster", "/thumbnails/lecture.jpg");
+    expect(screen.getByRole("region", { name: "videoPlayerLabel" })).toBeInTheDocument();
   });
 
   test("starting playback retires the title cover for the rest of the session", () => {
@@ -176,20 +177,20 @@ describe("LessonView", () => {
         markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
       />,
     );
-    const video = document.querySelector("video") as HTMLVideoElement;
+    const player = findPlayerIn(screen.getByRole("region", { name: "videoPlayerLabel" }));
     expect(screen.getByRole("heading", { name: "Module" })).toBeInTheDocument();
 
     act(() => {
-      fireEvent.play(video);
+      emitPlayerEvent(player, "play");
     });
     expect(screen.queryByRole("heading", { name: "Module" })).toBeNull();
 
     // Regression guard for the reported bug: the cover must not flash back
     // when the learner pauses mid-lesson, nor on a seek or on ended.
     act(() => {
-      fireEvent.pause(video);
-      fireEvent.seeking(video);
-      fireEvent.ended(video);
+      emitPlayerEvent(player, "pause");
+      emitPlayerEvent(player, "seeking");
+      emitPlayerEvent(player, "ended");
     });
     expect(screen.queryByRole("heading", { name: "Module" })).toBeNull();
   });

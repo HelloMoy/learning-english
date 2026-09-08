@@ -28,8 +28,7 @@ import * as React from "react";
  *
  * Modals in this project are opened imperatively through
  * `@ebay/nice-modal-react` rather than by conditionally rendering a `Dialog`
- * as a child — see `AGENTS.md` §Modals and
- * `src/components/modals/lesson-video-resume-modal/`.
+ * as a child — see `AGENTS.md` §Modals.
  *
  * @example Controlled by NiceModal
  * ```tsx

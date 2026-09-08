@@ -1,9 +1,12 @@
-import { LessonId } from "@/domain/entities/ids/ids";
+import "@testing-library/jest-dom/vitest";
 
-import NiceModal from "@ebay/nice-modal-react";
+import { LessonId } from "@/domain/entities/ids/ids";
+import { emitPlayerEvent } from "@/test-setup/stubs/vidstack-player";
+
 import { faker } from "@faker-js/faker";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
+import type { MediaPlayerInstance } from "@vidstack/react";
 import { useTranslations } from "next-intl";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -16,19 +19,49 @@ vi.mock("next-intl", () => ({
 const mockUseTranslations = vi.mocked(useTranslations);
 
 const mockStorage = new Map<string, string>();
-
 const storageKeyFor = (lessonId: string) => `learning-english:playback:${lessonId}`;
 
-/**
- * The resume prompt is a NiceModal-driven `Dialog`, so it is portalled to the
- * document root rather than rendered inside the player. Every render needs the
- * provider, and every assertion about the prompt goes through `screen`, not the
- * returned container.
- */
-const renderPlayer = (ui: React.ReactElement) =>
-  render(<NiceModal.Provider>{ui}</NiceModal.Provider>);
+const DURATION_SECONDS = 600;
+const RESUMABLE_SECONDS = 180;
 
-/** Lets the async mount-read resolve and the modal commit. */
+/**
+ * The wrapper is composition, and that is all these tests assert: does the
+ * overlay appear for the right saved positions, at the right moment, and does
+ * answering it dismiss the offer.
+ *
+ * Seeking and playing are deliberately **not** asserted here. jsdom loads no
+ * media provider — the player reports `currentTime` as `0` whatever is asked
+ * of it — so an assertion on the seek would be an assertion about the stub,
+ * not the feature. `useResumeOnFirstPlay` covers the calls; Playwright covers
+ * the real thing. See design.md §R3.
+ */
+function renderPlayer({
+  lessonId = LessonId.parse(faker.string.uuid()),
+  durationSeconds = DURATION_SECONDS,
+}: { lessonId?: LessonId; durationSeconds?: number } = {}) {
+  const playerRef = { current: null as MediaPlayerInstance | null };
+
+  const view = render(
+    <PlaybackPositionedVideoPlayer
+      lessonId={lessonId}
+      source="/videos/lesson.mp4"
+      title="Long vs short vowels"
+      durationSeconds={durationSeconds}
+      ref={playerRef}
+    />,
+  );
+
+  return { ...view, lessonId, playerRef };
+}
+
+/** `emitPlayerEvent` wrapped in `act`, since every event here changes state. */
+const emit = (player: MediaPlayerInstance | null, type: string, detail: unknown = null) => {
+  act(() => {
+    emitPlayerEvent(player, type, detail);
+  });
+};
+
+/** Lets the async mount-read resolve and the overlay commit. */
 const settle = async () => {
   await act(async () => {
     await Promise.resolve();
@@ -37,11 +70,7 @@ const settle = async () => {
   });
 };
 
-const videoIn = (container: HTMLElement) => container.querySelector("video") as HTMLVideoElement;
-
 beforeEach(() => {
-  // Echo the key plus any ICU values, so the overlay's interpolated
-  // "resume from MM:SS" copy stays assertable without real translations.
   mockUseTranslations.mockReturnValue(((key: string, values?: Record<string, unknown>) =>
     values === undefined ? key : `${key} ${Object.values(values).join(" ")}`) as never);
   mockStorage.clear();
@@ -68,318 +97,217 @@ afterEach(() => {
 });
 
 describe("PlaybackPositionedVideoPlayer", () => {
-  describe("Rendering", () => {
-    test("WHEN rendered THEN it shows a <video controls> with the source and title", () => {
+  describe("GIVEN the learner has only just arrived", () => {
+    test("WHEN a resumable position is stored THEN nothing is offered until they press play", async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
-      const source = "/videos/" + faker.system.fileName();
-      const title = faker.lorem.sentence();
+      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
 
-      const { getByTitle } = renderPlayer(
-        <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source={source}
-          title={title}
-        />,
-      );
+      renderPlayer({ lessonId });
+      await settle();
 
-      const video = getByTitle(title) as HTMLVideoElement;
-      expect(video.tagName).toBe("VIDEO");
-      expect(video).toHaveAttribute("controls");
-      expect(video.querySelector("source")?.getAttribute("src")).toBe(source);
+      expect(screen.queryByRole("dialog")).toBeNull();
     });
 
-    test("WHEN a poster is provided THEN the <video> receives the poster attribute", () => {
+    test("WHEN the page has loaded THEN the stored position is not overwritten", async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
-      const poster = faker.internet.url();
+      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
 
-      const { container } = renderPlayer(
-        <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source="/videos/x.mp4"
-          title="t"
-          poster={poster}
-        />,
-      );
+      renderPlayer({ lessonId });
+      await settle();
 
-      expect(container.querySelector("video")).toHaveAttribute("poster", poster);
+      expect(mockStorage.get(storageKeyFor(lessonId))).toBe(String(RESUMABLE_SECONDS));
+    });
+
+    test("WHEN the player renders THEN its keyboard shortcuts are live", () => {
+      const { playerRef } = renderPlayer();
+
+      expect(playerRef.current?.$props.keyDisabled()).toBe(false);
     });
   });
 
-  describe("Playback start reporting", () => {
-    /**
-     * The wrapper already owns the only `play` subscription (it flips the
-     * interaction gate there). `onPlaybackStart` rides that same listener so
-     * "playback has begun" has a single source of truth — `LessonView` uses
-     * it to retire the gold title cover.
-     */
-    test("WHEN the <video> emits play THEN onPlaybackStart is called", () => {
+  describe("GIVEN the learner presses play", () => {
+    test("WHEN a resumable position is stored THEN the overlay appears inside the player", async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
-      const onPlaybackStart = vi.fn();
+      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
 
-      const { container } = renderPlayer(
-        <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source="/videos/x.mp4"
-          title="t"
-          onPlaybackStart={onPlaybackStart}
-        />,
-      );
-
-      const video = container.querySelector("video") as HTMLVideoElement;
-      act(() => {
-        fireEvent.play(video);
-      });
-
-      expect(onPlaybackStart).toHaveBeenCalled();
-    });
-
-    test("WHEN no onPlaybackStart is provided THEN a play event does not throw", () => {
-      const lessonId = LessonId.parse(faker.string.uuid());
-
-      const { container } = renderPlayer(
-        <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source="/videos/x.mp4"
-          title="t"
-        />,
-      );
-
-      const video = container.querySelector("video") as HTMLVideoElement;
-      expect(() => {
-        act(() => {
-          fireEvent.play(video);
-        });
-      }).not.toThrow();
-    });
-  });
-
-  describe("Resume dialog wiring", () => {
-    test("WHEN there is no saved position THEN no dialog is opened", async () => {
-      const lessonId = LessonId.parse(faker.string.uuid());
-
-      renderPlayer(
-        <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source="/videos/x.mp4"
-          title="t"
-          durationSeconds={600}
-        />,
-      );
+      const { playerRef } = renderPlayer({ lessonId });
       await settle();
+      emit(playerRef.current, "play");
 
-      expect(screen.queryByRole("dialog")).toBeNull();
+      const overlay = await screen.findByRole("dialog");
+      expect(overlay).toHaveTextContent("03:00");
+      expect(screen.getByRole("region")).toContainElement(overlay);
     });
 
-    test("WHEN the saved position is below the threshold THEN no dialog is opened", async () => {
+    test("WHEN the overlay is open THEN the player's keyboard shortcuts are suppressed", async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(storageKeyFor(lessonId), "10");
+      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
 
-      renderPlayer(
-        <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source="/videos/x.mp4"
-          title="t"
-          durationSeconds={600}
-        />,
-      );
+      const { playerRef } = renderPlayer({ lessonId });
       await settle();
-
-      expect(screen.queryByRole("dialog")).toBeNull();
-    });
-
-    test("WHEN the saved position is within the last 10 seconds THEN no dialog is opened", async () => {
-      const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(storageKeyFor(lessonId), "595");
-
-      renderPlayer(
-        <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source="/videos/x.mp4"
-          title="t"
-          durationSeconds={600}
-        />,
-      );
-      await settle();
-
-      expect(screen.queryByRole("dialog")).toBeNull();
-    });
-
-    test("WHEN the saved position passes the thresholds THEN a dialog opens showing that position", async () => {
-      const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(storageKeyFor(lessonId), "180");
-
-      renderPlayer(
-        <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source="/videos/x.mp4"
-          title="t"
-          durationSeconds={600}
-        />,
-      );
-
-      const dialog = await screen.findByRole("dialog");
-      expect(dialog).toHaveTextContent("03:00");
-    });
-
-    test("WHEN the player re-renders THEN the dialog is not opened a second time", async () => {
-      const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(storageKeyFor(lessonId), "180");
-
-      const { rerender } = renderPlayer(
-        <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source="/videos/x.mp4"
-          title="t"
-          durationSeconds={600}
-        />,
-      );
-      await settle();
-
-      rerender(
-        <NiceModal.Provider>
-          <PlaybackPositionedVideoPlayer
-            lessonId={lessonId}
-            source="/videos/x.mp4"
-            title="t"
-            durationSeconds={600}
-          />
-        </NiceModal.Provider>,
-      );
-      await settle();
-
-      expect(screen.getAllByRole("dialog")).toHaveLength(1);
-    });
-
-    test("WHEN the dialog is open THEN the video has not been seeked yet", async () => {
-      const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(storageKeyFor(lessonId), "180");
-
-      const { container } = renderPlayer(
-        <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source="/videos/x.mp4"
-          title="t"
-          durationSeconds={600}
-        />,
-      );
+      emit(playerRef.current, "play");
       await screen.findByRole("dialog");
 
-      // Seeking is the learner's decision, not a side effect of being offered
-      // the choice — see the "restart from the beginning" requirement.
-      expect(videoIn(container).currentTime).toBe(0);
+      // Otherwise `Space` on the Resume button would both press it and toggle
+      // playback underneath — design.md §D6.
+      expect(playerRef.current?.$props.keyDisabled()).toBe(true);
+    });
+
+    test.each([
+      ["nothing is stored", null],
+      ["the position is trivial", "10"],
+      ["the position is near the end", String(DURATION_SECONDS - 5)],
+    ])("WHEN %s THEN no overlay appears", async (_case, stored) => {
+      const lessonId = LessonId.parse(faker.string.uuid());
+      if (stored !== null) mockStorage.set(storageKeyFor(lessonId), stored);
+
+      const { playerRef } = renderPlayer({ lessonId });
+      await settle();
+      emit(playerRef.current, "play");
+      await settle();
+
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+
+    test("WHEN the lesson has no known duration THEN no overlay appears", async () => {
+      const lessonId = LessonId.parse(faker.string.uuid());
+      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
+
+      const { playerRef } = renderPlayer({ lessonId, durationSeconds: 0 });
+      await settle();
+      emit(playerRef.current, "play");
+      await settle();
+
+      expect(screen.queryByRole("dialog")).toBeNull();
     });
   });
 
-  describe("Acting on the learner's choice", () => {
-    const renderWithSavedPosition = async (seconds: string) => {
+  describe("GIVEN the learner answers the overlay", () => {
+    const openOverlay = async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(storageKeyFor(lessonId), seconds);
+      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
 
-      const { container, rerender } = renderPlayer(
-        <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source="/videos/x.mp4"
-          title="t"
-          durationSeconds={600}
-        />,
-      );
+      const rendered = renderPlayer({ lessonId });
+      await settle();
+      emit(rendered.playerRef.current, "play");
       await screen.findByRole("dialog");
 
-      return { lessonId, container, rerender };
+      return rendered;
     };
 
-    test("WHEN Resume is chosen THEN the video seeks to the saved position and the dialog closes", async () => {
+    test.each(["resumeCta", "restartCta"])(
+      "WHEN %s is activated THEN the overlay closes",
+      async (action) => {
+        const user = userEvent.setup();
+        await openOverlay();
+
+        await user.click(screen.getByRole("button", { name: action }));
+        await settle();
+
+        expect(screen.queryByRole("dialog")).toBeNull();
+      },
+    );
+
+    test("WHEN Escape dismisses it THEN the overlay closes", async () => {
       const user = userEvent.setup();
-      const { container } = await renderWithSavedPosition("180");
-
-      await user.click(screen.getByRole("button", { name: "resumeCta" }));
-      await settle();
-
-      expect(videoIn(container).currentTime).toBe(180);
-      expect(screen.queryByRole("dialog")).toBeNull();
-    });
-
-    test("WHEN Restart is chosen THEN the video stays at the beginning and the dialog closes", async () => {
-      const user = userEvent.setup();
-      const { container } = await renderWithSavedPosition("180");
-
-      await user.click(screen.getByRole("button", { name: "restartCta" }));
-      await settle();
-
-      expect(videoIn(container).currentTime).toBe(0);
-      expect(screen.queryByRole("dialog")).toBeNull();
-    });
-
-    test("WHEN the dialog is dismissed with Escape THEN the video stays at the beginning", async () => {
-      const user = userEvent.setup();
-      const { container } = await renderWithSavedPosition("180");
+      await openOverlay();
 
       await user.keyboard("{Escape}");
       await settle();
 
-      expect(videoIn(container).currentTime).toBe(0);
       expect(screen.queryByRole("dialog")).toBeNull();
     });
 
-    test("WHEN the dialog is dismissed THEN the saved position is left intact for the next visit", async () => {
+    test("WHEN it is dismissed THEN nothing clears the stored position on the way out", async () => {
       const user = userEvent.setup();
-      const { lessonId } = await renderWithSavedPosition("180");
+      const { lessonId } = await openOverlay();
 
       await user.keyboard("{Escape}");
       await settle();
 
-      expect(mockStorage.get(storageKeyFor(lessonId))).toBe("180");
+      // Dismissal issues no delete of its own. Playback then restarts from
+      // the top and the ordinary cadence overwrites the value with where the
+      // learner actually is — which a real browser does and jsdom cannot.
+      expect(mockStorage.has(storageKeyFor(lessonId))).toBe(true);
     });
 
-    /**
-     * Regression: the `usePlaybackPosition` hook used to return a new object on
-     * every render, which made the mount-read effect's `position` dep appear
-     * "changed" every render — re-firing the read and re-opening the prompt
-     * even after the learner had answered it. The hook is memoized on
-     * `lessonId` now, and the player additionally guards on a ref, so a
-     * re-render after a choice must not bring the dialog back.
-     */
-    test("WHEN the player re-renders after a choice THEN the dialog does not re-open", async () => {
+    test("WHEN it is answered THEN the player's keyboard shortcuts come back", async () => {
       const user = userEvent.setup();
-      const { lessonId, rerender } = await renderWithSavedPosition("180");
+      const { playerRef } = await openOverlay();
 
       await user.click(screen.getByRole("button", { name: "resumeCta" }));
       await settle();
 
-      rerender(
-        <NiceModal.Provider>
-          <PlaybackPositionedVideoPlayer
-            lessonId={lessonId}
-            source="/videos/x.mp4"
-            title="t"
-            durationSeconds={600}
-          />
-        </NiceModal.Provider>,
-      );
+      expect(playerRef.current?.$props.keyDisabled()).toBe(false);
+    });
+
+    test("WHEN the learner plays again THEN the overlay is not offered twice", async () => {
+      const user = userEvent.setup();
+      const { playerRef } = await openOverlay();
+
+      await user.click(screen.getByRole("button", { name: "resumeCta" }));
+      await settle();
+      emit(playerRef.current, "play");
       await settle();
 
       expect(screen.queryByRole("dialog")).toBeNull();
     });
   });
 
-  describe("Storage integrity (no overwriting cold-load)", () => {
-    test("WHEN rendered with a saved position THEN the saved value is NOT overwritten with 0", async () => {
-      const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(`learning-english:playback:${lessonId}`, "180");
+  describe("GIVEN the page wants to know playback has begun", () => {
+    test("WHEN the player emits play THEN onPlaybackStart is called", async () => {
+      const onPlaybackStart = vi.fn();
+      const playerRef = { current: null as MediaPlayerInstance | null };
 
-      renderPlayer(
+      render(
         <PlaybackPositionedVideoPlayer
-          lessonId={lessonId}
-          source="/videos/x.mp4"
+          lessonId={LessonId.parse(faker.string.uuid())}
+          source="/videos/lesson.mp4"
           title="t"
-          durationSeconds={600}
+          durationSeconds={DURATION_SECONDS}
+          onPlaybackStart={onPlaybackStart}
+          ref={playerRef}
         />,
       );
+      await settle();
+      emit(playerRef.current, "play");
 
-      // After mount, the stored value remains — the wrapper reads on mount
-      // but does NOT write before user interaction.
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      expect(mockStorage.get(`learning-english:playback:${lessonId}`)).toBe("180");
+      expect(onPlaybackStart).toHaveBeenCalledTimes(1);
+    });
+
+    test("WHEN no callback is given THEN a play event does not throw", async () => {
+      const { playerRef } = renderPlayer();
+      await settle();
+
+      expect(() => emit(playerRef.current, "play")).not.toThrow();
+    });
+  });
+
+  describe("GIVEN the learner has watched some of the lesson", () => {
+    test("WHEN they pause after playing THEN the position is persisted", async () => {
+      const lessonId = LessonId.parse(faker.string.uuid());
+      const { playerRef } = renderPlayer({ lessonId });
+      await settle();
+
+      emit(playerRef.current, "play");
+      emit(playerRef.current, "pause");
+      await settle();
+
+      // The player reports 0 under jsdom, so this asserts *that* a write
+      // happened once the gate opened, not which value — the value is
+      // `usePersistPlaybackPosition`'s test.
+      expect(mockStorage.has(storageKeyFor(lessonId))).toBe(true);
+    });
+
+    test("WHEN they pause without ever playing THEN nothing is persisted", async () => {
+      const lessonId = LessonId.parse(faker.string.uuid());
+      const { playerRef } = renderPlayer({ lessonId });
+      await settle();
+
+      emit(playerRef.current, "pause");
+      await settle();
+
+      expect(mockStorage.has(storageKeyFor(lessonId))).toBe(false);
     });
   });
 });
