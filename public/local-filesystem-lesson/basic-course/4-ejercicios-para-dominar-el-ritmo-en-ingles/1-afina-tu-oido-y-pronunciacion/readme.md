@@ -1,4 +1,37 @@
 # Afina tu oído y pronunciación
 
-🎧 Aprende a escuchar los sonidos y a decir palabras paso a paso.
-Este video te ayuda a reconocer los sonidos del inglés para hablar mejor y escuchar más claro.
+## 🇪🇸 Español
+
+### Primer ejercicio de oído: identificar antes de producir
+
+Este es el primero de una serie de ejercicios de escucha activa. La idea es sencilla: antes de intentar pronunciar una palabra, tienes que **oírla bien**. Vas a escuchar sonidos aislados, identificarlos y sólo entonces repetirlos, paso a paso y sin prisa.
+
+**Qué vas a practicar**
+
+- 👂 **Escuchar:** identificar el sonido antes de intentar decirlo.
+- 🐢 **Repetir despacio:** primero lento y exagerado, después a velocidad normal.
+- 🎙️ **Comparar:** grabarte y contrastar con el audio original.
+
+**Practica con:** sonidos aislados · palabras cortas · la misma palabra repetida varias veces
+
+> ⚠️ **El error típico en español:** repetir sin haber identificado el sonido. Si tu oído todavía no lo distingue, tu boca sólo va a reproducir lo que ya sabías decir en español.
+
+**Al terminar vas a poder:** reconocer sonidos aislados del inglés y repetirlos con el modelo delante.
+
+## 🇺🇸 English
+
+### First ear-training exercise: identify before you produce
+
+This is the first in a series of active-listening exercises. The idea is simple: before trying to pronounce a word, you have to **hear it properly**. You'll listen to isolated sounds, identify them, and only then repeat them — step by step and without rushing.
+
+**What you'll practice**
+
+- 👂 **Listen:** identify the sound before trying to say it.
+- 🐢 **Repeat slowly:** slow and exaggerated first, normal speed after.
+- 🎙️ **Compare:** record yourself and check against the original audio.
+
+**Practice with:** isolated sounds · short words · the same word repeated several times
+
+> ⚠️ **The typical Spanish-speaker mistake:** repeating before you've identified the sound. If your ear can't tell it apart yet, your mouth will only reproduce what you already knew how to say in Spanish.
+
+**By the end you'll be able to:** recognize isolated English sounds and repeat them with the model in front of you.

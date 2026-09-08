@@ -61,4 +61,9 @@ describe("LessonNotesTabs", () => {
     );
     expect(container.querySelector("script")).toBeNull();
   });
+  test("delegates typography to the Markdown renderer instead of prose classes", () => {
+    const { container } = render(<LessonNotesTabs markdown={BILINGUAL} />);
+
+    expect(container.querySelector('[class*="prose"]')).toBeNull();
+  });
 });

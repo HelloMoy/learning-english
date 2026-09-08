@@ -1,5 +1,37 @@
 # The Vowel Sound /ʊ/ (o corta)
 
-El sonido /ʊ/, conocido como la "o corta" , es un sonido vocálico utilizado en el inglés americano. Es un sonido redondeado y corto, producido al redondear o al poner la boca en una posición semi abierta neutral y colocar la lengua en la parte posterior de la boca. Puedes escucharlo en palabras como "book" (libro), "look" (mirar) y "foot" (pie). Dominar este sonido es importante para sonar más natural en inglés americano y ayuda a distinguir palabras que de otro modo podrían sonar similares.
+## 🇪🇸 Español
 
-The /ʊ/ sound, often referred to as the "short o" or "o corta", is a vowel sound used in American English. It’s a rounded, short sound, produced by rounding the lips and placing the tongue towards the back of the mouth. You can hear it in words like "book", "look", and "foot". Mastering this sound is important for sounding more natural in American English and helps distinguish words that may otherwise sound similar.
+### La /ʊ/: la _u_ corta y relajada del inglés americano
+
+La /ʊ/ es una vocal breve, redondeada y floja. Es la hermana corta de /u/, y la diferencia entre las dos cambia el significado de muchas palabras. En español no tenemos nada tan relajado: nuestra _u_ siempre sale tensa.
+
+**Cómo se produce**
+
+- 👄 **Boca:** semiabierta, labios apenas redondeados y sin tensión.
+- 👅 **Lengua:** atrás y alta, pero sin llegar al tope.
+- 🔊 **Voz:** sonora y muy corta — entra y sale enseguida.
+
+**Lo oyes en:** _book_ · _look_ · _foot_ · _good_ · _put_
+
+> ⚠️ **El error típico en español:** alargarla hasta convertirla en /u/, de modo que _foot_ suena a _food_ y _pull_ a _pool_.
+
+**Al terminar vas a poder:** producir la /ʊ/ corta y separar pares como _foot / food_ y _full / fool_.
+
+## 🇺🇸 English
+
+### The /ʊ/: the short, relaxed American _u_
+
+The /ʊ/ is a brief, rounded, loose vowel. It's the short sibling of /u/, and the difference between the two changes the meaning of plenty of words. Spanish has nothing this relaxed — our _u_ always comes out tense.
+
+**How it's made**
+
+- 👄 **Mouth:** half open, lips barely rounded and free of tension.
+- 👅 **Tongue:** back and high, but not all the way up.
+- 🔊 **Voice:** voiced and very short — in and straight back out.
+
+**You hear it in:** _book_ · _look_ · _foot_ · _good_ · _put_
+
+> ⚠️ **The typical Spanish-speaker mistake:** stretching it into a /u/, so _foot_ comes out as _food_ and _pull_ as _pool_.
+
+**By the end you'll be able to:** produce a short /ʊ/ and keep pairs like _foot / food_ and _full / fool_ apart.

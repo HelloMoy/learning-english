@@ -1,5 +1,37 @@
 # Dark /L/ Part 1
 
-🌟 En esta lección (Parte 1), aprenderás a pronunciar la “L oscura” en inglés americano. Esta versión del sonido /l/ se produce al final de las palabras o antes de una consonante, con la parte trasera de la lengua elevada. Es más suave, profunda y distinta de la “L clara” que aparece al inicio de las palabras. 💬 Dominar la L oscura te ayudará a sonar más natural y fluido. ✨
+## 🇪🇸 Español
 
-🌟 In this lesson (Part 1), you'll learn how to pronounce the Dark L sound in American English. This version of the /l/ sound is produced at the end of words or before a consonant, with the back of the tongue raised. It’s softer, deeper, and different from the "light L" at the beginning of words. 💬 Mastering the Dark L will help you sound more natural and fluent! ✨
+### La L oscura: la /l/ del final de palabra
+
+El inglés tiene dos eles. La clara aparece al principio de palabra y se parece a la nuestra. La **oscura** aparece al final de palabra o antes de consonante, y se produce levantando la parte **trasera** de la lengua: sale más profunda, más grave, casi como una _u_. En español esta segunda no existe.
+
+**Cómo se produce**
+
+- 👄 **Boca:** entreabierta y relajada.
+- 👅 **Lengua:** la punta puede tocar arriba, pero lo importante es que la **parte trasera se eleva**.
+- 🔊 **Voz:** sonora, grave y sostenida — se puede alargar.
+
+**Lo oyes en:** _feel_ · _call_ · _milk_ · _cold_ · _well_
+
+> ⚠️ **El error típico en español:** usar la _l_ española clara en todas las posiciones. _Feel_ con _l_ española suena corto y plano; la L oscura hace que la palabra termine de otra forma.
+
+**Al terminar vas a poder:** distinguir la L clara de la oscura y producir la oscura al final de palabra.
+
+## 🇺🇸 English
+
+### The Dark L: the /l/ at the end of a word
+
+English has two Ls. The light one appears at the start of a word and resembles the Spanish _l_. The **dark** one appears at the end of a word or before a consonant, and it's made by raising the **back** of the tongue: it comes out deeper, lower, almost like a _u_. Spanish has no equivalent for that second one.
+
+**How it's made**
+
+- 👄 **Mouth:** slightly open and relaxed.
+- 👅 **Tongue:** the tip may touch the roof, but what matters is that the **back rises**.
+- 🔊 **Voice:** voiced, low and sustained — you can stretch it.
+
+**You hear it in:** _feel_ · _call_ · _milk_ · _cold_ · _well_
+
+> ⚠️ **The typical Spanish-speaker mistake:** using the light Spanish _l_ in every position. _Feel_ with a Spanish _l_ sounds short and flat; the dark L makes the word end differently.
+
+**By the end you'll be able to:** tell the light L from the dark one and produce the dark one at the end of a word.

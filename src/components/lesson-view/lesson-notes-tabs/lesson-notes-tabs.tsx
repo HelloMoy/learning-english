@@ -1,6 +1,6 @@
 "use client";
 
-import { Markdown } from "@/components/lesson-notes/markdown";
+import { Markdown } from "@/components/lesson-notes/markdown/markdown";
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -8,7 +8,6 @@ import { useState } from "react";
 import { splitBilingualNotes } from "../split-bilingual-notes/split-bilingual-notes";
 
 const COLUMN_LABEL = "text-xs font-bold tracking-[0.32em] text-gold uppercase";
-const PROSE = "prose prose-sm prose-slate dark:prose-invert max-w-none text-foreground";
 
 function tabClass(active: boolean, disabled = false): string {
   if (disabled) {
@@ -85,21 +84,15 @@ export function LessonNotesTabs({
             <div className="grid gap-8 sm:grid-cols-2">
               <div className="flex flex-col gap-3">
                 <h3 className={COLUMN_LABEL}>{t("spanish")}</h3>
-                <div className={PROSE}>
-                  <Markdown content={notes.es} />
-                </div>
+                <Markdown content={notes.es} />
               </div>
               <div className="flex flex-col gap-3">
                 <h3 className={COLUMN_LABEL}>{t("english")}</h3>
-                <div className={PROSE}>
-                  <Markdown content={notes.en} />
-                </div>
+                <Markdown content={notes.en} />
               </div>
             </div>
           ) : (
-            <div className={PROSE}>
-              <Markdown content={notes.markdown} />
-            </div>
+            <Markdown content={notes.markdown} />
           )}
         </div>
       ) : (

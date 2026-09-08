@@ -1,7 +1,37 @@
 # The cot–caught merger!
 
-En este video, aprenderás sobre la fusión de sonidos Cot–Caught, un cambio en el inglés donde dos vocales suenan igual /ɑ/, /ɔ/. Veremos cómo algunos hablantes nativos pronuncian palabras como cot y caught de la misma forma — ¡y por qué esto es importante! 🗣️
-Esta lección te ayudará a reconocer diferentes acentos y mejorar tu escucha y pronunciación, para que puedas entender mejor a los nativos y sonar más natural al hablar. 💬✨
+## 🇪🇸 Español
 
-In this video, you’ll learn about the Cot–Caught Merger, a sound change in English where two vowel sounds become one. We’ll explore how some native speakers pronounce words like cot and caught the same way — and why this matters! 🗣️
-This lesson will help you recognize different accents and improve your listening and pronunciation, so you can understand real native speech and sound more natural when you speak! 💬✨
+### Cuando /ɑ/ y /ɔ/ se convierten en una sola vocal
+
+Buena parte de los hablantes de inglés americano ya no distingue /ɑ/ de /ɔ/: para ellos _cot_ y _caught_ suenan exactamente igual. Otros mantienen las dos separadas. Ninguna de las dos formas está mal — lo que importa es reconocer las dos al escuchar.
+
+**Cómo se produce**
+
+- 👄 **Boca:** en el acento fusionado, una sola posición abierta para las dos palabras.
+- 👅 **Lengua:** atrás y baja, sin cambiar entre _cot_ y _caught_.
+- 🔊 **Voz:** en el acento no fusionado, la diferencia está en redondear o no los labios.
+
+**Lo oyes en:** _cot / caught_ · _stock / stalk_ · _don / dawn_ · _not / naught_
+
+> ⚠️ **El error típico en español:** dar por hecho que hay una única pronunciación correcta y bloquearte al oír a un nativo que fusiona los dos sonidos.
+
+**Al terminar vas a poder:** entender a hablantes con y sin la fusión, y elegir de forma consciente cuál de los dos modelos vas a imitar.
+
+## 🇺🇸 English
+
+### When /ɑ/ and /ɔ/ collapse into a single vowel
+
+A large share of American English speakers no longer distinguish /ɑ/ from /ɔ/: for them _cot_ and _caught_ sound exactly alike. Others keep the two apart. Neither is wrong — what matters is recognizing both when you listen.
+
+**How it's made**
+
+- 👄 **Mouth:** in a merged accent, one single open position serves both words.
+- 👅 **Tongue:** back and low, unchanged between _cot_ and _caught_.
+- 🔊 **Voice:** in an unmerged accent, the difference is whether the lips round.
+
+**You hear it in:** _cot / caught_ · _stock / stalk_ · _don / dawn_ · _not / naught_
+
+> ⚠️ **The typical Spanish-speaker mistake:** assuming there's one correct pronunciation, and freezing when a native speaker merges the two sounds.
+
+**By the end you'll be able to:** understand speakers with and without the merger, and decide deliberately which model you're imitating.
