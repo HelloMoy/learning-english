@@ -1,0 +1,35 @@
+/*
+ * Maps Vidstack's Default Layout onto the Immersion Cinema tokens.
+ *
+ * Colors and radii only — the layout's structure, spacing, and motion are
+ * left alone. The point is that the player stops looking like a third-party
+ * widget dropped into the page, not that it be rebuilt.
+ *
+ * Everything is scoped to `.vds-video-layout` so no token leaks to the rest
+ * of the app, and every value routes through an existing `--gold` / `--amber`
+ * / `--radius` token rather than a new hex, so the theme toggle carries the
+ * player with it.
+ */
+
+.vds-video-layout {
+  /* The scrubber fill, the volume fill, and the buffering spinner. */
+  --media-brand: var(--amber);
+
+  /* Control glyphs and time text over the video's own dark frame — these sit
+     on video, not on `--background`, so they stay near-white in both themes
+     instead of following `--foreground`. */
+  --media-controls-color: #f4f1ea;
+
+  --media-focus-ring-color: var(--ring);
+  --media-focus-ring: 0 0 0 3px var(--media-focus-ring-color);
+
+  --media-tooltip-bg-color: var(--popover);
+  --media-tooltip-color: var(--popover-foreground);
+  --media-tooltip-border-radius: var(--radius-md);
+
+  --media-menu-bg: var(--popover);
+  --media-menu-text-color: var(--popover-foreground);
+  --media-menu-text-secondary-color: var(--muted-foreground);
+  --media-menu-border-radius: var(--radius-lg);
+  --media-menu-border: 1px solid var(--border);
+}

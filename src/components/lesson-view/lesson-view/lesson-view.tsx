@@ -21,7 +21,7 @@ import { UpNextCard } from "../up-next-card/up-next-card";
  * The composition the Lesson Page renders. Receives the resolved `View`
  * from `findLessonForView` and the Server Action that completes a lesson.
  * Dispatches on `lesson.kind` so video and reading lessons render
- * appropriately (video → NativeVideoPlayer; reading → body).
+ * appropriately (video → PlaybackPositionedVideoPlayer; reading → body).
  *
  * The gold title block over the player is **cover art**, not a watermark:
  * it renders only while the lesson has no `poster` (nothing else covers the
@@ -46,7 +46,7 @@ export function LessonView({
   // seeking must NOT bring the cover back — once playback has begun the
   // learner is watching the frame, not the title.
   const [playbackStarted, setPlaybackStarted] = useState(false);
-  const t = useTranslations("Components.NativeVideoPlayer");
+  const t = useTranslations("Components.LessonVideoPlayer");
   const tLessonNotes = useTranslations("Components.LessonNotes");
   const { course, module, lesson, resources, nextLesson, modules, lessons } = view;
 

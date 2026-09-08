@@ -1,4 +1,5 @@
 // Aggregator for global mocks. Importing this file applies all mocks.
 // Add new mocks here as the project grows (e.g. ./auth, ./db, ./analytics).
+import "./browser-observers";
 import "./next";
 import "./i18n-navigation";
