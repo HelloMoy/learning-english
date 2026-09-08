@@ -58,11 +58,11 @@ describe("useResumeOnFirstPlay", () => {
       ["nothing is saved", null],
       ["the learner barely started", 5],
       ["the learner effectively finished", DURATION_SECONDS - 5],
-    ])("WHEN %s THEN play is left alone and nothing is offered", (_case, saved) => {
+    ])("WHEN %s THEN playback is left alone and nothing is offered", (_case, saved) => {
       const { result, player } = renderResumeHook({ savedPositionSeconds: saved });
 
       act(() => {
-        result.current.handlePlay();
+        result.current.handlePlaybackStarted();
       });
 
       expect(player.pause).not.toHaveBeenCalled();
@@ -76,7 +76,7 @@ describe("useResumeOnFirstPlay", () => {
       });
 
       act(() => {
-        result.current.handlePlay();
+        result.current.handlePlaybackStarted();
       });
 
       expect(player.pause).not.toHaveBeenCalled();
@@ -85,18 +85,18 @@ describe("useResumeOnFirstPlay", () => {
   });
 
   describe("GIVEN a saved position worth resuming", () => {
-    test("WHEN the hook mounts THEN nothing is offered until the learner presses play", () => {
+    test("WHEN the hook mounts THEN nothing is offered until playback starts", () => {
       const { result, player } = renderResumeHook({ savedPositionSeconds: RESUMABLE_SECONDS });
 
       expect(result.current.offeredSeconds).toBeNull();
       expect(player.pause).not.toHaveBeenCalled();
     });
 
-    test("WHEN the learner presses play THEN the player pauses and the position is offered", () => {
+    test("WHEN playback starts THEN the player pauses and the position is offered", () => {
       const { result, player } = renderResumeHook({ savedPositionSeconds: RESUMABLE_SECONDS });
 
       act(() => {
-        result.current.handlePlay();
+        result.current.handlePlaybackStarted();
       });
 
       expect(player.pause).toHaveBeenCalledTimes(1);
@@ -107,7 +107,7 @@ describe("useResumeOnFirstPlay", () => {
       const { result, player } = renderResumeHook({ savedPositionSeconds: RESUMABLE_SECONDS });
 
       act(() => {
-        result.current.handlePlay();
+        result.current.handlePlaybackStarted();
       });
       act(() => {
         result.current.resumeFromSavedPosition();
@@ -121,7 +121,7 @@ describe("useResumeOnFirstPlay", () => {
       const { result, player } = renderResumeHook({ savedPositionSeconds: RESUMABLE_SECONDS });
 
       act(() => {
-        result.current.handlePlay();
+        result.current.handlePlaybackStarted();
       });
       act(() => {
         result.current.restartFromBeginning();
@@ -136,29 +136,26 @@ describe("useResumeOnFirstPlay", () => {
     test.each([
       ["resuming", (api: ReturnType<typeof useResumeOnFirstPlay>) => api.resumeFromSavedPosition()],
       ["restarting", (api: ReturnType<typeof useResumeOnFirstPlay>) => api.restartFromBeginning()],
-    ])(
-      "WHEN the learner presses play again after %s THEN it is not offered twice",
-      (_case, answer) => {
-        const { result, player } = renderResumeHook({ savedPositionSeconds: RESUMABLE_SECONDS });
+    ])("WHEN playback starts again after %s THEN it is not offered twice", (_case, answer) => {
+      const { result, player } = renderResumeHook({ savedPositionSeconds: RESUMABLE_SECONDS });
 
-        act(() => {
-          result.current.handlePlay();
-        });
-        act(() => {
-          answer(result.current);
-        });
-        player.calls.length = 0;
+      act(() => {
+        result.current.handlePlaybackStarted();
+      });
+      act(() => {
+        answer(result.current);
+      });
+      player.calls.length = 0;
 
-        act(() => {
-          result.current.handlePlay();
-        });
+      act(() => {
+        result.current.handlePlaybackStarted();
+      });
 
-        expect(result.current.offeredSeconds).toBeNull();
-        expect(player.calls).toEqual([]);
-      },
-    );
+      expect(result.current.offeredSeconds).toBeNull();
+      expect(player.calls).toEqual([]);
+    });
 
-    test("WHEN the saved position arrives late but play already happened THEN it is not offered", () => {
+    test("WHEN the saved position arrives late but playback already started THEN it is not offered", () => {
       // The wrapper reads storage asynchronously, so `savedPositionSeconds`
       // can still be `null` on the first play. A learner who got playback
       // without a prompt must not be interrupted once the read lands.
@@ -174,7 +171,7 @@ describe("useResumeOnFirstPlay", () => {
       );
 
       act(() => {
-        result.current.handlePlay();
+        result.current.handlePlaybackStarted();
       });
       rerender({ saved: RESUMABLE_SECONDS });
 
@@ -202,7 +199,7 @@ describe("useResumeOnFirstPlay", () => {
       const { result } = renderResumeHook({ savedPositionSeconds: saved });
 
       act(() => {
-        result.current.handlePlay();
+        result.current.handlePlaybackStarted();
       });
 
       expect(result.current.offeredSeconds).toBe(saved);

@@ -79,8 +79,11 @@ import { buildVideoPlayerTranslations } from "./video-player-translations";
  * @param keyDisabled - Suppresses the player's own keyboard shortcuts; set
  *                      while an overlay owns the keyboard
  * @param children - Rendered inside the player box, over the video frame
- * @param lifecycle - `onPlay` / `onPause` / `onSeeking` / `onEnded` /
- *                    `onTimeUpdate`, forwarded to the player unchanged
+ * @param lifecycle - `onPlay` / `onPlaying` / `onPause` / `onSeeking` /
+ *                    `onEnded` / `onTimeUpdate`, forwarded to the player
+ *                    unchanged. `onPlay` reports the play *request*;
+ *                    `onPlaying` reports that frames are actually rolling,
+ *                    which is the only moment every provider can be paused
  * @param ref - The `MediaPlayerInstance`, for callers that drive playback
  */
 export function LessonVideoPlayer({
@@ -102,7 +105,7 @@ export function LessonVideoPlayer({
   ref?: Ref<MediaPlayerInstance | null>;
 } & Pick<
   ComponentProps<typeof MediaPlayer>,
-  "onPlay" | "onPause" | "onSeeking" | "onEnded" | "onTimeUpdate"
+  "onPlay" | "onPlaying" | "onPause" | "onSeeking" | "onEnded" | "onTimeUpdate"
 >) {
   const t = useTranslations("Components.VideoPlayer");
   const { resolvedTheme } = useTheme();
