@@ -49,6 +49,33 @@ const LessonTitleOverrides = z
   });
 
 /**
+ * Module-title overrides for one course, keyed by module slug.
+ *
+ * @remarks
+ * A key is one path segment. A two-segment key is a `lessonTitleOverrides`
+ * entry written into the wrong table — it would match no module and silently
+ * do nothing — and a course-prefixed key would let an entry name a course
+ * other than the one it lives under.
+ *
+ * Checked in a `superRefine` for the same reason {@link LessonTitleOverrides}
+ * is: Zod reports a key-schema failure as "Invalid key in record", which tells
+ * the author nothing about the shape a key should have.
+ */
+const ModuleTitleOverrides = z
+  .record(z.string().min(1), ReviewedTitle)
+  .superRefine((table, ctx) => {
+    for (const key of Object.keys(table)) {
+      if (key.includes("/")) {
+        ctx.addIssue({
+          code: "custom",
+          path: [key],
+          message: `"${key}" must be a bare module slug, with no course or lesson segment`,
+        });
+      }
+    }
+  });
+
+/**
  * Declaration of one course, exactly as written in `courses.manifest.json`.
  *
  * @remarks
@@ -100,6 +127,17 @@ export const CourseDeclaration = z.object({
    * move.
    */
   titleFromNotesModules: z.array(z.string().min(1)).optional(),
+  /**
+   * Module slug → title, for modules whose derived title reads wrong.
+   *
+   * A module title comes from `humanize(moduleSlug)`, which title-cases every
+   * word and cannot restore what slugification stripped. That is right for an
+   * English module name and wrong for `Ejercicios para dominar el ritmo en
+   * Inglés`, which comes back as `Ejercicios Para Dominar El Ritmo En Ingles`.
+   *
+   * An entry outranks the derived title. An absent entry accepts it.
+   */
+  moduleTitleOverrides: ModuleTitleOverrides.optional(),
   /**
    * `moduleSlug/lessonSlug` → title, for lessons no automatic source can name.
    *
@@ -174,6 +212,7 @@ export type ResolvedCourse = {
   sequence: number;
   slugOverrides: Record<string, string>;
   titleFromNotesModules: ReadonlySet<string>;
+  moduleTitleOverrides: Record<string, string>;
   lessonTitleOverrides: Record<string, string>;
 };
 
@@ -203,6 +242,7 @@ export function resolveCourseDeclaration(
     sequence: declaration.sequence,
     slugOverrides: declaration.slugOverrides ?? {},
     titleFromNotesModules: new Set(declaration.titleFromNotesModules ?? []),
+    moduleTitleOverrides: declaration.moduleTitleOverrides ?? {},
     lessonTitleOverrides: declaration.lessonTitleOverrides ?? {},
   };
 }

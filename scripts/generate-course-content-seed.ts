@@ -310,9 +310,11 @@ async function appendCourse(course: ResolvedCourse, context: WalkContext): Promi
   const lessonCountBefore = context.seed.lessonRows.length;
   const moduleCountBefore = context.seed.modules.length;
 
+  const moduleSlugs: string[] = [];
   for (const moduleFolder of listSubdirectories(courseDir)) {
-    await appendModule({ course, courseId, keyPrefix, moduleFolder }, context);
+    moduleSlugs.push(await appendModule({ course, courseId, keyPrefix, moduleFolder }, context));
   }
+  assertEveryModuleTitleOverrideMatched(course, moduleSlugs);
 
   context.seed.courses.push(
     Course.parse({
@@ -328,6 +330,26 @@ async function appendCourse(course: ResolvedCourse, context: WalkContext): Promi
   );
 }
 
+/**
+ * Fails when a `moduleTitleOverrides` key names no module of its course.
+ *
+ * A mistyped module slug is otherwise invisible: the entry simply never
+ * matches, and the derived title the author was trying to replace survives
+ * into the seed unremarked.
+ */
+function assertEveryModuleTitleOverrideMatched(
+  course: ResolvedCourse,
+  moduleSlugs: ReadonlyArray<string>,
+): void {
+  const present = new Set(moduleSlugs);
+  const unmatched = Object.keys(course.moduleTitleOverrides).filter((slug) => !present.has(slug));
+  if (unmatched.length > 0) {
+    throw new Error(
+      `${COURSES_MANIFEST_FILE}: course "${course.folder}" declares moduleTitleOverrides for modules it does not hold: ${unmatched.join(", ")}`,
+    );
+  }
+}
+
 /** Identity of the course a module or lesson is being walked under. */
 type CourseScope = {
   course: ResolvedCourse;
@@ -336,11 +358,16 @@ type CourseScope = {
   keyPrefix: string;
 };
 
-/** Walks one module folder and appends the module plus all its lessons. */
+/**
+ * Walks one module folder and appends the module plus all its lessons.
+ *
+ * @returns The module's slug, so the caller can check every declared
+ *          `moduleTitleOverrides` key against a module that actually exists.
+ */
 async function appendModule(
   scope: CourseScope & { moduleFolder: string },
   context: WalkContext,
-): Promise<void> {
+): Promise<string> {
   const { course, courseId, keyPrefix, moduleFolder } = scope;
   const moduleSlug = resolveSlug(moduleFolder, course.slugOverrides);
   const moduleId = uuidv5(`module:${course.slug}/${moduleSlug}`);
@@ -351,7 +378,7 @@ async function appendModule(
       id: moduleId,
       courseId,
       slug: moduleSlug,
-      title: humanize(moduleSlug),
+      title: course.moduleTitleOverrides[moduleSlug] ?? humanize(moduleSlug),
       sequence: parseSequence(moduleSlug),
     }),
   );
@@ -360,6 +387,7 @@ async function appendModule(
   for (const lessonFolder of listLessonFolders(moduleDir)) {
     await appendLesson({ ...scope, moduleSlug, moduleId, lessonFolder }, context);
   }
+  return moduleSlug;
 }
 
 /** Identity of the module a lesson is being walked under. */

@@ -79,6 +79,7 @@ The manifest SHALL be a JSON document of the shape:
       "sequence": 2,                             // required: position in the home ladder
       "slugOverrides": { "1 Day#1": "1-day-01" },
       "titleFromNotesModules": ["3-contractions-reductions"],
+      "moduleTitleOverrides": { "3-contractions-reductions": "Contractions & Reductions" },
       "lessonTitleOverrides": { "3-contractions-reductions/6-i-d": "I’d …" }
     }
   ]
@@ -86,9 +87,9 @@ The manifest SHALL be a JSON document of the shape:
 ```
 
 `slugOverrides` is keyed by the RAW on-disk name; `titleFromNotesModules` lists
-module slugs; `lessonTitleOverrides` is keyed by `moduleSlug/lessonSlug` relative
-to the course, because scoping each override map inside its course entry makes a
-cross-course key collision unrepresentable.
+module slugs; `moduleTitleOverrides` is keyed by module slug; `lessonTitleOverrides`
+is keyed by `moduleSlug/lessonSlug` relative to the course, because scoping each
+override map inside its course entry makes a cross-course key collision unrepresentable.
 
 The manifest SHALL be untracked by git. `public/local-filesystem-lesson/` is
 already ignored in full, so no new `.gitignore` rule is required; a comment SHALL
@@ -111,9 +112,9 @@ manifest is an error, an absent one is a default.
 
 #### Scenario: A new course is added without touching any code
 
-- **WHEN** a developer drops a new course folder under the content root, adds an
-  entry naming that folder with a `sequence` of `3` to `courses.manifest.json`,
-  and runs `pnpm generate:content-seed`
+- **WHEN** a developer drops a new course folder under the content root in the canonical
+  shape, adds an entry naming that folder with a `sequence` of `3` to
+  `courses.manifest.json`, and runs `pnpm generate:content-seed`
 - **THEN** `seed-content.ts` contains that course, its modules, lessons and
   resources, and no file under `scripts/` was edited
 
@@ -946,4 +947,146 @@ level-2 heading, so a monolingual lesson is explicit rather than merely ambiguou
 
 - **WHEN** a lesson's `readme.md` body is restructured into language sections
 - **THEN** the file's first `#` heading is unchanged byte-for-byte, so lesson-title derivation for allowlisted modules and the generated `seed-content.ts` are unaffected
+
+### Requirement: A course tree has one canonical on-disk shape
+
+Every declared course SHALL present the same shape under the content root, so the
+generator walks one layout and only one:
+
+```
+<content-root>/<course-folder>/<module-folder>/<lesson-folder>/
+    <video>.mp4            — optional; its presence makes the lesson a video lesson
+    <poster>.jpeg          — optional; the first image becomes the poster
+    readme.md              — optional; the lesson's notes, opening with a `#` heading
+    <resource>.pdf         — zero or more; resources sit beside the media, never below it
+```
+
+Exactly three folder levels separate the content root from a lesson's files. A module
+folder SHALL contain lesson folders and nothing else that the walk depends on; a lesson
+folder SHALL hold its media, poster, notes and resources as **direct children**, with no
+intervening subfolder. Notes SHALL be named `readme.md`, and a lesson whose title cannot
+be recovered from its slug SHALL carry that title as the first `#` heading of that file.
+
+Course content that arrives in a different shape — an extra grouping level, a lesson's
+files loose at module level, notes under another filename, resources in a subfolder —
+SHALL be migrated to this shape before the course is declared in `courses.manifest.json`.
+The generator SHALL NOT be taught to recognize alternative shapes, and the manifest SHALL
+NOT gain fields describing them: one contract keeps every course's content keys derivable
+from its path, and a second shape would double the surface every future content change is
+verified against.
+
+#### Scenario: A grouping level between module and lesson is flattened, not accommodated
+
+- **WHEN** an imported course nests lesson folders under `<module>/<group>/<lesson>/`
+- **THEN** each `<group>` is promoted to a sibling module of `<module>` before the course
+  is declared, and the generator's walk is unchanged
+
+#### Scenario: A lesson's files loose at module level are wrapped in a lesson folder
+
+- **WHEN** an imported module folder holds `lesson.mp4` and `thumbnail.jpeg` as direct
+  children, with no lesson folder around them
+- **THEN** those files are moved into a lesson folder inside that module before the course
+  is declared, so the module holds lesson folders only
+
+#### Scenario: Resources in a subfolder are hoisted beside the media
+
+- **WHEN** an imported lesson folder holds its PDFs under `<lesson>/resources/`
+- **THEN** those files are moved into `<lesson>/` before the course is declared, and the
+  generator emits one resource row per file exactly as it does for any other course
+
+#### Scenario: Notes under another filename are renamed
+
+- **WHEN** an imported lesson carries its notes as `description.md`
+- **THEN** the file is renamed `readme.md` before the course is declared, so the notes are
+  emitted as inline notes and a notes Resource rather than as an unnamed `other` resource
+
+### Requirement: Reshaping an imported course tree is a dry-runnable, plan-driven step
+
+The system SHALL provide `scripts/reshape-course-tree.ts`, a build-time step that brings
+one imported course folder to the canonical shape defined above. It SHALL:
+
+- Take a declarative plan naming the course folder and the moves it needs — module
+  promotions with their new ladder positions, lesson folders to create around loose files,
+  subfolders to hoist, and the notes filename to adopt. A course with no plan SHALL be left
+  untouched, so running the step can never disturb a course that is already canonical.
+- Default to a **dry run** that prints the `old → new` plan and mutates nothing. Renames
+  SHALL happen only under `--apply`, mirroring `normalize-content-disk.ts`.
+- Move files with `rename`, never copy, so a multi-gigabyte tree is reshaped without
+  duplicating a byte.
+- Be **idempotent**: re-running it against an already-reshaped tree SHALL make no changes
+  and exit zero.
+- Abort with a non-zero status, before mutating anything in the affected directory, when a
+  move would overwrite an existing entry or when two sources would land on one target.
+
+Reshaping SHALL run BEFORE `normalize-content-disk.ts`: the reshape decides where a folder
+lives, normalization decides what it is called. Running them in the other order would
+rename folders the plan still refers to by their raw names.
+
+#### Scenario: A dry run mutates nothing
+
+- **WHEN** the step runs without `--apply`
+- **THEN** it prints every move it would make and no file or folder on disk has changed
+
+#### Scenario: Re-running after a completed reshape is a no-op
+
+- **WHEN** the step runs a second time with `--apply` against a tree it has already reshaped
+- **THEN** it reports nothing to move and exits zero
+
+#### Scenario: A colliding move aborts before touching the directory
+
+- **WHEN** a planned move would land on a path that already exists
+- **THEN** the step exits non-zero naming both paths, and no move in that directory is performed
+
+#### Scenario: An undeclared course folder is not reshaped
+
+- **WHEN** the step runs with a plan naming one course folder, and the content root holds others
+- **THEN** only the named folder is touched
+
+### Requirement: Module titles may be overridden per course
+
+A course entry in `courses.manifest.json` SHALL be able to declare `moduleTitleOverrides`, a
+table of hand-written module titles that the generator SHALL prefer over the derived one.
+
+The generator derives a module's title with `humanize(moduleSlug)`, which strips accents and
+title-cases every word. That is adequate for English module names and wrong for any other
+language: `Ejercicios para dominar el ritmo en Inglés` becomes `Ejercicios Para Dominar El
+Ritmo En Ingles`.
+
+The table SHALL be keyed by **module slug** — not course-prefixed, because the course is already the entry
+the table lives under. An override SHALL take precedence over the derived title. A module with
+no entry SHALL keep the derived title, so an absent entry stays a deliberate acceptance of the
+automatic value rather than an oversight.
+
+Override values SHALL be validated, not repaired, on the same terms as `lessonTitleOverrides`:
+a value SHALL be non-empty, SHALL be trimmed, and SHALL NOT contain the straight apostrophe
+`'` (U+0027). A key naming a module the course does not hold SHALL NOT be silently ignored.
+
+Overriding a title SHALL NOT change the module's slug, id, sequence, or any content key: ids
+derive from the course and module slugs, never from the title.
+
+#### Scenario: An accented Spanish module title survives
+
+- **WHEN** a course entry maps `4-ejercicios-para-dominar-el-ritmo-en-ingles` to
+  `Ejercicios para dominar el ritmo en Inglés`
+- **THEN** the emitted module's title is that string verbatim, not the `humanize`-derived one
+
+#### Scenario: A module with no override keeps the derived title
+
+- **WHEN** a course declares `moduleTitleOverrides` for one of its modules
+- **THEN** every other module of that course is emitted with its `humanize(slug)` title, unchanged
+
+#### Scenario: An override applies only to its own course
+
+- **WHEN** two courses each hold a module slugged `1-intro` and only one declares an override for it
+- **THEN** only that course's module adopts the override
+
+#### Scenario: A straight apostrophe in an override is rejected
+
+- **WHEN** a `moduleTitleOverrides` value contains `'` (U+0027)
+- **THEN** the manifest fails validation, naming the offending key, and generation aborts
+
+#### Scenario: Module identity survives a title override
+
+- **WHEN** the generator is re-run after adding a module title override
+- **THEN** that module's id, slug and sequence are unchanged, and no lesson or resource key moves
 

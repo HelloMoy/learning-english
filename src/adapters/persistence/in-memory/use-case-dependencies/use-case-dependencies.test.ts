@@ -141,8 +141,13 @@ describe("getCoursePlatformDeps env-var switch", () => {
       const deps = getCoursePlatformDeps();
       const courses = await deps.courses.listAvailable();
 
-      // Assert
-      expect(courses.map((course) => course.sequence)).toEqual([1, 2]);
+      // Assert — derived, not literal: the catalog grows as courses are
+      // declared in the content manifest, and the invariant is the ordering.
+      const sequences = courses.map((course) => course.sequence);
+      expect(sequences).toEqual([...sequences].sort((a, b) => a - b));
+      expect(sequences).toEqual(
+        [seedCourse, ...seedContentCourses].map((course) => course.sequence).sort((a, b) => a - b),
+      );
     });
 
     test("WHEN both courses are served THEN each one's lessons resolve through the adapter that owns them", async () => {

@@ -2,12 +2,59 @@
   "version": 1,
   "courses": [
     {
+      "folder": "basic-course",
+      "slug": "basic-course",
+      "title": "Basic Course",
+      "description": "American pronunciation from the ground up: vowel and consonant sounds, rhythm drills, and fluency practice.",
+      "language": "en",
+      "sequence": 2,
+      "slugOverrides": {
+        "1 The Vowel Sound: ə (El más importante)": "1-the-vowel-sound-schwa",
+        "2 The Vowel Sound ɪ (e corta)": "2-the-vowel-sound-ih",
+        "3 The Vowel Sound ʊ (o corta)": "3-the-vowel-sound-uu",
+        "6 The vowel sound æ (a ligada)": "6-the-vowel-sound-ae",
+        "7 The vowel sound ɑ": "7-the-vowel-sound-ah",
+        "8 The Vowel sound ɔ": "8-the-vowel-sound-aw",
+        "10 The Vowel Sound ɛ": "10-the-vowel-sound-eh",
+        "13 Diphthong Sound aɪ": "13-diphthong-sound-ai",
+        "14 Diphthong Sound aʊ": "14-diphthong-sound-au",
+        "15 Diphthong Sound ɔɪ": "15-diphthong-sound-oi",
+        "16 Diphthong Sound eɪ": "16-diphthong-sound-ei",
+        "17 Diphthong Sound ɔʊ": "17-diphthong-sound-ou",
+        "1 Ejercicio para activar las cuerdas vocales y mejorar la respiración automáticamente": "1-activar-las-cuerdas-vocales",
+        "8 ʃ": "8-sh",
+        "9 tʃ": "9-ch",
+        "10 ʒ": "10-zh",
+        "11 dʒ": "11-dzh",
+        "12 θ": "12-th-voiceless",
+        "13 ð": "13-th-voiced",
+        "14 d̪ & t̪": "14-interdental-d-t",
+        "21 ŋ": "21-ng"
+      },
+      "titleFromNotesModules": [
+        "2-vowels",
+        "3-consonants",
+        "4-ejercicios-para-dominar-el-ritmo-en-ingles",
+        "5-fluidez-y-velocidad"
+      ],
+      "moduleTitleOverrides": {
+        "4-ejercicios-para-dominar-el-ritmo-en-ingles": "Ejercicios para dominar el ritmo en Inglés",
+        "5-fluidez-y-velocidad": "Fluidez y Velocidad"
+      },
+      "lessonTitleOverrides": {
+        "2-vowels/7-the-vowel-sound-ah": "The vowel sound /ɑ/",
+        "3-consonants/1-activar-las-cuerdas-vocales": "Ejercicio para activar las cuerdas vocales",
+        "3-consonants/14-interdental-d-t": "Interdental /d̪/ & /t̪/",
+        "3-consonants/2-consonantes-plosivas-y-de-parada": "Consonantes Plosivas y de Parada"
+      }
+    },
+    {
       "folder": "advanced-intermediate-course",
       "slug": "advanced-intermediate-course",
       "title": "Advanced Intermediate Course",
       "description": "Course content generated from public/local-filesystem-lesson.",
       "language": "en",
-      "sequence": 2,
+      "sequence": 3,
       "slugOverrides": {},
       "titleFromNotesModules": [
         "2-advanced-vowel-pronunciation-in-american-english",
