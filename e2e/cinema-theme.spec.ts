@@ -1,4 +1,4 @@
-import { seedContentLessonRows } from "@/adapters/persistence/in-memory/seed/seed-content";
+import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
 import { expect, test } from "@playwright/test";
 
@@ -11,11 +11,13 @@ import { moduleOfCourse, modulesOfCourse } from "./content-seed-fixtures";
  */
 const COURSE_SLUG = "advanced-intermediate-course";
 const FIRST_MODULE = modulesOfCourse(COURSE_SLUG)[0]!;
-const FIRST_LESSON = seedContentLessonRows.find((lesson) => lesson.moduleId === FIRST_MODULE.id)!;
+const FIRST_LESSON = contentCatalog.lessonRows.find(
+  (lesson) => lesson.moduleId === FIRST_MODULE.id,
+)!;
 
 // A module whose intro lesson carries bilingual notes (drives the tabs).
 const NOTES_MODULE = moduleOfCourse(COURSE_SLUG, "3-contractions-reductions");
-const NOTES_LESSON = seedContentLessonRows
+const NOTES_LESSON = contentCatalog.lessonRows
   .filter((lesson) => lesson.moduleId === NOTES_MODULE.id)
   .sort((a, b) => a.sequence - b.sequence)[0]!;
 

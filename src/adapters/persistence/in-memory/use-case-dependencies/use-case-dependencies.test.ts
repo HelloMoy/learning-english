@@ -2,10 +2,7 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import {
-  seedContentCourses,
-  seedContentLessonRows,
-} from "@/adapters/persistence/in-memory/seed/seed-content";
+import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 import { LessonId } from "@/domain/entities/ids/ids";
 
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
@@ -16,7 +13,7 @@ import { getCoursePlatformDeps } from "./use-case-dependencies";
  * The first declared course. The manifest may declare several; assertions
  * that need one course use this, and the catalog assertions cover the list.
  */
-const contentCourse = seedContentCourses[0]!;
+const contentCourse = contentCatalog.courses[0]!;
 
 const ORIGINAL_LOCATIONS_PATH = process.env.CONTENT_LOCATIONS_PATH;
 const ORIGINAL_SEED_FLAG = process.env.USE_COURSE_CONTENT_SEED;
@@ -47,11 +44,13 @@ const restore = (name: string, original: string | undefined): void => {
  * demonstrate nothing about key→URL resolution — which is the whole subject of
  * the content-locations suite below.
  */
-const keyedVideo = seedContentLessonRows.find(
+const keyedVideo = contentCatalog.lessonRows.find(
   (row): row is Extract<typeof row, { kind: "video" }> =>
     row.kind === "video" && !/^https?:/.test(row.source),
 )!;
-const keyedVideoCourse = seedContentCourses.find((course) => course.id === keyedVideo.courseId)!;
+const keyedVideoCourse = contentCatalog.courses.find(
+  (course) => course.id === keyedVideo.courseId,
+)!;
 
 /** That lesson's source, resolved through the real deps graph. */
 const firstContentVideoSource = async (): Promise<string> => {
@@ -82,10 +81,10 @@ describe("getCoursePlatformDeps", () => {
 
       // Assert
       expect(courses.map((course) => course.id)).toEqual(
-        seedContentCourses.map((course) => course.id),
+        contentCatalog.courses.map((course) => course.id),
       );
       expect(courses.map((course) => course.title)).toEqual(
-        seedContentCourses.map((course) => course.title),
+        contentCatalog.courses.map((course) => course.title),
       );
     });
 
@@ -177,7 +176,7 @@ describe("getCoursePlatformDeps", () => {
 
     test("WHEN the manifest points the local store at a CDN THEN URLs carry that prefix", async () => {
       // Arrange — the payoff: repointing storage is configuration, not a
-      // regeneration of seed-content.ts.
+      // edit to the course manifests.
       useLocationManifest({
         stores: { local: { driver: "local", baseUrl: "https://cdn.example.com/course-content" } },
         default: "local",
@@ -210,7 +209,7 @@ describe("getCoursePlatformDeps", () => {
     test("WHEN a route covers one prefix THEN only its keys move and the rest stay local", async () => {
       // Arrange — a partial migration: one course's assets served elsewhere
       // while everything outside that prefix is untouched.
-      const other = seedContentCourses.find((course) => course.id !== keyedVideoCourse.id)!;
+      const other = contentCatalog.courses.find((course) => course.id !== keyedVideoCourse.id)!;
       useLocationManifest({
         stores: {
           local: { driver: "local" },

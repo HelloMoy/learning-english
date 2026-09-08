@@ -1,16 +1,12 @@
-import {
-  seedContentLessonRows,
-  seedContentNotesKeys,
-  seedContentResourceRows,
-} from "../../src/adapters/persistence/in-memory/seed/seed-content.ts";
+import { contentCatalog } from "../../src/adapters/persistence/content-manifest/content-manifest.ts";
 import { isAbsoluteHttpUrl } from "../../src/domain/entities/url-or-path/url-or-path.ts";
 
 /**
- * Every content key the generated seed refers to, sorted and de-duplicated.
+ * Every content key the course manifests refer to, sorted and de-duplicated.
  *
  * @remarks
- * The seed is the authoritative inventory of what the app will ask for, which
- * is exactly the set a placement change has to keep resolvable. Both
+ * The manifests are the authoritative inventory of what the app will ask for,
+ * which is exactly the set a placement change has to keep resolvable. Both
  * `move-content.ts` and `verify:content` walk it, so neither can check a
  * different set from the other.
  *
@@ -24,16 +20,17 @@ import { isAbsoluteHttpUrl } from "../../src/domain/entities/url-or-path/url-or-
  */
 export function allContentKeys(): string[] {
   const keys = new Set<string>();
+  const { lessonRows, resourceRows, notesKeys } = contentCatalog;
 
-  for (const lesson of seedContentLessonRows) {
+  for (const lesson of lessonRows) {
     if (lesson.kind !== "video") continue;
     if (!isAbsoluteHttpUrl(lesson.source)) keys.add(lesson.source);
     if (lesson.poster) keys.add(lesson.poster);
   }
-  for (const resource of seedContentResourceRows) {
+  for (const resource of resourceRows) {
     keys.add(resource.url);
   }
-  for (const notesKey of Object.values(seedContentNotesKeys)) {
+  for (const notesKey of Object.values(notesKeys)) {
     keys.add(notesKey);
   }
 

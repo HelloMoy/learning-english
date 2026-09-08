@@ -5,7 +5,14 @@ import { normalizeFileName } from "./resolve-slug";
 
 /**
  * Classification of a lesson folder's contents into a structured shape the
- * seed generator can consume.
+ * manifest sync command can consume.
+ *
+ * @remarks
+ * This no longer decides what the application serves — the course manifests
+ * under `src/content/` do. It encodes the on-disk conventions (video / image /
+ * readme) so `sync:manifest` can PROPOSE an entry for a lesson folder the
+ * manifests do not yet describe. A human, or an existing declaration, has the
+ * last word.
  *
  * Rules (per the `course-content-storage` spec):
  *  - If the folder contains an `.mp4`, the lesson is `video`. Its `source`
@@ -25,14 +32,15 @@ export type ClassifiedLesson =
       videoKey: string;
       /**
        * The video's actual on-disk basename (raw, pre-normalization). The
-       * generator reads bytes via this — NOT via `videoKey`, whose basename
-       * is slugified for the URL and may differ from disk until normalized.
+       * sync command reads bytes via this — NOT via `videoKey`, whose
+       * basename is slugified for the URL and may differ from disk until
+       * normalized.
        */
       videoFileName: string;
       posterKey: string | null;
       /**
        * Raw on-disk filenames paired 1:1 with `resourceKeys` by index. Lets
-       * the generator preserve the original name even when no
+       * the sync command preserve the original name even when no
        * `rename-manifest.json` entry matches (e.g. re-generating on a tree
        * whose manifest was lost or never written).
        */
@@ -165,7 +173,7 @@ export function humanize(slug: string): string {
  * @remarks
  * Lesson notes open with the lesson's real name, which is often richer than
  * anything the folder slug preserved — `# Fast /æ/` where the folder is only
- * `4-fast`. This is how the generator recovers it.
+ * `4-fast`. This is how the sync command recovers it.
  *
  * Deliberately naive: the first `# ` line wins, with no tracking of fenced
  * code blocks. A `#` inside a fence before the real heading would be picked

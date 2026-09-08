@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -349,39 +349,5 @@ describe("lessonVideoSources — table invariants", () => {
     const text = textWithSource("2-vowels/3-the-vowel-sound-uu", "http://example.com/video.mp4");
 
     expect(() => parseCoursesManifest(text)).not.toThrow();
-  });
-});
-
-describe("courses.manifest.example.json", () => {
-  test("WHEN the tracked template is parsed THEN it satisfies the schema", () => {
-    // The live manifest is untracked, so this file is the only record in git
-    // of what a working one looks like. It must never drift out of shape.
-    const text = readFileSync(path.join("scripts", "courses.manifest.example.json"), "utf8");
-
-    expect(() => parseCoursesManifest(text)).not.toThrow();
-  });
-
-  test("WHEN the template is resolved THEN it declares the shipped courses in ladder order", () => {
-    const text = readFileSync(path.join("scripts", "courses.manifest.example.json"), "utf8");
-
-    const courses = resolveCoursesManifest(text, "public/local-filesystem-lesson");
-
-    expect(courses.map((course) => course.slug)).toEqual([
-      "basic-course",
-      "advanced-intermediate-course",
-    ]);
-    expect(courses[0]).toMatchObject({
-      folder: "basic-course",
-      title: "Basic Course",
-      language: "en",
-      sequence: 1,
-    });
-    expect(courses[1]).toMatchObject({
-      folder: "advanced-intermediate-course",
-      title: "Advanced Intermediate Course",
-      description: "Course content generated from public/local-filesystem-lesson.",
-      language: "en",
-      sequence: 2,
-    });
   });
 });

@@ -1,7 +1,4 @@
-import {
-  seedContentLessonRows,
-  seedContentResourceRows,
-} from "@/adapters/persistence/in-memory/seed/seed-content";
+import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
 import { expect, test } from "@playwright/test";
 
@@ -47,7 +44,7 @@ const MODULE_B = MODULES[1]!;
 const LAST_MODULE = MODULES[MODULES.length - 1]!;
 
 const lessonsIn = (moduleId: string) =>
-  bySequence(seedContentLessonRows.filter((lesson) => lesson.moduleId === moduleId));
+  bySequence(contentCatalog.lessonRows.filter((lesson) => lesson.moduleId === moduleId));
 
 const MODULE_A_LESSONS = lessonsIn(MODULE_A.id);
 
@@ -60,9 +57,9 @@ const MODULE_A_LESSONS = lessonsIn(MODULE_A.id);
 const PRIMARY_LESSON = MODULE_A_LESSONS.find(
   (lesson, index) =>
     index < MODULE_A_LESSONS.length - 1 &&
-    seedContentResourceRows.some((resource) => resource.lessonId === lesson.id),
+    contentCatalog.resourceRows.some((resource) => resource.lessonId === lesson.id),
 )!;
-const PRIMARY_RESOURCE = seedContentResourceRows.find(
+const PRIMARY_RESOURCE = contentCatalog.resourceRows.find(
   (resource) => resource.lessonId === PRIMARY_LESSON.id,
 )!;
 const LESSON_AFTER_PRIMARY = MODULE_A_LESSONS[MODULE_A_LESSONS.indexOf(PRIMARY_LESSON) + 1]!;
@@ -150,7 +147,7 @@ test.describe("Lesson Page — happy path", () => {
  * assertion passes both before and after the fix. See design.md §D2.
  */
 test.describe("Lesson Page — resource links resolve", () => {
-  const RESOURCES_OF_PRIMARY_LESSON = seedContentResourceRows.filter(
+  const RESOURCES_OF_PRIMARY_LESSON = contentCatalog.resourceRows.filter(
     (resource) => resource.lessonId === PRIMARY_LESSON.id,
   );
 

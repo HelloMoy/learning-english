@@ -1,0 +1,5 @@
+# The Vowel sound /ɔ/
+
+El sonido /ɔ/ es un sonido "ɑ" profundo y redondeado, utilizado en muchas palabras del inglés americano. Para producir este sonido, la boca está abierta ampliamente, pero los labios se redondean. Puedes escuchar este sonido en palabras como "law" (ley), "talk" (hablar) y "dog" (perro) (en algunos acentos). Es importante dominar el sonido /ɔ/ porque ayuda a mejorar tu pronunciación y fluidez. Usar este sonido correctamente te ayuda a diferenciar palabras que de otro modo podrían sonar similares, haciendo que tu habla suene más natural y cercana a la de un hablante nativo
+
+The /ɔ/ sound is a deep, rounded "a" sound that is used in many American English words. To produce this sound, the mouth is open wide, but the lips are rounded. You can hear this sound in words like "law", "talk", and "dog" (in some accents). It’s important to master the /ɔ/ sound because it helps improve your pronunciation and fluency. Using this sound correctly helps you differentiate between words that might otherwise sound similar, making your speech sound more natural and native-like

@@ -1,4 +1,4 @@
-import { seedContentLessonRows } from "@/adapters/persistence/in-memory/seed/seed-content";
+import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 import type { VideoLesson } from "@/domain/entities/lesson/lesson";
 
 import { expect, test, type BrowserContext, type Locator, type Page } from "@playwright/test";
@@ -40,7 +40,7 @@ import { modulesOfCourse } from "./content-seed-fixtures";
 
 const COURSE_SLUG = "advanced-intermediate-course";
 const MODULE = modulesOfCourse(COURSE_SLUG)[0]!;
-const LESSON = seedContentLessonRows
+const LESSON = contentCatalog.lessonRows
   .filter(
     (lesson): lesson is VideoLesson => lesson.moduleId === MODULE.id && lesson.kind === "video",
   )

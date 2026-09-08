@@ -1,0 +1,5 @@
+# The vowel sound /æ/ (a ligada)
+
+El sonido æ, conocido como la "A ligada", es un sonido vocálico común en el inglés americano. Es una mezcla del sonido de la "a" y el sonido de la "e". Puedes escucharlo en palabras como "cat" (gato), "bat" (murciélago) o "man" (hombre). Este sonido es importante porque se encuentra en muchas palabras cotidianas y contribuye a una pronunciación clara y precisa en inglés americano. Dominar el sonido æ mejora tu fluidez, ya que ayuda a que tu habla suene más natural y similar a la de un hablante nativo, especialmente en contextos informales o conversacionale.
+
+The æ sound, often called the "A ligada" in Spanish, is a vowel sound commonly used in American English. It's a blend of the "a" sound and the "e" sound. You can hear it in words like "cat", "bat", or "man". This sound is important because it’s found in many everyday words and contributes to clear and accurate American English pronunciation. Mastering the æ sound helps improve your fluency, as it can make your speech sound more natural and native-like, especially in casual, conversational contexts

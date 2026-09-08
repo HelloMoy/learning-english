@@ -1,8 +1,4 @@
-import {
-  seedContentCourses,
-  seedContentLessonRows,
-  seedContentModules,
-} from "@/adapters/persistence/in-memory/seed/seed-content";
+import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
 import { expect, test } from "@playwright/test";
 
@@ -19,20 +15,20 @@ import { expect, test } from "@playwright/test";
  * ordinals, module previews — so declaring a course in the manifest moves
  * this suite with it instead of breaking it.
  */
-const COURSES = seedContentCourses;
+const COURSES = contentCatalog.courses;
 const FIRST_COURSE = COURSES[0]!;
 const SECOND_COURSE = COURSES[1]!;
 
 /** Modules of one course, in the order the ladder card previews them. */
 const modulesOf = (courseId: string) =>
-  seedContentModules
+  contentCatalog.modules
     .filter((module) => module.courseId === courseId)
     .sort((a, b) => a.sequence - b.sequence);
 
 /** The first lesson of a course's first module — the one a card links into. */
 const firstLessonOf = (courseId: string) => {
   const module_ = modulesOf(courseId)[0]!;
-  const lesson = seedContentLessonRows
+  const lesson = contentCatalog.lessonRows
     .filter((row) => row.moduleId === module_.id)
     .sort((a, b) => a.sequence - b.sequence)[0]!;
   return { module: module_, lesson };
