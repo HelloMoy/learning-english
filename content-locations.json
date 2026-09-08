@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "stores": {
+    "local": {
+      "driver": "local",
+      "baseUrl": "/local-filesystem-lesson"
+    }
+  },
+  "default": "local",
+  "routes": [],
+  "overrides": {}
+}

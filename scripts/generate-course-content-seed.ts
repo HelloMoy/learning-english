@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
+import type { BlobStore } from "../src/adapters/persistence/blob-store/blob-store.ts";
 import { LocalFilesystemBlobStore } from "../src/adapters/persistence/blob-store/local-filesystem-blob-store/local-filesystem-blob-store.ts";
 import {
   resolveLessonRow,
@@ -11,6 +12,12 @@ import {
 import { Course } from "../src/domain/entities/course/course.ts";
 import { Module } from "../src/domain/entities/module/module.ts";
 import {
+  COURSES_MANIFEST_FILE,
+  loadCoursesManifest,
+  resolveCourseDeclaration,
+  type ResolvedCourse,
+} from "./courses-manifest/courses-manifest.ts";
+import {
   classifyLessonFolder,
   classifyResourceKind,
   folderExists,
@@ -19,11 +26,11 @@ import {
   listSubdirectories,
   parseSequence,
   resourceTitleFromFile,
+  type ClassifiedLesson,
 } from "./discriminate-lesson.ts";
 import { probeDurationSeconds } from "./ffprobe.ts";
 import { resolveSlug, toPosix } from "./resolve-slug.ts";
-import { usesTitleFromNotes } from "./title-from-notes-modules.ts";
-import { lessonTitleOverride } from "./title-overrides.ts";
+import { slugify } from "./slug.ts";
 import { uuidv5 } from "./uuid.ts";
 
 /**
@@ -106,17 +113,10 @@ export async function runGenerator(args: { sourceDir: string; outFile: string })
     );
   }
 
-  const output = renderSeedFile(
-    seed.course,
-    seed.modules,
-    seed.lessonRows,
-    seed.resourceRows,
-    seed.sourceNames,
-    seed.notesKeys,
-  );
+  const output = renderSeedFile(seed);
   writeFileSync(args.outFile, await formatWithPrettier(output, args.outFile), "utf8");
   console.log(
-    `[seed-gen] Wrote ${seed.modules.length} modules, ${seed.lessonRows.length} lessons, ${seed.resourceRows.length} resources → ${args.outFile}`,
+    `[seed-gen] Wrote ${seed.courses.length} courses, ${seed.modules.length} modules, ${seed.lessonRows.length} lessons, ${seed.resourceRows.length} resources → ${args.outFile}`,
   );
 }
 
@@ -129,16 +129,19 @@ export async function runGenerator(args: { sourceDir: string; outFile: string })
 const UNUSED_BASE_URL = "/unused-by-the-generator";
 
 /**
- * Where the generated course sits in the home's ladder of levels.
+ * Ladder position for a content root with no `courses.manifest.json`.
  *
- * The generator emits exactly one course, so its ladder position cannot be
- * derived from the content it walks — it has to be declared. `1` belongs to
- * the hand-written A1 seed in `seed.ts`; this course follows it.
+ * A course's place in the ladder cannot be derived from the content it holds,
+ * so a declared course states it. With nothing declared there is exactly one
+ * course and one sensible answer: `1` belongs to the hand-written A1 seed in
+ * `seed.ts`, so the filesystem-backed course follows it — which is what the
+ * generator emitted before the manifest existed.
  */
-const CONTENT_COURSE_SEQUENCE = 2;
+const UNDECLARED_COURSE_SEQUENCE = 2;
 
 export type BuiltSeed = {
-  course: Course;
+  /** Every declared course, in ladder order. */
+  courses: Course[];
   modules: Module[];
   /** Lesson rows whose `source` / `poster` hold content KEYS, not URLs. */
   lessonRows: LessonRow[];
@@ -194,10 +197,64 @@ function loadOriginalNameMap(sourceDir: string): Map<string, string> {
 }
 
 /**
- * Pure builder: walks the source directory and returns the seed's course and
- * modules as parsed entities, and its lessons and resources as ROWS holding
- * content keys. Side-effect-free (aside from reading files). The CLI entry
- * point (`runGenerator`) writes the rendered file.
+ * The courses to walk: whatever `courses.manifest.json` declares, or — when
+ * the content root has none — the first top-level folder with every field
+ * derived, which is exactly what the generator emitted before the manifest
+ * existed.
+ *
+ * A folder that no entry names is a staging area, not an error: it is
+ * reported and skipped, so half-imported content never silently ships.
+ */
+function resolveCoursesToWalk(sourceDir: string): ResolvedCourse[] {
+  const courseFolders = listSubdirectories(sourceDir);
+  if (courseFolders.length === 0) {
+    throw new Error(`No course folders found in ${sourceDir}`);
+  }
+
+  const declared = loadCoursesManifest(sourceDir);
+  if (declared === null) {
+    return [
+      resolveCourseDeclaration(
+        { folder: courseFolders[0] as string, sequence: UNDECLARED_COURSE_SEQUENCE },
+        sourceDir,
+      ),
+    ];
+  }
+
+  const declaredFolders = new Set(declared.map((course) => course.folder));
+  const skipped = courseFolders.filter((folder) => !declaredFolders.has(folder));
+  if (skipped.length > 0) {
+    console.warn(
+      `[seed-gen] Skipping folders no course declares in ${COURSES_MANIFEST_FILE}: ${skipped.join(", ")}`,
+    );
+  }
+  return declared;
+}
+
+/** Accumulators the walk fills in, shared across every course. */
+type SeedAccumulator = {
+  courses: Course[];
+  modules: Module[];
+  lessonRows: LessonRow[];
+  resourceRows: ResourceRow[];
+  sourceNames: Record<string, string>;
+  keys: string[];
+  notesKeys: Record<string, string>;
+};
+
+/** Everything a course walk needs beyond the course itself. */
+type WalkContext = {
+  sourceDir: string;
+  validationStore: BlobStore;
+  originalNames: Map<string, string>;
+  seed: SeedAccumulator;
+};
+
+/**
+ * Pure builder: walks the declared course folders and returns their courses
+ * and modules as parsed entities, and their lessons and resources as ROWS
+ * holding content keys. Side-effect-free (aside from reading files). The CLI
+ * entry point (`runGenerator`) writes the rendered file.
  */
 export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
   // Validation only. Every row is run through the same resolver the runtime
@@ -208,181 +265,251 @@ export async function buildSeed(sourceDir: string): Promise<BuiltSeed> {
     localRoot: path.resolve(sourceDir),
   });
 
-  const originalNames = loadOriginalNameMap(sourceDir);
-  const sourceNames: Record<string, string> = {};
-  const keys: string[] = [];
-  const notesKeys: Record<string, string> = {};
-  const recordSourceName = (id: string, slugRelPath: string, fallbackLeaf: string): void => {
-    sourceNames[id] = originalNames.get(slugRelPath) ?? fallbackLeaf;
+  const seed: SeedAccumulator = {
+    courses: [],
+    modules: [],
+    lessonRows: [],
+    resourceRows: [],
+    sourceNames: {},
+    keys: [],
+    notesKeys: {},
+  };
+  const context: WalkContext = {
+    sourceDir,
+    validationStore,
+    originalNames: loadOriginalNameMap(sourceDir),
+    seed,
   };
 
-  const courseFolders = listSubdirectories(sourceDir);
-  if (courseFolders.length === 0) {
-    throw new Error(`No course folders found in ${sourceDir}`);
-  }
-  if (courseFolders.length > 1) {
-    console.warn(
-      `[seed-gen] Multiple top-level folders in ${sourceDir}; using the first: "${courseFolders[0]}". Pass a more specific --source if this is wrong.`,
-    );
-  }
-  const courseFolder = courseFolders[0] as string;
-  const courseSlug = resolveSlug(courseFolder);
-  const courseId = uuidv5(`course:${courseSlug}`);
-  recordSourceName(courseId, courseSlug, courseFolder);
-
-  const modules: Module[] = [];
-  const lessonRows: LessonRow[] = [];
-  const resourceRows: ResourceRow[] = [];
-
-  const moduleFolders = listSubdirectories(path.join(sourceDir, courseFolder));
-
-  for (const moduleFolder of moduleFolders) {
-    const moduleSlug = resolveSlug(moduleFolder);
-    const moduleId = uuidv5(`module:${courseSlug}/${moduleSlug}`);
-    const moduleSequence = parseSequence(moduleSlug);
-    recordSourceName(moduleId, `${courseSlug}/${moduleSlug}`, moduleFolder);
-
-    modules.push(
-      Module.parse({
-        id: moduleId,
-        courseId,
-        slug: moduleSlug,
-        title: humanize(moduleSlug),
-        sequence: moduleSequence,
-      }),
-    );
-
-    const lessonFolders = listLessonFolders(path.join(sourceDir, courseFolder, moduleFolder));
-
-    for (const lessonFolder of lessonFolders) {
-      const lessonSlug = resolveSlug(lessonFolder);
-      const lessonId = uuidv5(`lesson:${courseSlug}/${moduleSlug}/${lessonSlug}`);
-      const lessonSequence = parseSequence(lessonSlug);
-      recordSourceName(lessonId, `${courseSlug}/${moduleSlug}/${lessonSlug}`, lessonFolder);
-
-      const classified = classifyLessonFolder(
-        path.join(sourceDir, courseFolder, moduleFolder, lessonFolder),
-        lessonSlug,
-        { titleFromNotesHeading: usesTitleFromNotes(moduleSlug) },
-      );
-
-      // Resolved once and threaded into both the lesson and its notes
-      // Resource: they are titled from the same string, so they cannot drift
-      // apart. An override outranks the heading and the slug alike.
-      const title =
-        lessonTitleOverride(`${courseSlug}/${moduleSlug}/${lessonSlug}`) ?? classified.title;
-
-      if (classified.kind === "video") {
-        const videoPath = path.join(
-          sourceDir,
-          courseFolder,
-          moduleFolder,
-          lessonFolder,
-          classified.videoFileName,
-        );
-        const durationSeconds = await probeDurationSeconds(videoPath);
-
-        // Keys from classifyLessonFolder are lesson-relative; the BlobStore
-        // expects keys relative to its `localRoot` (== sourceDir). Compose
-        // the full key here so the URL points at the right path.
-        const videoFullKey = `${courseSlug}/${moduleSlug}/${classified.videoKey}`;
-        const posterFullKey = classified.posterKey
-          ? `${courseSlug}/${moduleSlug}/${classified.posterKey}`
-          : null;
-        keys.push(videoFullKey);
-        if (posterFullKey) keys.push(posterFullKey);
-        if (classified.readmeKey) {
-          notesKeys[lessonId] = `${courseSlug}/${moduleSlug}/${classified.readmeKey}`;
-        }
-
-        // The row carries KEYS. `resolveLessonRow` is called purely to prove
-        // the row becomes a valid entity once a BlobStore resolves it; its
-        // return value is discarded.
-        const row: LessonRow = {
-          kind: "video",
-          id: lessonId,
-          courseId,
-          moduleId,
-          sequence: lessonSequence,
-          title,
-          description: classified.description,
-          source: videoFullKey,
-          durationSeconds,
-          ...(posterFullKey ? { poster: posterFullKey } : {}),
-        };
-        resolveLessonRow(row, validationStore);
-        lessonRows.push(row);
-
-        for (let i = 0; i < classified.resourceKeys.length; i++) {
-          const resourceKey = classified.resourceKeys[i] as string;
-          const rawName = classified.resourceRawNames[i] as string;
-          const fullKey = `${courseSlug}/${moduleSlug}/${resourceKey}`;
-          const resourceRow = buildResourceRow(lessonId, fullKey, title);
-          resolveResourceRow(resourceRow, validationStore);
-          resourceRows.push(resourceRow);
-          // Priority for sourceNames: raw on-disk filename (always available
-          // because classifyLessonFolder reads the folder at walk time) >
-          // manifest entry (legacy path) > current slugified basename.
-          recordSourceName(resourceRow.id, fullKey, rawName);
-          keys.push(fullKey);
-        }
-      } else {
-        const row: LessonRow = {
-          kind: "reading",
-          id: lessonId,
-          courseId,
-          moduleId,
-          sequence: lessonSequence,
-          title,
-          body: classified.body,
-        };
-        resolveLessonRow(row, validationStore);
-        lessonRows.push(row);
-
-        for (let i = 0; i < classified.resourceKeys.length; i++) {
-          const resourceKey = classified.resourceKeys[i] as string;
-          const rawName = classified.resourceRawNames[i] as string;
-          const fullKey = `${courseSlug}/${moduleSlug}/${resourceKey}`;
-          const resourceRow = buildResourceRow(lessonId, fullKey, title);
-          resolveResourceRow(resourceRow, validationStore);
-          resourceRows.push(resourceRow);
-          // Priority for sourceNames: raw on-disk filename (always available
-          // because classifyLessonFolder reads the folder at walk time) >
-          // manifest entry (legacy path) > current slugified basename.
-          recordSourceName(resourceRow.id, fullKey, rawName);
-          keys.push(fullKey);
-        }
-      }
-    }
+  for (const course of resolveCoursesToWalk(sourceDir)) {
+    await appendCourse(course, context);
   }
 
-  // Sort: modules and lessons by sequence; resources by lessonId then title.
-  modules.sort((a, b) => a.sequence - b.sequence);
-  lessonRows.sort((a, b) => {
+  sortSeed(seed);
+  return {
+    courses: seed.courses,
+    modules: seed.modules,
+    lessonRows: seed.lessonRows,
+    resourceRows: seed.resourceRows,
+    sourceNames: seed.sourceNames,
+    keys: seed.keys,
+    notesKeys: seed.notesKeys,
+  };
+}
+
+/** Walks one declared course folder and appends everything it holds. */
+async function appendCourse(course: ResolvedCourse, context: WalkContext): Promise<void> {
+  // The key prefix is the folder's normalized name, NOT `course.slug`: keys
+  // must equal the physical path under the content root, while the slug is
+  // free to differ because it only ever appears in URLs.
+  const keyPrefix = slugify(course.folder);
+  const courseId = uuidv5(`course:${course.slug}`);
+  recordSourceName(context, courseId, keyPrefix, course.folder);
+
+  const courseDir = path.join(context.sourceDir, course.folder);
+  const lessonCountBefore = context.seed.lessonRows.length;
+  const moduleCountBefore = context.seed.modules.length;
+
+  for (const moduleFolder of listSubdirectories(courseDir)) {
+    await appendModule({ course, courseId, keyPrefix, moduleFolder }, context);
+  }
+
+  context.seed.courses.push(
+    Course.parse({
+      id: courseId,
+      slug: course.slug,
+      title: course.title,
+      description: course.description,
+      language: course.language,
+      lessonCount: context.seed.lessonRows.length - lessonCountBefore,
+      moduleCount: context.seed.modules.length - moduleCountBefore,
+      sequence: course.sequence,
+    }),
+  );
+}
+
+/** Identity of the course a module or lesson is being walked under. */
+type CourseScope = {
+  course: ResolvedCourse;
+  courseId: string;
+  /** The course's content-key prefix — its normalized folder name. */
+  keyPrefix: string;
+};
+
+/** Walks one module folder and appends the module plus all its lessons. */
+async function appendModule(
+  scope: CourseScope & { moduleFolder: string },
+  context: WalkContext,
+): Promise<void> {
+  const { course, courseId, keyPrefix, moduleFolder } = scope;
+  const moduleSlug = resolveSlug(moduleFolder, course.slugOverrides);
+  const moduleId = uuidv5(`module:${course.slug}/${moduleSlug}`);
+  recordSourceName(context, moduleId, `${keyPrefix}/${moduleSlug}`, moduleFolder);
+
+  context.seed.modules.push(
+    Module.parse({
+      id: moduleId,
+      courseId,
+      slug: moduleSlug,
+      title: humanize(moduleSlug),
+      sequence: parseSequence(moduleSlug),
+    }),
+  );
+
+  const moduleDir = path.join(context.sourceDir, course.folder, moduleFolder);
+  for (const lessonFolder of listLessonFolders(moduleDir)) {
+    await appendLesson({ ...scope, moduleSlug, moduleId, lessonFolder }, context);
+  }
+}
+
+/** Identity of the module a lesson is being walked under. */
+type ModuleScope = CourseScope & {
+  moduleFolder: string;
+  moduleSlug: string;
+  moduleId: string;
+};
+
+/** Classifies one lesson folder and appends its lesson row and resources. */
+async function appendLesson(
+  scope: ModuleScope & { lessonFolder: string },
+  context: WalkContext,
+): Promise<void> {
+  const { course, courseId, keyPrefix, moduleFolder, moduleSlug, moduleId, lessonFolder } = scope;
+  const lessonSlug = resolveSlug(lessonFolder, course.slugOverrides);
+  const lessonId = uuidv5(`lesson:${course.slug}/${moduleSlug}/${lessonSlug}`);
+  const lessonSequence = parseSequence(lessonSlug);
+  recordSourceName(context, lessonId, `${keyPrefix}/${moduleSlug}/${lessonSlug}`, lessonFolder);
+
+  const lessonDir = path.join(context.sourceDir, course.folder, moduleFolder, lessonFolder);
+  const classified = classifyLessonFolder(lessonDir, lessonSlug, {
+    titleFromNotesHeading: course.titleFromNotesModules.has(moduleSlug),
+  });
+
+  // Resolved once and threaded into both the lesson and its notes Resource:
+  // they are titled from the same string, so they cannot drift apart. An
+  // override outranks the heading and the slug alike.
+  const title = course.lessonTitleOverrides[`${moduleSlug}/${lessonSlug}`] ?? classified.title;
+  // Keys from classifyLessonFolder are lesson-relative; the BlobStore expects
+  // keys relative to its `localRoot` (== sourceDir).
+  const fullKey = (lessonRelativeKey: string): string =>
+    `${keyPrefix}/${moduleSlug}/${lessonRelativeKey}`;
+
+  const row = await buildLessonRow({
+    classified,
+    lessonId,
+    courseId,
+    moduleId,
+    lessonSequence,
+    title,
+    lessonDir,
+    fullKey,
+  });
+  resolveLessonRow(row, context.validationStore);
+  context.seed.lessonRows.push(row);
+
+  if (row.kind === "video") {
+    context.seed.keys.push(row.source);
+    if (row.poster) context.seed.keys.push(row.poster);
+  }
+  if (classified.kind === "video" && classified.readmeKey) {
+    context.seed.notesKeys[lessonId] = fullKey(classified.readmeKey);
+  }
+
+  appendResources({ classified, lessonId, title, fullKey }, context);
+}
+
+/**
+ * The lesson row for a classified folder — a video row (with its probed
+ * duration and optional poster) or a reading row carrying the Markdown body.
+ */
+async function buildLessonRow(args: {
+  classified: ClassifiedLesson;
+  lessonId: string;
+  courseId: string;
+  moduleId: string;
+  lessonSequence: number;
+  title: string;
+  lessonDir: string;
+  fullKey: (lessonRelativeKey: string) => string;
+}): Promise<LessonRow> {
+  const { classified, lessonId, courseId, moduleId, lessonSequence, title, lessonDir, fullKey } =
+    args;
+  const common = {
+    id: lessonId,
+    courseId,
+    moduleId,
+    sequence: lessonSequence,
+    title,
+  };
+
+  if (classified.kind !== "video") {
+    return { kind: "reading", ...common, body: classified.body };
+  }
+
+  const posterKey = classified.posterKey ? fullKey(classified.posterKey) : null;
+  return {
+    kind: "video",
+    ...common,
+    description: classified.description,
+    source: fullKey(classified.videoKey),
+    durationSeconds: await probeDurationSeconds(path.join(lessonDir, classified.videoFileName)),
+    ...(posterKey ? { poster: posterKey } : {}),
+  };
+}
+
+/** Appends one resource row per non-lesson file in the folder. */
+function appendResources(
+  args: {
+    classified: ClassifiedLesson;
+    lessonId: string;
+    title: string;
+    fullKey: (lessonRelativeKey: string) => string;
+  },
+  context: WalkContext,
+): void {
+  const { classified, lessonId, title, fullKey } = args;
+  for (let i = 0; i < classified.resourceKeys.length; i++) {
+    const key = fullKey(classified.resourceKeys[i] as string);
+    const rawName = classified.resourceRawNames[i] as string;
+    const resourceRow = buildResourceRow(lessonId, key, title);
+    resolveResourceRow(resourceRow, context.validationStore);
+    context.seed.resourceRows.push(resourceRow);
+    // Priority for sourceNames: raw on-disk filename (always available
+    // because classifyLessonFolder reads the folder at walk time) >
+    // rename-manifest entry (legacy path) > current slugified basename.
+    recordSourceName(context, resourceRow.id, key, rawName);
+    context.seed.keys.push(key);
+  }
+}
+
+/**
+ * Records an entity's pre-normalization name, preferring the rename manifest
+ * and falling back to the name currently on disk.
+ */
+function recordSourceName(
+  context: WalkContext,
+  id: string,
+  slugRelPath: string,
+  fallbackLeaf: string,
+): void {
+  context.seed.sourceNames[id] = context.originalNames.get(slugRelPath) ?? fallbackLeaf;
+}
+
+/** Courses by ladder position; modules and lessons by sequence; resources by lesson then title. */
+function sortSeed(seed: SeedAccumulator): void {
+  seed.courses.sort((a, b) => a.sequence - b.sequence);
+  seed.modules.sort((a, b) => {
+    if (a.courseId !== b.courseId) return a.courseId.localeCompare(b.courseId);
+    return a.sequence - b.sequence;
+  });
+  seed.lessonRows.sort((a, b) => {
     if (a.moduleId !== b.moduleId) return a.moduleId.localeCompare(b.moduleId);
     return a.sequence - b.sequence;
   });
-  resourceRows.sort((a, b) => {
+  seed.resourceRows.sort((a, b) => {
     if (a.lessonId !== b.lessonId) return a.lessonId.localeCompare(b.lessonId);
     return a.title.localeCompare(b.title);
   });
-
-  const course = Course.parse({
-    id: courseId,
-    slug: courseSlug,
-    title: humanize(courseSlug),
-    // Relative to the repo root, never the absolute `sourceDir`: the CLI
-    // resolves that to wherever the repo happens to be checked out, which
-    // would bake one machine's home directory into the committed seed and
-    // make regeneration produce a diff on every other machine.
-    description: `Course content generated from ${toPosix(path.relative(process.cwd(), sourceDir))}.`,
-    language: "en",
-    lessonCount: lessonRows.length,
-    moduleCount: modules.length,
-    sequence: CONTENT_COURSE_SEQUENCE,
-  });
-
-  return { course, modules, lessonRows, resourceRows, sourceNames, keys, notesKeys };
 }
 
 function buildResourceRow(lessonId: string, resourceKey: string, lessonTitle: string): ResourceRow {
@@ -410,14 +537,8 @@ async function formatWithPrettier(source: string, filePath: string): Promise<str
   return prettier.format(source, { ...config, filepath: filePath });
 }
 
-function renderSeedFile(
-  course: Course,
-  modules: Module[],
-  lessonRows: LessonRow[],
-  resourceRows: ResourceRow[],
-  sourceNames: Record<string, string>,
-  notesKeys: Record<string, string>,
-): string {
+function renderSeedFile(seed: BuiltSeed): string {
+  const { courses, modules, lessonRows, resourceRows, sourceNames, notesKeys } = seed;
   // One JSON object per entity keeps the diff readable when content
   // changes. `formatWithPrettier` normalizes the result before it is
   // written, so this only has to be valid TypeScript, not pretty.
@@ -425,7 +546,8 @@ function renderSeedFile(
     items.map((item) => JSON.stringify(item, null, 2).replace(/\n/g, "\n  ")).join(",\n  ");
 
   return `// AUTOGENERATED by scripts/generate-course-content-seed.ts. DO NOT EDIT.
-// Re-run the generator after adding content under public/local-filesystem-lesson/.
+// Re-run the generator after adding content under public/local-filesystem-lesson/,
+// or after editing that folder's courses.manifest.json.
 //
 // The generator formats this file with the repo's Prettier config, so the
 // committed output is what \`pnpm format\` would produce — no hand-edits.
@@ -444,9 +566,13 @@ import type {
 import { Course } from "@/domain/entities/course/course";
 import { Module } from "@/domain/entities/module/module";
 
-export const SEED_CONTENT_COURSE_ID = "${course.id}";
+const _seedContentCourseRaw = [
+  ${renderJsonArray(courses)},
+];
 
-export const seedContentCourse = Course.parse(${JSON.stringify(course, null, 2)});
+export const seedContentCourses: ReadonlyArray<Course> = _seedContentCourseRaw.map((c) =>
+  Course.parse(c),
+);
 
 const _seedContentModuleRaw = [
   ${renderJsonArray(modules)},

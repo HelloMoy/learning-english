@@ -114,13 +114,15 @@ describe.skipIf(!FFMPEG_AVAILABLE)("buildSeed (integration)", () => {
   test("THEN it parses a Course from the first top-level folder", async () => {
     // Act
     const seed = await buildSeed(sourceDir);
+    const [course] = seed.courses;
 
     // Assert — every field round-trips through Zod without throwing.
-    expect(() => Course.parse(seed.course)).not.toThrow();
-    expect(seed.course.slug).toBe("test-course");
-    expect(seed.course.title).toBe("Test Course");
-    expect(seed.course.lessonCount).toBe(seed.lessonRows.length);
-    expect(seed.course.moduleCount).toBe(seed.modules.length);
+    expect(seed.courses).toHaveLength(1);
+    expect(() => Course.parse(course)).not.toThrow();
+    expect(course?.slug).toBe("test-course");
+    expect(course?.title).toBe("Test Course");
+    expect(course?.lessonCount).toBe(seed.lessonRows.length);
+    expect(course?.moduleCount).toBe(seed.modules.length);
   });
 
   test("AND it discovers both modules in the right order", async () => {
@@ -260,8 +262,8 @@ describe.skipIf(!FFMPEG_AVAILABLE)("buildSeed (integration)", () => {
     const seedB = await buildSeed(sourceDir);
 
     // Assert
-    expect(seedA.course.id).toBe(seedB.course.id);
-    expect(seedA.course.id).toMatch(
+    expect(seedA.courses[0]?.id).toBe(seedB.courses[0]?.id);
+    expect(seedA.courses[0]?.id).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
     );
   });

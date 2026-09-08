@@ -1,7 +1,9 @@
 import { describe, expect, test } from "vitest";
 
 import { normalizeFileName, resolveSlug, toPosix } from "./resolve-slug";
-import { SLUG_OVERRIDES } from "./slug-overrides";
+
+/** No course declared an override for the name under test. */
+const NO_OVERRIDES: Record<string, string> = {};
 
 describe("resolveSlug", () => {
   test("WHEN no override matches THEN it falls back to slugify", () => {
@@ -9,33 +11,34 @@ describe("resolveSlug", () => {
     const raw = "5 Sound Natural: American Intonation Essentials";
 
     // Act
-    const result = resolveSlug(raw);
+    const result = resolveSlug(raw, NO_OVERRIDES);
 
     // Assert
     expect(result).toBe("5-sound-natural-american-intonation-essentials");
   });
 
   test("WHEN an override matches the raw name THEN the override wins over slugify", () => {
-    // Arrange — inject an override for this test only, then restore.
+    // Arrange
     const raw = "1 Day#1";
-    const had = Object.prototype.hasOwnProperty.call(SLUG_OVERRIDES, raw);
-    const prev = SLUG_OVERRIDES[raw];
-    (SLUG_OVERRIDES as Record<string, string>)[raw] = "1-day-01";
 
-    try {
-      // Act
-      const result = resolveSlug(raw);
+    // Act
+    const overridden = resolveSlug(raw, { [raw]: "1-day-01" });
 
-      // Assert
-      expect(result).toBe("1-day-01");
-      expect(result).not.toBe(resolveSlugWithoutOverride(raw));
-    } finally {
-      if (had) {
-        (SLUG_OVERRIDES as Record<string, string>)[raw] = prev as string;
-      } else {
-        delete (SLUG_OVERRIDES as Record<string, string>)[raw];
-      }
-    }
+    // Assert
+    expect(overridden).toBe("1-day-01");
+    expect(overridden).not.toBe(resolveSlug(raw, NO_OVERRIDES));
+  });
+
+  test("WHEN the override map belongs to another course THEN it does not apply", () => {
+    // Arrange — each course carries its own map, so a same-named folder in a
+    // different course must be unaffected.
+    const raw = "1 Day#1";
+
+    // Act
+    const result = resolveSlug(raw, { "Some Other Folder": "elsewhere" });
+
+    // Assert
+    expect(result).toBe("1-day-1");
   });
 
   test("WHEN the input is already a slug THEN it round-trips (idempotent)", () => {
@@ -43,8 +46,8 @@ describe("resolveSlug", () => {
     const slug = "8-everyday-english-phrases-part-2-master-them";
 
     // Act
-    const once = resolveSlug(slug);
-    const twice = resolveSlug(once);
+    const once = resolveSlug(slug, NO_OVERRIDES);
+    const twice = resolveSlug(once, NO_OVERRIDES);
 
     // Assert
     expect(once).toBe(slug);
@@ -88,17 +91,6 @@ describe("normalizeFileName", () => {
     expect(twice).toBe(once);
   });
 });
-
-/**
- * Local helper: what the automatic path would produce, to prove the override
- * actually diverged from `slugify` in the override test above.
- */
-function resolveSlugWithoutOverride(raw: string): string {
-  // mirror slugify's shape without importing it: rely on resolveSlug of a
-  // guaranteed-unmapped variant would be fragile, so hardcode the expected
-  // automatic slug for the fixture used above.
-  return raw === "1 Day#1" ? "1-day-1" : raw;
-}
 
 describe("toPosix", () => {
   test("WHEN the input is already POSIX THEN it round-trips unchanged", () => {

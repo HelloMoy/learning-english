@@ -1,7 +1,6 @@
 import path from "node:path";
 
 import { slugify } from "./slug";
-import { SLUG_OVERRIDES } from "./slug-overrides";
 
 /**
  * Single source of truth for turning a raw on-disk folder name into a
@@ -10,12 +9,23 @@ import { SLUG_OVERRIDES } from "./slug-overrides";
  * asset always equals the content key the generator emits. Two copies of
  * this logic is exactly the drift that caused seed URLs to 404.
  *
- * Resolution order: an explicit entry in `SLUG_OVERRIDES` (keyed by the raw
- * name as it appears on disk) wins; otherwise automatic `slugify`.
+ * Resolution order: an explicit entry in `overrides` (keyed by the raw name
+ * as it appears on disk) wins; otherwise automatic `slugify`.
+ *
+ * @remarks
+ * The map is an argument rather than a module-level constant because
+ * overrides are declared per course in `courses.manifest.json`. Two courses
+ * may legitimately hold sibling folders with the same raw name and want
+ * different slugs, which a single global table cannot express. Callers
+ * operating outside any declared course pass `{}`.
+ *
+ * @param rawName - Folder name exactly as it appears on disk
+ * @param overrides - The owning course's `slugOverrides`, or `{}`
+ * @returns The URL-safe slug
  */
-export function resolveSlug(rawName: string): string {
-  if (Object.prototype.hasOwnProperty.call(SLUG_OVERRIDES, rawName)) {
-    return SLUG_OVERRIDES[rawName] as string;
+export function resolveSlug(rawName: string, overrides: Record<string, string>): string {
+  if (Object.prototype.hasOwnProperty.call(overrides, rawName)) {
+    return overrides[rawName] as string;
   }
   return slugify(rawName);
 }

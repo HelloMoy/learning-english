@@ -1,13 +1,21 @@
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+
 import { SEED_COURSE_ID, seedCourse } from "@/adapters/persistence/in-memory/seed/seed";
-import {
-  SEED_CONTENT_COURSE_ID,
-  seedContentCourse,
-} from "@/adapters/persistence/in-memory/seed/seed-content";
+import { seedContentCourses } from "@/adapters/persistence/in-memory/seed/seed-content";
 import { CourseId } from "@/domain/entities/ids/ids";
 
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 
 import { getCoursePlatformDeps, isCourseContentSeedEnabled } from "./use-case-dependencies";
+
+/**
+ * The filesystem-backed course under test. The manifest may declare several;
+ * these assertions only need one, and the catalog assertions below cover the
+ * whole list.
+ */
+const contentCourse = seedContentCourses[0]!;
 
 /**
  * The env-var switch is read at function-call time (not module-load), so
@@ -16,7 +24,16 @@ import { getCoursePlatformDeps, isCourseContentSeedEnabled } from "./use-case-de
  * state into each other or into the rest of the suite.
  */
 const ORIGINAL_ENV = process.env.USE_COURSE_CONTENT_SEED;
-const ORIGINAL_BASE_URL = process.env.CONTENT_BASE_URL;
+const ORIGINAL_LOCATIONS_PATH = process.env.CONTENT_LOCATIONS_PATH;
+
+const manifestRoot = mkdtempSync(path.join(tmpdir(), "deps-locations-"));
+
+/** Writes a location manifest to a temp file and points the env var at it. */
+function useLocationManifest(doc: Record<string, unknown>): void {
+  const file = path.join(mkdtempSync(path.join(manifestRoot, "dir-")), "content-locations.json");
+  writeFileSync(file, JSON.stringify({ version: 1, ...doc }));
+  process.env.CONTENT_LOCATIONS_PATH = file;
+}
 
 const restore = (name: string, original: string | undefined): void => {
   if (original === undefined) {
@@ -29,7 +46,7 @@ const restore = (name: string, original: string | undefined): void => {
 /** First video lesson of the content seed, read through the real deps graph. */
 const firstContentVideoSource = async (): Promise<string> => {
   const deps = getCoursePlatformDeps();
-  const lessons = await deps.lessons.listByCourse(CourseId.parse(SEED_CONTENT_COURSE_ID));
+  const lessons = await deps.lessons.listByCourse(contentCourse.id);
   const video = lessons.find((l) => l.kind === "video");
   if (video?.kind !== "video") throw new Error("content seed has no video lesson");
   return video.source;
@@ -38,12 +55,12 @@ const firstContentVideoSource = async (): Promise<string> => {
 describe("getCoursePlatformDeps env-var switch", () => {
   beforeEach(() => {
     delete process.env.USE_COURSE_CONTENT_SEED;
-    delete process.env.CONTENT_BASE_URL;
+    delete process.env.CONTENT_LOCATIONS_PATH;
   });
 
   afterEach(() => {
     restore("USE_COURSE_CONTENT_SEED", ORIGINAL_ENV);
-    restore("CONTENT_BASE_URL", ORIGINAL_BASE_URL);
+    restore("CONTENT_LOCATIONS_PATH", ORIGINAL_LOCATIONS_PATH);
   });
 
   describe("isCourseContentSeedEnabled", () => {
@@ -105,11 +122,14 @@ describe("getCoursePlatformDeps env-var switch", () => {
       const courses = await deps.courses.listAvailable();
 
       // Assert
-      expect(courses).toHaveLength(2);
-      expect(courses.map((course) => course.id)).toEqual([SEED_COURSE_ID, SEED_CONTENT_COURSE_ID]);
+      expect(courses).toHaveLength(1 + seedContentCourses.length);
+      expect(courses.map((course) => course.id)).toEqual([
+        SEED_COURSE_ID,
+        ...seedContentCourses.map((course) => course.id),
+      ]);
       expect(courses.map((course) => course.title)).toEqual([
         seedCourse.title,
-        seedContentCourse.title,
+        ...seedContentCourses.map((course) => course.title),
       ]);
     });
 
@@ -134,13 +154,11 @@ describe("getCoursePlatformDeps env-var switch", () => {
       // Act
       const deps = getCoursePlatformDeps();
       const a1Lessons = await deps.lessons.listByCourse(CourseId.parse(SEED_COURSE_ID));
-      const contentLessons = await deps.lessons.listByCourse(
-        CourseId.parse(SEED_CONTENT_COURSE_ID),
-      );
+      const contentLessons = await deps.lessons.listByCourse(contentCourse.id);
 
       // Assert
       expect(a1Lessons).toHaveLength(seedCourse.lessonCount);
-      expect(contentLessons).toHaveLength(seedContentCourse.lessonCount);
+      expect(contentLessons).toHaveLength(contentCourse.lessonCount);
       const a1Video = a1Lessons.find((lesson) => lesson.kind === "video");
       expect(a1Video?.kind === "video" && a1Video.source).toBe("/videos/vowels-short-vs-long.mp4");
     });
@@ -150,9 +168,7 @@ describe("getCoursePlatformDeps env-var switch", () => {
       process.env.USE_COURSE_CONTENT_SEED = "1";
       const deps = getCoursePlatformDeps();
       const [a1First] = await deps.lessons.listByCourse(CourseId.parse(SEED_COURSE_ID));
-      const [contentFirst] = await deps.lessons.listByCourse(
-        CourseId.parse(SEED_CONTENT_COURSE_ID),
-      );
+      const [contentFirst] = await deps.lessons.listByCourse(contentCourse.id);
 
       // Act
       const foundA1 = await deps.lessons.byId(a1First!.id);
@@ -199,8 +215,8 @@ describe("getCoursePlatformDeps env-var switch", () => {
     });
   });
 
-  describe("CONTENT_BASE_URL", () => {
-    test("WHEN it is unset THEN content URLs keep the pre-change local prefix", async () => {
+  describe("content-locations.json", () => {
+    test("WHEN no manifest exists THEN content URLs keep the pre-change local prefix", async () => {
       // Arrange — the default must be byte-identical to the old baked-in
       // behaviour, or every existing page silently 404s.
       process.env.USE_COURSE_CONTENT_SEED = "1";
@@ -212,11 +228,14 @@ describe("getCoursePlatformDeps env-var switch", () => {
       expect(source.startsWith("/local-filesystem-lesson/")).toBe(true);
     });
 
-    test("WHEN it is set THEN content URLs carry the configured prefix, with the seed untouched", async () => {
+    test("WHEN the manifest points the local store at a CDN THEN URLs carry that prefix", async () => {
       // Arrange — the payoff: repointing storage is configuration, not a
       // regeneration of seed-content.ts.
       process.env.USE_COURSE_CONTENT_SEED = "1";
-      process.env.CONTENT_BASE_URL = "https://cdn.example.com/course-content";
+      useLocationManifest({
+        stores: { local: { driver: "local", baseUrl: "https://cdn.example.com/course-content" } },
+        default: "local",
+      });
 
       // Act
       const source = await firstContentVideoSource();
@@ -226,11 +245,14 @@ describe("getCoursePlatformDeps env-var switch", () => {
       expect(source).toMatch(/\.mp4$/);
     });
 
-    test("WHEN it has a trailing slash THEN the resolved URL has no double slash", async () => {
+    test("WHEN a baseUrl has a trailing slash THEN the resolved URL has no double slash", async () => {
       // Arrange — LocalFilesystemBlobStore normalizes this; assert the
       // composition root does not defeat that by pre-joining.
       process.env.USE_COURSE_CONTENT_SEED = "1";
-      process.env.CONTENT_BASE_URL = "https://cdn.example.com/course-content/";
+      useLocationManifest({
+        stores: { local: { driver: "local", baseUrl: "https://cdn.example.com/course-content/" } },
+        default: "local",
+      });
 
       // Act
       const source = await firstContentVideoSource();
@@ -238,6 +260,40 @@ describe("getCoursePlatformDeps env-var switch", () => {
       // Assert
       expect(source.startsWith("https://cdn.example.com/course-content/")).toBe(true);
       expect(source).not.toContain("course-content//");
+    });
+
+    test("WHEN a route covers one prefix THEN only its keys move and the rest stay local", async () => {
+      // Arrange — a partial migration: one course's assets served elsewhere
+      // while everything outside that prefix is untouched.
+      process.env.USE_COURSE_CONTENT_SEED = "1";
+      useLocationManifest({
+        stores: {
+          local: { driver: "local" },
+          cdn: { driver: "local", baseUrl: "https://cdn.example.com/migrated" },
+        },
+        default: "local",
+        routes: [{ prefix: contentCourse.slug, store: "cdn" }],
+      });
+
+      // Act
+      const source = await firstContentVideoSource();
+      const deps = getCoursePlatformDeps();
+      const [a1Lesson] = await deps.lessons.listByCourse(CourseId.parse(SEED_COURSE_ID));
+
+      // Assert
+      expect(source.startsWith("https://cdn.example.com/migrated/")).toBe(true);
+      expect(a1Lesson?.kind === "video" && a1Lesson.source).toBe(
+        "/videos/vowels-short-vs-long.mp4",
+      );
+    });
+
+    test("WHEN the manifest is invalid THEN building the graph throws rather than falling back", () => {
+      // Arrange
+      process.env.USE_COURSE_CONTENT_SEED = "1";
+      useLocationManifest({ stores: { local: { driver: "local" } }, default: "missing-store" });
+
+      // Act + Assert
+      expect(() => getCoursePlatformDeps()).toThrow(/missing-store/);
     });
   });
 });

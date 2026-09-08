@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "courses": [
+    {
+      "folder": "advanced-intermediate-course",
+      "slug": "advanced-intermediate-course",
+      "title": "Advanced Intermediate Course",
+      "description": "Course content generated from public/local-filesystem-lesson.",
+      "language": "en",
+      "sequence": 2,
+      "slugOverrides": {},
+      "titleFromNotesModules": [
+        "2-advanced-vowel-pronunciation-in-american-english",
+        "3-contractions-reductions"
+      ],
+      "lessonTitleOverrides": {
+        "3-contractions-reductions/6-i-d-you-d-we-d-all-the-would-contractions": "I’d, you’d, we’d — all the WOULD contractions"
+      }
+    }
+  ]
+}
