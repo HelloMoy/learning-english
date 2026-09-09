@@ -1,8 +1,10 @@
 import { getCoursePlatformDeps } from "@/adapters/persistence/in-memory/use-case-dependencies/use-case-dependencies";
 import type { CourseLevel } from "@/components/course-ladder/course-ladder";
 import { HomeView } from "@/components/home-view/home-view";
+import { shareMetadata } from "@/lib/share-metadata/share-metadata";
 
-import { setRequestLocale } from "next-intl/server";
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cache, use } from "react";
 
 type Props = {
@@ -14,6 +16,20 @@ const loadCatalog = cache(async () => {
   const result = await deps.useCases.findCourseCatalog();
   return result.isOk() ? result.value.entries : [];
 });
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const home = await getTranslations({ locale, namespace: "HomePage" });
+  const t = await getTranslations({ locale, namespace: "Metadata" });
+  return shareMetadata({
+    locale,
+    href: "/",
+    title: home("title"),
+    description: t("homeDescription"),
+    siteName: t("siteName"),
+    imageAlt: t("imageAlt", { title: home("title") }),
+  });
+}
 
 /**
  * The locale home route. A thin shell: it resolves the catalog through the

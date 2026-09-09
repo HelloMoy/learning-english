@@ -231,5 +231,17 @@
   "Layout": {
     "skipToContent": "Skip to main content",
     "headerNav": "Primary"
+  },
+  "Metadata": {
+    "siteName": "English Course",
+    "homeDescription": "Pronunciation-first English courses, in order. Each level assumes the sounds from the one before it.",
+    "courseDescription": "{description} {moduleCount, plural, one {# module} other {# modules}}, {lessonCount, plural, one {# lesson} other {# lessons}}.",
+    "moduleDescription": "{courseTitle} · Module {sequence} of {moduleCount}. {lessonCount, plural, one {# lesson} other {# lessons}}.",
+    "lessonDescription": "{courseTitle} · {moduleTitle} · Lesson {sequence}.",
+    "moduleFact": "{count, plural, one {# module} other {# modules}}",
+    "lessonFact": "{count, plural, one {# lesson} other {# lessons}}",
+    "levelFact": "Level {level}",
+    "imageAlt": "{title} — English Course",
+    "lessonBadge": "Lesson {sequence}"
   }
 }

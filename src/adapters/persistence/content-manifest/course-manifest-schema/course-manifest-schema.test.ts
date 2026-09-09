@@ -152,3 +152,34 @@ describe("parseCourseManifests", () => {
     });
   });
 });
+
+describe("uploadDate", () => {
+  /**
+   * Guards the `course-content-storage` capability's "a video lesson may
+   * declare when it was published" requirement. The date exists so a Lecture
+   * can be described as a schema.org `VideoObject`, which requires one —
+   * emitting that type without a date produces markup validators reject, so
+   * the field is optional and its absence is meaningful.
+   */
+  test("WHEN a video lesson declares no uploadDate THEN the manifest still parses", () => {
+    expect(() => parseCourseManifests([courseManifest()])).not.toThrow();
+  });
+
+  test("WHEN a video lesson declares a calendar date THEN it survives verbatim", () => {
+    const uploadDate = "2026-01-15";
+
+    const [course] = parseCourseManifests([manifestWithLesson({ uploadDate })]);
+
+    expect(course!.modules[0]!.lessons[0]).toMatchObject({ kind: "video", uploadDate });
+  });
+
+  test("WHEN an uploadDate is not a calendar date THEN it is refused, naming the lesson", () => {
+    const manifest = manifestWithLesson({
+      slug: "4-fast-ae",
+      uploadDate: "15/01/2026",
+    });
+
+    expect(() => parseCourseManifests([manifest])).toThrow(InvalidCourseManifestError);
+    expect(() => parseCourseManifests([manifest])).toThrow(/4-fast-ae/);
+  });
+});

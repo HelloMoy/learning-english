@@ -1,4 +1,8 @@
-import type { Metadata } from "next";
+import { StructuredData } from "@/components/structured-data/structured-data";
+import { websiteSchema } from "@/lib/course-schema/course-schema";
+import { siteUrl } from "@/lib/site-url/site-url";
+
+import type { Metadata, Viewport } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
@@ -24,11 +28,34 @@ const geistMono = Geist_Mono({
 });
 
 /**
- * Dynamic per-locale metadata. Reads the localized `HomePage.title` so the
- * document `<title>` reflects the current locale. The description follows.
+ * Site-wide theme colour, one entry per theme.
  *
- * Spec: lesson-view-polish § Requirement: "The Lesson Page sets a per-page
- * <title>".
+ * @remarks
+ * `themeColor` left `metadata` in Next 14 and is silently ignored there now.
+ * Two entries rather than one because the app defaults to dark and treats light
+ * as an opt-in, so the browser chrome has to be told about both.
+ */
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f1e6" },
+    { media: "(prefers-color-scheme: dark)", color: "#08080b" },
+  ],
+};
+
+/**
+ * Per-locale defaults every route inherits: the origin its relative URLs are
+ * absolutized against, and the title template that appends the brand.
+ *
+ * @remarks
+ * `metadataBase` is what turns a relative `og:url` or `og:image` into the
+ * absolute URL crawlers require. Without it Next emits the relative path, the
+ * page renders fine, and every share preview silently loses its image.
+ *
+ * `title.default` covers routes that set no title of their own; a route that
+ * does set one gets `%s · English Course` from the template.
+ *
+ * Spec: site-metadata § "resolves one absolute site URL", lesson-view-polish
+ * § "The Lesson Page sets a per-page <title>".
  */
 export async function generateMetadata({
   params,
@@ -36,10 +63,15 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "HomePage" });
+  const home = await getTranslations({ locale, namespace: "HomePage" });
+  const metadata = await getTranslations({ locale, namespace: "Metadata" });
   return {
-    title: t("title"),
-    description: t("subtitle"),
+    metadataBase: new URL(siteUrl()),
+    title: {
+      default: home("title"),
+      template: `%s · ${metadata("siteName")}`,
+    },
+    description: home("subtitle"),
   };
 }
 
@@ -85,6 +117,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             themes={["dark", "light"]}
             disableTransitionOnChange
           >
+            <StructuredData data={websiteSchema({ siteUrl: siteUrl(), locale })} />
             <SkipLink />
             <CinemaBackground />
             <SiteHeader />

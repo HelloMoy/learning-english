@@ -89,7 +89,9 @@ test.describe("Lesson Page — happy path", () => {
     await page.goto(lessonUrl("en", MODULE_A.slug, PRIMARY_LESSON.id));
 
     // Document <title> reflects the resolved lesson.
-    await expect(page).toHaveTitle(PRIMARY_LESSON.title);
+    // The brand suffix comes from the layout's title template — see
+    // lesson-view-polish § "The Lesson Page sets a per-page <title>".
+    await expect(page).toHaveTitle(`${PRIMARY_LESSON.title} · English Course`);
 
     // Breadcrumb shows three segments.
     await expect(page.getByRole("navigation", { name: /breadcrumb/i })).toBeVisible();
@@ -230,7 +232,7 @@ test.describe("Lesson Page — error states", () => {
     // lesson-not-in-module fallback). The response stays 200 in dev
     // mode; the spec only requires the localized message and a home
     // link, not a 404 status.
-    await expect(page).toHaveTitle(/^Not found$/);
+    await expect(page).toHaveTitle(/^Not found · English Course$/);
     await expect(page.getByRole("heading", { name: /couldn't find this course/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /go to home/i })).toHaveAttribute("href", /\/en$/);
   });

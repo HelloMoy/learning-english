@@ -92,6 +92,9 @@ function toVideoRow(
     // An absent poster stays absent: spreading `undefined` would put the key
     // in the row, and `resolveLessonRow` would resolve it to `<base>/undefined`.
     ...(lesson.poster === undefined ? {} : { poster: lesson.poster }),
+    // Same reasoning for the upload date: its absence is meaningful, because a
+    // Lecture without one is deliberately not described as a `VideoObject`.
+    ...(lesson.uploadDate === undefined ? {} : { uploadDate: lesson.uploadDate }),
   };
 }
 

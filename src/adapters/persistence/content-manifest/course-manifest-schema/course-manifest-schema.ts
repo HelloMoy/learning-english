@@ -85,6 +85,15 @@ const ManifestVideoLesson = z.object({
   poster: assetReference().optional(),
   /** Key of the lesson's Markdown notes, read by `LessonNotesRepository`. */
   notesKey: assetReference().optional(),
+  /**
+   * When the Lecture was published, as a calendar date.
+   *
+   * Optional on purpose. schema.org's `VideoObject` requires an upload date,
+   * and emitting that type without one produces structured data validators
+   * reject — so a lesson that declares no date is simply not described as a
+   * video, rather than being described badly or forced to invent one.
+   */
+  uploadDate: z.iso.date().optional(),
 });
 
 const ManifestReadingLesson = z.object({

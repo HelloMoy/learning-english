@@ -231,5 +231,17 @@
   "Layout": {
     "skipToContent": "Pular para o conteúdo principal",
     "headerNav": "Principal"
+  },
+  "Metadata": {
+    "siteName": "English Course",
+    "homeDescription": "Cursos de inglês focados na pronúncia, em ordem. Cada nível assume os sons do anterior.",
+    "courseDescription": "{description} {moduleCount, plural, one {# módulo} other {# módulos}}, {lessonCount, plural, one {# aula} other {# aulas}}.",
+    "moduleDescription": "{courseTitle} · Módulo {sequence} de {moduleCount}. {lessonCount, plural, one {# aula} other {# aulas}}.",
+    "lessonDescription": "{courseTitle} · {moduleTitle} · Aula {sequence}.",
+    "moduleFact": "{count, plural, one {# módulo} other {# módulos}}",
+    "lessonFact": "{count, plural, one {# aula} other {# aulas}}",
+    "levelFact": "Nível {level}",
+    "imageAlt": "{title} — English Course",
+    "lessonBadge": "Aula {sequence}"
   }
 }

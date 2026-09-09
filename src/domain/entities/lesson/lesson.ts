@@ -33,6 +33,12 @@ export const VideoLesson = z.object({
   source: urlOrRelativePath(),
   durationSeconds: z.number().int().positive(),
   poster: urlOrRelativePath().optional(),
+  /**
+   * When the Lecture was published, as a calendar date. Absent for most of the
+   * catalog; a delivery adapter describing the video to search engines emits
+   * nothing rather than guessing when it is missing.
+   */
+  uploadDate: z.iso.date().optional(),
 });
 
 /**
