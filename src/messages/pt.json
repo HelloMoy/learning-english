@@ -171,7 +171,8 @@
       "startCourse": "Começar curso",
       "moduleOrdinal": "Lição {number}",
       "moreModules": "+{count} mais",
-      "moduleListLabel": "Lições deste curso"
+      "moduleListLabel": "Lições deste curso",
+      "viewCourseContent": "Ver conteúdo do curso"
     },
     "ContinueWatching": {
       "heading": "Continuar assistindo",
@@ -226,8 +227,8 @@
       "goHome": "Ir para o início",
       "backToCourse": "Voltar para o curso",
       "moduleLabel": "Aula {number}",
-      "open": "Abrir",
-      "videoOrdinal": "Vídeo {number}"
+      "videoOrdinal": "Vídeo {number}",
+      "watchVideo": "Assistir vídeo"
     }
   },
   "PageNotFound": {

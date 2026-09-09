@@ -88,7 +88,7 @@ describe("ModuleOverview", () => {
     );
   });
 
-  test("renders one Open link per lesson, in sequence order, with locale-aware hrefs", () => {
+  test("renders one watch-video link per lesson, in sequence order, with locale-aware hrefs", () => {
     render(
       <ModuleOverview
         course={course}
@@ -96,7 +96,9 @@ describe("ModuleOverview", () => {
         lessons={[lessonA, lessonB]}
       />,
     );
-    const links = screen.getAllByRole("link", { name: /CourseCatalog\.moduleOverview\.open/ });
+    const links = screen.getAllByRole("link", {
+      name: /CourseCatalog\.moduleOverview\.watchVideo/,
+    });
     expect(links).toHaveLength(2);
     expect(links[0]).toHaveAttribute(
       "href",
@@ -157,7 +159,7 @@ describe("ModuleOverview", () => {
     expect(container.querySelector("img")).toBeNull();
   });
 
-  test("WHEN a row renders THEN its thumbnail links to the same lesson as its Open action", () => {
+  test("WHEN a row renders THEN its thumbnail links to the same lesson as its watch-video action", () => {
     // Act
     const { container } = render(
       <ModuleOverview
@@ -169,9 +171,11 @@ describe("ModuleOverview", () => {
 
     // Assert — compared against each other rather than against a hardcoded
     // path, so this fails the moment the two destinations diverge.
-    const open = screen.getByRole("link", { name: /CourseCatalog\.moduleOverview\.open/ });
+    const watchVideo = screen.getByRole("link", {
+      name: /CourseCatalog\.moduleOverview\.watchVideo/,
+    });
     const thumbnail = container.querySelector('a[aria-hidden="true"]');
-    expect(thumbnail).toHaveAttribute("href", open.getAttribute("href"));
+    expect(thumbnail).toHaveAttribute("href", watchVideo.getAttribute("href"));
   });
 
   test("WHEN a row renders THEN its thumbnail is out of the a11y tree and the tab order", () => {
@@ -200,9 +204,9 @@ describe("ModuleOverview", () => {
       />,
     );
 
-    // Assert — three rows, three links: the back link plus one "Open" each.
+    // Assert — three rows, three links: the back link plus one watch-video action each.
     expect(
-      screen.getAllByRole("link", { name: /CourseCatalog\.moduleOverview\.open/ }),
+      screen.getAllByRole("link", { name: /CourseCatalog\.moduleOverview\.watchVideo/ }),
     ).toHaveLength(3);
     expect(screen.getAllByRole("link")).toHaveLength(4);
   });
@@ -330,7 +334,7 @@ describe("ModuleOverview — completion indicator", () => {
     expect(screen.getByText("Exercise 2 Pronunciation Step By Step Lesson")).toBeInTheDocument();
   });
 
-  test("WHEN a row shows the indicator THEN it keeps its eyebrow, title, duration and Open action", () => {
+  test("WHEN a row shows the indicator THEN it keeps its eyebrow, title, duration and watch-video action", () => {
     // Arrange
     window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessonA.id}`, "1");
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
@@ -353,7 +357,7 @@ describe("ModuleOverview — completion indicator", () => {
       screen.getByText('CourseCatalog.moduleOverview.duration:{"minutes":4}'),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /CourseCatalog\.moduleOverview\.open/ }),
+      screen.getByRole("link", { name: /CourseCatalog\.moduleOverview\.watchVideo/ }),
     ).toHaveAttribute(
       "href",
       "/courses/course-1/modules/mod-1/lessons/33333333-3333-4333-8333-333333333333",
@@ -450,7 +454,7 @@ describe("ModuleOverview — watch progress", () => {
     expect(container.querySelectorAll('[role="progressbar"]')).toHaveLength(0);
   });
 
-  test("WHEN a row shows a bar THEN the Open action is still its only tab stop", () => {
+  test("WHEN a row shows a bar THEN the watch-video action is still its only tab stop", () => {
     window.localStorage.setItem(`${PLAYBACK_KEY_PREFIX}${lessonA.id}`, "60");
     announceStorageChange();
 
@@ -468,7 +472,7 @@ describe("ModuleOverview — watch progress", () => {
     expect(row.querySelector('[role="progressbar"]')).not.toHaveAttribute("tabindex");
   });
 
-  test("WHEN a row shows a bar THEN it keeps its eyebrow, title, duration and Open action", () => {
+  test("WHEN a row shows a bar THEN it keeps its eyebrow, title, duration and watch-video action", () => {
     window.localStorage.setItem(`${PLAYBACK_KEY_PREFIX}${lessonA.id}`, "60");
     announceStorageChange();
 
@@ -483,6 +487,6 @@ describe("ModuleOverview — watch progress", () => {
     expect(screen.getByText('videoOrdinal:{"number":1}')).toBeInTheDocument();
     expect(screen.getByText("Lesson A")).toBeInTheDocument();
     expect(screen.getByText('duration:{"minutes":4}')).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /open/ })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /watchVideo/ })).toBeInTheDocument();
   });
 });

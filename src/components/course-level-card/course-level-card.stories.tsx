@@ -35,7 +35,7 @@ const leadingModules = [
 const meta: Meta<typeof CourseLevelCard> = {
   title: "Cinema/CourseLevelCard",
   component: CourseLevelCard,
-  args: { course, leadingModules, state: "not-started" },
+  args: { course, leadingModules, resumeHref: null },
   // The card fills its grid cell on the home; a fixed frame here keeps the
   // module list at the width it really gets rather than the full canvas.
   decorators: [
@@ -55,10 +55,14 @@ export const NotStarted: Story = {};
 
 /**
  * The course the continue-watching record points at: gold border, a marked
- * badge, and a call to action that invites continuing rather than starting.
+ * badge, a primary action that resumes the stored lesson, and a quieter second
+ * action that still reaches the course overview the primary one gives up.
  */
 export const InProgress: Story = {
-  args: { state: "in-progress" },
+  args: {
+    resumeHref:
+      "/courses/advanced-intermediate-course/modules/1-advanced-pronunciation-course/lessons/6361a41b-29e4-5679-8207-445797ed8fa7",
+  },
 };
 
 /**
