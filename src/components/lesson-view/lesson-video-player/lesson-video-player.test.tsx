@@ -194,6 +194,15 @@ describe("LessonVideoPlayer", () => {
       expect(screen.getByRole("region")).toHaveClass("aspect-video", "w-full");
       expect(screen.getByRole("region")).not.toHaveClass("fixed");
     });
+
+    test("WHEN the video is in the page THEN no swipe-up hint is drawn over it", () => {
+      // The hint only makes sense while the player is pinned to the viewport
+      // and the browser's toolbar is still on screen; in the page it would be
+      // noise over the video.
+      renderPlayer();
+
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
   });
 
   describe("GIVEN the in-player overlay slot", () => {

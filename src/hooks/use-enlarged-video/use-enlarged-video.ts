@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Whether the lesson video is filling the viewport, and the two ways out of it.
@@ -18,7 +18,7 @@ export type EnlargedVideo = {
 
 /**
  * Owns the lesson player's viewport-filling mode: the state, the `Escape` key,
- * and the page's scroll lock.
+ * and the place in the page to come back to.
  *
  * @remarks
  * This is the app's answer to a control the browser cannot supply. Safari on
@@ -36,10 +36,21 @@ export type EnlargedVideo = {
  * shortcuts, which the player suppresses whenever an overlay owns the
  * keyboard — precisely when a learner most wants out.
  *
- * The page's previous `overflow` is captured and restored rather than cleared,
- * so a surface that suppresses its own scrolling gets its own value back. The
- * restore also runs on unmount, so navigating away mid-mode cannot leave the
- * next page frozen.
+ * **The page behind the mode is deliberately not locked.** Safari on iPhone
+ * hides its toolbar only for a real scroll gesture on the document, and that
+ * gesture passes straight through the pinned player to the page beneath. A
+ * swipe over the video is therefore the one way the enlarged video reaches the
+ * whole screen once the phone is rotated, and it works only while the document
+ * can still scroll; a `body { overflow: hidden }` lock is exactly what kept the
+ * video wedged under the toolbar. None of that scrolling shows — the backdrop
+ * covers the page.
+ *
+ * What the gesture moves is put back on the way out: the page's vertical
+ * offset at entry is restored once the mode has left, so the player is where
+ * the learner left it rather than under the sticky header. The restore waits
+ * for the exit to commit, so the page is scrolled in its in-flow layout, and it
+ * never runs on unmount — that is a navigation, and the next page has its own
+ * place.
  *
  * @returns Whether the mode is active, a `toggle` for the control, and an
  *          `exit` that is a no-op when the video is already in the page
@@ -47,14 +58,21 @@ export type EnlargedVideo = {
  */
 export function useEnlargedVideo(): EnlargedVideo {
   const [isEnlarged, setIsEnlarged] = useState(false);
+  const pageOffsetAtEntry = useRef<number | undefined>(undefined);
 
-  const toggle = useCallback(() => {
-    setIsEnlarged((enlarged) => !enlarged);
+  const enter = useCallback(() => {
+    pageOffsetAtEntry.current = window.scrollY;
+    setIsEnlarged(true);
   }, []);
 
   const exit = useCallback(() => {
     setIsEnlarged(false);
   }, []);
+
+  const toggle = useCallback(() => {
+    if (isEnlarged) exit();
+    else enter();
+  }, [isEnlarged, enter, exit]);
 
   // The player's own `Escape` handling is not an option: its keyboard
   // shortcuts are suppressed whenever an overlay owns the keyboard, which is
@@ -70,16 +88,14 @@ export function useEnlargedVideo(): EnlargedVideo {
     return () => document.removeEventListener("keydown", exitOnEscape);
   }, [isEnlarged, exit]);
 
-  // The page is captured rather than reset, so a surface that suppresses its
-  // own scrolling gets that back instead of the browser default.
+  // Runs after the exit has committed, so the page is back in its in-flow
+  // layout before it is scrolled. Effects do not run on unmount, which is
+  // what keeps a navigation from inheriting this page's offset.
   useEffect(() => {
-    if (!isEnlarged) return;
+    if (isEnlarged || pageOffsetAtEntry.current === undefined) return;
 
-    const pageOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = pageOverflow;
-    };
+    window.scrollTo({ top: pageOffsetAtEntry.current });
+    pageOffsetAtEntry.current = undefined;
   }, [isEnlarged]);
 
   return { isEnlarged, toggle, exit };
