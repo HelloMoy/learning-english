@@ -26,9 +26,36 @@ test.describe("Immersion Cinema — chrome", () => {
     page,
   }) => {
     await page.goto("/en");
-    await expect(page.getByRole("link", { name: /learn.*english/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /english.*course/i })).toBeVisible();
     await expect(page.getByText(/immersion cinema · home/i)).toBeVisible();
   });
+
+  /**
+   * `toBeVisible()` passes on a wordmark whose right half is clipped: the
+   * header's brand group carries `overflow-hidden`, so a mark too wide for the
+   * viewport is silently cut rather than scrolling the page. Geometry is the
+   * only assertion that can see that, which is why this reads the bounding box.
+   */
+  for (const locale of ["en", "es", "pt"] as const) {
+    test(`WHEN the home renders at 320px in ${locale} THEN the wordmark fits the viewport`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 320, height: 700 });
+      await page.goto(`/${locale}`);
+
+      const wordmark = page.getByRole("link", { name: /english.*course/i });
+      const box = await wordmark.boundingBox();
+      expect(box).not.toBeNull();
+
+      const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      }));
+
+      expect(box!.x + box!.width).toBeLessThanOrEqual(clientWidth);
+      expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+    });
+  }
 
   test("WHEN a lesson is visited THEN the section eyebrow reads LESSON", async ({ page }) => {
     await page.goto(

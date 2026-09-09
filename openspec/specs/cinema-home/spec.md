@@ -6,7 +6,9 @@ Define the Immersion Cinema presentation of the locale layout and home route. Th
 ## Requirements
 ### Requirement: Global header shows brand and section chrome
 
-The locale layout SHALL render an Immersion Cinema header containing the `LEARN·ENGLISH` wordmark, a section eyebrow of the form `IMMERSION CINEMA · <SECTION>` where `<SECTION>` derives from the current route (`HOME`, `COURSE`, `MODULE`, `LESSON`), and the existing locale switcher and theme toggle re-styled as chips. The header SHALL remain a landmark, keep locale switching and theme toggling functional, and be localized.
+The locale layout SHALL render an Immersion Cinema header containing the `ENGLISH·COURSE` wordmark, a section eyebrow of the form `IMMERSION CINEMA · <SECTION>` where `<SECTION>` derives from the current route (`HOME`, `COURSE`, `MODULE`, `LESSON`), and the existing locale switcher and theme toggle re-styled as chips. The header SHALL remain a landmark, keep locale switching and theme toggling functional, and be localized.
+
+The wordmark SHALL read `ENGLISH·COURSE` in every supported locale. It is a brand mark, not copy: it is not translated, and it names the same product the site publishes to the outside world through its metadata, so a learner reads one name in the header, the browser tab and a shared link preview.
 
 The header SHALL fit within the viewport at every phone-class viewport width in every supported locale, rather than forcing the document to scroll horizontally. Its contents are not all equally load-bearing, so it sheds them in a fixed order as width runs out:
 
@@ -52,7 +54,11 @@ At every width the locale control and the theme toggle SHALL remain fully within
 
 #### Scenario: The wordmark survives the narrowest width
 - **WHEN** the header renders at a 320px viewport width
-- **THEN** the `LEARN·ENGLISH` wordmark is still present and still links to the locale home
+- **THEN** the `ENGLISH·COURSE` wordmark is still present, is not clipped, and still links to the locale home
+
+#### Scenario: The wordmark reads the same in every locale
+- **WHEN** the header renders under `en`, `es` or `pt`
+- **THEN** the wordmark reads `ENGLISH·COURSE` in all three, because the brand mark is not translated copy
 
 ### Requirement: Home renders the whole catalog as an ordered ladder of levels
 

@@ -1,9 +1,13 @@
 import { getCoursePlatformDeps } from "@/adapters/persistence/in-memory/use-case-dependencies/use-case-dependencies";
 import { LessonPageError, LessonView } from "@/components/lesson-view";
 import { RememberContinueWatching } from "@/components/lesson-view/remember-continue-watching/remember-continue-watching";
+import { StructuredData } from "@/components/structured-data/structured-data";
 import { LessonId } from "@/domain/entities/ids/ids";
 import { Slug } from "@/domain/entities/slug/slug";
 import type { LessonView as LessonViewData } from "@/domain/use-cases/find-lesson-for-view/find-lesson-for-view";
+import { breadcrumbSchema, videoSchema } from "@/lib/course-schema/course-schema";
+import { shareMetadata } from "@/lib/share-metadata/share-metadata";
+import { siteUrl } from "@/lib/site-url/site-url";
 
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -69,11 +73,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (result.isErr()) {
     return { title: t("notFound") };
   }
-  return { title: result.value.lesson.title };
+
+  const { course, module: courseModule, lesson } = result.value;
+  const meta = await getTranslations({ locale, namespace: "Metadata" });
+  return shareMetadata({
+    locale,
+    href: `/courses/${course.slug}/modules/${courseModule.slug}/lessons/${lesson.id}`,
+    title: lesson.title,
+    description: meta("lessonDescription", {
+      courseTitle: course.title,
+      moduleTitle: courseModule.title,
+      sequence: lesson.sequence,
+    }),
+    siteName: meta("siteName"),
+    imageAlt: meta("imageAlt", { title: lesson.title }),
+    // Only a Lecture has a runtime; a reading lesson must not claim to be a video.
+    videoDurationSeconds: lesson.kind === "video" ? lesson.durationSeconds : undefined,
+  });
 }
 
 export default async function LessonPage({ params }: Props) {
-  const { courseSlug, moduleSlug, lessonId } = await params;
+  const { locale, courseSlug, moduleSlug, lessonId } = await params;
 
   const courseSlugResult = Slug.safeParse(courseSlug);
   const moduleSlugResult = Slug.safeParse(moduleSlug);
@@ -107,8 +127,28 @@ export default async function LessonPage({ params }: Props) {
   // rendered inline, the resource also anchors the `Notes` heading.
   const notesResource = notes?.resource ?? null;
 
+  const origin = siteUrl();
+  const courseUrl = `${origin}/${locale}/courses/${view.course.slug}`;
+  const moduleUrl = `${courseUrl}/modules/${view.module.slug}`;
+  const lessonUrl = `${moduleUrl}/lessons/${view.lesson.id}`;
+  // Null for every lesson that declares no upload date, which is most of the
+  // catalog today. `VideoObject` requires one, and emitting the type without
+  // it produces markup validators reject.
+  const video =
+    view.lesson.kind === "video"
+      ? videoSchema({ lesson: view.lesson, siteUrl: origin, locale, url: lessonUrl })
+      : null;
+
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6">
+      <StructuredData
+        data={breadcrumbSchema([
+          { name: view.course.title, url: courseUrl },
+          { name: view.module.title, url: moduleUrl },
+          { name: view.lesson.title, url: lessonUrl },
+        ])}
+      />
+      {video ? <StructuredData data={video} /> : null}
       {/*
         Renders nothing. It records where the learner is so the home can offer
         to bring them back — the smallest possible client island around one

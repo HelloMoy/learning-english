@@ -59,6 +59,18 @@ describe("message catalogues", () => {
     },
   );
 
+  /**
+   * Guards the `site-metadata` capability's "sharing copy is localized"
+   * requirement. Key parity across locales is already covered above; this is
+   * the one string in the namespace that must NOT be translated — it is the
+   * brand the wordmark renders, and `og:site_name` has to agree with it in
+   * every locale.
+   */
+  it("keeps the brand name identical in every locale", () => {
+    const names = Object.values(CATALOGUES).map((messages) => messages.Metadata.siteName);
+    expect(new Set(names)).toEqual(new Set(["English Course"]));
+  });
+
   it.each(Object.entries(CATALOGUES))("%s exposes the course vocabulary keys", (_locale, m) => {
     const overview = (m as typeof en).CourseCatalog.courseOverview;
     expect(Object.keys(overview)).toEqual(
