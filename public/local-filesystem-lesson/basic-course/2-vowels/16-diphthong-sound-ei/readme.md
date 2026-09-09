@@ -35,3 +35,21 @@ The /eɪ/ starts in a mid-front position, close to the Spanish _e_, and glides u
 > ⚠️ **The typical Spanish-speaker mistake:** pronouncing it as a pure, motionless Spanish _e_, so _cake_ comes out as _quek_ and _day_ as _de_.
 
 **By the end you'll be able to:** add the final glide to every long-_a_ word, like _make_ and _day_.
+
+## 🇧🇷 Português
+
+### O ditongo /eɪ/: do _e_ médio para cima
+
+O /eɪ/ começa numa posição média anterior, parecida com o nosso _ê_, e desliza para cima até /ɪ/. O português já faz esse movimento em _lei_ e _sei_; o problema é que na leitura do inglês a vogal costuma sair parada, e sem o movimento a palavra soa errada mesmo com o resto certo.
+
+**Como se produz**
+
+- 👄 **Boca:** entreaberta no começo, fecha um pouco no fim.
+- 👅 **Língua:** à frente e média no começo, sobe no fim.
+- 🔊 **Voz:** sonora e longa, com um fechamento suave e contínuo.
+
+**Você ouve em:** _cake_ · _brave_ · _age_ · _day_ · _make_
+
+> ⚠️ **O erro típico de quem fala português:** usar o _ê_ puro e parado de _você_, de modo que _cake_ sai como _quêq_ e _day_ como _dê_.
+
+**No fim você vai conseguir:** acrescentar o deslizamento final em todas as palavras com _a_ longo, como _make_ e _day_.

@@ -35,3 +35,21 @@ The English /h/ is just air leaving the throat, with no friction anywhere in the
 > ⚠️ **The typical Spanish-speaker mistake:** rasping like the _j_ in _jamón_, or dropping it entirely. If it disappears, _hair_ sounds like _air_ and _hate_ like _ate_.
 
 **By the end you'll be able to:** produce a clean puff of air and stop dropping the /h/ at the start of a word.
+
+## 🇧🇷 Português
+
+### O /h/: um sopro, e você já o faz
+
+O /h/ inglês é só ar saindo da garganta, sem nenhum roce na boca. Boa notícia: é praticamente o _r_ de _rato_ do português brasileiro, só que mais suave. O problema não é produzi-lo — é lembrar de produzi-lo, porque o _h_ escrito em português é mudo.
+
+**Como se produz**
+
+- 👄 **Boca:** já posicionada para a vogal que vem depois.
+- 👅 **Língua:** relaxada, não cria nenhum estreitamento.
+- 🔊 **Voz:** **surda** — só um sopro vindo da garganta, sem raspar.
+
+**Você ouve em:** _house_ · _hello_ · _happy_ · _behind_ · _who_
+
+> ⚠️ **O erro típico de quem fala português:** simplesmente não pronunciá-lo, porque em português o _h_ não soa. Se ele some, _hair_ soa como _air_ e _hate_ como _ate_.
+
+**No fim você vai conseguir:** produzir um sopro limpo e não deixar o /h/ cair no começo da palavra.

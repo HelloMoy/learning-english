@@ -35,3 +35,21 @@ The /u/ is a long, heavily rounded vowel. It's the tense version of /ʊ/, and th
 > ⚠️ **The typical Spanish-speaker mistake:** clipping it like a Spanish _u_ and landing on /ʊ/ instead: _fool_ comes out as _full_, _pool_ as _pull_.
 
 **By the end you'll be able to:** hold the /u/ long enough that it never collapses into /ʊ/.
+
+## 🇧🇷 Português
+
+### O /u/: longo, arredondado e sustentado
+
+O /u/ é uma vogal longa e bem arredondada. É a versão tensa do /ʊ/, e a diferença entre as duas é de duração e de tensão, não de posição. Em inglês o /u/ dura bem mais do que o nosso _u_.
+
+**Como se produz**
+
+- 👄 **Boca:** lábios bem arredondados e projetados para a frente, como para assobiar.
+- 👅 **Língua:** atrás e bem alta, perto do palato mole.
+- 🔊 **Voz:** sonora, longa e estável — o som não se move.
+
+**Você ouve em:** _food_ · _blue_ · _school_ · _move_ · _two_
+
+> ⚠️ **O erro típico de quem fala português:** encurtá-lo como o _u_ do português e acabar dizendo /ʊ/: _fool_ soa como _full_ e _pool_ como _pull_.
+
+**No fim você vai conseguir:** sustentar o /u/ tempo suficiente para nunca deixá-lo virar /ʊ/.

@@ -35,3 +35,21 @@ The /ɛ/ is a short front vowel, close to the Spanish _e_ but a little more open
 > ⚠️ **The typical Spanish-speaker mistake:** confusing it with /æ/. Open too far and _bed_ becomes _bad_, _pen_ becomes _pan_.
 
 **By the end you'll be able to:** land your jaw at the right mid position and keep _bed / bad_ and _pen / pan_ apart.
+
+## 🇧🇷 Português
+
+### O /ɛ/: o _e_ curto e anterior
+
+O /ɛ/ é uma vogal curta e anterior — é o mesmo som do _é_ aberto de _pé_ em português, um pouco mais relaxado. É uma das vogais inglesas mais fáceis para você, desde que não a confunda com o /æ/, que é a vizinha mais aberta.
+
+**Como se produz**
+
+- 👄 **Boca:** um pouco aberta, lábios relaxados e **sem** arredondar.
+- 👅 **Língua:** à frente e baixa, mas não totalmente.
+- 🔊 **Voz:** sonora e curta, sem alongar.
+
+**Você ouve em:** _bed_ · _said_ · _head_ · _ten_ · _friend_
+
+> ⚠️ **O erro típico de quem fala português:** confundir com o /æ/, que o português não tem. Se abrir demais, _bed_ vira _bad_ e _pen_ vira _pan_.
+
+**No fim você vai conseguir:** colocar a mandíbula no ponto médio certo e separar _bed / bad_ e _pen / pan_.

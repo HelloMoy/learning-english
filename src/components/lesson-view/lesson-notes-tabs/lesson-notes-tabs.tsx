@@ -2,12 +2,10 @@
 
 import { Markdown } from "@/components/lesson-notes/markdown/markdown";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { splitBilingualNotes } from "../split-bilingual-notes/split-bilingual-notes";
-
-const COLUMN_LABEL = "text-xs font-bold tracking-[0.32em] text-gold uppercase";
+import { selectNotesForLocale } from "../select-notes-for-locale/select-notes-for-locale";
 
 function tabClass(active: boolean, disabled = false): string {
   if (disabled) {
@@ -20,11 +18,12 @@ function tabClass(active: boolean, disabled = false): string {
 
 /**
  * The Lesson Page's Notes/Transcript tab pair (design.md §D6/§D7). The
- * Notes tab splits the bilingual `readme.md` into "Español" / "English"
- * columns (falling back to a single column when the split is ambiguous).
- * The Transcript tab is present for visual parity but disabled — no
- * transcript data exists — so activating it only reveals a localized
- * "not available" notice, never transcript content.
+ * Notes tab renders the `readme.md` section written in the app's active
+ * locale — one language at a time, never a side-by-side pair — falling back
+ * to English and then Spanish when the notes do not carry that locale. The
+ * Transcript tab is present for visual parity but disabled — no transcript
+ * data exists — so activating it only reveals a localized "not available"
+ * notice, never transcript content.
  */
 export function LessonNotesTabs({
   markdown,
@@ -34,8 +33,9 @@ export function LessonNotesTabs({
   description?: string;
 }) {
   const t = useTranslations("Components.LessonTabs");
+  const locale = useLocale();
   const [tab, setTab] = useState<"notes" | "transcript">("notes");
-  const notes = splitBilingualNotes(markdown);
+  const notes = selectNotesForLocale(markdown, locale);
 
   return (
     <section
@@ -80,20 +80,7 @@ export function LessonNotesTabs({
           id="lesson-panel-notes"
           aria-labelledby="lesson-tab-notes"
         >
-          {notes.kind === "split" ? (
-            <div className="grid gap-8 sm:grid-cols-2">
-              <div className="flex flex-col gap-3">
-                <h3 className={COLUMN_LABEL}>{t("spanish")}</h3>
-                <Markdown content={notes.es} />
-              </div>
-              <div className="flex flex-col gap-3">
-                <h3 className={COLUMN_LABEL}>{t("english")}</h3>
-                <Markdown content={notes.en} />
-              </div>
-            </div>
-          ) : (
-            <Markdown content={notes.markdown} />
-          )}
+          <Markdown content={notes} />
         </div>
       ) : (
         <div

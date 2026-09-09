@@ -35,3 +35,21 @@ The /oʊ/ starts in a mid-back position with the lips already rounded, then glid
 > ⚠️ **The typical Spanish-speaker mistake:** using the short, motionless Spanish _o_. That makes _go_ sound Spanish and strips _boat_ of its American sound entirely.
 
 **By the end you'll be able to:** turn every long _o_ into a movement rather than a fixed vowel.
+
+## 🇧🇷 Português
+
+### O ditongo /oʊ/: do _o_ médio até o arredondamento
+
+O /oʊ/ começa numa posição média e posterior com os lábios já arredondados e desliza ligeiramente para cima, na direção de /ʊ/. É o equivalente posterior do /eɪ/: o _o_ do inglês também não fica parado.
+
+**Como se produz**
+
+- 👄 **Boca:** lábios arredondados no começo, fecham um pouco mais no fim.
+- 👅 **Língua:** atrás e média no começo, sobe ligeiramente no fim.
+- 🔊 **Voz:** sonora e longa, com o movimento suave e contínuo.
+
+**Você ouve em:** _go_ · _boat_ · _foam_ · _no_ · _home_
+
+> ⚠️ **O erro típico de quem fala português:** usar o _ô_ curto e parado de _avô_. Assim _go_ soa português e _boat_ perde por completo o som americano.
+
+**No fim você vai conseguir:** transformar cada _o_ longo num movimento, e não numa vogal fixa.

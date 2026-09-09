@@ -35,3 +35,21 @@ The /n/ is made by raising your tongue to touch the alveolar ridge — just behi
 > ⚠️ **The typical Spanish-speaker mistake:** releasing the tongue too early at the end of a word and adding a vowel. _Man_ doesn't end in _mana_: the tongue stays up and the sound dies there.
 
 **By the end you'll be able to:** hold a final /n/ without adding a vowel after it.
+
+## 🇧🇷 Português
+
+### O /n/: nasal, sonoro e com a língua no alvéolo
+
+O /n/ é produzido levantando a língua até tocar o alvéolo — logo atrás dos dentes de cima — enquanto o ar sai pelo **nariz**. É igual ao do português no começo da palavra, mas em inglês ele aparece muitíssimo no fim, e é aí que dá trabalho.
+
+**Como se produz**
+
+- 👄 **Boca:** entreaberta; o ar não sai por ela.
+- 👅 **Língua:** a ponta toca o alvéolo e **fica lá**.
+- 🔊 **Voz:** **sonora** e nasal — o ar escapa pelo nariz.
+
+**Você ouve em:** _no_ · _nice_ · _man_ · _soon_ · _again_
+
+> ⚠️ **O erro típico de quem fala português:** nasalizar a vogal e nunca encostar a língua, como em _bem_ e _bom_. _Man_ não termina numa vogal nasal: a língua sobe, encosta e o som se apaga ali.
+
+**No fim você vai conseguir:** sustentar o /n/ final com a língua no alvéolo, em vez de trocá-lo por uma vogal nasal.

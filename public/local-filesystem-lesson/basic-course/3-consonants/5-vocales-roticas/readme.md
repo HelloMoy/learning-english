@@ -35,3 +35,21 @@ In American English a vowel followed by /r/ isn't pronounced separately: the two
 > ⚠️ **The typical Spanish-speaker mistake:** pronouncing the vowel and then adding the /r/ as a separate letter. That splits the syllable in two and sounds choppy.
 
 **By the end you'll be able to:** fuse vowel and /r/ into a single movement in words like _bird_ and _car_.
+
+## 🇧🇷 Português
+
+### Vogais róticas: quando o /r/ engole a vogal
+
+No inglês americano, uma vogal seguida de /r/ não é pronunciada em separado: as duas se fundem num único som rótico. Você não diz _bi-rd_, diz um som contínuo em que a língua já está recuada desde o começo. É por isso que o americano soa tão diferente do britânico.
+
+**Como se produz**
+
+- 👄 **Boca:** lábios ligeiramente arredondados durante toda a sílaba.
+- 👅 **Língua:** recuada desde o início da vogal, não só ao chegar no /r/.
+- 🔊 **Voz:** sonora e contínua, sem corte entre vogal e /r/.
+
+**Você ouve em:** _bird_ · _car_ · _air_ · _her_ · _more_
+
+> ⚠️ **O erro típico de quem fala português:** pronunciar a vogal e depois acrescentar o /r/ como uma letra à parte. Isso parte a sílaba em duas e soa picotado.
+
+**No fim você vai conseguir:** fundir vogal e /r/ num só movimento em palavras como _bird_ e _car_.

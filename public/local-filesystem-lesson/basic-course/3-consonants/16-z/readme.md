@@ -35,3 +35,21 @@ The /z/ is made just like /s/, but **with the vocal cords vibrating**: it's a bu
 > ⚠️ **The typical Spanish-speaker mistake:** pronouncing it as /s/. That makes _eyes_ sound like _ice_, _peas_ like _peace_, and strips almost every plural of its correct sound.
 
 **By the end you'll be able to:** voice the /z/ and keep pairs like _eyes / ice_ and _peas / peace_ apart.
+
+## 🇧🇷 Português
+
+### O /z/: o /s/ com voz
+
+O /z/ é produzido como o /s/, mas **com as cordas vocais vibrando**: é um zumbido, não um assobio. O português tem esse som em _casa_ e _zebra_, então a produção você já domina — o que falta é usá-lo no fim da palavra, posição em que o português nunca o coloca.
+
+**Como se produz**
+
+- 👄 **Boca:** entreaberta, dentes quase juntos, igual ao /s/.
+- 👅 **Língua:** perto do alvéolo, com um canal estreito.
+- 🔊 **Voz:** **sonora** — ponha a mão na garganta e sinta o zumbido.
+
+**Você ouve em:** _zoo_ · _buzz_ · _music_ · _is_ · _because_
+
+> ⚠️ **O erro típico de quem fala português:** ensurdecer o /z/ final e transformá-lo em /s/ ou /ʃ/. Assim _eyes_ soa como _ice_, _peas_ como _peace_ e quase todos os plurais perdem o som certo.
+
+**No fim você vai conseguir:** sonorizar o /z/ até o fim da palavra e separar pares como _eyes / ice_ e _peas / peace_.

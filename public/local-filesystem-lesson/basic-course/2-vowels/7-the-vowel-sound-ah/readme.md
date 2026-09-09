@@ -35,3 +35,21 @@ The /ɑ/ is the most open vowel in English — the one you make when a doctor as
 > ⚠️ **The typical Spanish-speaker mistake:** clipping it like a Spanish _a_, or rounding the lips by accident — which slides it toward /ɔ/ and makes _hot_ sound like _hought_.
 
 **By the end you'll be able to:** open wide enough and keep your lips loose, so _father_ and _hot_ sound American.
+
+## 🇧🇷 Português
+
+### O /ɑ/: o _a_ profundo e aberto do inglês americano
+
+O /ɑ/ é a vogal mais aberta do inglês: aquela que você faz quando o médico pede para abrir a boca. É profunda, posterior e longa, e é um dos sons que mais identificam o sotaque americano.
+
+**Como se produz**
+
+- 👄 **Boca:** bem aberta, mandíbula caída, lábios **sem** arredondar.
+- 👅 **Língua:** atrás e embaixo, plana no fundo da boca.
+- 🔊 **Voz:** sonora e longa, com o som saindo lá da garganta.
+
+**Você ouve em:** _father_ · _hot_ · _dog_ · _stop_ · _lock_
+
+> ⚠️ **O erro típico de quem fala português:** encurtá-lo como o _a_ português ou arredondar os lábios sem querer, o que o desloca para /ɔ/ e faz _hot_ soar como _hought_.
+
+**No fim você vai conseguir:** abrir a boca o suficiente e manter os lábios soltos para que _father_ e _hot_ soem americanos.

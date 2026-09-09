@@ -35,3 +35,21 @@ In many varieties of American English the weak vowels of unstressed syllables me
 > ⚠️ **The typical Spanish-speaker mistake:** pronouncing the weak vowel exactly as it's written, letter by letter. _Chocolate_ isn't cho-co-LA-te: it's /ˈtʃɑklət/, with two reduced syllables.
 
 **By the end you'll be able to:** reduce any unstressed syllable without worrying about which vowel is written there.
+
+## 🇧🇷 Português
+
+### Quando /ɪ/ e /ə/ viram o mesmo som
+
+Em muitas variedades do inglês americano, as vogais fracas das sílabas sem acento se fundem: /ɪ/ e /ə/ deixam de se distinguir e ficam num único som neutro. Saber disso tira a pressão — nas sílabas átonas você não precisa acertar a vogal exata, precisa **reduzi-la**.
+
+**Como se produz**
+
+- 👄 **Boca:** relaxada e neutra, como no schwa.
+- 👅 **Língua:** no centro, sem procurar uma posição precisa.
+- 🔊 **Voz:** sonora, fraca e brevíssima — a sílaba passa quase sem soar.
+
+**Você ouve em:** _rabbit_ · _roses_ · _chocolate_ · _Lenin / Lennon_
+
+> ⚠️ **O erro típico de quem fala português:** pronunciar a vogal fraca como está escrita, letra por letra. _Chocolate_ não é cho-co-LA-te: é /ˈtʃɑklət/, com duas sílabas reduzidas.
+
+**No fim você vai conseguir:** reduzir qualquer sílaba sem acento sem se preocupar com qual é a vogal escrita.

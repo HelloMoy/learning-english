@@ -35,3 +35,21 @@ The /m/ is made by closing your lips and letting all the air flow out through yo
 > ⚠️ **The typical Spanish-speaker mistake:** opening your lips at the end of the word and adding a vowel, turning _time_ into _taima_.
 
 **By the end you'll be able to:** close and **keep** your lips closed on a final /m/, letting the sound finish in your nose.
+
+## 🇧🇷 Português
+
+### O /m/: lábios fechados, ar pelo nariz
+
+O /m/ é produzido fechando os lábios e deixando todo o ar sair pelo **nariz** enquanto as cordas vocais vibram. No começo da palavra é idêntico ao do português. Como no /n/, o que muda em inglês é o peso no fim da palavra: ele se sustenta, não some.
+
+**Como se produz**
+
+- 👄 **Boca:** lábios completamente fechados, sem apertar.
+- 👅 **Língua:** relaxada, não participa.
+- 🔊 **Voz:** **sonora** e nasal — dá para sustentar o quanto quiser.
+
+**Você ouve em:** _man_ · _milk_ · _smile_ · _time_ · _come_
+
+> ⚠️ **O erro típico de quem fala português:** não fechar os lábios no fim da palavra, como em _bom_, onde o _m_ escrito é só a marca da vogal nasal. Em _time_ e _come_ os lábios fecham de verdade.
+
+**No fim você vai conseguir:** fechar e **manter** os lábios no /m/ final, deixando o som terminar no nariz.

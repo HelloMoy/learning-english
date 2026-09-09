@@ -35,3 +35,21 @@ Plosives are made by **cutting off** the air completely and releasing it in a bu
 > ⚠️ **The typical Spanish-speaker mistake:** adding a vowel after the final consonant, the way Spanish does. _Stop_ isn't _stopa_: the air is cut and stays inside.
 
 **By the end you'll be able to:** burst your initial plosives and cut the final ones without adding a vowel.
+
+## 🇧🇷 Português
+
+### Plosivas e de parada: /p/, /b/, /t/, /d/, /k/, /g/
+
+As plosivas são produzidas **cortando** o ar por completo e soltando-o de uma vez. O que quase ninguém explica é que em inglês nem sempre elas são soltas: no começo da palavra explodem com força, e no fim muitas vezes são cortadas sem liberar o ar. Essa parada silenciosa é uma das marcas do sotaque americano.
+
+**Como se produz**
+
+- 👄 **Boca:** o fechamento é feito com os lábios (/p/, /b/), a língua à frente (/t/, /d/) ou atrás (/k/, /g/).
+- 💨 **Ar:** no início da palavra, explosão clara e com sopro; no fim, corte sem liberação.
+- 🔊 **Voz:** /p/, /t/, /k/ são surdas; /b/, /d/, /g/ são sonoras.
+
+**Você ouve em:** _pen_ · _back_ · _time_ · _dog_ · _cat_ · _stop_ (final sem soltar)
+
+> ⚠️ **O erro típico de quem fala português:** acrescentar um _i_ depois da consoante final, como em _hot dogui_. _Stop_ não é _stopi_: o ar é cortado e fica dentro.
+
+**No fim você vai conseguir:** explodir as plosivas iniciais e cortar as finais sem acrescentar vogal.

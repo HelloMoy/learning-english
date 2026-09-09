@@ -35,3 +35,21 @@ English has two Ls. The light one appears at the start of a word and resembles t
 > ⚠️ **The typical Spanish-speaker mistake:** using the light Spanish _l_ in every position. _Feel_ with a Spanish _l_ sounds short and flat; the dark L makes the word end differently.
 
 **By the end you'll be able to:** tell the light L from the dark one and produce the dark one at the end of a word.
+
+## 🇧🇷 Português
+
+### O L escuro: o /l/ do fim da palavra
+
+O inglês tem dois eles. O claro aparece no começo da palavra e se parece com o nosso. O **escuro** aparece no fim da palavra ou antes de consoante, e é produzido levantando a parte **de trás** da língua: sai mais profundo, mais grave, quase como um _u_. O português brasileiro já vocaliza o _l_ final em _mal_ e _sol_, então o ponto de partida é bom — falta a língua subir atrás em vez de simplesmente virar vogal.
+
+**Como se produz**
+
+- 👄 **Boca:** entreaberta e relaxada.
+- 👅 **Língua:** a ponta pode encostar em cima, mas o importante é que a **parte de trás se eleve**.
+- 🔊 **Voz:** sonora, grave e sustentada — dá para alongar.
+
+**Você ouve em:** _feel_ · _call_ · _milk_ · _cold_ · _well_
+
+> ⚠️ **O erro típico de quem fala português:** trocar o L escuro por um _u_ puro, como em _mau_. _Feel_ vira _fiu_ e a consoante desaparece; no inglês a língua ainda sobe, o som não some.
+
+**No fim você vai conseguir:** distinguir o L claro do escuro e produzir o escuro no fim da palavra.

@@ -35,3 +35,21 @@ The /ɔɪ/ starts on a mid-back vowel with rounded lips and glides toward a high
 > ⚠️ **The typical Spanish-speaker mistake:** starting on the closed Spanish _o_. The English first element is far more open: _boy_ doesn't begin at _bo_, it begins closer to _baw_.
 
 **By the end you'll be able to:** open that first element and carry your lips from rounded to spread without breaking the sound.
+
+## 🇧🇷 Português
+
+### O ditongo /ɔɪ/: do /ɔ/ arredondado até o /ɪ/
+
+O /ɔɪ/ começa numa vogal média e posterior com os lábios arredondados e desliza para uma vogal alta e anterior. Os lábios passam de arredondados a esticados ao longo do som, e é esse percurso que se pratica aqui.
+
+**Como se produz**
+
+- 👄 **Boca:** lábios **arredondados** no começo, esticados no fim.
+- 👅 **Língua:** atrás e média no começo, à frente e alta no fim.
+- 🔊 **Voz:** sonora e longa, com o peso na primeira parte.
+
+**Você ouve em:** _boy_ · _noise_ · _toy_ · _voice_ · _coin_
+
+> ⚠️ **O erro típico de quem fala português:** começar com o _o_ fechado de _boi_. O primeiro elemento do inglês é bem mais aberto: _boy_ não começa em _bo_, começa perto de _baw_.
+
+**No fim você vai conseguir:** abrir esse primeiro elemento e levar os lábios de arredondados a esticados sem quebrar o som.

@@ -35,3 +35,21 @@ English consonants burn far more air than Spanish ones: there are bursts, vibrat
 > ⚠️ **The typical Spanish-speaker mistake:** speaking on just enough air and letting the volume drop at the end of each sentence. In English final consonants are heard, and that takes air in reserve.
 
 **By the end you'll be able to:** hold long consonants without running out of air, and reach the end of a sentence intact.
+
+## 🇧🇷 Português
+
+### Resistência ao ar: o aquecimento antes das consoantes
+
+As consoantes inglesas gastam muito mais ar que as do português: há sopros, vibrações e oclusões que não usamos. Se você não controla a respiração, cansa em poucos minutos e o fim de cada frase apaga. Este exercício é o aquecimento do módulo de consoantes.
+
+**O que você vai praticar**
+
+- 🫁 **Respiração:** ar vindo do diafragma, não do peito.
+- 🎤 **Cordas vocais:** sentir a vibração com a mão na garganta.
+- ⏱️ **Resistência:** sustentar o som sem que perca força no fim.
+
+**Pratique com:** sons sustentados: _sss_ · _zzz_ · _fff_ · _vvv_ · _mmm_
+
+> ⚠️ **O erro típico de quem fala português:** falar com o ar contado e deixar o volume cair no fim de cada frase. Em inglês as consoantes finais são ouvidas, e para isso é preciso ar de reserva.
+
+**No fim você vai conseguir:** sustentar consoantes longas sem ficar sem ar e chegar inteiro ao fim da frase.

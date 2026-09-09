@@ -35,3 +35,21 @@ Here you're no longer working on isolated sounds but on **combinations**: /æ/ f
 > ⚠️ **The typical Spanish-speaker mistake:** closing the /æ/ toward a Spanish _a_ the moment the consonant arrives. The vowel has to stay open all the way through.
 
 **By the end you'll be able to:** pronounce _æn_ and _æt_ with an open vowel and the right final consonant.
+
+## 🇧🇷 Português
+
+### Terceiro exercício: as combinações _æn_ e _æt_
+
+Aqui você já não trabalha sons soltos e sim **combinações**: o /æ/ seguido de /n/ e o /æ/ seguido de /t/. São duas terminações muito frequentes, e cada uma obriga a vogal a se comportar de um jeito — diante do /n/ ela nasaliza e alonga, diante do /t/ ela é cortada.
+
+**O que você vai praticar**
+
+- 👄 **Vogal:** manter o /æ/ aberto nas duas combinações.
+- 👃 **Diante de /n/:** o ar passa para o nariz e a vogal se alonga.
+- ✂️ **Diante de /t/:** a vogal é cortada e o /t/ final não é solto.
+
+**Pratique com:** _man_ · _plan_ · _can_ — _cat_ · _hat_ · _that_
+
+> ⚠️ **O erro típico de quem fala português:** fechar o /æ/ na direção do nosso _a_ assim que chega a consoante, e — diante do /n/ — trocar tudo por uma vogal nasal como em _mãe_. A vogal tem que aguentar aberta até o fim.
+
+**No fim você vai conseguir:** pronunciar _æn_ e _æt_ com a vogal aberta e a consoante final correta.
