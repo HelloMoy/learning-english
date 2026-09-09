@@ -33,3 +33,72 @@
   --media-menu-border-radius: var(--radius-lg);
   --media-menu-border: 1px solid var(--border);
 }
+
+/*
+ * Takes the embed frame out of the layout flow.
+ *
+ * Vidstack stretches a YouTube (or Vimeo) iframe to `height: 1000%` so the
+ * embed's own chrome falls outside the visible band, and clips it with
+ * `overflow: hidden` on the provider. In flow, that only works on engines
+ * where clipping also bounds layout. WebKit for iOS clips the painting but
+ * still sizes the boxes *above* the provider from the overflow, so the
+ * lesson's player wrapper measured 1198px against a 216px player and buried
+ * the lesson body under a black slab.
+ *
+ * Absolute positioning changes where the browser is told the oversized frame
+ * lives, not how big it is: the 1000% height and the middle band the learner
+ * sees are both unchanged. The provider is already `position: relative`, so it
+ * is the containing block, and the offset reproduces the vertical centring
+ * that `align-items: center` gave the frame in flow.
+ *
+ * Both offsets are percentages of the **provider**, never of the frame's own
+ * height, and there is no transform. That is deliberate. `translateY(-50%)`
+ * would resolve against the frame's own used height, and WebKit for iOS sizes
+ * an iframe from its content rather than from its CSS height — so when the
+ * embed re-lays itself out, after a seek for instance, the two disagree and
+ * the visible band slides off the video. Percentages of the containing block
+ * cannot drift that way.
+ */
+[data-media-provider] iframe.vds-youtube,
+[data-media-provider] iframe.vds-vimeo {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/*
+ * The oversized case, matching Vidstack's own
+ * `iframe.vds-youtube[data-no-controls] { height: 1000% }`. Lifting the frame
+ * by 450% of the provider puts its centre on the provider's centre:
+ * -450% + 1000%/2 = 50%. Both terms are the same box, so the two rules stay in
+ * step; without the attribute the frame is 100% tall and belongs at `top: 0`.
+ */
+[data-media-provider] iframe.vds-youtube[data-no-controls],
+[data-media-provider] iframe.vds-vimeo[data-no-controls] {
+  top: -450%;
+}
+
+/*
+ * The viewport-filling mode.
+ *
+ * This cannot be a set of Tailwind utilities on the element. Vidstack's own
+ * `[data-media-player] { position: relative; width: 100% }` ties `.fixed` and
+ * `.w-dvw` on specificity and is loaded after them, so the utilities lose the
+ * cascade and the player never leaves the page. Attaching the class to the
+ * player's own attribute selector settles it.
+ *
+ * The box stays 16:9 rather than filling the viewport's own shape. The embed
+ * lays its video out against the iframe's width and the player shows only the
+ * middle band, so a band shorter than `width x 9/16` — which is what a
+ * landscape viewport would give — would crop the video top and bottom. This is
+ * the largest 16:9 that fits, centred by `inset: 0` + `margin: auto`, with the
+ * backdrop filling what it does not.
+ */
+[data-media-player].lesson-video-player--enlarged {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  margin: auto;
+  width: 100dvw;
+  max-width: calc(100dvh * 16 / 9);
+}

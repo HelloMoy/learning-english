@@ -175,6 +175,27 @@ describe("LessonVideoPlayer", () => {
     );
   });
 
+  describe("GIVEN a learner who wants the video bigger", () => {
+    /*
+     * The enlarge control lives in the Default Layout's `fullscreenButton`
+     * slot, and that layout renders no controls at all here — jsdom never
+     * fires the `IntersectionObserver` the player defers loading behind, so
+     * `.vds-video-layout` stays empty and the slot never mounts. Whether the
+     * control is present, pins the player, and survives the toggle without
+     * being replaced is therefore asserted in `e2e/lesson-video-player.spec.ts`,
+     * against a browser that really lays the chrome out.
+     *
+     * What is testable here is the collapsed box the player presents to the
+     * page, which is the shape the rest of the lesson layout is built on.
+     */
+    test("WHEN the video is in the page THEN the player is a full-width 16:9 box", () => {
+      renderPlayer();
+
+      expect(screen.getByRole("region")).toHaveClass("aspect-video", "w-full");
+      expect(screen.getByRole("region")).not.toHaveClass("fixed");
+    });
+  });
+
   describe("GIVEN the in-player overlay slot", () => {
     test("WHEN children are passed THEN they render inside the player box", () => {
       renderPlayer({ children: <div data-testid="resume-overlay">Resume?</div> });
