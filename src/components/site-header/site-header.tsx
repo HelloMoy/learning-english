@@ -8,7 +8,7 @@ import { usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 
 /**
- * The Immersion Cinema top bar: the `LEARN·ENGLISH` wordmark, a section
+ * The Immersion Cinema top bar: the `ENGLISH·COURSE` wordmark, a section
  * eyebrow ("IMMERSION CINEMA · <SECTION>") derived from the current route,
  * and the locale + theme chips. Client-side because the section label reads
  * the pathname; the locale/theme controls were already client components.

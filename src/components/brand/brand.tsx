@@ -2,16 +2,22 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils/utils";
 
 /**
- * The Immersion Cinema wordmark: `LEARN·ENGLISH`, letter-spaced, with the
+ * The Immersion Cinema wordmark: `ENGLISH·COURSE`, letter-spaced, with the
  * middle dot in the gold accent. Links home (locale-aware). The visible
  * text carries the accessible name, so no extra `aria-label` is needed.
  *
+ * The mark is not localized. It names the product the site publishes to the
+ * outside world, so it reads the same in every locale and matches what the
+ * metadata announces as `og:site_name`.
+ *
  * @remarks
- * The type scale steps down below `sm`. `LEARN·ENGLISH` contains no spaces, so
- * it cannot wrap: at the full `17px`/`0.28em` it measures 203px and leaves too
- * little of a 320px viewport for the header's locale and theme controls. At
- * `13px`/`0.18em` it measures 139px, which fits the budget in the
- * `mobile-viewport-fit` change's design (D2) with room to spare.
+ * The type scale steps down below `sm`. `ENGLISH·COURSE` contains no spaces,
+ * so it cannot wrap: at the full `17px`/`0.28em` it measures 223px and leaves
+ * too little of a 320px viewport for the header's locale and theme controls.
+ * At `13px`/`0.18em` it measures 153px, ending 169px into a 320px viewport and
+ * leaving the remaining 151px to the locale and theme chips — measured in
+ * Chromium in all three locales, which render it identically because the mark
+ * is locale-invariant.
  */
 export function Brand({ href = "/", className }: { href?: string; className?: string }) {
   return (
@@ -22,7 +28,7 @@ export function Brand({ href = "/", className }: { href?: string; className?: st
         className,
       )}
     >
-      LEARN<span className="px-[0.15em] text-gold">·</span>ENGLISH
+      ENGLISH<span className="px-[0.15em] text-gold">·</span>COURSE
     </Link>
   );
 }
