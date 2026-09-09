@@ -1,6 +1,7 @@
 import { getCoursePlatformDeps } from "@/adapters/persistence/in-memory/use-case-dependencies/use-case-dependencies";
 import type { CourseLevel } from "@/components/course-ladder/course-ladder";
 import { HomeView } from "@/components/home-view/home-view";
+import { requireSupportedLocale } from "@/i18n/require-supported-locale/require-supported-locale";
 import { shareMetadata } from "@/lib/share-metadata/share-metadata";
 
 import type { Metadata } from "next";
@@ -19,6 +20,7 @@ const loadCatalog = cache(async () => {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
+  requireSupportedLocale(locale);
   const home = await getTranslations({ locale, namespace: "HomePage" });
   const t = await getTranslations({ locale, namespace: "Metadata" });
   return shareMetadata({

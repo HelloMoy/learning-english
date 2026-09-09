@@ -3,6 +3,7 @@ import { CourseOverview } from "@/components/course-overview/course-overview";
 import { CourseOverviewError } from "@/components/course-overview/course-overview-error";
 import { StructuredData } from "@/components/structured-data/structured-data";
 import { Slug } from "@/domain/entities/slug/slug";
+import { requireSupportedLocale } from "@/i18n/require-supported-locale/require-supported-locale";
 import { breadcrumbSchema, courseSchema } from "@/lib/course-schema/course-schema";
 import { shareMetadata } from "@/lib/share-metadata/share-metadata";
 import { siteUrl } from "@/lib/site-url/site-url";
@@ -22,6 +23,7 @@ const loadCourseView = cache(async (slug: ReturnType<typeof Slug.parse>) => {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, courseSlug } = await params;
+  requireSupportedLocale(locale);
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "HomePage" });
   const slugResult = Slug.safeParse(courseSlug);

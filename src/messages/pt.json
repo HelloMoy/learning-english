@@ -230,9 +230,9 @@
       "videoOrdinal": "Vídeo {number}"
     }
   },
-  "LocaleNotFound": {
-    "heading": "Idioma não suportado",
-    "description": "Ainda não temos traduções para este idioma.",
+  "PageNotFound": {
+    "heading": "Página não encontrada",
+    "description": "Esta página não existe, ou mudou de lugar. O curso continua aqui.",
     "goHome": "Ir para o início"
   },
   "Layout": {
