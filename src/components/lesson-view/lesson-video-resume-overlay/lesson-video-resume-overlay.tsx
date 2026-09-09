@@ -33,6 +33,21 @@ import { useEffect, useId, useRef } from "react";
  * not touch the player, and does not decide whether it should be shown.
  * `useResumeOnFirstPlay` owns that and acts on the answer.
  *
+ * **Below `sm` the prose gives way, not the choice.** Being bounded by the
+ * player means being bounded by a 16:9 box about 200px tall on a phone, and a
+ * card laid out for a desktop column overflowed it at both ends — where the
+ * lesson wrapper's `overflow: hidden` cut off the heading and the first line of
+ * the description. The heading and the description are what go, because the
+ * timestamped action already carries what they say; the timestamp and the two
+ * actions are the choice itself and survive at every size.
+ *
+ * They go to `sr-only`, never to `hidden` and never out of the tree, because
+ * they are the dialog's `aria-labelledby` and `aria-describedby` targets: a
+ * screen-reader user is offered exactly what a sighted one is. `max-h-full`
+ * with `overflow-y-auto` is the backstop for a translation long enough to
+ * overflow even the compact form — it scrolls inside the card rather than
+ * being clipped by an ancestor.
+ *
  * @param positionSeconds - The saved position to offer, in seconds
  * @param onResume - Continue from `positionSeconds`
  * @param onRestart - Start from `0`; also the dismissal path
@@ -77,7 +92,7 @@ export function LessonVideoResumeOverlay({
       aria-describedby={descriptionId}
       className="absolute inset-0 z-20 grid place-items-center bg-black/70 p-4 backdrop-blur-[2px]"
     >
-      <div className="relative w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl sm:p-8">
+      <div className="relative max-h-full w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-card p-4 shadow-2xl sm:p-6 md:p-8">
         <Button
           variant="ghost"
           size="icon-sm"
@@ -90,22 +105,22 @@ export function LessonVideoResumeOverlay({
 
         <h2
           id={labelId}
-          className="pr-8 text-2xl font-bold text-foreground"
+          className="sr-only sm:not-sr-only sm:pr-8 sm:text-2xl sm:font-bold sm:text-foreground"
         >
           {t("dialogLabel")}
         </h2>
         <p
           id={descriptionId}
-          className="mt-2 text-sm text-muted-foreground"
+          className="sr-only sm:not-sr-only sm:mt-2 sm:text-sm sm:text-muted-foreground"
         >
           {t("description")}
         </p>
 
-        <p className="mt-5 text-lg font-semibold text-foreground">
+        <p className="text-base font-semibold text-foreground sm:mt-5 sm:text-lg">
           {t("resumeFrom", { seconds: formatMinutesSeconds(positionSeconds) })}
         </p>
 
-        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
+        <div className="mt-4 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:justify-end">
           <Button
             variant="outline"
             size="lg"

@@ -55,3 +55,33 @@ export const LongLesson: Story = {
 export const InSpanish: Story = {
   parameters: { locale: "es" },
 };
+
+/**
+ * The compact form, at the width where the player is a 16:9 box barely 200px
+ * tall. The heading and the description stop being painted — they stay in the
+ * accessibility tree — so the timestamp and the two actions fit without being
+ * clipped by the player. The decorator narrows the player box rather than the
+ * viewport, which is what the breakpoint actually responds to.
+ */
+export const OnAPhone: Story = {
+  decorators: [
+    (Story) => (
+      <div className="min-h-svh bg-background p-4">
+        <div className="relative aspect-video w-full max-w-[358px] overflow-hidden rounded-2xl border border-border bg-black">
+          <Story />
+        </div>
+        <p className="mt-6 max-w-[358px] text-sm text-muted-foreground">
+          Nothing is cut off: the card is bounded by the player, and scrolls inside itself if a
+          translation ever makes it taller.
+        </p>
+      </div>
+    ),
+  ],
+  args: { positionSeconds: 550 },
+};
+
+/** The compact form in Spanish, where every label is longer. */
+export const OnAPhoneInSpanish: Story = {
+  ...OnAPhone,
+  parameters: { locale: "es" },
+};

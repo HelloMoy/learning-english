@@ -4,6 +4,8 @@ import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 import "./lesson-video-player.css";
 
+import { useEnlargedVideo } from "@/hooks/use-enlarged-video/use-enlarged-video";
+import { cn } from "@/lib/utils/utils";
 import { youtubeVideoIdFrom } from "@/lib/youtube-source/youtube-source";
 
 import { MediaPlayer, MediaProvider, Poster, type MediaPlayerInstance } from "@vidstack/react";
@@ -12,6 +14,7 @@ import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import type { ComponentProps, ReactNode, Ref } from "react";
 
+import { VideoEnlargeButton } from "../video-enlarge-button/video-enlarge-button";
 import { buildVideoPlayerTranslations } from "./video-player-translations";
 
 /**
@@ -49,6 +52,27 @@ import { buildVideoPlayerTranslations } from "./video-player-translations";
  * persistence are built on. A bare embed would strand both: its `start=`
  * parameter can say where to begin, but nothing can read back where the learner
  * stopped.
+ *
+ * **Fullscreen stays the browser's wherever the browser has it.** The layout's
+ * own fullscreen button is left in place and a fallback is added *after* it, so
+ * a browser that can take the player fullscreen behaves exactly as it did
+ * before this control existed. The fallback exists for the case the library
+ * cannot serve: Safari on iPhone exposes no element Fullscreen API, a
+ * YouTube-sourced lesson has no `<video>` for `webkitEnterFullscreen`, and the
+ * library hides a button it cannot support, which left an iPhone learner with
+ * no way to enlarge a lesson at all. Exactly one of the two ever paints —
+ * `VideoEnlargeButton` renders nothing while `canFullscreen` is true.
+ *
+ * Enlarged, the player is pinned to the viewport as the **largest 16:9 box that
+ * fits**, over a black backdrop, rather than stretched to the viewport's own
+ * shape. That is forced by the YouTube provider: the embed lays its video out
+ * against the iframe's width and the player shows only the middle band, so a
+ * band shorter than `width × 9/16` — which is what a landscape viewport would
+ * give — crops the video top and bottom.
+ *
+ * The element is never portalled. Moving the player in the tree would remount
+ * the provider `<iframe>`, reloading the embed and resetting `currentTime`
+ * under the resume overlay and the position writes; a class costs none of that.
  *
  * Three of the player's defaults are wrong for this app and are overridden
  * here rather than worked around by callers:
@@ -109,37 +133,62 @@ export function LessonVideoPlayer({
 >) {
   const t = useTranslations("Components.VideoPlayer");
   const { resolvedTheme } = useTheme();
+  const { isEnlarged, toggle } = useEnlargedVideo();
 
   return (
-    <MediaPlayer
-      ref={ref}
-      className="aspect-video w-full bg-black"
-      src={playerSourceFrom(source)}
-      poster={poster}
-      title={title}
-      ariaLabel={ariaLabel}
-      viewType="video"
-      playsInline
-      keyDisabled={keyDisabled}
-      {...lifecycle}
-    >
-      <MediaProvider>
-        {poster !== undefined ? (
-          <Poster
-            className="vds-poster"
-            src={poster}
-            alt=""
-          />
-        ) : null}
-      </MediaProvider>
-      <DefaultVideoLayout
-        icons={defaultLayoutIcons}
-        translations={buildVideoPlayerTranslations(t)}
-        colorScheme={resolvedTheme === "light" ? "light" : "dark"}
-        smallLayoutWhen={({ width }) => width < 576}
-      />
-      {children}
-    </MediaPlayer>
+    <>
+      {isEnlarged ? (
+        <div
+          aria-hidden="true"
+          className="fixed inset-0 z-40 bg-black"
+        />
+      ) : null}
+      <MediaPlayer
+        ref={ref}
+        className={cn(
+          // `align-bottom` because the player is an inline-level flex box:
+          // left on the text baseline it leaves a few pixels of descender
+          // space under the video, inside a wrapper that is painted black.
+          "aspect-video w-full bg-black align-bottom",
+          // The enlarged geometry is a rule in this component's stylesheet,
+          // not utilities here — Vidstack's own player rules outrank them.
+          isEnlarged && "lesson-video-player--enlarged",
+        )}
+        src={playerSourceFrom(source)}
+        poster={poster}
+        title={title}
+        ariaLabel={ariaLabel}
+        viewType="video"
+        playsInline
+        keyDisabled={keyDisabled}
+        {...lifecycle}
+      >
+        <MediaProvider>
+          {poster !== undefined ? (
+            <Poster
+              className="vds-poster"
+              src={poster}
+              alt=""
+            />
+          ) : null}
+        </MediaProvider>
+        <DefaultVideoLayout
+          icons={defaultLayoutIcons}
+          translations={buildVideoPlayerTranslations(t)}
+          colorScheme={resolvedTheme === "light" ? "light" : "dark"}
+          smallLayoutWhen={({ width }) => width < 576}
+          slots={{
+            afterFullscreenButton: (
+              <VideoEnlargeButton
+                isEnlarged={isEnlarged}
+                onToggle={toggle}
+              />
+            ),
+          }}
+        />
+        {children}
+      </MediaPlayer>
+    </>
   );
 }
 
