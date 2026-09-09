@@ -84,6 +84,10 @@
       "playbackRate": "Playback speed",
       "videoPlayerLabel": "Lecture video player"
     },
+    "SwipeUpHint": {
+      "message": "Swipe up to hide the browser bar and see the whole video",
+      "dismiss": "Dismiss hint"
+    },
     "VideoPlayer": {
       "announcements": "Announcements",
       "accessibility": "Accessibility",

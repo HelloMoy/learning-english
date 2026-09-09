@@ -81,6 +81,29 @@ async function openLesson(page: Page) {
   return { player, embedFrame };
 }
 
+/**
+ * Brings the control bar into view, the only way a learner can.
+ *
+ * The compact layout keeps the bottom bar `visibility: hidden` until
+ * playback has started, and then auto-hides it about two seconds later. So
+ * the video is played, then paused — a paused player keeps its controls up,
+ * which is the one stable state to assert against.
+ */
+async function revealControls(page: Page) {
+  await expect(page.locator("[data-media-player] .vds-controls")).toBeAttached({
+    timeout: 15_000,
+  });
+  const playPause = page.locator(".vds-play-button");
+
+  await playPause.tap();
+  await expect(page.locator("[data-media-player][data-started]")).toBeAttached({
+    timeout: 15_000,
+  });
+  await playPause.tap();
+
+  await expect(page.getByRole("button", { name: ENTER_FULLSCREEN })).toBeVisible();
+}
+
 test.describe("GIVEN a YouTube-sourced lesson", () => {
   test("WHEN the provider builds its embed frame THEN that frame is out of the layout flow", async ({
     page,
@@ -153,29 +176,6 @@ test.describe("GIVEN Safari on an iPhone", () => {
   test.use(IPHONE);
   test.skip(({ browserName }) => browserName !== "webkit", "iPhone Safari is WebKit");
 
-  /**
-   * Brings the control bar into view, the only way a learner can.
-   *
-   * The compact layout keeps the bottom bar `visibility: hidden` until
-   * playback has started, and then auto-hides it about two seconds later. So
-   * the video is played, then paused — a paused player keeps its controls up,
-   * which is the one stable state to assert against.
-   */
-  async function revealControls(page: Page) {
-    await expect(page.locator("[data-media-player] .vds-controls")).toBeAttached({
-      timeout: 15_000,
-    });
-    const playPause = page.locator(".vds-play-button");
-
-    await playPause.tap();
-    await expect(page.locator("[data-media-player][data-started]")).toBeAttached({
-      timeout: 15_000,
-    });
-    await playPause.tap();
-
-    await expect(page.getByRole("button", { name: ENTER_FULLSCREEN })).toBeVisible();
-  }
-
   test("WHEN the chrome renders THEN the fallback stands in for the hidden button", async ({
     page,
   }) => {
@@ -200,9 +200,14 @@ test.describe("GIVEN Safari on an iPhone", () => {
     expect(wrapperHeight).toBeLessThanOrEqual(playerHeight + WRAPPER_BORDER_PX);
   });
 
-  test("WHEN the control is pressed THEN the player fills the viewport and the page stops scrolling", async ({
+  test("WHEN the control is pressed THEN the player fills the viewport and the page stays free to scroll", async ({
     page,
   }) => {
+    // Safari on iPhone hides its toolbar only for a real scroll gesture on the
+    // document, and that gesture passes through the pinned player to the page
+    // beneath — a scroll lock here is what kept the enlarged video wedged
+    // under the toolbar. The page is covered by the backdrop, so nothing of
+    // that scrolling shows.
     const { player } = await openLesson(page);
     const viewport = page.viewportSize()!;
     await revealControls(page);
@@ -215,7 +220,25 @@ test.describe("GIVEN Safari on an iPhone", () => {
       "aria-pressed",
       "true",
     );
-    await expect(page.locator("body")).toHaveCSS("overflow", "hidden");
+    await expect(page.locator("body")).not.toHaveCSS("overflow", "hidden");
+    const offsetWhenEnlarged = await page.evaluate(() => window.scrollY);
+    await page.evaluate(() => window.scrollBy(0, 200));
+    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(offsetWhenEnlarged);
+  });
+
+  test("WHEN the mode is left THEN the page is back where it was", async ({ page }) => {
+    // Without a lock, a swipe made to hide the toolbar moves the page under
+    // the pinned player. Back in the page, the player has to be where the
+    // learner left it, not under the sticky header.
+    await openLesson(page);
+    await revealControls(page);
+    const offsetAtEntry = await page.evaluate(() => window.scrollY);
+
+    await page.getByRole("button", { name: ENTER_FULLSCREEN }).click();
+    await page.evaluate(() => window.scrollBy(0, 200));
+    await page.getByRole("button", { name: EXIT_FULLSCREEN }).click();
+
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(offsetAtEntry);
   });
 
   test("WHEN entering and leaving the mode THEN the player element is never replaced", async ({
@@ -270,5 +293,58 @@ test.describe("GIVEN Safari on an iPhone", () => {
 
     await expect(page.getByRole("button", { name: ENTER_FULLSCREEN })).toBeVisible();
     await expect(player).toHaveCSS("position", "relative");
+  });
+});
+
+test.describe("GIVEN an iPhone held in landscape with Safari's toolbar on screen", () => {
+  // Playwright cannot draw Safari's toolbar, but it can emulate what the page
+  // measures: touch input, a landscape viewport, and a `screen` whose short
+  // side is taller than that viewport — 292 of 402 points, as measured on iOS
+  // 26.5 with the toolbar up. iOS keeps `screen` in portrait terms whatever
+  // the orientation, so the emulated screen does too.
+  test.use({
+    ...IPHONE,
+    viewport: { width: 874, height: 292 },
+    contextOptions: { screen: { width: 402, height: 874 } },
+  });
+  test.skip(({ browserName }) => browserName !== "webkit", "iPhone Safari is WebKit");
+
+  const SWIPE_UP_HINT = messages.Components.SwipeUpHint.message;
+  const DISMISS_HINT = messages.Components.SwipeUpHint.dismiss;
+
+  test("WHEN the video is enlarged THEN the learner is told to swipe up", async ({ page }) => {
+    await openLesson(page);
+    await revealControls(page);
+    await expect(page.getByRole("status")).toHaveCount(0);
+
+    await page.getByRole("button", { name: ENTER_FULLSCREEN }).click();
+
+    await expect(page.getByRole("status")).toContainText(SWIPE_UP_HINT);
+  });
+
+  test("WHEN the viewport reaches the screen's short side THEN the hint leaves on its own", async ({
+    page,
+  }) => {
+    // What a swipe that hides the toolbar does to the viewport, minus the
+    // toolbar: the layout viewport grows to the full 402 points.
+    await openLesson(page);
+    await revealControls(page);
+    await page.getByRole("button", { name: ENTER_FULLSCREEN }).click();
+    await expect(page.getByRole("status")).toContainText(SWIPE_UP_HINT);
+
+    await page.setViewportSize({ width: 874, height: 402 });
+
+    await expect(page.getByRole("status")).toHaveCount(0);
+  });
+
+  test("WHEN the hint is dismissed THEN it stays away", async ({ page }) => {
+    await openLesson(page);
+    await revealControls(page);
+    await page.getByRole("button", { name: ENTER_FULLSCREEN }).click();
+    await expect(page.getByRole("status")).toContainText(SWIPE_UP_HINT);
+
+    await page.getByRole("button", { name: DISMISS_HINT }).click();
+
+    await expect(page.getByRole("status")).toHaveCount(0);
   });
 });

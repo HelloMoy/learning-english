@@ -4,6 +4,7 @@ import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 import "./lesson-video-player.css";
 
+import { useBrowserChromeVisible } from "@/hooks/use-browser-chrome-visible/use-browser-chrome-visible";
 import { useEnlargedVideo } from "@/hooks/use-enlarged-video/use-enlarged-video";
 import { cn } from "@/lib/utils/utils";
 import { youtubeVideoIdFrom } from "@/lib/youtube-source/youtube-source";
@@ -14,6 +15,7 @@ import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import type { ComponentProps, ReactNode, Ref } from "react";
 
+import { SwipeUpHint } from "../swipe-up-hint/swipe-up-hint";
 import { VideoEnlargeButton } from "../video-enlarge-button/video-enlarge-button";
 import { buildVideoPlayerTranslations } from "./video-player-translations";
 
@@ -69,6 +71,14 @@ import { buildVideoPlayerTranslations } from "./video-player-translations";
  * against the iframe's width and the player shows only the middle band, so a
  * band shorter than `width × 9/16` — which is what a landscape viewport would
  * give — crops the video top and bottom.
+ *
+ * On an iPhone the viewport itself is the ceiling: Safari's toolbar takes 110
+ * of the 402 landscape points and hides only for a real swipe on the document,
+ * which is why the mode never locks the page's scroll — the swipe has to travel
+ * through the pinned player to the page beneath. While that toolbar is still on
+ * screen a `SwipeUpHint` is drawn along the top of the box to say so.
+ * `useBrowserChromeVisible` decides when, from what the page can measure, and
+ * the hint is gone the moment the viewport reaches the screen's short side.
  *
  * The element is never portalled. Moving the player in the tree would remount
  * the provider `<iframe>`, reloading the embed and resetting `currentTime`
@@ -134,6 +144,7 @@ export function LessonVideoPlayer({
   const t = useTranslations("Components.VideoPlayer");
   const { resolvedTheme } = useTheme();
   const { isEnlarged, toggle } = useEnlargedVideo();
+  const isBrowserChromeVisible = useBrowserChromeVisible();
 
   return (
     <>
@@ -186,6 +197,7 @@ export function LessonVideoPlayer({
             ),
           }}
         />
+        {isEnlarged && isBrowserChromeVisible ? <SwipeUpHint /> : null}
         {children}
       </MediaPlayer>
     </>

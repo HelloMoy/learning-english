@@ -325,8 +325,26 @@ in-player resume overlay or the playback-position writes specified by the
 The control SHALL be labelled from `next-intl` for every locale in
 `src/i18n/routing.ts`, SHALL expose whether the mode is active, and SHALL be reachable
 by keyboard with a visible focus ring. A learner SHALL be able to leave the mode by
-that same control and by pressing `Escape`, so the mode is never a trap. While the mode
-is active, the page behind it SHALL NOT scroll.
+that same control and by pressing `Escape`, so the mode is never a trap.
+
+**The page behind the mode SHALL remain scrollable.** The mode SHALL NOT lock, clip, or
+otherwise suppress the document's scrolling while it is active. On iPhone Safari the
+browser's toolbar hides only in response to a real scroll gesture on the document, and
+after a rotation that toolbar is back on screen; a swipe over the pinned Player is
+therefore the only way the video can reach the whole screen, and it works only while the
+document underneath can still scroll. Nothing of that scrolling SHALL be visible: the
+backdrop covers the page. The scroll position the page had when the mode was entered
+SHALL be restored when the mode is left, so a gesture made to hide the toolbar does not
+leave the Player scrolled out of view once the learner is back in the page.
+
+**The mode SHALL tell a touch learner how to reclaim the screen.** While the mode is
+active on a touch device in landscape orientation and the viewport is shorter than the
+screen's short side — the browser's chrome is still on screen — the Player SHALL show a
+hint, drawn over the video, telling the learner to swipe up. The hint SHALL disappear on
+its own as soon as the viewport reaches the screen's short side, SHALL be dismissible by
+the learner for the rest of that enlarged session, SHALL NOT intercept the gesture it
+asks for, and SHALL be localized from `next-intl` for every locale. It SHALL NOT be shown
+in portrait, on a device without touch, or while the video is in the page.
 
 The library's own fullscreen button SHALL NOT be relied upon as the *only* affordance,
 because it hides itself wherever the Fullscreen API reports no support — which is
@@ -349,8 +367,24 @@ button remains the affordance and the fallback SHALL NOT render.
 
 #### Scenario: Enlarging pins the player to the viewport
 - **WHEN** the learner activates the enlarge control
-- **THEN** the Player fills the viewport, is painted above the rest of the page, the
-  page behind it does not scroll, and the video is fitted inside it without cropping
+- **THEN** the Player fills the viewport, is painted above the rest of the page, and the
+  video is fitted inside it without cropping
+
+#### Scenario: The page behind the mode stays scrollable
+- **WHEN** the mode is active
+- **THEN** the document's scrolling is not suppressed — `body` carries no `overflow`
+  lock — and the page behind the backdrop can still be scrolled by a gesture
+
+#### Scenario: Leaving the mode puts the page back where it was
+- **WHEN** the learner enters the mode, the page is scrolled while it is active, and the
+  learner leaves the mode
+- **THEN** the page is scrolled back to the position it had when the mode was entered
+
+#### Scenario: A swipe over the pinned player reaches the whole screen on iPhone
+- **WHEN** the mode is active in Safari on an iPhone held in landscape with the browser's
+  toolbar on screen — whether the learner enlarged before or after rotating — and the
+  learner swipes up over the video
+- **THEN** Safari hides its toolbar and the Player fills the whole screen
 
 #### Scenario: Enlarging does not interrupt playback
 - **WHEN** the learner activates the enlarge control while the video is playing and
@@ -367,3 +401,21 @@ button remains the affordance and the fallback SHALL NOT render.
 - **THEN** the control's accessible name comes from `src/messages/es.json`, and it
   exposes whether the enlarged mode is currently active
 
+#### Scenario: The swipe-up hint appears while the browser chrome takes part of the screen
+- **WHEN** the mode is active on a touch device in landscape and the viewport is shorter
+  than the screen's short side
+- **THEN** a hint telling the learner to swipe up is shown over the video, localized for
+  the active locale
+
+#### Scenario: The swipe-up hint leaves once the viewport reaches the full height
+- **WHEN** the hint is shown and the viewport grows to the screen's short side
+- **THEN** the hint is no longer shown, without any action from the learner
+
+#### Scenario: The swipe-up hint can be dismissed
+- **WHEN** the hint is shown and the learner activates its dismiss control
+- **THEN** the hint is no longer shown for the rest of that enlarged session
+
+#### Scenario: The swipe-up hint is not shown where it makes no sense
+- **WHEN** the video is in the page, or the device has no touch input, or the device is in
+  portrait orientation
+- **THEN** no swipe-up hint is rendered
