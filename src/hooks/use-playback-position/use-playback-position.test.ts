@@ -3,13 +3,21 @@ import type { PlaybackPositionRepository } from "@/domain/ports/playback-positio
 
 import { faker } from "@faker-js/faker";
 import { act, renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { usePlaybackPosition } from "./use-playback-position";
+
+vi.mock("@/hooks/use-saved-playback-positions/use-saved-playback-positions", () => ({
+  refreshSavedPlaybackPositions: vi.fn(),
+}));
+
+const { refreshSavedPlaybackPositions } =
+  await import("@/hooks/use-saved-playback-positions/use-saved-playback-positions");
 
 const mockStorage = new Map<string, string>();
 
 beforeEach(() => {
+  vi.mocked(refreshSavedPlaybackPositions).mockClear();
   mockStorage.clear();
   // jsdom provides window.localStorage, but we replace getItem/setItem with
   // a plain Map to isolate each test.
@@ -140,6 +148,32 @@ describe("usePlaybackPosition", () => {
         value = await result.current.get();
       });
       expect(value).toBe(55);
+    });
+  });
+
+  describe("GIVEN surfaces elsewhere on the page are showing progress", () => {
+    test("WHEN a position is written THEN the readers of every saved position are told to re-read", async () => {
+      // The `storage` event only fires for *other* tabs, so a write made
+      // here has to announce itself or a mounted progress bar goes stale.
+      const lessonId = LessonId.parse(faker.string.uuid());
+      const { result } = renderHook(() => usePlaybackPosition(lessonId));
+
+      await act(async () => {
+        await result.current.set(42);
+      });
+
+      expect(refreshSavedPlaybackPositions).toHaveBeenCalled();
+    });
+
+    test("WHEN a write is rejected by validation THEN no re-read is announced", async () => {
+      const lessonId = LessonId.parse(faker.string.uuid());
+      const { result } = renderHook(() => usePlaybackPosition(lessonId));
+
+      await act(async () => {
+        await result.current.set(Number.NaN);
+      });
+
+      expect(refreshSavedPlaybackPositions).not.toHaveBeenCalled();
     });
   });
 

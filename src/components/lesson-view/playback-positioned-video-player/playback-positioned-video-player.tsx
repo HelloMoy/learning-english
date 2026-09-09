@@ -1,6 +1,7 @@
 "use client";
 
 import type { LessonId } from "@/domain/entities/ids/ids";
+import { useCompleteWhenWatched } from "@/hooks/use-complete-when-watched/use-complete-when-watched";
 import { usePersistPlaybackPosition } from "@/hooks/use-persist-playback-position/use-persist-playback-position";
 import { usePlaybackPosition } from "@/hooks/use-playback-position/use-playback-position";
 import { useResumeOnFirstPlay } from "@/hooks/use-resume-on-first-play/use-resume-on-first-play";
@@ -32,6 +33,11 @@ import { LessonVideoResumeOverlay } from "../lesson-video-resume-overlay/lesson-
  *   `time-update`, immediate `pause`/`seeking`/`ended`, flush on unmount and
  *   `beforeunload`) and the gate that keeps a cold load from overwriting a
  *   stored position with `0`.
+ * - `useCompleteWhenWatched` marks the lesson complete once playback reaches
+ *   the end, through the same path the manual button uses. It carries its own
+ *   gate, for the mirror-image reason: opening a lesson whose stored position
+ *   is already past the threshold must not record a completion the learner
+ *   did not earn on this visit.
  *
  * The saved position is read once on mount. That read is **pure** — it feeds
  * the offer and writes nothing.
@@ -95,6 +101,9 @@ export function PlaybackPositionedVideoPlayer({
       get currentTime() {
         return playerRef.current?.currentTime ?? 0;
       },
+      get duration() {
+        return playerRef.current?.duration ?? 0;
+      },
       pause: () => playerRef.current?.pause(),
       play: () => void playerRef.current?.play()?.catch(() => {}),
       seekTo: (seconds: number) => {
@@ -106,6 +115,7 @@ export function PlaybackPositionedVideoPlayer({
 
   const persistence = usePersistPlaybackPosition({ lessonId, player });
   const resume = useResumeOnFirstPlay({ savedPositionSeconds, durationSeconds, player });
+  const completion = useCompleteWhenWatched({ lessonId, durationSeconds, player });
 
   const isOfferOpen = resume.offeredSeconds !== null;
 
@@ -119,13 +129,20 @@ export function PlaybackPositionedVideoPlayer({
       keyDisabled={isOfferOpen}
       onPlay={() => {
         persistence.openWriteGate();
+        completion.handlePlaybackStarted();
         onPlaybackStart?.();
       }}
       onPlaying={resume.handlePlaybackStarted}
       onPause={persistence.handleImmediateWrite}
       onSeeking={persistence.handleImmediateWrite}
-      onEnded={persistence.handleImmediateWrite}
-      onTimeUpdate={persistence.handleTimeUpdate}
+      onEnded={() => {
+        persistence.handleImmediateWrite();
+        completion.handleProgress();
+      }}
+      onTimeUpdate={() => {
+        persistence.handleTimeUpdate();
+        completion.handleProgress();
+      }}
     >
       {resume.offeredSeconds !== null ? (
         <LessonVideoResumeOverlay

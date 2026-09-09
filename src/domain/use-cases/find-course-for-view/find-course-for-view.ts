@@ -34,15 +34,37 @@ export type LeadingLesson = {
 };
 
 /**
+ * One lesson reduced to what progress accounting needs: which lesson it is,
+ * and how long it runs.
+ *
+ * @remarks
+ * Distinct from {@link LeadingLesson}, which is bounded by
+ * {@link LEADING_LESSONS_CAP} because it feeds a *preview*. A progress meter
+ * counts the whole module, so this list is deliberately uncapped — and it
+ * carries the runtime because completion is derived from a saved playback
+ * position measured against it.
+ *
+ * A lesson with no runtime — every reading lesson — reports zero, so the
+ * entries and the module's `lessonCount` always agree.
+ */
+export type LessonRuntime = {
+  id: LessonId;
+  durationSeconds: number;
+};
+
+/**
  * What a course overview needs to know about one module without opening it:
- * how many lessons it holds, how long they run in total, and enough of the
- * leading ones to show that the module is a container rather than a video.
+ * how many lessons it holds, how long they run in total, enough of the
+ * leading ones to show that the module is a container rather than a video,
+ * and the id and runtime of every lesson so the card can report how far the
+ * learner has got.
  */
 export type ModuleSummary = {
   moduleId: ModuleId;
   lessonCount: number;
   totalDurationSeconds: number;
   leadingLessons: LeadingLesson[];
+  lessonRuntimes: LessonRuntime[];
 };
 
 export type CourseForView = {
@@ -63,6 +85,11 @@ const toInternalError = (cause: unknown): FindCourseForViewErrors => ({
 });
 
 const bySequence = <T extends { sequence: number }>(a: T, b: T): number => a.sequence - b.sequence;
+
+const toLessonRuntime = (lesson: Lesson): LessonRuntime => ({
+  id: lesson.id,
+  durationSeconds: lesson.kind === "video" ? lesson.durationSeconds : 0,
+});
 
 const toLeadingLesson = (lesson: Lesson): LeadingLesson => ({
   id: lesson.id,
@@ -100,6 +127,7 @@ const summarizeModules = (
         0,
       ),
       leadingLessons: moduleLessons.slice(0, LEADING_LESSONS_CAP).map(toLeadingLesson),
+      lessonRuntimes: moduleLessons.map(toLessonRuntime),
     };
   });
 };

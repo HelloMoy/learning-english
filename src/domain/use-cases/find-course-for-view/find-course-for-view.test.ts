@@ -150,6 +150,7 @@ describe("findCourseForView", () => {
         lessonCount: 0,
         totalDurationSeconds: 0,
         leadingLessons: [],
+        lessonRuntimes: [],
       });
     });
 
@@ -213,6 +214,61 @@ describe("findCourseForView", () => {
         title: "Lesson 1",
         poster: "/local-filesystem-lesson/poster-1.jpeg",
       });
+    });
+
+    it("reports every lesson's runtime, not only the ones the preview shows", async () => {
+      // The card previews six lessons but its progress meter counts all of
+      // them, so the runtimes must run past the cap the preview obeys.
+      const many = Array.from({ length: LEADING_LESSONS_CAP + 4 }, (_, index) =>
+        Lesson.parse({
+          ...lessonA,
+          id: `99999999-9999-4999-8999-${String(index).padStart(12, "0")}`,
+          moduleId: mod1.id,
+          sequence: index + 1,
+          title: `Lesson ${index + 1}`,
+          durationSeconds: (index + 1) * 10,
+        }),
+      );
+      const useCase = makeFindCourseForView({
+        courses: makeStubCourseRepository({ bySlugMap: { "course-1": course } }),
+        modules: makeStubModuleRepository({ listByCourse: { [course.id]: [mod1] } }),
+        lessons: makeStubLessonRepository({ listByCourse: { [course.id]: [...many].reverse() } }),
+      });
+      const result = await useCase({ courseSlug: Slug.parse("course-1") });
+      expect(result.isOk()).toBe(true);
+      if (!result.isOk()) return;
+      const [summary] = result.value.moduleSummaries;
+      expect(summary?.lessonRuntimes).toHaveLength(LEADING_LESSONS_CAP + 4);
+      expect(summary?.lessonRuntimes).toEqual(
+        many.map((lesson) => ({ id: lesson.id, durationSeconds: durationOf(lesson) })),
+      );
+    });
+
+    it("reports a runtime of zero for a lesson that has none", async () => {
+      const reading = Lesson.parse({
+        kind: "reading",
+        id: "77777777-7777-4777-8777-777777777777",
+        courseId: course.id,
+        moduleId: mod1.id,
+        sequence: 3,
+        title: "Reading lesson",
+        body: "Body",
+      });
+      const useCase = makeFindCourseForView({
+        courses: makeStubCourseRepository({ bySlugMap: { "course-1": course } }),
+        modules: makeStubModuleRepository({ listByCourse: { [course.id]: [mod1] } }),
+        lessons: makeStubLessonRepository({
+          listByCourse: { [course.id]: [lessonA, lessonB, reading] },
+        }),
+      });
+      const result = await useCase({ courseSlug: Slug.parse("course-1") });
+      expect(result.isOk()).toBe(true);
+      if (!result.isOk()) return;
+      const [summary] = result.value.moduleSummaries;
+      // The count and the runtimes must agree, or the meter's denominator
+      // would disagree with the card's own "N videos" line.
+      expect(summary?.lessonRuntimes).toHaveLength(summary?.lessonCount ?? 0);
+      expect(summary?.lessonRuntimes[2]).toEqual({ id: reading.id, durationSeconds: 0 });
     });
 
     it("derives every summary from a single lessons fetch", async () => {

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Define the Immersion Cinema presentation of the Lesson Page. The lesson view adopts a three-column cinema layout: a left "Course outline" sidebar, a center column with a video hero (the native player, with a gold title cover shown only over an idle, poster-less lesson) followed by the lesson title, description, a Notes/Transcript tab pair, and a "Mark as complete" action, and a right rail with "Resources", "Lesson notes (source)", and an "Up next" card. Notes render as a bilingual ES/EN split; the Transcript tab is present for visual parity but disabled. Existing `NativeVideoPlayer`, breadcrumb, resource list, up-next, and mark-complete behaviors are preserved.
+Define the Immersion Cinema presentation of the Lesson Page. The lesson view adopts a three-column cinema layout: a left "Course outline" sidebar, a center column with a video hero (the native player, with a gold title cover shown only over an idle, poster-less lesson) followed by the lesson title, description, a Notes/Transcript tab pair, and a "Mark as complete" action, and a right rail with "Resources", "Lesson notes (source)", and an "Up next" card. Notes render in the app's active locale — one language at a time, never a side-by-side pair; the Transcript tab is present for visual parity but disabled. Existing `NativeVideoPlayer`, breadcrumb, resource list, up-next, and mark-complete behaviors are preserved.
 
 ## Requirements
 
@@ -71,35 +71,57 @@ In the outline, each module title SHALL be a disclosure control that expands and
 - **WHEN** the learner moves focus to a module title with the keyboard and presses `Enter` or `Space`
 - **THEN** the module toggles between expanded and collapsed, and the focused control shows a visible focus ring
 
-### Requirement: Notes tab shows a bilingual split; Transcript is present but disabled
+### Requirement: Notes tab shows the active locale's notes; Transcript is present but disabled
 
-The center column SHALL render a Notes tab and a Transcript tab. The Notes tab SHALL split the lesson's bilingual `readme.md` into two labelled columns ("Español" and "English") using a pure presentational splitter, falling back to a single column when the content cannot be split cleanly. Notes SHALL render through the existing safe Markdown component (no raw HTML). The Transcript tab SHALL be present for visual parity but disabled (`aria-disabled`), showing a localized "not available" state, since no transcript data exists.
+The center column SHALL render a Notes tab and a Transcript tab. The Notes tab SHALL render the lesson's notes in **exactly one language — the app's active locale** — as a single full-width column, using a pure presentational selector over the lesson's `readme.md`. It SHALL NOT render two languages at the same time. Notes SHALL render through the existing safe Markdown component (no raw HTML). The Transcript tab SHALL be present for visual parity but disabled (`aria-disabled`), showing a localized "not available" state, since no transcript data exists.
 
-The splitter SHALL identify each language by an explicit **level-2 language section heading** — a `##` heading (not `###` or deeper) whose text names the language, in either language's own words (for example `## Español`, `## 🇪🇸 Español`, `## English`, `## Inglés`). A language section SHALL run from its heading until the next level-2 heading or the end of the document. Content before the first level-2 heading — the lesson's `#` title — SHALL be discarded, and a level-2 section whose heading names no language SHALL be ignored. The splitter SHALL NOT infer languages by counting blank-line-separated blocks, so a lesson MAY nest `###` and `####` sub-headings, lists, blockquotes and examples inside a language section without losing its columns.
+The active locale SHALL be the one `next-intl` reports for the current request — the same locale the header's language control sets — so switching the app's language switches the notes with it. The Notes tab SHALL NOT offer a language control of its own.
 
-The language heading itself SHALL be dropped from the rendered column body, because the Notes tab already renders its own "Español" / "English" column label above each column. Everything else inside the section SHALL be preserved verbatim and rendered as Markdown.
+The selector SHALL identify each language by an explicit **level-2 language section heading** — a `##` heading (not `###` or deeper) whose text names the language, in any of the three locales' own words and with or without a flag emoji (for example `## Español`, `## 🇪🇸 Español`, `## Spanish`, `## English`, `## 🇺🇸 English`, `## Inglés`, `## Português`, `## 🇧🇷 Português`, `## Portuguese`). A language section SHALL run from its heading until the next level-2 heading or the end of the document. Content before the first level-2 heading — the lesson's `#` title — SHALL be discarded, and a level-2 section whose heading names no recognized language SHALL be ignored. The selector SHALL NOT infer languages by counting blank-line-separated blocks, so a lesson MAY nest `###` and `####` sub-headings, lists, blockquotes and examples inside a language section without losing its content.
 
-Notes that carry exactly one language section SHALL render in a single column containing that section's body, with the language heading dropped. Notes with no language section at all SHALL render the original Markdown in a single column, so notes never render broken.
+When the notes carry no section for the active locale, the selector SHALL resolve in this order and render the first section it finds: **active locale → English → Spanish**. When the notes carry no recognized language section at all, the Notes tab SHALL render the original Markdown unchanged. Notes therefore never render empty and never render broken.
 
-#### Scenario: Notes split into ES/EN columns
-- **WHEN** a lesson's notes contain a `## Español` section followed by a `## English` section
-- **THEN** the Notes tab shows two labelled columns with the Spanish section's body under "Español" and the English section's body under "English", and neither column repeats its `##` language heading
+The language heading itself SHALL be dropped from the rendered body. Everything else inside the section SHALL be preserved verbatim and rendered as Markdown. The Notes tab SHALL NOT render a language label above the body — the panel is already in the language the learner selected, so a label would state what the app's own language control states.
 
-#### Scenario: Nested sub-sections survive the split
-- **WHEN** a language section contains `###` sub-headings, `####` sub-headings and bullet lists beneath its `##` language heading
-- **THEN** that column renders every nested sub-heading and list item, and the notes still render as two columns
+#### Scenario: Spanish notes render for a Spanish learner
+- **WHEN** a lesson whose notes carry `## 🇪🇸 Español`, `## 🇺🇸 English` and `## 🇧🇷 Português` sections is opened under the `es` locale
+- **THEN** the Notes tab shows the Spanish section's body alone, occupying the full width, with no English or Portuguese text and no "ESPAÑOL" / "ENGLISH" column labels
 
-#### Scenario: The language sections may appear in either order
+#### Scenario: English notes render for an English learner
+- **WHEN** the same lesson is opened under the `en` locale
+- **THEN** the Notes tab shows the English section's body alone, and neither the Spanish nor the Portuguese body appears in the panel
+
+#### Scenario: Portuguese notes render for a Portuguese learner
+- **WHEN** the same lesson is opened under the `pt` locale
+- **THEN** the Notes tab shows the Portuguese section's body alone, and neither the Spanish nor the English body appears in the panel
+
+#### Scenario: Switching the app's language switches the notes
+- **WHEN** the learner changes the app's language from Spanish to Portuguese while on a lesson page
+- **THEN** the Notes tab body is the Portuguese section, without the learner touching any control inside the panel
+
+#### Scenario: A missing locale section falls back to English
+- **WHEN** a lesson's notes carry only `## Español` and `## English` sections and the lesson is opened under the `pt` locale
+- **THEN** the Notes tab shows the English section's body alone, rather than an empty panel or two columns
+
+#### Scenario: A missing locale and missing English fall back to Spanish
+- **WHEN** a lesson's notes carry only a `## Español` section and the lesson is opened under the `pt` locale
+- **THEN** the Notes tab shows the Spanish section's body
+
+#### Scenario: The language heading is never shown
+- **WHEN** any language section is rendered
+- **THEN** its `##` language heading is not present in the panel, and the section's own `###` sub-headings are the first headings the learner sees
+
+#### Scenario: Nested sub-sections survive the selection
+- **WHEN** the selected language section contains `###` sub-headings, `####` sub-headings and bullet lists beneath its `##` language heading
+- **THEN** the panel renders every nested sub-heading and list item
+
+#### Scenario: The language sections may appear in any order
 - **WHEN** a lesson's notes place the `## English` section before the `## Español` section
-- **THEN** the Spanish section's body still renders under "Español" and the English section's body under "English"
+- **THEN** the locale still selects its own section, unaffected by the order the sections appear in the file
 
-#### Scenario: Monolingual notes render one column without the language marker
-- **WHEN** a lesson's notes contain only a `## English` section
-- **THEN** the Notes tab renders a single column with that section's body, and the `## English` heading is not shown
-
-#### Scenario: Ambiguous notes fall back to one column
+#### Scenario: Ambiguous notes fall back to the whole body
 - **WHEN** the notes contain no level-2 language section heading
-- **THEN** the Notes tab renders the markdown in a single column without error
+- **THEN** the Notes tab renders the markdown as-is in a single column without error
 
 #### Scenario: Transcript tab is disabled
 - **WHEN** the user reaches the Transcript tab
@@ -113,21 +135,44 @@ Notes that carry exactly one language section SHALL render in a single column co
 
 In the "Course outline" sidebar, a lesson row whose lesson has been completed SHALL carry a completion indicator distinguishing it from lessons not yet taken. The indicator SHALL be perceivable without relying on colour alone and SHALL carry a localized accessible name, so the row's state reaches assistive technology and not only sighted users.
 
-The indicator SHALL coexist with the existing current-lesson marker: the lesson being viewed SHALL keep its `aria-current` treatment whether or not it is also complete.
+A lesson row whose lesson has been partly watched SHALL additionally carry the **watch
+progress bar** specified by the `watch-progress` capability, rendered beneath the lesson
+title within the row. A completed row SHALL show the bar full. Both indicators SHALL
+apply the shared completion rule — marked through the button, or watched to the end — so
+the outline can never disagree with the module overview about the same lesson.
 
-Because completion is read in the browser after hydration (see the `lesson-progress` capability), the outline SHALL render no completion marks on the server and SHALL NOT render an explicit "not completed" marker at any time.
+The bar SHALL NOT become part of the row link's accessible name, and SHALL NOT add a tab
+stop: the row keeps exactly one announced, focusable control, which on the largest module
+is 214 rows' worth of tab stops that must not double. It is announced as its own
+`progressbar`, so its reading is still available to assistive technology.
+
+The indicators SHALL coexist with the existing current-lesson marker: the lesson being viewed SHALL keep its `aria-current` treatment whether or not it is also complete or partly watched.
+
+Because completion and playback position are read in the browser after hydration (see the `lesson-progress` and `watch-progress` capabilities), the outline SHALL render no completion marks and no progress bars on the server, SHALL NOT render an explicit "not completed" marker at any time, and SHALL render no bar at all for a lesson with nothing watched.
 
 #### Scenario: A completed lesson is distinguishable in the outline
 - **WHEN** the outline renders a module containing a lesson the learner has completed
-- **THEN** that lesson's row shows the completion indicator, and lessons not completed show none
+- **THEN** that lesson's row shows the completion indicator and a full progress bar, and lessons never opened show neither
+
+#### Scenario: A partly watched lesson shows how far it got
+- **WHEN** the outline renders a lesson with a stored position of 240 seconds against a 600-second duration
+- **THEN** that row shows a progress bar filled to 40%, and no completion indicator
 
 #### Scenario: The current lesson can also be complete
 - **WHEN** the lesson currently being viewed has already been completed
 - **THEN** the row carries both the current-lesson marker (`aria-current`) and the completion indicator, and neither replaces the other
 
+#### Scenario: The bar does not rename or duplicate the row's control
+- **WHEN** a row carrying a progress bar is reached by keyboard or by a screen reader
+- **THEN** the row link's accessible name is the lesson title alone, the link remains the row's only tab stop, and the bar is announced separately as a progress bar
+
 #### Scenario: The indicator is announced, not merely coloured
 - **WHEN** a screen reader reaches a completed lesson's row
 - **THEN** the completed state is announced through a localized accessible name, and the distinction does not depend on colour alone
+
+#### Scenario: A lesson with no runtime carries no bar
+- **WHEN** the outline renders a reading lesson
+- **THEN** that row shows no progress bar, and its completion still reflects the manual button
 
 #### Scenario: Marking the current lesson updates the outline without a reload
 - **WHEN** the learner activates "Mark as complete" for the lesson they are viewing

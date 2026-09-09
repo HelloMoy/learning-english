@@ -73,13 +73,17 @@ const leading = (entries: ReadonlyArray<[string, string | undefined]>): LeadingL
     ...(poster === undefined ? {} : { poster }),
   }));
 
-const summary = (overrides: Partial<ModuleSummary>): ModuleSummary => ({
-  moduleId: module3.id,
-  lessonCount: 6,
-  totalDurationSeconds: 3600,
-  leadingLessons: leading(MODULE_3),
-  ...overrides,
-});
+const summary = (overrides: Partial<ModuleSummary>): ModuleSummary => {
+  const leadingLessons = leading(MODULE_3);
+  return {
+    moduleId: module3.id,
+    lessonCount: 6,
+    totalDurationSeconds: 3600,
+    leadingLessons,
+    lessonRuntimes: leadingLessons.map((lesson) => ({ id: lesson.id, durationSeconds: 600 })),
+    ...overrides,
+  };
+};
 
 const meta: Meta<typeof ModuleShowcaseCard> = {
   title: "Components/ModuleShowcaseCard",

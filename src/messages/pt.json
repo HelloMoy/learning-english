@@ -182,6 +182,15 @@
       "courseOutline": "Índice do curso",
       "remaining": "Faltam {remaining} de {total}",
       "progressLabel": "Progresso da reprodução"
+    },
+    "LessonWatchProgress": {
+      "ariaLabel": "{percent} assistido"
+    },
+    "ModuleWatchProgress": {
+      "label": "{completed} / {total} vídeos",
+      "ariaLabel": "{completed} de {total} vídeos concluídos",
+      "completedLabel": "Lição concluída",
+      "completedAriaLabel": "Todos os {total} vídeos concluídos"
     }
   },
   "CourseCatalog": {

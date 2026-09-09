@@ -1,7 +1,7 @@
 "use client";
 
 import type { LessonId } from "@/domain/entities/ids/ids";
-import { useLessonCompletion } from "@/hooks/use-lesson-completion/use-lesson-completion";
+import { useLessonWatchState } from "@/hooks/use-lesson-watch-state/use-lesson-watch-state";
 
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -24,11 +24,25 @@ import { useTranslations } from "next-intl";
  * The check icon is decorative and the meaning is carried by a localized
  * accessible name, so the distinction never rests on colour or glyph alone.
  *
+ * Completion has two producers — the **Mark as complete** button and playback
+ * reaching the end of the video — and this reads both through
+ * `useLessonWatchState`. A caller that passes the lesson's runtime therefore
+ * marks a lesson the learner watched to the end but never pressed the button
+ * on; a caller that cannot supply one falls back to the stored mark alone.
+ *
  * @param lessonId - The lesson whose completion is being shown
+ * @param durationSeconds - The lesson's runtime, where the caller knows it;
+ *                          omit for a lesson that has none
  */
-export function LessonCompletionMark({ lessonId }: { lessonId: LessonId }) {
+export function LessonCompletionMark({
+  lessonId,
+  durationSeconds = 0,
+}: {
+  lessonId: LessonId;
+  durationSeconds?: number;
+}) {
   const t = useTranslations("Components.LessonCompletion");
-  const isComplete = useLessonCompletion(lessonId);
+  const { isComplete } = useLessonWatchState({ lessonId, durationSeconds });
 
   if (!isComplete) return null;
 

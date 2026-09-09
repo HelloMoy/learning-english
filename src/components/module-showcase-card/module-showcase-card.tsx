@@ -1,4 +1,5 @@
 import { Eyebrow } from "@/components/eyebrow/eyebrow";
+import { ModuleWatchProgress } from "@/components/module-watch-progress/module-watch-progress";
 import type { Course } from "@/domain/entities/course/course";
 import type { Module } from "@/domain/entities/module/module";
 import type { ModuleSummary } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
@@ -86,6 +87,19 @@ const DECK = {
  * it out of the frame is what makes it immune to truncation: real module
  * titles run to 50 characters.
  *
+ * ## Progress
+ *
+ * The left panel reads *what the module holds → how far you are → the way
+ * in*, so the progress meter sits between the count line and the call to
+ * action. It is a client island — completion lives in `localStorage`, which
+ * the server cannot read — and it is the only part of this card that is not
+ * server-rendered. A module with no completed lesson renders no meter at all,
+ * rather than one drawn at zero, since the pre-hydration frame must not
+ * assert that the learner has watched nothing.
+ *
+ * It counts `lessonRuntimes`, every lesson the module holds, rather than the
+ * bounded `leadingLessons` the deck previews.
+ *
  * ## The deck
  *
  * Lessons are laid out as a gallery receding to the right: landscape cards,
@@ -169,6 +183,8 @@ export function ModuleShowcaseCard({
               duration,
             })}
           </p>
+
+          <ModuleWatchProgress lessonRuntimes={summary.lessonRuntimes} />
 
           <Link
             href={href as never}

@@ -78,6 +78,23 @@ export function serverCompletionSnapshot(): ReadonlySet<string> {
 }
 
 /**
+ * Every lesson completed on this device, as one snapshot.
+ *
+ * @remarks
+ * The shape a *count* needs. {@link useLessonCompletion} answers for one
+ * lesson, which is right for an indicator and wrong for a module meter that
+ * must ask about seventeen at once — and a hook call per lesson would break
+ * the rules of hooks the moment a module is reordered.
+ *
+ * Browser-side only — do NOT call from a Server Component.
+ *
+ * @returns A stable set of completed lesson ids; empty before hydration
+ */
+export function useCompletedLessons(): ReadonlySet<string> {
+  return useSyncExternalStore(subscribe, getSnapshot, serverCompletionSnapshot);
+}
+
+/**
  * Whether a lesson has been completed on this device.
  *
  * @remarks
@@ -97,8 +114,7 @@ export function serverCompletionSnapshot(): ReadonlySet<string> {
  * @returns `true` once storage reports the lesson complete
  */
 export function useLessonCompletion(lessonId: LessonId): boolean {
-  const completed = useSyncExternalStore(subscribe, getSnapshot, serverCompletionSnapshot);
-  return completed.has(lessonId);
+  return useCompletedLessons().has(lessonId);
 }
 
 /**

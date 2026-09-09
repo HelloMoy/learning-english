@@ -1,8 +1,10 @@
 import { Course } from "@/domain/entities/course/course";
 import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
+import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { finishThresholdSeconds } from "@/lib/watch-progress/watch-progress";
 
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -10,6 +12,9 @@ import { ModuleOverview } from "./module-overview";
 
 vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
+  // The progress bar formats its percentage through next-intl rather than
+  // concatenating a string, so the mock has to answer for the formatter too.
+  useFormatter: () => ({ number: (value: number) => `${Math.round(value * 100)}%` }),
 }));
 
 const mockUseTranslations = vi.mocked(useTranslations);
@@ -353,5 +358,131 @@ describe("ModuleOverview — completion indicator", () => {
       "href",
       "/courses/course-1/modules/mod-1/lessons/33333333-3333-4333-8333-333333333333",
     );
+  });
+});
+
+describe("ModuleOverview — watch progress", () => {
+  const PLAYBACK_KEY_PREFIX = "learning-english:playback:";
+
+  const announceStorageChange = () => {
+    act(() => {
+      refreshSavedPlaybackPositions();
+      window.dispatchEvent(new StorageEvent("storage", { key: null }));
+    });
+  };
+
+  beforeEach(() => {
+    mockUseTranslations.mockImplementation(
+      () =>
+        ((key: string, values?: Record<string, unknown>) =>
+          values ? `${key}:${JSON.stringify(values)}` : key) as never,
+    );
+    window.localStorage.clear();
+    announceStorageChange();
+  });
+
+  test("WHEN a lesson has been partly watched THEN its row shows how far the learner got", () => {
+    window.localStorage.setItem(`${PLAYBACK_KEY_PREFIX}${lessonB.id}`, "60");
+    announceStorageChange();
+
+    const { container } = render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonA, lessonB]}
+      />,
+    );
+
+    const rows = container.querySelectorAll("li");
+    const bar = rows[1]!.querySelector('[role="progressbar"]');
+    expect(bar).not.toBeNull();
+    // 60 of lessonB's 240 seconds.
+    expect(bar).toHaveAttribute("aria-valuenow", "25");
+    expect(rows[0]!.querySelector('[role="progressbar"]')).toBeNull();
+  });
+
+  test("WHEN a lesson has been watched to its end THEN the row reads full and carries the mark", () => {
+    window.localStorage.setItem(
+      `${PLAYBACK_KEY_PREFIX}${lessonA.id}`,
+      String(finishThresholdSeconds(240)),
+    );
+    announceStorageChange();
+
+    const { container } = render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonA, lessonB]}
+      />,
+    );
+
+    const row = container.querySelectorAll("li")[0]!;
+    expect(row.querySelector('[role="progressbar"]')).toHaveAttribute("aria-valuenow", "100");
+    expect(row.querySelector('[data-testid="lesson-completion-mark"]')).not.toBeNull();
+  });
+
+  test("WHEN a lesson has never been opened THEN no bar is drawn at all", () => {
+    // An empty bar in the pre-hydration frame would assert the learner has
+    // watched nothing, which may well be false.
+    const { container } = render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonA, lessonB]}
+      />,
+    );
+
+    expect(container.querySelectorAll('[role="progressbar"]')).toHaveLength(0);
+  });
+
+  test("WHEN a reading lesson renders THEN it carries no bar", () => {
+    window.localStorage.setItem(`${PLAYBACK_KEY_PREFIX}${readingLesson.id}`, "60");
+    announceStorageChange();
+
+    const { container } = render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[readingLesson]}
+      />,
+    );
+
+    expect(container.querySelectorAll('[role="progressbar"]')).toHaveLength(0);
+  });
+
+  test("WHEN a row shows a bar THEN the Open action is still its only tab stop", () => {
+    window.localStorage.setItem(`${PLAYBACK_KEY_PREFIX}${lessonA.id}`, "60");
+    announceStorageChange();
+
+    const { container } = render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonA]}
+      />,
+    );
+
+    const row = container.querySelectorAll("li")[0]!;
+    const tabbable = row.querySelectorAll("a:not([tabindex='-1']), button, [tabindex='0']");
+    expect(tabbable).toHaveLength(1);
+    expect(row.querySelector('[role="progressbar"]')).not.toHaveAttribute("tabindex");
+  });
+
+  test("WHEN a row shows a bar THEN it keeps its eyebrow, title, duration and Open action", () => {
+    window.localStorage.setItem(`${PLAYBACK_KEY_PREFIX}${lessonA.id}`, "60");
+    announceStorageChange();
+
+    render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonA]}
+      />,
+    );
+
+    expect(screen.getByText('videoOrdinal:{"number":1}')).toBeInTheDocument();
+    expect(screen.getByText("Lesson A")).toBeInTheDocument();
+    expect(screen.getByText('duration:{"minutes":4}')).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /open/ })).toBeInTheDocument();
   });
 });

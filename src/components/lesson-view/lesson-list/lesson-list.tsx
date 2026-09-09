@@ -1,4 +1,5 @@
 import { LessonCompletionMark } from "@/components/lesson-completion-mark/lesson-completion-mark";
+import { LessonWatchProgress } from "@/components/lesson-watch-progress/lesson-watch-progress";
 import type { Course } from "@/domain/entities/course/course";
 import type { LessonId } from "@/domain/entities/ids/ids";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
@@ -13,6 +14,19 @@ import { useTranslations } from "next-intl";
  * lesson route. The current lesson is marked with `aria-current="page"` and
  * a visual indicator. Each row uses the project's standard minimum touch
  * target height and a visible focus ring.
+ *
+ * @remarks
+ * Each row passes its lesson's runtime to the completion mark and to the watch
+ * progress bar beneath it, so the outline applies the same completion rule as
+ * every other surface: a video watched to its end is done, whether or not the
+ * learner pressed the button.
+ *
+ * The bar is a **sibling** of the row link rather than a child of it. Folded
+ * inside, its `aria-label` would join the link's accessible name — renaming
+ * every one of the 214 rows the largest module holds from "Lesson title" to
+ * "Lesson title, 40% watched". Outside, the link keeps its name, the row keeps
+ * its single tab stop, and the bar is still announced as a progress bar in its
+ * own right.
  */
 export function LessonList({
   course,
@@ -30,23 +44,38 @@ export function LessonList({
     <ul className="space-y-1 pl-2">
       {lessons.map((lesson) => {
         const isCurrent = lesson.id === currentLessonId;
+        const durationSeconds = lesson.kind === "video" ? lesson.durationSeconds : 0;
         return (
-          <li key={lesson.id}>
+          <li
+            key={lesson.id}
+            // The current-row treatment sits on the row, not on the link, so
+            // it also frames the progress bar beneath it. On the link it
+            // stopped at the title and left the bar visually orphaned.
+            className={isCurrent ? "rounded border-l-2 border-gold bg-gold/10" : undefined}
+          >
             <Link
               href={lessonPath(course, module, lesson) as never}
               aria-current={isCurrent ? "page" : undefined}
               aria-label={isCurrent ? t("currentLessonAria") : undefined}
               className={
                 isCurrent
-                  ? "block min-h-9 rounded border-l-2 border-gold bg-gold/10 px-2 py-2 text-sm font-semibold text-gold focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                  ? "block min-h-9 rounded px-2 py-2 text-sm font-semibold text-gold focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
                   : "block min-h-9 rounded px-2 py-2 text-sm text-muted-foreground hover:bg-foreground/5 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
               }
             >
               <span className="flex items-center justify-between gap-2">
                 {lesson.title}
-                <LessonCompletionMark lessonId={lesson.id} />
+                <LessonCompletionMark
+                  lessonId={lesson.id}
+                  durationSeconds={durationSeconds}
+                />
               </span>
             </Link>
+            <LessonWatchProgress
+              lessonId={lesson.id}
+              durationSeconds={durationSeconds}
+              className="px-2 pb-1.5"
+            />
           </li>
         );
       })}

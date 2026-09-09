@@ -2,9 +2,11 @@ import { Course } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
+import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { finishThresholdSeconds } from "@/lib/watch-progress/watch-progress";
 
 import { faker } from "@faker-js/faker";
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -12,6 +14,9 @@ import { LessonList } from "./lesson-list";
 
 vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
+  // The progress bar formats its percentage through next-intl rather than
+  // concatenating a string, so the mock has to answer for the formatter too.
+  useFormatter: () => ({ number: (value: number) => `${Math.round(value * 100)}%` }),
 }));
 
 const mockUseTranslations = vi.mocked(useTranslations);
@@ -44,6 +49,21 @@ const makeLesson = (sequence: number, title: string) =>
     sequence,
     title,
     body: "body",
+  });
+
+const VIDEO_DURATION_SECONDS = 600;
+
+const makeVideoLesson = (sequence: number, title: string) =>
+  Lesson.parse({
+    kind: "video",
+    id: LessonId.parse(faker.string.uuid()),
+    courseId,
+    moduleId,
+    sequence,
+    title,
+    description: title,
+    source: "/local-filesystem-lesson/lesson.mp4",
+    durationSeconds: VIDEO_DURATION_SECONDS,
   });
 
 describe("LessonList", () => {
@@ -99,7 +119,10 @@ describe("LessonList — completion indicator", () => {
   beforeEach(() => {
     mockUseTranslations.mockReturnValue(((key: string) => key) as never);
     window.localStorage.clear();
-    window.dispatchEvent(new StorageEvent("storage", { key: null }));
+    act(() => {
+      refreshSavedPlaybackPositions();
+      window.dispatchEvent(new StorageEvent("storage", { key: null }));
+    });
   });
 
   test("WHEN a lesson has been completed THEN its row shows the indicator", () => {
@@ -123,6 +146,32 @@ describe("LessonList — completion indicator", () => {
     expect(marks).toHaveLength(1);
     const items = within(container.querySelector("ul")!).getAllByRole("listitem");
     expect(items[1]!.querySelector('[data-testid="lesson-completion-mark"]')).not.toBeNull();
+  });
+
+  test("WHEN a video was watched to its end THEN its row shows the indicator", () => {
+    // The outline reads the same completion rule as the module overview: a
+    // lesson finished by watching is done, button or no button.
+    const lessons = [makeVideoLesson(1, "First"), makeVideoLesson(2, "Second")];
+    window.localStorage.setItem(
+      `learning-english:playback:${lessons[1]!.id}`,
+      String(finishThresholdSeconds(VIDEO_DURATION_SECONDS)),
+    );
+    act(() => {
+      refreshSavedPlaybackPositions();
+    });
+
+    const { container } = render(
+      <LessonList
+        course={course}
+        module={courseModule}
+        lessons={lessons}
+        currentLessonId={lessons[0]!.id}
+      />,
+    );
+
+    const items = within(container.querySelector("ul")!).getAllByRole("listitem");
+    expect(items[1]!.querySelector('[data-testid="lesson-completion-mark"]')).not.toBeNull();
+    expect(items[0]!.querySelector('[data-testid="lesson-completion-mark"]')).toBeNull();
   });
 
   test("WHEN no lesson has been completed THEN no marker of any kind is rendered", () => {
@@ -187,5 +236,120 @@ describe("LessonList — completion indicator", () => {
     const mark = container.querySelector('[data-testid="lesson-completion-mark"]');
     expect(mark?.textContent).toContain("completed");
     expect(mark?.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+  });
+});
+
+describe("LessonList — watch progress", () => {
+  const PLAYBACK_KEY_PREFIX = "learning-english:playback:";
+
+  const announceStorageChange = () => {
+    act(() => {
+      refreshSavedPlaybackPositions();
+      window.dispatchEvent(new StorageEvent("storage", { key: null }));
+    });
+  };
+
+  beforeEach(() => {
+    mockUseTranslations.mockReturnValue(((key: string) => key) as never);
+    window.localStorage.clear();
+    announceStorageChange();
+  });
+
+  test("WHEN a lesson has been partly watched THEN its row shows how far the learner got", () => {
+    const lessons = [makeVideoLesson(1, "First"), makeVideoLesson(2, "Second")];
+    window.localStorage.setItem(
+      `${PLAYBACK_KEY_PREFIX}${lessons[1]!.id}`,
+      String(VIDEO_DURATION_SECONDS * 0.4),
+    );
+    announceStorageChange();
+
+    const { container } = render(
+      <LessonList
+        course={course}
+        module={courseModule}
+        lessons={lessons}
+        currentLessonId={lessons[0]!.id}
+      />,
+    );
+
+    const items = within(container.querySelector("ul")!).getAllByRole("listitem");
+    expect(items[1]!.querySelector('[role="progressbar"]')).toHaveAttribute("aria-valuenow", "40");
+    expect(items[0]!.querySelector('[role="progressbar"]')).toBeNull();
+  });
+
+  test("WHEN a lesson is complete THEN its row's bar reads full", () => {
+    const lessons = [makeVideoLesson(1, "First")];
+    window.localStorage.setItem(
+      `${PLAYBACK_KEY_PREFIX}${lessons[0]!.id}`,
+      String(finishThresholdSeconds(VIDEO_DURATION_SECONDS)),
+    );
+    announceStorageChange();
+
+    const { container } = render(
+      <LessonList
+        course={course}
+        module={courseModule}
+        lessons={lessons}
+        currentLessonId={lessons[0]!.id}
+      />,
+    );
+
+    expect(container.querySelector('[role="progressbar"]')).toHaveAttribute("aria-valuenow", "100");
+  });
+
+  test("WHEN nothing has been watched THEN no bar is drawn at all", () => {
+    // An empty bar in the pre-hydration frame would assert the learner has
+    // watched nothing, which may well be false.
+    const lessons = [makeVideoLesson(1, "First"), makeVideoLesson(2, "Second")];
+
+    const { container } = render(
+      <LessonList
+        course={course}
+        module={courseModule}
+        lessons={lessons}
+        currentLessonId={lessons[0]!.id}
+      />,
+    );
+
+    expect(container.querySelectorAll('[role="progressbar"]')).toHaveLength(0);
+  });
+
+  test("WHEN the lesson is a reading lesson THEN its row carries no bar", () => {
+    const lessons = [makeLesson(1, "Reading")];
+    window.localStorage.setItem(`${PLAYBACK_KEY_PREFIX}${lessons[0]!.id}`, "120");
+    announceStorageChange();
+
+    const { container } = render(
+      <LessonList
+        course={course}
+        module={courseModule}
+        lessons={lessons}
+        currentLessonId={lessons[0]!.id}
+      />,
+    );
+
+    expect(container.querySelectorAll('[role="progressbar"]')).toHaveLength(0);
+  });
+
+  test("WHEN a row shows a bar THEN the link keeps its name and stays the row's only tab stop", () => {
+    // 214 rows on the largest module: a bar folded into the link would rename
+    // every one of them and a focusable bar would double the tab stops.
+    const lessons = [makeVideoLesson(1, "First")];
+    window.localStorage.setItem(`${PLAYBACK_KEY_PREFIX}${lessons[0]!.id}`, "120");
+    announceStorageChange();
+
+    const { container } = render(
+      <LessonList
+        course={course}
+        module={courseModule}
+        lessons={lessons}
+        currentLessonId={lessons[0]!.id}
+      />,
+    );
+
+    const item = within(container.querySelector("ul")!).getAllByRole("listitem")[0]!;
+    expect(within(item).getByRole("link").textContent).toBe("First");
+    expect(item.querySelectorAll("a, button, [tabindex='0']")).toHaveLength(1);
+    expect(item.querySelector('[role="progressbar"]')).not.toHaveAttribute("tabindex");
   });
 });
