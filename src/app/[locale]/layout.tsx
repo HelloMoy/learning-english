@@ -1,4 +1,5 @@
 import { StructuredData } from "@/components/structured-data/structured-data";
+import { requireSupportedLocale } from "@/i18n/require-supported-locale/require-supported-locale";
 import { websiteSchema } from "@/lib/course-schema/course-schema";
 import { siteUrl } from "@/lib/site-url/site-url";
 
@@ -63,6 +64,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  requireSupportedLocale(locale);
   const home = await getTranslations({ locale, namespace: "HomePage" });
   const metadata = await getTranslations({ locale, namespace: "Metadata" });
   return {

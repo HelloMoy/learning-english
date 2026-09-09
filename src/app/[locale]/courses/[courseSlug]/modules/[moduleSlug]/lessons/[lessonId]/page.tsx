@@ -5,6 +5,7 @@ import { StructuredData } from "@/components/structured-data/structured-data";
 import { LessonId } from "@/domain/entities/ids/ids";
 import { Slug } from "@/domain/entities/slug/slug";
 import type { LessonView as LessonViewData } from "@/domain/use-cases/find-lesson-for-view/find-lesson-for-view";
+import { requireSupportedLocale } from "@/i18n/require-supported-locale/require-supported-locale";
 import { breadcrumbSchema, videoSchema } from "@/lib/course-schema/course-schema";
 import { shareMetadata } from "@/lib/share-metadata/share-metadata";
 import { siteUrl } from "@/lib/site-url/site-url";
@@ -58,6 +59,7 @@ const loadLessonNotes = cache(async (lessonId: ReturnType<typeof LessonId.parse>
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, courseSlug, moduleSlug, lessonId } = await params;
+  requireSupportedLocale(locale);
   const t = await getTranslations({ locale, namespace: "HomePage" });
   const courseSlugResult = Slug.safeParse(courseSlug);
   const moduleSlugResult = Slug.safeParse(moduleSlug);
