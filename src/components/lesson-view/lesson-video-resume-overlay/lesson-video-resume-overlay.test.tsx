@@ -68,6 +68,42 @@ describe("LessonVideoResumeOverlay", () => {
       expect(screen.getByText("resumeFrom 00:57")).toBeInTheDocument();
     });
 
+    /*
+     * On a phone the player is a 16:9 box barely 200px tall and the card no
+     * longer paints its heading or its description — they are there for
+     * assistive technology only. jsdom applies no stylesheet, so which of them
+     * a sighted learner sees is a question only a browser can answer, and
+     * `e2e/lesson-playback-resume.spec.ts` answers it by measuring the card
+     * against the player. What belongs here is the half that CSS must never be
+     * able to take away.
+     */
+    test("WHEN it renders THEN the heading and description are in the document, not conditionally rendered", () => {
+      // The compact form is a stylesheet concern. Dropping either element from
+      // the tree instead would take the dialog's name and description with it.
+      renderOverlay();
+
+      expect(screen.getByRole("heading", { name: "dialogLabel" })).toBeInTheDocument();
+      expect(screen.getByText("description")).toBeInTheDocument();
+    });
+
+    test("WHEN it renders THEN the dialog's name and description resolve to those elements", () => {
+      renderOverlay();
+
+      const dialog = screen.getByRole("dialog");
+      expect(dialog).toHaveAccessibleName("dialogLabel");
+      expect(dialog).toHaveAccessibleDescription("description");
+    });
+
+    test("WHEN it renders THEN the card cannot outgrow the player box", () => {
+      // The last-resort bound: a longer translation scrolls inside the card
+      // rather than spilling past the player, where the lesson wrapper's
+      // `overflow: hidden` would cut it off.
+      const { container } = renderOverlay();
+      const card = container.querySelector("[role='dialog'] > div");
+
+      expect(card).toHaveClass("max-h-full", "overflow-y-auto");
+    });
+
     test("WHEN the position is an arbitrary number of seconds THEN it is formatted, not printed raw", () => {
       const positionSeconds = faker.number.int({ min: 60, max: 3599 });
       const minutes = Math.floor(positionSeconds / 60);

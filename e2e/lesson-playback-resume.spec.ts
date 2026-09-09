@@ -1,9 +1,27 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 import type { VideoLesson } from "@/domain/entities/lesson/lesson";
 
-import { expect, test, type BrowserContext, type Locator, type Page } from "@playwright/test";
+import {
+  devices,
+  expect,
+  test,
+  type BrowserContext,
+  type Locator,
+  type Page,
+} from "@playwright/test";
 
 import { modulesOfCourse } from "./content-seed-fixtures";
+
+/**
+ * Device emulation minus `defaultBrowserType`, which Playwright refuses inside
+ * a `describe` because it would force a new worker. The project selects the
+ * engine; the non-WebKit ones skip.
+ */
+function deviceWithoutEngine(device: (typeof devices)[string]) {
+  const emulation: Record<string, unknown> = { ...device };
+  delete emulation.defaultBrowserType;
+  return emulation;
+}
 
 /**
  * E2E tests for the playback-position resume cycle (capability:
@@ -423,4 +441,45 @@ test.describe("Lesson playback-position resume cycle, on a YouTube lesson", () =
       .poll(() => percentWatched(page), { timeout: 30_000 })
       .toBeGreaterThan(seededPercent);
   });
+});
+
+/**
+ * The overlay is bounded by the player, and on a phone the player is a 16:9
+ * box barely 200px tall. A card laid out for a desktop column overflows it at
+ * both ends, where the lesson wrapper's `overflow: hidden` clips it — the
+ * learner is offered a choice whose heading and first line are gone.
+ *
+ * Spec coverage: "The resume overlay stays fully readable inside the player at
+ * every viewport" (capability `playback-position`).
+ */
+test.describe("The resume overlay on a phone", () => {
+  test.use(deviceWithoutEngine(devices["iPhone 13"]));
+  test.skip(({ browserName }) => browserName !== "webkit", "phone Safari is WebKit");
+
+  for (const width of [390, 320]) {
+    test(`WHEN the overlay opens at ${width}px THEN the card lies inside the player`, async ({
+      page,
+      context,
+    }) => {
+      await page.setViewportSize({ width, height: 664 });
+      await clearStorageFor(context);
+      await seedSavedPosition(context, RESUMABLE_SECONDS);
+
+      await page.goto(lessonUrl("en"));
+      await expect(playerRegion(page)).toBeVisible();
+      await expect
+        .poll(async () => playerRegion(page).getAttribute("data-can-play"), { timeout: 30_000 })
+        .not.toBeNull();
+      await pressPlay(page);
+      await expect(resumeOverlay(page)).toBeVisible({ timeout: 30_000 });
+
+      // The dialog element is the full-player backdrop; the card inside it is
+      // what overflows, so that is what has to be measured.
+      const player = (await playerRegion(page).boundingBox())!;
+      const card = (await resumeOverlay(page).locator(":scope > div").boundingBox())!;
+
+      expect(card.y).toBeGreaterThanOrEqual(player.y);
+      expect(card.y + card.height).toBeLessThanOrEqual(player.y + player.height);
+    });
+  }
 });
