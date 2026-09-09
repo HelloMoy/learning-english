@@ -1,8 +1,11 @@
 "use client";
 
-import { findContinueWatchingAction, type ContinueWatchingPanel } from "@/app/[locale]/actions";
+import type { ContinueWatchingPanel } from "@/app/[locale]/actions";
+import {
+  resolveContinueWatchingPanel,
+  type ResolveContinueWatching,
+} from "@/app/[locale]/resolve-continue-watching";
 import { Eyebrow } from "@/components/eyebrow/eyebrow";
-import type { ContinueWatchingLocation } from "@/domain/entities/continue-watching-location/continue-watching-location";
 import { LessonId } from "@/domain/entities/ids/ids";
 import type { ContinueWatchingRepository } from "@/domain/ports/continue-watching-repository/continue-watching-repository";
 import type { PlaybackPositionRepository } from "@/domain/ports/playback-position-repository/playback-position-repository";
@@ -18,21 +21,6 @@ import { useEffect, useState } from "react";
 /** The card's own atmosphere, matching `ModuleShowcaseCard`'s glow. */
 const PANEL_GLOW =
   "radial-gradient(90% 160% at 4% 0%, color-mix(in oklab, var(--glow) 34%, var(--background)), var(--background) 68%)";
-
-/**
- * Calls the Server Action and unwraps its envelope.
- *
- * `next-safe-action` answers with `data`, `validationErrors` or
- * `serverError`, and the panel's answer to all three failures is the same:
- * render nothing. Collapsing them here keeps that shape out of the component
- * and lets a test inject a plain function.
- */
-const resolveThroughAction = async (
-  location: ContinueWatchingLocation,
-): Promise<ContinueWatchingPanel | null> => {
-  const result = await findContinueWatchingAction(location);
-  return result?.data ?? null;
-};
 
 /** How far into the lesson the learner is, as a whole percentage. */
 type Progress = {
@@ -69,11 +57,11 @@ type Progress = {
  * @param positions - Overrides the playback store; tests inject a fake
  */
 export function ContinueWatching({
-  resolve = resolveThroughAction,
+  resolve = resolveContinueWatchingPanel,
   continueWatching,
   positions,
 }: {
-  resolve?: (location: ContinueWatchingLocation) => Promise<ContinueWatchingPanel | null>;
+  resolve?: ResolveContinueWatching;
   continueWatching?: ContinueWatchingRepository;
   positions?: PlaybackPositionRepository;
 }) {

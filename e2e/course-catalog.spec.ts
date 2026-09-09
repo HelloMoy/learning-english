@@ -87,7 +87,7 @@ test.describe("Course catalog navigation", () => {
     });
     await expect(moduleHeading).toBeVisible();
 
-    const firstLessonLink = page.getByRole("link", { name: /^open$/i }).first();
+    const firstLessonLink = page.getByRole("link", { name: /^watch video$/i }).first();
     await expect(firstLessonLink).toHaveAttribute(
       "href",
       lessonUrl("en", COURSE_SLUG, FIRST_MODULE.slug, FIRST_LESSON.id),

@@ -1,9 +1,26 @@
-# Capability: cinema-module-overview
+## ADDED Requirements
 
-## Purpose
+### Requirement: A video row is clickable across its whole area
 
-Define the Immersion Cinema presentation of the module overview route (`/[locale]/courses/[courseSlug]/modules/[moduleSlug]`). The module is presented as a video list: a header carrying the back link, the module's video count and ordinal, and its title, followed by an ordered list of video rows — one per lesson — each showing a thumbnail/play affordance, a "Video N" eyebrow, the lesson title, duration when known, and a trailing action, naming the video it opens, that links to the Lesson Page.
-## Requirements
+A video row is one object — a full-width band holding one lesson's thumbnail, ordinal, title, progress and duration — so a pointer landing anywhere in the row SHALL navigate to that lesson's page, not only a pointer landing on the trailing action.
+
+The extended hit area SHALL be an extension of that trailing action, not a new control. The row SHALL therefore continue to expose exactly one announced and tabbable link, and its accessible name SHALL remain the action's own label rather than the row's whole text.
+
+The row SHALL show a pointer-driven hover treatment, so the area that responds to a click is the area that looks like it will.
+
+#### Scenario: Clicking the row body opens the lesson
+- **WHEN** the user clicks the row's title, its ordinal, its progress bar or its duration
+- **THEN** they navigate to that row's lesson for the active locale — the same destination as the row's trailing action
+
+#### Scenario: The row still exposes exactly one control
+- **WHEN** a screen reader or keyboard user traverses a video row
+- **THEN** exactly one link is announced and reachable for that row, as before the hit area was extended, and the row itself is not announced as a link
+
+#### Scenario: The row shows it is clickable
+- **WHEN** the pointer moves over any part of a row
+- **THEN** the row shows a hover treatment covering the whole band rather than only under the trailing action
+
+## MODIFIED Requirements
 
 ### Requirement: Video rows mark lessons the learner has already completed
 
@@ -57,6 +74,7 @@ row with nothing watched SHALL render no bar.
 #### Scenario: A reading lesson's row carries no bar
 - **WHEN** a row renders for a lesson with no duration
 - **THEN** it shows no progress bar, and its completion mark still reflects the manual button
+
 ### Requirement: Module overview renders as a video list
 
 The module overview (`/[locale]/courses/[courseSlug]/modules/[moduleSlug]`) SHALL present a back link to the course, an eyebrow stating how many videos the module holds and its ordinal (`N videos · Lesson NN`), the module title, and an ordered list of video rows. Each row SHALL show a thumbnail/play affordance, a `Video N` eyebrow, the lesson title, its duration for video lessons, and a trailing action linking to the Lesson Page. All copy SHALL be localized and links SHALL be locale-aware.
@@ -109,6 +127,7 @@ Each row's thumbnail SHALL render the lesson's `poster` artwork when the lesson 
 #### Scenario: Retired vocabulary is absent
 - **WHEN** the module overview renders in any supported locale
 - **THEN** no row or eyebrow is labelled with an episode or season term
+
 ### Requirement: Video row titles stay legible on narrow viewports
 
 In the module overview's video list, a lesson title too long for the space available SHALL remain legible rather than being cut to a prefix. On narrow viewports the title SHALL wrap onto as many lines as it needs; the single-line treatment is reserved for rows wide enough to show a title that distinguishes it from its neighbours.
@@ -133,23 +152,3 @@ the completion mark, and the trailing action stay as they are; the row simply gr
 #### Scenario: The row keeps its structure when a title wraps
 - **WHEN** a title wraps onto several lines
 - **THEN** the row still shows its `Video N` eyebrow, its completion mark when the lesson is complete, and its trailing action, and that action remains fully within the viewport
-
-### Requirement: A video row is clickable across its whole area
-
-A video row is one object — a full-width band holding one lesson's thumbnail, ordinal, title, progress and duration — so a pointer landing anywhere in the row SHALL navigate to that lesson's page, not only a pointer landing on the trailing action.
-
-The extended hit area SHALL be an extension of that trailing action, not a new control. The row SHALL therefore continue to expose exactly one announced and tabbable link, and its accessible name SHALL remain the action's own label rather than the row's whole text.
-
-The row SHALL show a pointer-driven hover treatment, so the area that responds to a click is the area that looks like it will.
-
-#### Scenario: Clicking the row body opens the lesson
-- **WHEN** the user clicks the row's title, its ordinal, its progress bar or its duration
-- **THEN** they navigate to that row's lesson for the active locale — the same destination as the row's trailing action
-
-#### Scenario: The row still exposes exactly one control
-- **WHEN** a screen reader or keyboard user traverses a video row
-- **THEN** exactly one link is announced and reachable for that row, as before the hit area was extended, and the row itself is not announced as a link
-
-#### Scenario: The row shows it is clickable
-- **WHEN** the pointer moves over any part of a row
-- **THEN** the row shows a hover treatment covering the whole band rather than only under the trailing action

@@ -253,13 +253,16 @@ test.describe("Mobile viewport fit — module list titles at 320px", () => {
     expect(second).toMatch(/Exercise 2 Pronunciation Step By Step Lesson/);
   });
 
-  test("WHEN a title wraps THEN its row keeps the Open action within the viewport", async ({
+  test("WHEN a title wraps THEN its row keeps the watch-video action within the viewport", async ({
     page,
   }) => {
     await gotoRendered(page, `/en/courses/${COURSE_SLUG}/modules/${SHARED_PREFIX_MODULE.slug}`);
 
     const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
-    const box = (await page.getByRole("link", { name: /open/i }).first().boundingBox())!;
+    const box = (await page
+      .getByRole("link", { name: /watch video/i })
+      .first()
+      .boundingBox())!;
 
     expect(box.x + box.width).toBeLessThanOrEqual(clientWidth);
   });

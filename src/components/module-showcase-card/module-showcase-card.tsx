@@ -23,6 +23,21 @@ const TILE_GLOW =
   "radial-gradient(120% 120% at 30% 12%, color-mix(in oklab, var(--glow) 26%, var(--background)), var(--background) 72%)";
 
 /**
+ * Extends the call to action's pointer target to the whole panel without
+ * adding a control: the box is the link's own `::after`, so the DOM, the
+ * accessibility tree and the tab order are untouched.
+ *
+ * `z-10` is what lifts it over the deck. The deck's cards carry explicit
+ * `zIndex` values, but they sit inside their own stacking context — the
+ * container establishes one with `perspective` — so one step above that
+ * container clears all of them at once.
+ *
+ * Anything that must stay clickable through this overlay needs `relative
+ * z-20`.
+ */
+const STRETCHED_HIT_AREA = "after:absolute after:inset-0 after:z-10 after:content-['']";
+
+/**
  * The receding gallery.
  *
  * Cards are landscape — the posters' own orientation, so nothing is cropped
@@ -124,13 +139,22 @@ const DECK = {
  * six links per deck across ten modules would add sixty tab stops to reach a
  * destination already on offer; a card that jumped straight to one lesson
  * would also re-fragment the "this is a container" model this component
- * exists to establish. They carry no hover or pointer affordance, so they do
- * not advertise interactivity they lack.
+ * exists to establish.
  *
  * The card itself is a plain container with two links to the same
  * destination — the heading and the call to action — rather than one wrapping
  * link, so its accessible name stays the module title instead of swallowing
  * the count line, the button and every lesson in the deck.
+ *
+ * ## Where a click lands
+ *
+ * The whole panel is a pointer target for the module overview, because it
+ * looks like one object and a click on the artwork should do what a click on
+ * the button does. That target is the call to action's own stretched
+ * `::after`: it changes nothing about what is announced or tabbed to, which is
+ * exactly why the deck can be covered by it while staying hidden and
+ * link-free. Any interactive element added to this card later must sit above
+ * the overlay with `relative z-20` or it will be unreachable by pointer.
  */
 export function ModuleShowcaseCard({
   course,
@@ -161,10 +185,16 @@ export function ModuleShowcaseCard({
 
       <div
         data-testid="module-showcase-panel"
-        className="flex flex-col gap-8 overflow-hidden rounded-2xl border border-border p-6 lg:flex-row lg:items-center lg:gap-10 lg:p-8"
+        className="relative flex flex-col gap-8 overflow-hidden rounded-2xl border border-border p-6 transition-colors hover:border-gold/40 lg:flex-row lg:items-center lg:gap-10 lg:p-8"
         style={{ background: CARD_GLOW }}
       >
-        <div className="relative flex flex-col gap-4 lg:w-[30%] lg:shrink-0">
+        {/*
+          Deliberately not `relative`: the call to action's stretched hit area
+          resolves against the nearest positioned ancestor, and a positioned
+          column would trap it in this third of the card instead of covering
+          the panel. Nothing here is absolutely positioned, so nothing needs it.
+        */}
+        <div className="flex flex-col gap-4 lg:w-[30%] lg:shrink-0">
           <h3 className="font-sans text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
             <Link
               href={href as never}
@@ -189,7 +219,10 @@ export function ModuleShowcaseCard({
           <Link
             href={href as never}
             data-testid="module-showcase-cta"
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-primary px-6 text-sm font-bold tracking-wide text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none sm:w-auto sm:self-start"
+            className={cn(
+              "inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-primary px-6 text-sm font-bold tracking-wide text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none sm:w-auto sm:self-start",
+              STRETCHED_HIT_AREA,
+            )}
           >
             {t("viewVideos")}
           </Link>

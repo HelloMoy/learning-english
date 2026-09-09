@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  resolveContinueWatchingPanel,
+  type ResolveContinueWatching,
+} from "@/app/[locale]/resolve-continue-watching";
 import { CourseLevelCard } from "@/components/course-level-card/course-level-card";
 import type { Course } from "@/domain/entities/course/course";
 import type { Module } from "@/domain/entities/module/module";
@@ -15,6 +19,12 @@ import { useEffect, useState } from "react";
 export type CourseLevel = {
   course: Course;
   leadingModules: Module[];
+};
+
+/** The course being continued, and the lesson its card resumes. */
+type CourseInProgress = {
+  courseSlug: string;
+  lessonHref: string;
 };
 
 /**
@@ -37,35 +47,55 @@ export type CourseLevel = {
  * progress query is needed, and a record pointing at a retired course simply
  * matches nothing.
  *
+ * ## Why the ladder resolves rather than trusting the record
+ *
+ * The card's primary action now resumes the stored lesson, so the ladder needs
+ * an href it can stand behind. Building one from the raw record would take a
+ * single call to `lessonPath`, but a record naming a lesson that has since
+ * been removed would turn a link that always worked into a 404. Resolving
+ * through the same Server Action the `Continue watching` panel uses answers
+ * `null` for exactly those records, and the ladder then reads as not started —
+ * which is the truer account of a dead record than an in-progress badge.
+ *
  * @param continueWatching - Overrides the storage adapter; tests inject a
  *                           fake here instead of driving `window.localStorage`
+ * @param resolve - Overrides the resolver; defaults to the Server Action.
+ *                  Tests inject a plain function here
  */
 export function CourseLadder({
   levels,
   continueWatching,
+  resolve = resolveContinueWatchingPanel,
 }: {
   levels: ReadonlyArray<CourseLevel>;
   continueWatching?: ContinueWatchingRepository;
+  resolve?: ResolveContinueWatching;
 }) {
   const t = useTranslations("Components.CourseLadder");
   const isHydrated = useIsHydrated();
   const locations = useContinueWatching(continueWatching);
-  const [inProgressCourseSlug, setInProgressCourseSlug] = useState<string | null>(null);
+  const [inProgress, setInProgress] = useState<CourseInProgress | null>(null);
 
   useEffect(() => {
     let isCurrent = true;
-    void locations.get().then((location) => {
+    void locations.get().then(async (location) => {
+      if (!location || !isCurrent) {
+        return;
+      }
+      const panel = await resolve(location);
       if (isCurrent) {
-        setInProgressCourseSlug(location?.courseSlug ?? null);
+        setInProgress(
+          panel ? { courseSlug: location.courseSlug, lessonHref: panel.lessonHref } : null,
+        );
       }
     });
     return () => {
       isCurrent = false;
     };
-  }, [locations]);
+  }, [locations, resolve]);
 
-  const isInProgress = (course: Course): boolean =>
-    isHydrated && inProgressCourseSlug === course.slug;
+  const resumeHrefFor = (course: Course): string | null =>
+    isHydrated && inProgress?.courseSlug === course.slug ? inProgress.lessonHref : null;
 
   // A third column only once there is a third course. Fixing the grid at
   // three would leave a visible hole beside a two-course catalog — the empty
@@ -107,7 +137,7 @@ export function CourseLadder({
               data-testid="course-ladder-node"
               className={cn(
                 "flex size-10 shrink-0 items-center justify-center rounded-full border text-xs font-extrabold tabular-nums",
-                isInProgress(level.course)
+                resumeHrefFor(level.course)
                   ? "border-gold bg-gold text-[color:var(--primary-foreground)] shadow-[0_2px_20px_color-mix(in_oklab,var(--glow)_45%,transparent)]"
                   : "border-border bg-card text-muted-foreground",
               )}
@@ -129,7 +159,7 @@ export function CourseLadder({
             <CourseLevelCard
               course={level.course}
               leadingModules={level.leadingModules}
-              state={isInProgress(level.course) ? "in-progress" : "not-started"}
+              resumeHref={resumeHrefFor(level.course)}
             />
           </li>
         ))}

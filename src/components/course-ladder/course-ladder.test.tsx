@@ -1,3 +1,4 @@
+import type { ContinueWatchingPanel } from "@/app/[locale]/actions";
 import { ContinueWatchingLocation } from "@/domain/entities/continue-watching-location/continue-watching-location";
 import { Course } from "@/domain/entities/course/course";
 import { Module } from "@/domain/entities/module/module";
@@ -56,18 +57,44 @@ const makeRepository = (stored: ContinueWatchingLocation | null): ContinueWatchi
   set: async () => {},
 });
 
+const LESSON_ID = "33333333-3333-4333-8333-333333333333";
+
 const locationIn = (course: Course) =>
   ContinueWatchingLocation.parse({
     courseSlug: course.slug,
     moduleSlug: "module-1",
-    lessonId: "33333333-3333-4333-8333-333333333333",
+    lessonId: LESSON_ID,
   });
 
-const renderLadder = (stored: ContinueWatchingLocation | null = null) =>
+const lessonHrefIn = (course: Course) =>
+  `/courses/${course.slug}/modules/module-1/lessons/${LESSON_ID}`;
+
+/**
+ * A resolver over one fixed answer, standing in for the Server Action. The
+ * ladder resolves rather than trusting the raw record, so every render needs
+ * one — the default would reach for the network.
+ */
+const makeResolver =
+  (panel: ContinueWatchingPanel | null) => async (): Promise<ContinueWatchingPanel | null> =>
+    panel;
+
+const panelFor = (course: Course): ContinueWatchingPanel => ({
+  courseTitle: course.title,
+  moduleTitle: "Module 1",
+  lessonTitle: "A lesson",
+  lessonHref: lessonHrefIn(course),
+  durationSeconds: 600,
+});
+
+const renderLadder = (
+  stored: ContinueWatchingLocation | null = null,
+  panel: ContinueWatchingPanel | null = stored ? panelFor(basic) : null,
+) =>
   render(
     <CourseLadder
       levels={levels}
       continueWatching={makeRepository(stored)}
+      resolve={makeResolver(panel)}
     />,
   );
 
@@ -106,6 +133,7 @@ describe("CourseLadder", () => {
       <CourseLadder
         levels={[levels[0]!]}
         continueWatching={makeRepository(null)}
+        resolve={makeResolver(null)}
       />,
     );
     expect(screen.getAllByTestId("course-level-card")).toHaveLength(1);
@@ -126,7 +154,7 @@ describe("CourseLadder", () => {
 
   describe("GIVEN a record pointing at the second course", () => {
     test("WHEN the record has been read THEN only that card is marked", async () => {
-      renderLadder(locationIn(advanced));
+      renderLadder(locationIn(advanced), panelFor(advanced));
 
       await waitFor(() => {
         const cards = screen.getAllByTestId("course-level-card");
@@ -139,12 +167,56 @@ describe("CourseLadder", () => {
     });
 
     test("WHEN the record has been read THEN that card invites continuing", async () => {
-      renderLadder(locationIn(advanced));
+      renderLadder(locationIn(advanced), panelFor(advanced));
       await waitFor(() => {
         const ctas = screen.getAllByTestId("course-level-cta");
         expect(ctas[1]).toHaveTextContent(card("continueCourse"));
         expect(ctas[0]).toHaveTextContent(card("startCourse"));
       });
+    });
+
+    test("WHEN the record has been read THEN that card resumes the resolved lesson", async () => {
+      renderLadder(locationIn(advanced), panelFor(advanced));
+      await waitFor(() => {
+        expect(screen.getAllByTestId("course-level-cta")[1]).toHaveAttribute(
+          "href",
+          lessonHrefIn(advanced),
+        );
+      });
+      // The other card never learns of a lesson to resume, so it keeps
+      // pointing at its own course overview.
+      expect(screen.getAllByTestId("course-level-cta")[0]).toHaveAttribute(
+        "href",
+        `/courses/${basic.slug}`,
+      );
+    });
+
+    test("WHEN the record has been read THEN only that card offers the second action", async () => {
+      renderLadder(locationIn(advanced), panelFor(advanced));
+      await waitFor(() => {
+        expect(screen.getAllByTestId("course-level-secondary-cta")).toHaveLength(1);
+      });
+      expect(screen.getByTestId("course-level-secondary-cta")).toHaveAttribute(
+        "href",
+        `/courses/${advanced.slug}`,
+      );
+    });
+  });
+
+  describe("GIVEN a record the server can no longer resolve", () => {
+    test("WHEN rendered THEN no card is marked and none offers to resume", async () => {
+      // The lesson was renamed away or removed while this device still held a
+      // record naming it. Marking the card would offer a resume with nowhere
+      // to resume to.
+      renderLadder(locationIn(advanced), null);
+
+      await waitFor(() => {
+        expect(screen.getAllByTestId("course-level-card")).toHaveLength(2);
+      });
+      for (const element of screen.getAllByTestId("course-level-card")) {
+        expect(element).toHaveAttribute("data-state", "not-started");
+      }
+      expect(screen.queryByTestId("course-level-secondary-cta")).toBeNull();
     });
   });
 
@@ -155,7 +227,7 @@ describe("CourseLadder", () => {
         moduleSlug: "module-1",
         lessonId: "33333333-3333-4333-8333-333333333333",
       });
-      renderLadder(stale);
+      renderLadder(stale, panelFor(basic));
 
       await waitFor(() => {
         expect(screen.getAllByTestId("course-level-card")).toHaveLength(2);
@@ -170,7 +242,7 @@ describe("CourseLadder", () => {
     test("WHEN first painted THEN every card reads as not started", () => {
       // The honest pre-hydration state. Marking a card before the record is
       // known would flash a claim the markup cannot justify.
-      renderLadder(locationIn(advanced));
+      renderLadder(locationIn(advanced), panelFor(advanced));
       for (const element of screen.getAllByTestId("course-level-card")) {
         expect(element).toHaveAttribute("data-state", "not-started");
       }

@@ -7,6 +7,7 @@ import type { Lesson } from "@/domain/entities/lesson/lesson";
 import type { Module } from "@/domain/entities/module/module";
 import { courseOverviewPath, lessonPath } from "@/i18n/lesson-routes";
 import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/utils/utils";
 
 import { Play } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -14,6 +15,14 @@ import Image from "next/image";
 
 const THUMB_GLOW =
   "radial-gradient(120% 120% at 30% 12%, color-mix(in oklab, var(--glow) 26%, var(--background)), var(--background) 72%)";
+
+/**
+ * Extends the row action's pointer target to the whole row without adding a
+ * control: the box is the link's own `::after`, so the DOM, the accessibility
+ * tree and the tab order are untouched. Anything that must stay clickable
+ * through it needs `relative z-20`.
+ */
+const STRETCHED_HIT_AREA = "after:absolute after:inset-0 after:z-10 after:content-['']";
 
 /**
  * Convert a video lesson duration to a one-line minute label. Reading
@@ -28,7 +37,7 @@ function lessonDurationMinutes(lesson: Lesson): number | null {
 /**
  * The module overview as a video list: a back link to the course, a title
  * header, and one row per lesson (thumbnail, "Video N" eyebrow,
- * title, duration, and an "Open" action linking to the Lesson Page).
+ * title, duration, and a watch-video action linking to the Lesson Page).
  *
  * Rows used to be labelled "Episode N". That term denoted a Module on the
  * course overview and a Lesson here, so a learner who opened "episode 3"
@@ -38,7 +47,7 @@ function lessonDurationMinutes(lesson: Lesson): number | null {
  * @remarks
  * A row's central column carries the lesson's watch progress beneath its
  * title: the row's open middle is the only place a bar fits without crowding
- * the eyebrow, the duration or the "Open" action. Both that bar and the
+ * the eyebrow, the duration or the row's action. Both that bar and the
  * completion mark are client islands — progress lives in `localStorage`,
  * which the server cannot read — so the rest of the list stays
  * server-rendered, and a lesson with nothing watched renders neither.
@@ -49,7 +58,7 @@ function lessonDurationMinutes(lesson: Lesson): number | null {
  * image, so a slow or missing JPEG degrades to the placeholder instead of
  * a broken-image icon.
  *
- * The thumbnail links to the same lesson as the row's "Open" action, but
+ * The thumbnail links to the same lesson as the row's action, but
  * is deliberately pointer-only: `aria-hidden` plus `tabIndex={-1}` keep it
  * out of the accessibility tree and the tab order. It duplicates a
  * destination the row already exposes, so announcing it would read every
@@ -57,6 +66,14 @@ function lessonDurationMinutes(lesson: Lesson): number | null {
  * module. If the row is ever restructured so the thumbnail becomes the
  * primary control, that treatment and the image's empty `alt` must both
  * flip to a real accessible name.
+ *
+ * ## Where a click lands
+ *
+ * The whole row is a pointer target for its lesson: the row reads as one
+ * object, so a click on the title should do what a click on the action does.
+ * That target is the action's own stretched `::after` — no wrapping link, no
+ * extra control, no extra tab stop — and the row lights up on hover so the
+ * area that responds to a click is the area that looks like it will.
  */
 export function ModuleOverview({
   course,
@@ -113,7 +130,7 @@ export function ModuleOverview({
             return (
               <li
                 key={lesson.id}
-                className="flex items-center gap-4 border-b border-border py-4 first:border-t"
+                className="relative flex items-center gap-4 border-b border-border py-4 transition-colors first:border-t hover:bg-foreground/5"
               >
                 <Link
                   href={lessonPath(course, module, lesson) as never}
@@ -164,13 +181,16 @@ export function ModuleOverview({
                 ) : null}
                 <Link
                   href={lessonPath(course, module, lesson) as never}
-                  className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-lg border border-border bg-card px-4 text-sm font-semibold text-card-foreground transition-colors hover:border-gold/50 hover:text-gold focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                  className={cn(
+                    "inline-flex min-h-10 shrink-0 items-center gap-2 rounded-lg border border-border bg-card px-4 text-sm font-semibold text-card-foreground transition-colors hover:border-gold/50 hover:text-gold focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
+                    STRETCHED_HIT_AREA,
+                  )}
                 >
                   <Play
                     className="size-3.5"
                     fill="currentColor"
                   />
-                  {t("open")}
+                  {t("watchVideo")}
                 </Link>
               </li>
             );

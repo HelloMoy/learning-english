@@ -49,16 +49,19 @@ const buildModule = (sequence: number) =>
 
 const leadingModules = [1, 2, 3].map(buildModule);
 
+const overviewHref = "/courses/advanced-intermediate-course";
+const resumeHref = "/courses/advanced-intermediate-course/modules/module-1/lessons/lesson-1";
+
 const renderCard = (props?: {
   course?: Course;
   leadingModules?: Module[];
-  state?: "in-progress" | "not-started";
+  resumeHref?: string | null;
 }) =>
   render(
     <CourseLevelCard
       course={props?.course ?? course}
       leadingModules={props?.leadingModules ?? leadingModules}
-      state={props?.state ?? "not-started"}
+      resumeHref={props?.resumeHref ?? null}
     />,
   );
 
@@ -80,10 +83,7 @@ describe("CourseLevelCard", () => {
   test("names the course and links its heading to the course overview", () => {
     renderCard();
     const heading = screen.getByRole("heading", { name: course.title });
-    expect(within(heading).getByRole("link")).toHaveAttribute(
-      "href",
-      "/courses/advanced-intermediate-course",
-    );
+    expect(within(heading).getByRole("link")).toHaveAttribute("href", overviewHref);
   });
 
   test("shows the course description", () => {
@@ -129,24 +129,63 @@ describe("CourseLevelCard", () => {
 
   describe("GIVEN the course has not been started", () => {
     test("WHEN rendered THEN it invites the learner to start it", () => {
-      renderCard({ state: "not-started" });
+      renderCard({ resumeHref: null });
       expect(screen.getByTestId("course-level-state")).toHaveTextContent(card("notStarted"));
       const cta = screen.getByTestId("course-level-cta");
       expect(cta).toHaveTextContent(card("startCourse"));
-      expect(cta).toHaveAttribute("href", "/courses/advanced-intermediate-course");
+      expect(cta).toHaveAttribute("href", overviewHref);
+    });
+
+    test("WHEN rendered THEN it offers that one way in and no second action", () => {
+      renderCard({ resumeHref: null });
+      expect(screen.queryByTestId("course-level-secondary-cta")).toBeNull();
     });
   });
 
   describe("GIVEN the course is the one being continued", () => {
     test("WHEN rendered THEN it is marked and invites the learner to continue", () => {
-      renderCard({ state: "in-progress" });
+      renderCard({ resumeHref });
       expect(screen.getByTestId("course-level-state")).toHaveTextContent(card("inProgress"));
       expect(screen.getByTestId("course-level-cta")).toHaveTextContent(card("continueCourse"));
     });
 
+    test("WHEN rendered THEN continuing goes to the lesson, not the course overview", () => {
+      renderCard({ resumeHref });
+      expect(screen.getByTestId("course-level-cta")).toHaveAttribute("href", resumeHref);
+    });
+
+    test("WHEN rendered THEN a second action still reaches the course overview", () => {
+      renderCard({ resumeHref });
+      const secondary = screen.getByTestId("course-level-secondary-cta");
+      expect(secondary).toHaveTextContent(card("viewCourseContent"));
+      expect(secondary).toHaveAttribute("href", overviewHref);
+    });
+
     test("WHEN rendered THEN the card is flagged for styling and assertions", () => {
-      renderCard({ state: "in-progress" });
+      renderCard({ resumeHref });
       expect(screen.getByTestId("course-level-card")).toHaveAttribute("data-state", "in-progress");
+    });
+  });
+
+  describe("GIVEN the card's body is clickable across its whole area", () => {
+    /**
+     * The body's hit area is a stretched pseudo-element on the title link, so
+     * it must not show up as a control. These two tests are the regression
+     * guard: a future author reaching for a wrapping `<Link>` fails them.
+     */
+    test("WHEN not started THEN the title and the one action are its only links", () => {
+      renderCard({ resumeHref: null });
+      expect(screen.getAllByRole("link")).toHaveLength(2);
+    });
+
+    test("WHEN in progress THEN the title and its two actions are its only links", () => {
+      renderCard({ resumeHref });
+      expect(screen.getAllByRole("link")).toHaveLength(3);
+    });
+
+    test("WHEN rendered THEN the title link is named by the course alone", () => {
+      renderCard({ resumeHref });
+      expect(screen.getByRole("link", { name: course.title })).toBeInTheDocument();
     });
   });
 });
