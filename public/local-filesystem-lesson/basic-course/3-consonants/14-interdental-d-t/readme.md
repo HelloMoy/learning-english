@@ -35,3 +35,21 @@ When a /t/ or /d/ is followed by a _th_ (/θ/ or /ð/), the tongue doesn't wait:
 > ⚠️ **The typical Spanish-speaker mistake:** pronouncing each word separately and resetting the tongue in between. That breaks the link, and it's exactly what makes a Spanish speaker sound choppy at speed.
 
 **By the end you'll be able to:** move your tongue forward ahead of the _th_ and link _at the_ and _and the_ in one movement.
+
+## 🇧🇷 Português
+
+### T e D interdentais: quando a língua se adianta pela palavra seguinte
+
+Quando um /t/ ou um /d/ vem seguido de um _th_ (/θ/ ou /ð/), a língua não espera: ela se adianta **até os dentes** já na primeira consoante. É um ajuste automático que os nativos fazem sem pensar, e é uma das coisas que fazem a fala rápida soar conectada em vez de picotada.
+
+**Como se produz**
+
+- 👄 **Boca:** entreaberta, sem mudar de posição entre as duas palavras.
+- 👅 **Língua:** o /t/ ou /d/ é articulado **contra os dentes**, não no alvéolo.
+- 🔊 **Voz:** sonora em /d̪/, surda em /t̪/ — igual às versões normais.
+
+**Você ouve em:** _at the_ · _and the_ · _put those_ · _read this_ · _get there_
+
+> ⚠️ **O erro típico de quem fala português:** pronunciar cada palavra separada e recolocar a língua entre uma e outra. Isso corta a ligação e é justamente o que faz a fala rápida sair picotada.
+
+**No fim você vai conseguir:** adiantar a língua antes do _th_ e ligar _at the_ e _and the_ num só movimento.

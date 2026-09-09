@@ -35,3 +35,21 @@ The /θ/ is made by pushing your tongue slightly between your teeth and blowing.
 > ⚠️ **The typical Spanish-speaker mistake:** swapping in /t/ or /s/. _Think_ pronounced _tink_ or _sink_ is the most frequent error — and _sink_ is a different word.
 
 **By the end you'll be able to:** push the tongue out far enough, and keep _think / sink_ and _thin / tin_ apart.
+
+## 🇧🇷 Português
+
+### O /θ/: a língua entre os dentes, sem voz
+
+O /θ/ é produzido colocando a ponta da língua entre os dentes e soprando. É **surdo**: não há vibração. O português não tem esse som em nenhuma variedade, então ele precisa ser construído do zero — e a boa notícia é que é um dos poucos em que dá para conferir no espelho se está certo.
+
+**Como se produz**
+
+- 👄 **Boca:** entreaberta, sem tensão nos lábios.
+- 👅 **Língua:** a ponta aparece **entre os dentes**, suavemente.
+- 🔊 **Voz:** **surda** — só ar passando por cima da língua.
+
+**Você ouve em:** _think_ · _thanks_ · _thumb_ · _math_ · _nothing_
+
+> ⚠️ **O erro típico de quem fala português:** trocá-lo por /t/ ou por /s/. _Think_ pronunciado _tink_ ou _sink_ é o erro mais frequente, e _sink_ ainda por cima é outra palavra.
+
+**No fim você vai conseguir:** colocar a língua para fora o suficiente e separar _think / sink_ e _thin / tin_.

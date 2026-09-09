@@ -4,7 +4,7 @@ import path from "node:path";
 import { faker } from "@faker-js/faker";
 import { describe, expect, test } from "vitest";
 
-import { splitBilingualNotes } from "../../src/components/lesson-view/split-bilingual-notes/split-bilingual-notes";
+import advancedCourse from "../../src/content/advanced-intermediate-course.json";
 import basicCourse from "../../src/content/basic-course.json";
 import { mirrorViolations, notesShapeViolations, type NotesEntry } from "./verify-notes-shape";
 
@@ -15,10 +15,16 @@ function languageSection(heading: string): string {
   );
 }
 
-function bilingualBody(): string {
-  return ["# Title", "", languageSection("🇪🇸 Español"), "", languageSection("🇺🇸 English")].join(
-    "\n",
-  );
+function trilingualBody(): string {
+  return [
+    "# Title",
+    "",
+    languageSection("🇪🇸 Español"),
+    "",
+    languageSection("🇺🇸 English"),
+    "",
+    languageSection("🇧🇷 Português"),
+  ].join("\n");
 }
 
 function entry(markdown: string) {
@@ -26,8 +32,8 @@ function entry(markdown: string) {
 }
 
 describe("notesShapeViolations", () => {
-  test("WHEN a body carries both language sections with sub-headings THEN nothing is reported", () => {
-    expect(notesShapeViolations(entry(bilingualBody()))).toEqual([]);
+  test("WHEN a body carries one conformant section per locale THEN nothing is reported", () => {
+    expect(notesShapeViolations(entry(trilingualBody()))).toEqual([]);
   });
 
   test("WHEN a body carries a single language section THEN nothing is reported", () => {
@@ -82,10 +88,46 @@ describe("notesShapeViolations", () => {
     ]);
   });
 
+  test("WHEN the Portuguese section has no sub-heading THEN that section is reported", () => {
+    const body = [
+      "# Title",
+      "",
+      languageSection("🇪🇸 Español"),
+      "",
+      languageSection("🇺🇸 English"),
+      "",
+      "## 🇧🇷 Português",
+      "",
+      faker.lorem.paragraph(),
+    ].join("\n");
+
+    expect(notesShapeViolations(entry(body))).toEqual([
+      'basic-course/module/lesson/readme.md: section "🇧🇷 Português" has no ### sub-heading',
+    ]);
+  });
+
+  test("WHEN the Portuguese section holds no prose THEN that section is reported", () => {
+    const body = [
+      "# Title",
+      "",
+      languageSection("Español"),
+      "",
+      languageSection("English"),
+      "",
+      "## Português",
+      "",
+      "### Só um título",
+    ].join("\n");
+
+    expect(notesShapeViolations(entry(body))).toEqual([
+      'basic-course/module/lesson/readme.md: section "Português" has no prose below its sub-heading',
+    ]);
+  });
+
   test("WHEN several files are non-conformant THEN each is reported, in the order given", () => {
     const entries = [
       { path: "a/readme.md", markdown: "# A\n" },
-      { path: "b/readme.md", markdown: bilingualBody() },
+      { path: "b/readme.md", markdown: trilingualBody() },
       { path: "c/readme.md", markdown: `# C\n\n${faker.lorem.paragraph()}` },
     ];
 
@@ -97,22 +139,44 @@ describe("notesShapeViolations", () => {
 });
 
 describe("mirrorViolations", () => {
-  function bilingual(es: string, en: string): NotesEntry[] {
+  function trilingual(es: string, en: string, pt: string): NotesEntry[] {
     return [
-      { path: "lesson/readme.md", markdown: `# T\n\n## Español\n\n${es}\n\n## English\n\n${en}` },
+      {
+        path: "lesson/readme.md",
+        markdown: `# T\n\n## Español\n\n${es}\n\n## English\n\n${en}\n\n## Português\n\n${pt}`,
+      },
     ];
   }
 
   const SPANISH = "### Sub\n\nUn párrafo.\n\n- uno\n- dos\n\n**Lo oyes en:** *cat* · *bat*";
   const ENGLISH = "### Sub\n\nA paragraph.\n\n- one\n- two\n\n**You hear it in:** *cat* · *bat*";
+  const PORTUGUESE = "### Sub\n\nUm parágrafo.\n\n- um\n- dois\n\n**Você ouve em:** *cat* · *bat*";
 
-  test("WHEN both sections share a skeleton and examples THEN nothing is reported", () => {
-    expect(mirrorViolations(bilingual(SPANISH, ENGLISH))).toEqual([]);
+  test("WHEN all three sections share a skeleton and examples THEN nothing is reported", () => {
+    expect(mirrorViolations(trilingual(SPANISH, ENGLISH, PORTUGUESE))).toEqual([]);
   });
 
   test("WHEN one section has an extra bullet THEN the skeleton mismatch is reported", () => {
     const violations = mirrorViolations(
-      bilingual(SPANISH.replace("- dos", "- dos\n\n- tres"), ENGLISH),
+      trilingual(SPANISH.replace("- dos", "- dos\n\n- tres"), ENGLISH, PORTUGUESE),
+    );
+
+    expect(violations).toHaveLength(1);
+    expect(violations[0]).toContain("skeleton");
+  });
+
+  test("WHEN the Portuguese section has an extra bullet THEN the skeleton mismatch is reported", () => {
+    const violations = mirrorViolations(
+      trilingual(SPANISH, ENGLISH, PORTUGUESE.replace("- dois", "- dois\n\n- três")),
+    );
+
+    expect(violations).toHaveLength(1);
+    expect(violations[0]).toContain("skeleton");
+  });
+
+  test("WHEN the Portuguese section drops its sub-heading THEN the skeleton mismatch is reported", () => {
+    const violations = mirrorViolations(
+      trilingual(SPANISH, ENGLISH, PORTUGUESE.replace("### Sub\n\n", "")),
     );
 
     expect(violations).toHaveLength(1);
@@ -120,14 +184,27 @@ describe("mirrorViolations", () => {
   });
 
   test("WHEN one section drops its sub-heading THEN the skeleton mismatch is reported", () => {
-    const violations = mirrorViolations(bilingual(SPANISH, ENGLISH.replace("### Sub\n\n", "")));
+    const violations = mirrorViolations(
+      trilingual(SPANISH, ENGLISH.replace("### Sub\n\n", ""), PORTUGUESE),
+    );
 
     expect(violations).toHaveLength(1);
     expect(violations[0]).toContain("skeleton");
   });
 
-  test("WHEN the columns list different example words THEN the mismatch is reported", () => {
-    const violations = mirrorViolations(bilingual(SPANISH, ENGLISH.replace("*bat*", "*bad*")));
+  test("WHEN the sections list different example words THEN the mismatch is reported", () => {
+    const violations = mirrorViolations(
+      trilingual(SPANISH, ENGLISH.replace("*bat*", "*bad*"), PORTUGUESE),
+    );
+
+    expect(violations).toHaveLength(1);
+    expect(violations[0]).toContain("example words");
+  });
+
+  test("WHEN the Portuguese section lists different example words THEN the mismatch is reported", () => {
+    const violations = mirrorViolations(
+      trilingual(SPANISH, ENGLISH, PORTUGUESE.replace("*bat*", "*bad*")),
+    );
 
     expect(violations).toHaveLength(1);
     expect(violations[0]).toContain("example words");
@@ -140,24 +217,60 @@ describe("mirrorViolations", () => {
   });
 });
 
-const BASIC_COURSE_ROOT = path.join(
-  process.cwd(),
-  "public/local-filesystem-lesson",
-  basicCourse.slug,
-);
+const CONTENT_ROOT = path.join(process.cwd(), "public/local-filesystem-lesson");
 
-/** Every lesson notes file the Basic Course manifest declares, read from disk. */
-function declaredNotes(): NotesEntry[] {
-  return basicCourse.modules
+type CourseManifest = {
+  slug: string;
+  modules: { lessons: { notesKey?: string }[] }[];
+};
+
+/**
+ * Every lesson notes file a course manifest declares that is present on this
+ * machine.
+ *
+ * Only the Basic Course's text assets are tracked by git (`.gitignore`:
+ * "the multi-GB content root, ignored wholesale by default"), so a fresh clone
+ * or CI runner has the Advanced Course's manifest but none of its `readme.md`
+ * files. Skipping what is absent is what lets the whole-catalog corpus check
+ * degrade to the tracked course instead of failing on a missing file.
+ */
+function notesOf(course: CourseManifest): NotesEntry[] {
+  return course.modules
     .flatMap((module) => module.lessons)
-    .filter((lesson) => lesson.notesKey !== undefined)
-    .map((lesson) => {
-      const relativeToCourse = lesson.notesKey.slice(`${basicCourse.slug}/`.length);
-      return {
-        path: lesson.notesKey,
-        markdown: fs.readFileSync(path.join(BASIC_COURSE_ROOT, relativeToCourse), "utf8"),
-      };
-    });
+    .map((lesson) => lesson.notesKey)
+    .filter((notesKey): notesKey is string => notesKey !== undefined)
+    .map((notesKey) => ({
+      notesKey,
+      file: path.join(CONTENT_ROOT, course.slug, notesKey.slice(`${course.slug}/`.length)),
+    }))
+    .filter(({ file }) => fs.existsSync(file))
+    .map(({ notesKey, file }) => ({
+      path: notesKey,
+      markdown: fs.readFileSync(file, "utf8"),
+    }));
+}
+
+/** Every lesson notes file the Basic Course manifest declares. */
+function declaredNotes(): NotesEntry[] {
+  return notesOf(basicCourse);
+}
+
+/** Every lesson notes file every declared course carries. */
+function everyDeclaredNotes(): NotesEntry[] {
+  return [basicCourse, advancedCourse].flatMap(notesOf);
+}
+
+/** The `##` language heading each locale is marked with in a notes body. */
+const LOCALE_SECTION_HEADING: Readonly<Record<string, RegExp>> = {
+  es: /^##(?!#).*(?:Español|Spanish)/m,
+  en: /^##(?!#).*(?:English|Inglés)/m,
+  pt: /^##(?!#).*(?:Português|Portuguese)/m,
+};
+
+function localesMissingFrom(markdown: string): string[] {
+  return Object.entries(LOCALE_SECTION_HEADING)
+    .filter(([, heading]) => !heading.test(markdown))
+    .map(([locale]) => locale);
 }
 
 /** The lesson's `#` title heading, which feeds manifest title derivation. */
@@ -250,12 +363,12 @@ describe("the basic-course corpus", () => {
     expect(mirrorViolations(notes)).toEqual([]);
   });
 
-  test("WHEN every declared notes body is split THEN each yields two language columns", () => {
-    const unsplit = notes
-      .filter(({ markdown }) => splitBilingualNotes(markdown).kind !== "split")
-      .map(({ path: notesPath }) => notesPath);
+  test("WHEN every declared notes body is read THEN each carries a section per locale", () => {
+    const incomplete = notes
+      .filter(({ markdown }) => localesMissingFrom(markdown).length > 0)
+      .map(({ path: notesPath, markdown }) => `${notesPath}: ${localesMissingFrom(markdown)}`);
 
-    expect(unsplit).toEqual([]);
+    expect(incomplete).toEqual([]);
   });
 
   test("WHEN a body is rewritten THEN its `#` title heading is unchanged", () => {
@@ -264,5 +377,31 @@ describe("the basic-course corpus", () => {
     );
 
     expect(headings).toEqual(TITLE_HEADINGS);
+  });
+});
+
+describe("every declared course's corpus", () => {
+  const notes = everyDeclaredNotes();
+
+  test("WHEN both manifests are read THEN at least the tracked course's notes are present", () => {
+    // The Basic Course's 48 notes files are tracked; the Advanced Course's are
+    // not, so this count is a floor, not an equality.
+    expect(notes.length).toBeGreaterThanOrEqual(declaredNotes().length);
+  });
+
+  test("WHEN every declared notes body is checked THEN none violates the notes shape", () => {
+    expect(notesShapeViolations(notes)).toEqual([]);
+  });
+
+  test("WHEN every declared notes body is read THEN each carries a section per locale", () => {
+    const incomplete = notes
+      .filter(({ markdown }) => localesMissingFrom(markdown).length > 0)
+      .map(({ path: notesPath, markdown }) => `${notesPath}: ${localesMissingFrom(markdown)}`);
+
+    expect(incomplete).toEqual([]);
+  });
+
+  test("WHEN the language sections of each lesson are compared THEN they mirror each other", () => {
+    expect(mirrorViolations(notes)).toEqual([]);
   });
 });

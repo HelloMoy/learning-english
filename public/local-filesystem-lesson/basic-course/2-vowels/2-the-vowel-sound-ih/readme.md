@@ -35,3 +35,21 @@ The /ɪ/ is a short, loose vowel that doesn't exist in Spanish. It sits between 
 > ⚠️ **The typical Spanish-speaker mistake:** swapping in the tense, long Spanish _i_. That turns _sit_ into _seat_, _ship_ into _sheep_ and _fill_ into _feel_.
 
 **By the end you'll be able to:** hear and produce the difference in pairs like _sit / seat_ and _ship / sheep_.
+
+## 🇧🇷 Português
+
+### O /ɪ/: curto, relaxado, nem _i_ nem _e_
+
+O /ɪ/ é uma vogal curta e frouxa que o português não tem. Fica entre o nosso _i_ e o nosso _ê_, e aparece em dezenas de palavras do dia a dia. É a vogal que quem fala português mais confunde, porque o nosso ouvido a arquiva como o _i_ de sempre.
+
+**Como se produz**
+
+- 👄 **Boca:** levemente aberta, lábios relaxados e sem esticar.
+- 👅 **Língua:** à frente e um pouco alta, mas **mais baixa** que no /i/.
+- 🔊 **Voz:** sonora, curta e sem tensão — não alongue.
+
+**Você ouve em:** _sit_ · _fish_ · _lid_ · _pick_ · _bin_
+
+> ⚠️ **O erro típico de quem fala português:** trocá-lo pelo _i_ português, tenso e longo. Assim _sit_ vira _seat_, _ship_ vira _sheep_ e _fill_ vira _feel_.
+
+**No fim você vai conseguir:** ouvir e produzir a diferença em pares como _sit / seat_ e _ship / sheep_.

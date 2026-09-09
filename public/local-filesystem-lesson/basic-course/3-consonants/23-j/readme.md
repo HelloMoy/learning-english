@@ -35,3 +35,21 @@ The /j/ is the sound of the English _y_ in _yes_. It's made with the tongue high
 > ⚠️ **The typical Spanish-speaker mistake:** producing it with friction, like the Rioplatense _y_ or like a /dʒ/. _Yes_ is neither _shes_ nor _jes_: the tongue never quite touches.
 
 **By the end you'll be able to:** glide the /j/ without friction, and keep _yes_ apart from _jes_ and _year_ from _jeer_.
+
+## 🇧🇷 Português
+
+### O /j/: o _i_ de _iate_, sem fricção
+
+O /j/ é o som do _y_ inglês em _yes_. É produzido com a língua alta e à frente, deslizando na direção da vogal seguinte. Você já o faz em _iate_ e _maio_: em inglês não há nenhum roce, só um deslizamento rápido.
+
+**Como se produz**
+
+- 👄 **Boca:** lábios relaxados e ligeiramente esticados.
+- 👅 **Língua:** à frente e alta, perto do palato mas **sem tocá-lo**.
+- 🔊 **Voz:** **sonora** e breve — desliza para a vogal, não se sustenta.
+
+**Você ouve em:** _yes_ · _you_ · _year_ · _young_ · _yellow_
+
+> ⚠️ **O erro típico de quem fala português:** ler o _y_ como o nosso _j_ e produzir /ʒ/ ou /dʒ/. _Yes_ não é _jes_ nem _djes_: a língua nem chega a roçar.
+
+**No fim você vai conseguir:** deslizar o /j/ sem fricção e separar _yes_ de _jes_ e _year_ de _jeer_.

@@ -35,3 +35,21 @@ These two vowels are made in almost the same spot, which is why they get confuse
 > ⚠️ **The typical Spanish-speaker mistake:** using one Spanish _a_ for both and giving every syllable the same weight. The result is rhythm-less English — right sound by sound, but flat.
 
 **By the end you'll be able to:** choose between the two by looking at where the word's stress falls.
+
+## 🇧🇷 Português
+
+### /ə/ e /ʌ/: o mesmo lugar na boca, acento diferente
+
+Estas duas vogais são produzidas quase no mesmo ponto, e é por isso que se confundem. O que as separa não é o timbre e sim **o acento**: o schwa vive em sílabas sem acento e o strut em sílabas acentuadas. No inglês americano o schwa ganha quase sempre, e isso faz parte do que dá ritmo ao idioma.
+
+**Como se produz**
+
+- 👄 **Boca:** /ə/ relaxada e neutra; /ʌ/ um pouco mais aberta.
+- 👅 **Língua:** as duas no centro; /ʌ/ um pouco mais baixa.
+- 🔊 **Voz:** /ə/ fraca e curta, sempre sem acento; /ʌ/ clara e plena, sempre acentuada.
+
+**Você ouve em:** /ə/ em _sofa_ · _banana_ · _support_ — /ʌ/ em _cup_ · _luck_ · _love_
+
+> ⚠️ **O erro típico de quem fala português:** usar a mesma vogal para as duas e dar a todas as sílabas o mesmo peso. O resultado é um inglês sem ritmo, correto som a som mas plano.
+
+**No fim você vai conseguir:** decidir qual das duas usar olhando onde cai o acento da palavra.

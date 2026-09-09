@@ -35,3 +35,21 @@ The /tʃ/ is an **affricate**: it starts with a full closure, like a /t/, and re
 > ⚠️ **The typical Spanish-speaker mistake:** using /tʃ/ where the word takes /ʃ/. _Chair_ and _share_ start differently, and that initial closure is the only difference.
 
 **By the end you'll be able to:** keep /tʃ/ and /ʃ/ apart and pick the right one in pairs like _chair / share_ and _chip / ship_.
+
+## 🇧🇷 Português
+
+### O /tʃ/: um /t/ que se abre em /ʃ/
+
+O /tʃ/ é uma **africada**: começa com um fechamento completo, como um /t/, e se solta no sopro do /ʃ/. É o som que o português brasileiro faz em _tia_ e _time_, então você já sabe produzi-lo. O que é preciso treinar é usá-lo onde o inglês pede — e não trocá-lo pelo /ʃ/.
+
+**Como se produz**
+
+- 👄 **Boca:** lábios ligeiramente arredondados, como no /ʃ/.
+- 👅 **Língua:** primeiro fecha contra o alvéolo, depois solta na direção do palato.
+- 🔊 **Voz:** **surda**, rápida e com força — é uma batida, não um sopro longo.
+
+**Você ouve em:** _chair_ · _chocolate_ · _church_ · _watch_ · _teacher_
+
+> ⚠️ **O erro típico de quem fala português:** usar /ʃ/ onde a palavra pede /tʃ/, lendo _chair_ como se fosse _xér_. _Chair_ e _share_ começam diferente, e a única diferença é esse fechamento inicial.
+
+**No fim você vai conseguir:** separar /tʃ/ de /ʃ/ e escolher o certo em pares como _chair / share_ e _chip / ship_.

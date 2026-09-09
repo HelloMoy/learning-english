@@ -35,3 +35,21 @@ The /ɔ/ is made in the same deep place as /ɑ/, but with your lips rounded. Tha
 > ⚠️ **The typical Spanish-speaker mistake:** using the closed Spanish _o_. This English vowel is far more open: _law_ isn't _lo_, it's a long, rounded _a_.
 
 **By the end you'll be able to:** round your lips without closing your mouth, and keep _cot / caught_ apart when the person you're talking to distinguishes them.
+
+## 🇧🇷 Português
+
+### O /ɔ/: aberto como o /ɑ/, mas com os lábios arredondados
+
+O /ɔ/ é produzido no mesmo ponto profundo do /ɑ/, mas arredondando os lábios. É toda a diferença, e basta para mudar o significado da palavra. Não o confunda com o _ô_ do português, que é mais fechado e bem mais curto.
+
+**Como se produz**
+
+- 👄 **Boca:** bem aberta, mas com os lábios **arredondados** para a frente.
+- 👅 **Língua:** atrás e baixa, como no /ɑ/.
+- 🔊 **Voz:** sonora e longa, sustentada sem se mover.
+
+**Você ouve em:** _law_ · _talk_ · _caught_ · _bought_ · _dog_ (em alguns sotaques)
+
+> ⚠️ **O erro típico de quem fala português:** usar o _ô_ fechado. Essa vogal do inglês é bem mais aberta: _law_ não é _lô_, é um _a_ arredondado e longo.
+
+**No fim você vai conseguir:** arredondar os lábios sem fechar a boca, e separar _cot / caught_ quando seu interlocutor distingue os dois.

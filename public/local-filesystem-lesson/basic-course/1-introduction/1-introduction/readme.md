@@ -35,3 +35,21 @@ The fastest way to improve your speaking isn't learning more words: it's learnin
 > ⚠️ **The typical Spanish-speaker mistake:** studying pronunciation by reading about it. You can understand exactly how a sound is made and still be unable to make it. Every lesson is practiced out loud or it doesn't count.
 
 **By the end you'll be able to:** understand how the course is organized and what to do in each lesson so the practice sticks.
+
+## 🇧🇷 Português
+
+### Por onde começar: o ouvido antes da boca
+
+O jeito mais rápido de melhorar seu speaking não é aprender mais palavras: é aprender os **sons**. Se o seu ouvido não distingue dois sons, sua boca também não vai produzi-los; e o contrário é igualmente verdadeiro — assim que você consegue produzir um som, começa a ouvi-lo em todo lugar. Por isso este curso começa pelas vogais, segue pelas consoantes e só depois trabalha o ritmo.
+
+**O que você vai praticar**
+
+- 👂 **Ouvir:** distinguir sons que não existem na sua língua ou que soam iguais para você.
+- 👄 **Produzir:** colocar boca, língua e voz na posição certa.
+- 🔁 **Repetir:** pronúncia é memória muscular, não teoria.
+
+**Pratique com:** sua própria voz gravada · um espelho · trechos curtos repetidos muitas vezes
+
+> ⚠️ **O erro típico:** estudar pronúncia lendo sobre ela. Você pode entender perfeitamente como um som é produzido e continuar sem conseguir fazê-lo. Cada aula se pratica em voz alta ou não conta.
+
+**No fim você vai conseguir:** entender como o curso está organizado e o que fazer em cada aula para que a prática fique.

@@ -35,3 +35,21 @@ Everything you've practiced separately — vowels, flap, rhythm — comes togeth
 > ⚠️ **The typical Spanish-speaker mistake:** speeding up before the sounds are right. Speed doesn't fix pronunciation — it hides it, and then it stays that way.
 
 **By the end you'll be able to:** chain vowels and flaps at natural speed without losing the quality of each sound.
+
+## 🇧🇷 Português
+
+### Vogais e flap em velocidade real, com uma música
+
+Tudo o que você praticou em separado — vogais, flap, ritmo — aqui se junta e vai para a velocidade real. Uma música é a melhor academia para a língua: o tempo é fixo, a letra se repete e você não pode parar para pensar. É treino de agilidade, não de teoria.
+
+**O que você vai praticar**
+
+- 👅 **Flap:** localizar cada _t_ entre vogais e transformá-la numa batida rápida.
+- 🎵 **Vogais:** mantê-las abertas e longas mesmo com o tempo empurrando.
+- ⏩ **Velocidade:** começar em meia velocidade e subir até o tempo original.
+
+**Pratique com:** a música inteira · um verso repetido · o mesmo verso em meia velocidade
+
+> ⚠️ **O erro típico de quem fala português:** acelerar antes de os sons estarem certos. A velocidade não conserta a pronúncia: ela esconde, e depois fica assim.
+
+**No fim você vai conseguir:** encadear vogais e flap em velocidade natural sem perder a qualidade de cada som.

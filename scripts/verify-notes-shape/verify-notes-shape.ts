@@ -14,7 +14,7 @@ export type NotesEntry = {
 const LANGUAGE_SECTION_HEADING = /^##(?!#)\s*(.*)$/;
 /** A level-3-or-deeper heading is a sub-heading inside a language section. */
 const SUB_HEADING = /^###+\s*\S/;
-const LANGUAGE_LABEL = /espa(ñ|n)ol|spanish|english|ingl(é|e)s/i;
+const LANGUAGE_LABEL = /espa(ñ|nh|n)ol|spanish|english|ingl(é|e|ê)s|portugu(ê|e|é)s|portuguese/i;
 
 type LanguageSection = {
   readonly heading: string;
@@ -81,7 +81,7 @@ function violationsOf({ path, markdown }: NotesEntry): string[] {
  * body that is only its `#` title is reported too — a lesson the learner opens
  * to find nothing is a content gap, not an accepted state.
  *
- * The check is a line scan, matching `splitBilingualNotes`: it needs to know
+ * The check is a line scan, matching `selectNotesForLocale`: it needs to know
  * where the level-2 headings are, and a Markdown AST would buy nothing but a
  * dependency. Its known limit is the same one — a `##` inside a fenced code
  * block reads as a heading — and notes bodies are prose.
@@ -102,8 +102,9 @@ export function notesShapeViolations(entries: ReadonlyArray<NotesEntry>): string
 
 /** An italic run — `*word*` — but never the `**` of a bold marker. */
 const ITALIC_RUN = /(?<!\*)\*(?!\*)([^*]+)\*(?!\*)/g;
-/** The bold label that introduces a lesson's example words, in either language. */
-const EXAMPLES_LABEL = /^\*\*(Lo oyes en|You hear it in|Practica con|Practice with):/;
+/** The bold label that introduces a lesson's example words, in any of the three languages. */
+const EXAMPLES_LABEL =
+  /^\*\*(Lo oyes en|You hear it in|Você ouve em|Practica con|Practice with|Pratique com):/;
 
 /**
  * Collapses a section's lines into blocks separated by blank lines, so a
@@ -144,39 +145,44 @@ function exampleWordsOf(lines: ReadonlyArray<string>): string[] {
   return [...examples.matchAll(ITALIC_RUN)].map((match) => match[1] ?? "");
 }
 
+/** How one language section differs from the one it is compared against. */
+function mismatchOf(reference: LanguageSection, other: LanguageSection): string | null {
+  const skeletons = [skeletonOf(reference.lines), skeletonOf(other.lines)];
+  if (skeletons[0]?.join() !== skeletons[1]?.join()) {
+    return `sections differ in skeleton — ${skeletons[0]} vs ${skeletons[1]}`;
+  }
+
+  const examples = [exampleWordsOf(reference.lines), exampleWordsOf(other.lines)];
+  if (examples[0]?.join() !== examples[1]?.join()) {
+    return `sections list different example words — ${examples[0]} vs ${examples[1]}`;
+  }
+
+  return null;
+}
+
 /**
- * Reports every bilingual lesson whose two language sections are not mirrors
- * of one another (`course-content-storage`: "the two language sections SHALL
- * be mirrors").
+ * Reports every lesson whose language sections are not mirrors of one another
+ * (`course-content-storage`: "the language sections SHALL be mirrors").
  *
  * @remarks
- * Checks the two halves of the requirement a machine can settle: the sections
- * carry the same blocks in the same order, and they list the same example
- * words. Whether they make the same claims is a reading task, not a parsing
- * one, and stays a review step.
+ * Checks the two halves of the requirement a machine can settle: every section
+ * carries the same blocks in the same order as the first one, and they all list
+ * the same example words. Whether they make the same claims is a reading task,
+ * not a parsing one, and stays a review step.
  *
- * A monolingual body has nothing to mirror and is passed over — the missing
- * second section is `notesShapeViolations`' business, not this one.
+ * A body with a single language section has nothing to mirror and is passed
+ * over — a missing section is `notesShapeViolations`' business, not this one.
  *
  * @param entries - Notes files to check, in the order they should be reported
- * @returns One violation per mismatch found, empty when every pair mirrors
+ * @returns One violation per file that mismatches, empty when every one mirrors
  * @category Content
  */
 export function mirrorViolations(entries: ReadonlyArray<NotesEntry>): string[] {
   return entries.flatMap(({ path, markdown }) => {
-    const [first, second] = languageSectionsOf(markdown);
-    if (first === undefined || second === undefined) return [];
+    const [reference, ...rest] = languageSectionsOf(markdown);
+    if (reference === undefined) return [];
 
-    const skeletons = [skeletonOf(first.lines), skeletonOf(second.lines)];
-    if (skeletons[0]?.join() !== skeletons[1]?.join()) {
-      return [`${path}: sections differ in skeleton — ${skeletons[0]} vs ${skeletons[1]}`];
-    }
-
-    const examples = [exampleWordsOf(first.lines), exampleWordsOf(second.lines)];
-    if (examples[0]?.join() !== examples[1]?.join()) {
-      return [`${path}: sections list different example words — ${examples[0]} vs ${examples[1]}`];
-    }
-
-    return [];
+    const mismatch = rest.map((section) => mismatchOf(reference, section)).find(Boolean);
+    return mismatch === undefined || mismatch === null ? [] : [`${path}: ${mismatch}`];
   });
 }

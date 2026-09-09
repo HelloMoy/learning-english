@@ -35,3 +35,21 @@ The American English /r/ is nothing like the Spanish one. It's the so-called _bu
 > ⚠️ **The typical Spanish-speaker mistake:** using the Spanish _r_, which taps the alveolar ridge — or worse, the trilled _rr_. _Very_ with a trill sounds foreign instantly.
 
 **By the end you'll be able to:** produce an /r/ with no contact and no trill, and hold it without sliding back into the Spanish _r_.
+
+## 🇧🇷 Português
+
+### O /r/ americano: a língua recua, nunca vibra
+
+O /r/ do inglês americano não se parece com nenhum dos nossos. É o chamado _bunched R_: a língua recua e se agrupa no centro da boca **sem tocar em nada**. Não há batida, não há vibração, não há sopro na garganta. É provavelmente o som que mais denuncia quem fala português.
+
+**Como se produz**
+
+- 👄 **Boca:** lábios ligeiramente arredondados e projetados para a frente.
+- 👅 **Língua:** recuada e abaulada no centro, sem tocar o palato nem os dentes.
+- 🔊 **Voz:** sonora e contínua — dá para sustentar como uma vogal.
+
+**Você ouve em:** _red_ · _right_ · _car_ · _very_ · _around_
+
+> ⚠️ **O erro típico de quem fala português:** usar o _r_ de _caro_, que bate no alvéolo, ou o _r_ gutural de _rato_. _Very_ com qualquer um dos dois soa estrangeiro na hora.
+
+**No fim você vai conseguir:** produzir um /r/ sem contato e sem vibração, e sustentá-lo sem que vire um _r_ do português.

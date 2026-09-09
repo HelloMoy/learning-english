@@ -154,9 +154,7 @@
     "LessonTabs": {
       "notes": "Notes",
       "transcript": "Transcript",
-      "transcriptUnavailable": "No transcript is available for this lesson yet.",
-      "spanish": "Español",
-      "english": "English"
+      "transcriptUnavailable": "No transcript is available for this lesson yet."
     },
     "LessonCompletion": {
       "completed": "Completed"

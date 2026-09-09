@@ -35,3 +35,21 @@ The /s/ is a **voiceless** consonant made by pushing air through a narrow channe
 > ⚠️ **The typical Spanish-speaker mistake:** adding an _e_ in front when a word starts with _s_ + consonant. _Spanish_ isn't _Espanish_, and that extra vowel is very audible.
 
 **By the end you'll be able to:** start words directly on the /s/, and stop confusing it with /z/ at the end of a word.
+
+## 🇧🇷 Português
+
+### O /s/: o assobio surdo
+
+O /s/ é uma consoante **surda**, produzida empurrando ar por um canal estreito entre a língua e o palato. É praticamente igual ao nosso _s_ de _sapo_, então você já o tem. O trabalho aqui não é produzi-lo: é não deixá-lo entrar onde a palavra pede /z/ ou /θ/.
+
+**Como se produz**
+
+- 👄 **Boca:** entreaberta, dentes quase juntos.
+- 👅 **Língua:** perto do alvéolo, deixando um canal bem estreito.
+- 🔊 **Voz:** **surda** — só ar, sem vibração na garganta.
+
+**Você ouve em:** _see_ · _sun_ · _bus_ · _class_ · _nice_
+
+> ⚠️ **O erro típico de quem fala português:** acrescentar um _i_ ou um _e_ na frente quando a palavra começa por _s_ + consoante. _Spanish_ não é _Ispanish_, e essa vogal a mais se ouve de longe.
+
+**No fim você vai conseguir:** começar as palavras direto no /s/ e não confundi-lo com /z/ no fim da palavra.

@@ -35,3 +35,21 @@ When a /t/ or /d/ sits **between two vowels** and the second one is unstressed, 
 > ⚠️ **The typical Spanish-speaker mistake:** pronouncing the written _t_ at full strength. _Water_ with a clear /t/ sounds like textbook English, not spoken American English.
 
 **By the end you'll be able to:** spot when a _t_ becomes a flap, and produce it with the _r_ you can already make.
+
+## 🇧🇷 Português
+
+### O flap /ɾ/: o _t_ que soa como o _r_ de _caro_
+
+Quando um /t/ ou um /d/ fica **entre duas vogais** e a segunda não é acentuada, os americanos não o pronunciam como /t/: transformam-no numa batida rapidíssima de língua. Essa batida é exatamente o nosso _r_ de _caro_. É uma das melhores notícias para quem fala português: esse som você já tem.
+
+**Como se produz**
+
+- 👄 **Boca:** entreaberta, sem tensão.
+- 👅 **Língua:** uma batida rápida e leve contra o alvéolo, como em _caro_.
+- 🔊 **Voz:** sonora e brevíssima — dura menos que um /d/.
+
+**Você ouve em:** _better_ · _butter_ · _city_ · _party_ · _water_
+
+> ⚠️ **O erro típico de quem fala português:** pronunciar o _t_ escrito com toda a força, ou palatalizá-lo como em _tia_. _Water_ com /t/ claro soa a inglês de livro, não a inglês americano falado.
+
+**No fim você vai conseguir:** reconhecer quando o _t_ vira flap e produzi-lo com o _r_ que você já sabe fazer.

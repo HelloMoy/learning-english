@@ -35,3 +35,21 @@ The _x_ isn't one sound, it's **two consonants together**, and which two depends
 > ⚠️ **The typical Spanish-speaker mistake:** slipping a vowel between the two consonants, the way Spanish does. _Next_ isn't _nekest_, and _box_ doesn't end in _bokes_.
 
 **By the end you'll be able to:** produce both sounds back to back with no vowel between them, and pick /ks/ or /gz/ by the stress.
+
+## 🇧🇷 Português
+
+### O _x_: dois sons, /ks/ e /gz/
+
+O _x_ não é um som, são **duas consoantes juntas**, e quais elas são depende de onde cai o acento. Se a sílaba seguinte não é acentuada, sai /ks/ (surdo); se é acentuada, sonoriza em /gz/. É a única letra do inglês que muda assim.
+
+**Como se produz**
+
+- 👄 **Boca:** dois movimentos seguidos, sem vogal no meio.
+- 👅 **Língua:** primeiro a parte de trás fecha (/k/ ou /g/), depois a ponta se aproxima do alvéolo (/s/ ou /z/).
+- 🔊 **Voz:** **surda** em /ks/, **sonora** em /gz/ — quem escolhe é o acento da palavra.
+
+**Você ouve em:** /ks/ em _box_ · _six_ · _next_ — /gz/ em _example_ · _exam_ · _exact_
+
+> ⚠️ **O erro típico de quem fala português:** enfiar uma vogal entre as duas consoantes. _Next_ não é _nékisti_, e _box_ não termina em _bókis_.
+
+**No fim você vai conseguir:** produzir os dois sons seguidos sem vogal no meio, e escolher /ks/ ou /gz/ pelo acento.

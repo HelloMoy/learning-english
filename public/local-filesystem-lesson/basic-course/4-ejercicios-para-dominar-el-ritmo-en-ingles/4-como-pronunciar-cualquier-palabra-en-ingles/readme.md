@@ -35,3 +35,21 @@ This is the tool that closes the rhythm module. Natives don't pronounce every sy
 > ⚠️ **The typical Spanish-speaker mistake:** giving every syllable the same force, the way Spanish does. Even with every sound right, the result is flat and hard to follow.
 
 **By the end you'll be able to:** apply stress and reduction to pronounce a new word without having heard it first.
+
+## 🇧🇷 Português
+
+### Redução vocálica: a regra que resolve quase qualquer palavra
+
+Esta é a ferramenta que fecha o módulo de ritmo. Os nativos não pronunciam todas as sílabas igual: acentuam uma e **reduzem** as outras, trocando a vogal por um schwa. Se você sabe onde cai o acento, sabe o que reduzir — e com isso consegue atacar uma palavra que nunca tinha visto.
+
+**O que você vai praticar**
+
+- 🎯 **Localize o acento:** em cada palavra há uma sílaba que manda.
+- 🫥 **Reduza o resto:** as vogais sem acento vão para o schwa /ə/.
+- 🎵 **Confira o ritmo:** forte–fraco–fraco, não todas iguais.
+
+**Pratique com:** _banana_ → /bəˈnænə/ · _chocolate_ → /ˈtʃɑklət/ · _photograph_ / _photography_
+
+> ⚠️ **O erro típico de quem fala português:** dar a todas as sílabas a mesma força. Mesmo com cada som correto, o resultado sai plano e custa a ser entendido.
+
+**No fim você vai conseguir:** aplicar acento e redução para pronunciar uma palavra nova sem nunca a ter ouvido.

@@ -35,3 +35,21 @@ The /dʒ/ is the **voiced** affricate: it starts with a closure like a /d/ and r
 > ⚠️ **The typical Spanish-speaker mistake:** pronouncing it as the Spanish _y_, or as the _j_ in _jamón_. _Jungle_ starts with neither _yungle_ nor _hungle_.
 
 **By the end you'll be able to:** make the closure voiced, and keep _jump_ apart from _chump_ and from _young_.
+
+## 🇧🇷 Português
+
+### O /dʒ/: um /d/ que se abre em /ʒ/
+
+O /dʒ/ é a africada **sonora**: começa com um fechamento como o do /d/ e se solta no /ʒ/. É o par com voz do /tʃ/. O português brasileiro já o produz em _dia_ e _pode ir_, mas nunca no começo de palavra escrita com _j_ — e é aí que ele escapa.
+
+**Como se produz**
+
+- 👄 **Boca:** lábios ligeiramente arredondados.
+- 👅 **Língua:** fecha contra o alvéolo e solta na direção do palato.
+- 🔊 **Voz:** **sonora** desde o primeiro instante — a vibração começa junto com o fechamento.
+
+**Você ouve em:** _jump_ · _juice_ · _jungle_ · _bridge_ · _age_
+
+> ⚠️ **O erro típico de quem fala português:** ler o _j_ inglês como o nosso, sem o fechamento. _Jungle_ não começa como _jogo_: antes do /ʒ/ há um /d/.
+
+**No fim você vai conseguir:** produzir o fechamento com voz e separar _jump_ de _chump_ e de _young_.

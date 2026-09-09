@@ -35,3 +35,21 @@ Being able to produce the dark L in isolation is half the work. The other half i
 > ⚠️ **The typical Spanish-speaker mistake:** releasing the tongue between words and falling back on the light Spanish _l_. That breaks the link and brings the choppy rhythm right back.
 
 **By the end you'll be able to:** hold the dark L across word boundaries and build the muscle memory to do it without thinking.
+
+## 🇧🇷 Português
+
+### O L escuro na fala conectada
+
+Saber produzir o L escuro isolado é metade do trabalho. A outra metade é usá-lo **dentro de uma frase**, onde ele se liga à vogal seguinte, se combina com outras consoantes e muitas vezes chega tão perto de um /u/ que quase desaparece. Essa parte se ganha com repetição, não com teoria.
+
+**Como se produz**
+
+- 👄 **Boca:** relaxada; não force a mandíbula ao ligar as palavras.
+- 👅 **Língua:** mantenha a parte de trás elevada durante toda a ligação entre palavras.
+- 🔊 **Voz:** sonora e contínua — o L não corta a frase, ele liga.
+
+**Você ouve em:** _feel it_ · _call him_ · _all of us_ · _well done_ · _help me_
+
+> ⚠️ **O erro típico de quem fala português:** soltar a língua entre uma palavra e outra e voltar ao _l_ claro. Isso quebra a ligação e devolve o ritmo picotado.
+
+**No fim você vai conseguir:** manter o L escuro ao ligar palavras e ganhar a memória muscular para fazer isso sem pensar.

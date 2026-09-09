@@ -35,3 +35,21 @@ The /i/ is the highest, most forward vowel in English, and the longest. It resem
 > ⚠️ **The typical Spanish-speaker mistake:** pronouncing /ɪ/ and /i/ the same. Shorten the /i/ and _feet_ becomes _fit_, _leave_ becomes _live_.
 
 **By the end you'll be able to:** lengthen and tense the /i/ until _feet / fit_ and _leave / live_ are clearly apart.
+
+## 🇧🇷 Português
+
+### O /i/: longo, tenso e com sorriso
+
+O /i/ é a vogal mais alta e anterior do inglês, e a mais longa. Parece com o nosso _i_, mas dura mais e sai com mais tensão nos lábios. É o par do /ɪ/, e confundir os dois é o erro de pronúncia mais frequente de quem fala português.
+
+**Como se produz**
+
+- 👄 **Boca:** lábios esticados para os lados, como num sorriso.
+- 👅 **Língua:** bem à frente e bem alta, quase encostando no palato.
+- 🔊 **Voz:** sonora, longa e tensa — sustente.
+
+**Você ouve em:** _sleep_ · _eat_ · _please_ · _see_ · _green_
+
+> ⚠️ **O erro típico de quem fala português:** pronunciar /ɪ/ e /i/ igual, já que o português não tem o /ɪ/. Se encurtar o /i/, _feet_ vira _fit_ e _leave_ vira _live_.
+
+**No fim você vai conseguir:** alongar e tensionar o /i/ até separar com clareza _feet / fit_ e _leave / live_.

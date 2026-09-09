@@ -35,3 +35,21 @@ The /w/ is made by rounding your lips tightly and opening them into the followin
 > ⚠️ **The typical Spanish-speaker mistake:** starting with the _g_ of Spanish _güe_ — _water_ said as _guater_ — or opening the lips too early and losing the rounding.
 
 **By the end you'll be able to:** produce the /w/ from the rounding, and use it to link words as in _go on_.
+
+## 🇧🇷 Português
+
+### O /w/: lábios arredondados que se abrem
+
+O /w/ é produzido arredondando bem os lábios e abrindo-os na direção da vogal seguinte, com a voz vibrando. É um som de **movimento**, não uma posição fixa. Você já o faz em _quatro_ e _água_. Além de aparecer em palavras, ele serve para **ligar**: os nativos o inserem entre uma vogal arredondada e a seguinte.
+
+**Como se produz**
+
+- 👄 **Boca:** lábios bem arredondados no começo, abrindo em seguida.
+- 👅 **Língua:** atrás e alta, como no /u/.
+- 🔊 **Voz:** **sonora** e breve — é um deslizamento, não se sustenta.
+
+**Você ouve em:** _we_ · _water_ · _win_ · _away_ · _go on_ → /ɡoʊ wɑn/
+
+> ⚠️ **O erro típico de quem fala português:** ler o _w_ como um /v/, dizendo _váter_ em vez de _water_, ou abrir os lábios cedo demais e perder o arredondamento.
+
+**No fim você vai conseguir:** produzir o /w/ a partir do arredondamento e usá-lo para ligar palavras como em _go on_.

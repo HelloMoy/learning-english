@@ -35,3 +35,21 @@ The schwa is the sound of **unstressed** syllables. It has no color of its own: 
 > ⚠️ **The typical Spanish-speaker mistake:** pronouncing every vowel the way it's spelled. A Spanish speaker says _pro-BLE-ma_ with a full o and a full e; in English _problem_ is /ˈprɑbləm/ and that second vowel reduces to almost nothing.
 
 **By the end you'll be able to:** recognize the schwa when you hear it, and reduce unstressed syllables instead of pronouncing them in full.
+
+## 🇧🇷 Português
+
+### O schwa /ə/: a vogal mais frequente do inglês
+
+O schwa é o som das sílabas **sem acento**. Não tem cor própria: a boca fica relaxada, no centro, e a vogal quase desaparece. É o som mais comum do inglês, e é o que separa uma pronúncia de estudante de uma pronúncia natural.
+
+**Como se produz**
+
+- 👄 **Boca:** entreaberta e frouxa, sem esticar nem arredondar os lábios.
+- 👅 **Língua:** bem no centro da boca, sem subir nem descer.
+- 🔊 **Voz:** sonora, muito curta e fraca — o acento nunca cai nela.
+
+**Você ouve em:** _about_ · _banana_ · _problem_ · _support_ · _the_
+
+> ⚠️ **O erro típico de quem fala português:** dar a cada vogal o valor cheio da escrita. Em português dizemos _pro-BLE-ma_ com o o e o e inteiros; em inglês _problem_ é /ˈprɑbləm/ e a segunda vogal se reduz a quase nada.
+
+**No fim você vai conseguir:** reconhecer o schwa ao ouvi-lo e reduzir as sílabas sem acento em vez de pronunciá-las inteiras.

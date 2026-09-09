@@ -35,3 +35,21 @@ A large share of American English speakers no longer distinguish /ɑ/ from /ɔ/:
 > ⚠️ **The typical Spanish-speaker mistake:** assuming there's one correct pronunciation, and freezing when a native speaker merges the two sounds.
 
 **By the end you'll be able to:** understand speakers with and without the merger, and decide deliberately which model you're imitating.
+
+## 🇧🇷 Português
+
+### Quando /ɑ/ e /ɔ/ viram uma vogal só
+
+Boa parte dos falantes de inglês americano já não distingue /ɑ/ de /ɔ/: para eles _cot_ e _caught_ soam exatamente igual. Outros mantêm os dois separados. Nenhuma das duas formas está errada — o que importa é reconhecer as duas ao escutar.
+
+**Como se produz**
+
+- 👄 **Boca:** no sotaque fundido, uma única posição aberta serve para as duas palavras.
+- 👅 **Língua:** atrás e baixa, sem mudar entre _cot_ e _caught_.
+- 🔊 **Voz:** no sotaque não fundido, a diferença está em arredondar ou não os lábios.
+
+**Você ouve em:** _cot / caught_ · _stock / stalk_ · _don / dawn_ · _not / naught_
+
+> ⚠️ **O erro típico de quem fala português:** achar que existe uma única pronúncia correta e travar ao ouvir um nativo que funde os dois sons.
+
+**No fim você vai conseguir:** entender falantes com e sem a fusão, e escolher de forma consciente qual dos dois modelos você vai imitar.
