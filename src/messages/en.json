@@ -182,6 +182,15 @@
       "courseOutline": "Course outline",
       "remaining": "{remaining} left of {total}",
       "progressLabel": "Playback progress"
+    },
+    "LessonWatchProgress": {
+      "ariaLabel": "{percent} watched"
+    },
+    "ModuleWatchProgress": {
+      "label": "{completed} / {total} videos",
+      "ariaLabel": "{completed} of {total} videos completed",
+      "completedLabel": "Lesson completed",
+      "completedAriaLabel": "All {total} videos completed"
     }
   },
   "CourseCatalog": {

@@ -5,6 +5,7 @@ import type { LessonId } from "@/domain/entities/ids/ids";
 import { PlaybackPosition } from "@/domain/ports/playback-position-repository/playback-position";
 import type { PlaybackPositionRepository } from "@/domain/ports/playback-position-repository/playback-position-repository";
 import { makeGetPlaybackPosition } from "@/domain/use-cases/get-playback-position/get-playback-position";
+import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
 
 import { useMemo } from "react";
 
@@ -27,6 +28,10 @@ import { useMemo } from "react";
  * checks the lesson exists via `LessonRepository`, which has no browser-side
  * implementation — reaching it needs the Server Action path, which is where
  * this moves when per-user sync arrives with auth.
+ *
+ * A successful write notifies `useSavedPlaybackPositions`, the sibling store
+ * that lists every saved position for the progress indicators. A write that
+ * fails validation notifies nothing — there is nothing new to read.
  *
  * The returned object is memoized on the lesson, so consumers can list it in
  * a `useEffect` dependency array without retriggering on every render.
@@ -75,6 +80,9 @@ export function usePlaybackPosition(
           return false;
         }
         await positions.setPosition(position.data.lessonId, position.data.seconds);
+        // The `storage` event only fires for *other* tabs, so a progress bar
+        // mounted beside the player would go stale without this.
+        refreshSavedPlaybackPositions();
         return true;
       },
     };

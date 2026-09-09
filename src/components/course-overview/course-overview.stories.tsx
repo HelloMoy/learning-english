@@ -66,6 +66,10 @@ const moduleSummaries: ModuleSummary[] = modules.map((module, index) => {
       title: `Lesson ${tile + 1}`,
       poster: POSTER,
     })),
+    lessonRuntimes: Array.from({ length: lessonCount }, () => ({
+      id: LessonId.parse(faker.string.uuid()),
+      durationSeconds: Math.round((minutes * 60) / lessonCount),
+    })),
   };
 });
 

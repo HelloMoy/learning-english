@@ -11,6 +11,10 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { Outline } from "./outline";
 
 vi.mock("next-intl", () => ({
+  // The outline's watch-progress bar formats its percentage through next-intl
+  // rather than concatenating a string, so the mock has to answer for the
+  // formatter too.
+  useFormatter: () => ({ number: (value: number) => `${Math.round(value * 100)}%` }),
   useTranslations: vi.fn(),
 }));
 

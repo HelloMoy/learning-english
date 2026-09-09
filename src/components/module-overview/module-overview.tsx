@@ -1,5 +1,6 @@
 import { Eyebrow } from "@/components/eyebrow/eyebrow";
 import { LessonCompletionMark } from "@/components/lesson-completion-mark/lesson-completion-mark";
+import { LessonWatchProgress } from "@/components/lesson-watch-progress/lesson-watch-progress";
 import { PlayButton } from "@/components/play-button/play-button";
 import type { Course } from "@/domain/entities/course/course";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
@@ -35,6 +36,13 @@ function lessonDurationMinutes(lesson: Lesson): number | null {
  * levels of the hierarchy. See the `course-vocabulary` capability.
  *
  * @remarks
+ * A row's central column carries the lesson's watch progress beneath its
+ * title: the row's open middle is the only place a bar fits without crowding
+ * the eyebrow, the duration or the "Open" action. Both that bar and the
+ * completion mark are client islands — progress lives in `localStorage`,
+ * which the server cannot read — so the rest of the list stays
+ * server-rendered, and a lesson with nothing watched renders neither.
+ *
  * A row's thumbnail shows the lesson's `poster` artwork, falling back to
  * the gradient tile and a decorative play circle when the lesson has none
  * — reading lessons never carry one. The gradient also sits behind the
@@ -101,6 +109,7 @@ export function ModuleOverview({
           {lessons.map((lesson) => {
             const minutes = lessonDurationMinutes(lesson);
             const poster = lesson.kind === "video" ? lesson.poster : undefined;
+            const durationSeconds = lesson.kind === "video" ? lesson.durationSeconds : 0;
             return (
               <li
                 key={lesson.id}
@@ -138,8 +147,15 @@ export function ModuleOverview({
                     <span className="text-base font-semibold text-foreground sm:truncate">
                       {lesson.title}
                     </span>
-                    <LessonCompletionMark lessonId={lesson.id} />
+                    <LessonCompletionMark
+                      lessonId={lesson.id}
+                      durationSeconds={durationSeconds}
+                    />
                   </span>
+                  <LessonWatchProgress
+                    lessonId={lesson.id}
+                    durationSeconds={durationSeconds}
+                  />
                 </div>
                 {minutes !== null ? (
                   <span className="hidden text-sm text-muted-foreground tabular-nums sm:inline">

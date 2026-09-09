@@ -66,6 +66,10 @@ const summaryFor = (module: Module): ModuleSummary => ({
       poster: "/local-filesystem-lesson/poster.jpeg",
     },
   ],
+  lessonRuntimes: [
+    { id: LessonId.parse("55555555-5555-4555-8555-555555555555"), durationSeconds: 300 },
+    { id: LessonId.parse("66666666-6666-4666-8666-666666666666"), durationSeconds: 300 },
+  ],
 });
 
 const renderOverview = (overrides?: {

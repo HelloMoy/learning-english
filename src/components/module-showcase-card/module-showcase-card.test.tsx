@@ -4,8 +4,9 @@ import type {
   LeadingLesson,
   ModuleSummary,
 } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
+import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
 
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -62,6 +63,10 @@ const summary = (overrides?: Partial<ModuleSummary>): ModuleSummary => ({
   lessonCount: 6,
   totalDurationSeconds: 3600,
   leadingLessons: [1, 2, 3, 4, 5, 6].map((sequence) => leadingLesson(sequence)),
+  lessonRuntimes: [1, 2, 3, 4, 5, 6].map((sequence) => ({
+    id: leadingLesson(sequence).id,
+    durationSeconds: 600,
+  })),
   ...overrides,
 });
 
@@ -284,5 +289,101 @@ describe("ModuleShowcaseCard", () => {
     expect(screen.getByTestId("module-showcase-meta")).toHaveTextContent(
       metaText(0, "durationMinutes", { minutes: 0 }),
     );
+  });
+});
+
+describe("ModuleShowcaseCard — watch progress", () => {
+  const COMPLETED_KEY_PREFIX = "learning-english:completed:";
+
+  const announceStorageChange = () => {
+    act(() => {
+      refreshSavedPlaybackPositions();
+      window.dispatchEvent(new StorageEvent("storage", { key: null }));
+    });
+  };
+
+  beforeEach(() => {
+    window.localStorage.clear();
+    announceStorageChange();
+  });
+
+  test("WHEN some lessons are complete THEN the meter sits between the count line and the call to action", () => {
+    const cardSummary = summary();
+    window.localStorage.setItem(`${COMPLETED_KEY_PREFIX}${cardSummary.lessonRuntimes[0]!.id}`, "1");
+    announceStorageChange();
+
+    render(
+      <ModuleShowcaseCard
+        course={course}
+        module={module3}
+        summary={cardSummary}
+      />,
+    );
+
+    const meter = screen.getByRole("progressbar");
+    expect(meter).toHaveAttribute("aria-valuenow", "1");
+    expect(meter).toHaveAttribute("aria-valuemax", "6");
+    const meta = screen.getByTestId("module-showcase-meta");
+    const cta = screen.getByTestId("module-showcase-cta");
+    expect(meta.compareDocumentPosition(meter) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(meter.compareDocumentPosition(cta) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  test("WHEN a lesson beyond the gallery's preview is complete THEN the meter counts it", () => {
+    // The gallery previews six lessons; a module holding more must still be
+    // counted in full.
+    const cardSummary = summary({
+      lessonCount: 17,
+      lessonRuntimes: Array.from({ length: 17 }, (_, index) => ({
+        id: `44444444-4444-4444-8444-${String(index).padStart(12, "0")}` as LeadingLesson["id"],
+        durationSeconds: 600,
+      })),
+    });
+    window.localStorage.setItem(
+      `${COMPLETED_KEY_PREFIX}${cardSummary.lessonRuntimes[16]!.id}`,
+      "1",
+    );
+    announceStorageChange();
+
+    render(
+      <ModuleShowcaseCard
+        course={course}
+        module={module3}
+        summary={cardSummary}
+      />,
+    );
+
+    expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuemax", "17");
+  });
+
+  test("WHEN the learner has not started the module THEN no meter is rendered", () => {
+    render(
+      <ModuleShowcaseCard
+        course={course}
+        module={module3}
+        summary={summary()}
+      />,
+    );
+
+    expect(screen.queryByRole("progressbar")).toBeNull();
+  });
+
+  test("WHEN the meter renders THEN it adds no tab stop and displaces nothing", () => {
+    const cardSummary = summary();
+    window.localStorage.setItem(`${COMPLETED_KEY_PREFIX}${cardSummary.lessonRuntimes[0]!.id}`, "1");
+    announceStorageChange();
+
+    render(
+      <ModuleShowcaseCard
+        course={course}
+        module={module3}
+        summary={cardSummary}
+      />,
+    );
+
+    expect(screen.getByRole("progressbar")).not.toHaveAttribute("tabindex");
+    expect(screen.getByTestId("module-showcase-meta")).toBeInTheDocument();
+    expect(screen.getByTestId("module-showcase-cta")).toBeInTheDocument();
+    expect(screen.getByTestId("module-showcase-deck")).toBeInTheDocument();
   });
 });

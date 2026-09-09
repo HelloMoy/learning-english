@@ -16,6 +16,14 @@ vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
 }));
 
+vi.mock("@/hooks/use-lesson-completion/use-lesson-completion", () => ({
+  markLessonComplete: vi.fn(async () => {}),
+  useLessonCompletion: () => false,
+  useCompletedLessons: () => new Set<string>(),
+}));
+
+const { markLessonComplete } = await import("@/hooks/use-lesson-completion/use-lesson-completion");
+
 const mockUseTranslations = vi.mocked(useTranslations);
 
 const mockStorage = new Map<string, string>();
@@ -84,6 +92,7 @@ const settle = async () => {
 beforeEach(() => {
   mockUseTranslations.mockReturnValue(((key: string, values?: Record<string, unknown>) =>
     values === undefined ? key : `${key} ${Object.values(values).join(" ")}`) as never);
+  vi.mocked(markLessonComplete).mockClear();
   mockStorage.clear();
   Object.defineProperty(window, "localStorage", {
     configurable: true,
@@ -374,6 +383,53 @@ describe("PlaybackPositionedVideoPlayer", () => {
       await settle();
 
       expect(mockStorage.has(storageKeyFor(lessonId))).toBe(false);
+    });
+  });
+
+  describe("GIVEN the learner watches the lesson to its end", () => {
+    /** jsdom loads no provider, so the clock is the only thing worth faking. */
+    const holdPlayerAt = (player: MediaPlayerInstance, seconds: number) => {
+      vi.spyOn(player, "currentTime", "get").mockReturnValue(seconds);
+      vi.spyOn(player, "duration", "get").mockReturnValue(DURATION_SECONDS);
+    };
+
+    test("WHEN a time update arrives past the finish threshold THEN the lesson is marked complete", async () => {
+      const lessonId = LessonId.parse(faker.string.uuid());
+      const { playerRef } = renderPlayer({ lessonId });
+      await settle();
+      holdPlayerAt(playerOf(playerRef), DURATION_SECONDS);
+
+      emit(playerRef.current, "play");
+      emit(playerRef.current, "time-update");
+      await settle();
+
+      expect(markLessonComplete).toHaveBeenCalledWith(lessonId);
+    });
+
+    test("WHEN the video ends THEN the lesson is marked complete", async () => {
+      const lessonId = LessonId.parse(faker.string.uuid());
+      const { playerRef } = renderPlayer({ lessonId });
+      await settle();
+      holdPlayerAt(playerOf(playerRef), DURATION_SECONDS);
+
+      emit(playerRef.current, "play");
+      emit(playerRef.current, "ended");
+      await settle();
+
+      expect(markLessonComplete).toHaveBeenCalledWith(lessonId);
+    });
+
+    test("WHEN they stop partway THEN the lesson is not marked complete", async () => {
+      const { playerRef } = renderPlayer();
+      await settle();
+      holdPlayerAt(playerOf(playerRef), RESUMABLE_SECONDS);
+
+      emit(playerRef.current, "play");
+      emit(playerRef.current, "time-update");
+      emit(playerRef.current, "pause");
+      await settle();
+
+      expect(markLessonComplete).not.toHaveBeenCalled();
     });
   });
 });
