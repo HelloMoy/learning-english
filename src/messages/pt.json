@@ -31,6 +31,24 @@
     "dark": "Escuro"
   },
   "Components": {
+    "AddToHomeScreenGuide": {
+      "label": "Tenha o curso a um toque",
+      "payoff": "Adicione à sua tela de início e ele abre como um app, sem procurar a aba.",
+      "iosMore": "···",
+      "iosShare": "Compartilhar",
+      "iosAddToHomeScreen": "Adicionar à Tela de Início",
+      "iosAdd": "Adicionar",
+      "iosOpenAsWebApp": "Abrir como Web App",
+      "stepMore": "Toque em «···» na barra de baixo, à direita do endereço.",
+      "stepShare": "Escolha «Compartilhar», a primeira opção do menu.",
+      "stepAddToHomeScreen": "Desça na lista e escolha «Adicionar à Tela de Início».",
+      "stepAdd": "Toque em «Adicionar». Deixe «Abrir como Web App» ativado.",
+      "progress": "Passo {current} de {total}",
+      "result": "Pronto: o curso fica na sua tela de início, como qualquer outro app.",
+      "openGuide": "Como adicionar este curso à sua tela de início",
+      "dialogTitle": "Adicionar à tela de início",
+      "dismiss": "Fechar o guia"
+    },
     "CourseNavigator": {
       "loading": "Carregando próxima aula…",
       "nextLabel": "Próxima aula",
