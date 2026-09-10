@@ -70,7 +70,7 @@ const getServerSnapshot = (): boolean => false;
  * @example
  * ```tsx
  * const isChromeVisible = useBrowserChromeVisible();
- * return isEnlarged && isChromeVisible ? <SwipeUpHint /> : null;
+ * return isEnlarged && isChromeVisible ? <ScrollDownHint /> : null;
  * ```
  *
  * @returns `true` while a touch device in landscape has a viewport shorter than

@@ -102,8 +102,9 @@
       "playbackRate": "Velocidad de reproducción",
       "videoPlayerLabel": "Reproductor de video de la lección"
     },
-    "SwipeUpHint": {
-      "message": "Desliza hacia arriba para ocultar la barra del navegador y ver el video completo",
+    "ScrollDownHint": {
+      "message": "Baja para pantalla completa",
+      "screenReaderMessage": "Desplázate hacia abajo para ver el video en pantalla completa.",
       "dismiss": "Cerrar la pista"
     },
     "VideoPlayer": {
