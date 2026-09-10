@@ -1,8 +1,10 @@
 "use client";
 
 import { Brand } from "@/components/brand/brand";
+import { InstallAppButton } from "@/components/install-app-button/install-app-button";
 import { LocaleSwitcher } from "@/components/locale-switcher/locale-switcher";
 import { ThemeToggle } from "@/components/theme-toggle/theme-toggle";
+import { useCanInstallToHomeScreen } from "@/hooks/use-can-install-to-home-screen/use-can-install-to-home-screen";
 import { usePathname } from "@/i18n/navigation";
 
 import { useTranslations } from "next-intl";
@@ -25,6 +27,7 @@ export function sectionKey(
 export function SiteHeader() {
   const t = useTranslations("SiteHeader");
   const pathname = usePathname();
+  const canInstall = useCanInstallToHomeScreen();
   const section = t(sectionKey(pathname));
 
   return (
@@ -46,6 +49,10 @@ export function SiteHeader() {
           </span>
         </div>
         <div className="flex min-w-0 shrink-0 items-center gap-2.5">
+          {/* Only ever present on iPhone Safari, and only before the app has been
+              installed, so it is decided after hydration and appears a moment
+              after load — which does nudge the chips after it one step right. */}
+          {canInstall ? <InstallAppButton /> : null}
           <LocaleSwitcher />
           <ThemeToggle />
         </div>

@@ -1,3 +1,4 @@
+import { useCanInstallToHomeScreen } from "@/hooks/use-can-install-to-home-screen/use-can-install-to-home-screen";
 import { usePathname } from "@/i18n/navigation";
 
 import { render, screen } from "@testing-library/react";
@@ -17,6 +18,10 @@ import { sectionKey, SiteHeader } from "./site-header";
  * the real children rather than stubbing the components keeps the test
  * honest about what the header actually mounts.
  */
+vi.mock("@/hooks/use-can-install-to-home-screen/use-can-install-to-home-screen", () => ({
+  useCanInstallToHomeScreen: vi.fn(),
+}));
+
 vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
   useLocale: vi.fn(() => "en"),
@@ -115,5 +120,39 @@ describe("SiteHeader", () => {
       // Assert
       expect(screen.getByText(/sectionHome/)).toBeInTheDocument();
     });
+  });
+});
+
+describe("SiteHeader install control", () => {
+  describe("GIVEN the flow only exists on an uninstalled iPhone Safari", () => {
+    test("WHEN the app can be installed THEN the control is offered", () => {
+      vi.mocked(useCanInstallToHomeScreen).mockReturnValue(true);
+
+      render(<SiteHeader />);
+
+      expect(screen.getByRole("button", { name: "openGuide" })).toBeInTheDocument();
+    });
+
+    test("WHEN it cannot THEN no control is offered", () => {
+      // Desktop, another iOS browser, or an app already launched from the home
+      // screen — in all three the guide would be noise.
+      vi.mocked(useCanInstallToHomeScreen).mockReturnValue(false);
+
+      render(<SiteHeader />);
+
+      expect(screen.queryByRole("button", { name: "openGuide" })).not.toBeInTheDocument();
+    });
+  });
+});
+
+describe("SiteHeader control order", () => {
+  test("GIVEN the install control is present WHEN rendered THEN it leads the chips", () => {
+    vi.mocked(useCanInstallToHomeScreen).mockReturnValue(true);
+
+    render(<SiteHeader />);
+
+    const labels = screen.getAllByRole("button").map((c) => c.getAttribute("aria-label"));
+
+    expect(labels.indexOf("openGuide")).toBe(0);
   });
 });

@@ -31,6 +31,24 @@
     "dark": "Dark"
   },
   "Components": {
+    "AddToHomeScreenGuide": {
+      "label": "Keep the course one tap away",
+      "payoff": "Add it to your home screen and it opens like an app — no hunting for the tab.",
+      "iosMore": "···",
+      "iosShare": "Share",
+      "iosAddToHomeScreen": "Add to Home Screen",
+      "iosAdd": "Add",
+      "iosOpenAsWebApp": "Open as Web App",
+      "stepMore": "Tap “···” in the bottom bar, to the right of the address.",
+      "stepShare": "Choose “Share”, the first item in the menu.",
+      "stepAddToHomeScreen": "Scroll the list and choose “Add to Home Screen”.",
+      "stepAdd": "Tap “Add”. Leave “Open as Web App” switched on.",
+      "progress": "Step {current} of {total}",
+      "result": "Done — the course now sits on your home screen, like any other app.",
+      "openGuide": "How to add this course to your home screen",
+      "dialogTitle": "Add to home screen",
+      "dismiss": "Dismiss the guide"
+    },
     "CourseNavigator": {
       "loading": "Loading next lesson…",
       "nextLabel": "Next lesson",

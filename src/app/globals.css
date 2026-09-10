@@ -181,3 +181,89 @@
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * Motion for the add-to-home-screen guide's mock iPhone.
+ *
+ * The guide depicts iOS surfaces, so it borrows iOS's own motion: sheets rise
+ * from the bottom edge, the menu opens out of the corner its control sits in,
+ * and the step's target keeps pulsing so the learner sees where the tap lands.
+ * Without this the guide reads as a slideshow of screenshots.
+ *
+ * Deliberately plain CSS rather than per-component JavaScript: the
+ * `prefers-reduced-motion` block above already neutralises every animation on
+ * the page, so a viewer who asked for stillness gets it for free.
+ */
+@keyframes guide-sheet-rise {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes guide-menu-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes guide-dim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes guide-tap {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  20% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+
+@keyframes guide-point {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(231, 182, 76, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 14px 3px rgba(231, 182, 76, 0.5);
+  }
+}
+
+.guide-sheet-rise {
+  animation: guide-sheet-rise 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.guide-menu-pop {
+  transform-origin: bottom right;
+  animation: guide-menu-pop 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.guide-dim-in {
+  animation: guide-dim-in 420ms ease both;
+}
+
+.guide-tap {
+  animation: guide-tap 1900ms ease-out infinite;
+}
+
+.guide-point {
+  animation: guide-point 1900ms ease-in-out infinite;
+}
