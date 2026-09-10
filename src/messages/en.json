@@ -102,8 +102,9 @@
       "playbackRate": "Playback speed",
       "videoPlayerLabel": "Lecture video player"
     },
-    "SwipeUpHint": {
-      "message": "Swipe up to hide the browser bar and see the whole video",
+    "ScrollDownHint": {
+      "message": "Scroll for full screen",
+      "screenReaderMessage": "Scroll down to see the video on the whole screen.",
       "dismiss": "Dismiss hint"
     },
     "VideoPlayer": {

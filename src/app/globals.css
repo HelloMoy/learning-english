@@ -267,3 +267,34 @@
 .guide-point {
   animation: guide-point 1900ms ease-in-out infinite;
 }
+
+/*
+ * `bounce`, mirrored and widened. Tailwind's own travels up, and the scroll
+ * hint's arrow points down — the glyph and its motion have to agree. Displaced
+ * at both ends of the cycle and at rest in the middle, so a run stopped on a
+ * half iteration ends where the base style already is, without a jump.
+ *
+ * 60%, not `bounce`'s 25%: a quarter of a 16px glyph is four pixels, which
+ * measured on a phone reads as no animation at all. Keep this generous.
+ *
+ * Declared through `@theme` rather than as a plain `.animate-arrow-drop` rule
+ * so it is generated as a real utility. An unlayered rule outranks every
+ * utility, which would leave `repeat-*` unable to bound the run and the arrow
+ * moving forever.
+ */
+@theme {
+  --animate-arrow-drop: arrow-drop 1s infinite;
+
+  @keyframes arrow-drop {
+    0%,
+    100% {
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+      transform: translateY(60%);
+    }
+
+    50% {
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+      transform: none;
+    }
+  }
+}

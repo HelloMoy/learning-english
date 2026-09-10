@@ -15,7 +15,7 @@ import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import type { ComponentProps, ReactNode, Ref } from "react";
 
-import { SwipeUpHint } from "../swipe-up-hint/swipe-up-hint";
+import { ScrollDownHint } from "../scroll-down-hint/scroll-down-hint";
 import { VideoEnlargeButton } from "../video-enlarge-button/video-enlarge-button";
 import { buildVideoPlayerTranslations } from "./video-player-translations";
 
@@ -76,7 +76,7 @@ import { buildVideoPlayerTranslations } from "./video-player-translations";
  * of the 402 landscape points and hides only for a real swipe on the document,
  * which is why the mode never locks the page's scroll — the swipe has to travel
  * through the pinned player to the page beneath. While that toolbar is still on
- * screen a `SwipeUpHint` is drawn along the top of the box to say so.
+ * screen a `ScrollDownHint` is drawn along the top of the box to say so.
  * `useBrowserChromeVisible` decides when, from what the page can measure, and
  * the hint is gone the moment the viewport reaches the screen's short side.
  *
@@ -197,7 +197,7 @@ export function LessonVideoPlayer({
             ),
           }}
         />
-        {isEnlarged && isBrowserChromeVisible ? <SwipeUpHint /> : null}
+        {isEnlarged && isBrowserChromeVisible ? <ScrollDownHint /> : null}
         {children}
       </MediaPlayer>
     </>

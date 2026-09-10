@@ -102,8 +102,9 @@
       "playbackRate": "Velocidade de reprodução",
       "videoPlayerLabel": "Reprodutor de vídeo da aula"
     },
-    "SwipeUpHint": {
-      "message": "Deslize para cima para ocultar a barra do navegador e ver o vídeo inteiro",
+    "ScrollDownHint": {
+      "message": "Role para tela cheia",
+      "screenReaderMessage": "Role para baixo para ver o vídeo em tela cheia.",
       "dismiss": "Fechar a dica"
     },
     "VideoPlayer": {
