@@ -242,6 +242,51 @@ describe("LessonVideoPlayer", () => {
     });
   });
 
+  describe("GIVEN a learner who taps the video", () => {
+    /*
+     * The gestures are the player's own children, not part of the Default
+     * Layout, so unlike the layout's chrome they mount under jsdom (`Poster`
+     * does too). What they *do* to playback is Playwright's to prove; what is
+     * observable here is the contract: which gestures exist and which do not.
+     */
+    const gesturesIn = (player: HTMLElement) =>
+      Array.from(player.querySelectorAll("[data-media-gesture]")).map((gesture) => ({
+        event: gesture.getAttribute("event"),
+        action: gesture.getAttribute("action"),
+      }));
+
+    test("WHEN rendered THEN a single tap toggles playback", () => {
+      renderPlayer();
+
+      expect(gesturesIn(screen.getByRole("region"))).toContainEqual({
+        event: "pointerup",
+        action: "toggle:paused",
+      });
+    });
+
+    test("WHEN rendered THEN no gesture merely reveals the controls", () => {
+      // On a touch device Vidstack's own set swaps play/pause for show/hide
+      // controls, which is what left YouTube's centre icon dead on iPhone.
+      renderPlayer();
+
+      expect(gesturesIn(screen.getByRole("region")).map((gesture) => gesture.action)).not.toContain(
+        "toggle:controls",
+      );
+    });
+
+    test("WHEN rendered THEN a double tap still seeks and toggles fullscreen", () => {
+      renderPlayer();
+
+      expect(gesturesIn(screen.getByRole("region"))).toEqual(
+        expect.arrayContaining([
+          { event: "dblpointerup", action: "toggle:fullscreen" },
+          { event: "dblpointerup", action: "seek:-10" },
+          { event: "dblpointerup", action: "seek:10" },
+        ]),
+      );
+    });
+  });
+
   describe("GIVEN the player's chrome must be localized", () => {
     test("WHEN rendered THEN every layout word is read from the VideoPlayer namespace", () => {
       renderPlayer();

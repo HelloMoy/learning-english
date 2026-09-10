@@ -79,6 +79,41 @@
 }
 
 /*
+ * The player's own tap gestures.
+ *
+ * They are children of the player, not of `.vds-video-layout`, because the
+ * layout's set is switched off (`noGestures`) — on a touch device it swapped
+ * play/pause for show/hide controls. Vidstack's geometry for gestures is
+ * scoped to the layout, so it is restated here: a gesture is a region the
+ * component compares the tap's coordinates against, and without a size it
+ * matches nothing. The elements are `pointer-events: none` (set by Vidstack)
+ * and paint nothing.
+ *
+ * When two gestures accept the same event Vidstack keeps the one with the
+ * highest computed `z-index`, so the seek regions carry 1 and the whole-box
+ * ones an explicit 0 — a comparison between numbers, never `auto`.
+ */
+[data-media-player] > .vds-gesture {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+[data-media-player] > .vds-gesture[action="seek:-10"],
+[data-media-player] > .vds-gesture[action="seek:10"] {
+  width: 20%;
+  z-index: 1;
+}
+
+[data-media-player] > .vds-gesture[action="seek:10"] {
+  left: unset;
+  right: 0;
+}
+
+/*
  * The viewport-filling mode.
  *
  * This cannot be a set of Tailwind utilities on the element. Vidstack's own
