@@ -1,6 +1,8 @@
 import "@testing-library/jest-dom/vitest";
 
-import { act, render, screen } from "@testing-library/react";
+import { SWIPE_THRESHOLD_PX } from "@/hooks/use-horizontal-swipe/use-horizontal-swipe";
+
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { useTranslations } from "next-intl";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
@@ -42,9 +44,43 @@ const translate = (key: string, values?: Record<string, unknown>) =>
  * Timer-driven state changes have to be flushed inside `act`, or React never
  * applies them and every assertion below quietly reads the first step.
  */
-const advanceSteps = async (count: number) => {
+const advanceClock = async (milliseconds: number) => {
   await act(async () => {
-    await vi.advanceTimersByTimeAsync(STEP_INTERVAL_MS * count);
+    await vi.advanceTimersByTimeAsync(milliseconds);
+  });
+};
+
+/**
+ * One interval at a time: each frame schedules the next frame's wait from an
+ * effect, and only an `act` boundary flushes that effect, so a single long
+ * advance would run the first timer and then find nothing left to run.
+ */
+const advanceSteps = async (count: number) => {
+  for (let step = 0; step < count; step += 1) await advanceClock(STEP_INTERVAL_MS);
+};
+
+/**
+ * Explicit coordinates, because `userEvent.pointer` derives them from a layout
+ * jsdom never computes — every element sits at the origin there, so every drag
+ * it builds measures zero.
+ */
+const HORIZONTAL_TRAVEL = SWIPE_THRESHOLD_PX + 20;
+
+const dragAcrossGuide = ({
+  towards,
+  alsoDownBy = 0,
+}: {
+  towards: "left" | "right";
+  alsoDownBy?: number;
+}) => {
+  const start = { clientX: 300, clientY: 100 };
+  const guide = screen.getByRole("region", { name: MESSAGES.label });
+
+  fireEvent.pointerDown(guide, start);
+  fireEvent.pointerUp(guide, {
+    clientX:
+      towards === "left" ? start.clientX - HORIZONTAL_TRAVEL : start.clientX + HORIZONTAL_TRAVEL,
+    clientY: start.clientY + alsoDownBy,
   });
 };
 
@@ -110,14 +146,17 @@ describe("GuideAutoplay", () => {
   });
 
   describe("GIVEN the guide is taken off screen", () => {
-    test("WHEN unmounted THEN it stops its timer", () => {
+    test("WHEN unmounted THEN it leaves no timer running", () => {
+      // Asserted as a pending timer rather than as a call to `clearInterval`,
+      // so the guide is free to be timed however it likes and the rule stays
+      // the one the requirement states.
       vi.useFakeTimers();
-      const clearIntervalSpy = vi.spyOn(globalThis, "clearInterval");
       const { unmount } = render(<GuideAutoplay onDismiss={vi.fn()} />);
+      expect(vi.getTimerCount()).toBeGreaterThan(0);
 
       unmount();
 
-      expect(clearIntervalSpy).toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
     });
   });
 
@@ -216,6 +255,119 @@ describe("GuideAutoplay fit", () => {
       expect(box).toHaveClass("justify-center");
       expect(box?.firstElementChild).toHaveClass("w-fit");
       expect(box?.firstElementChild).toHaveStyle({ transformOrigin: "top center" });
+    });
+  });
+});
+
+describe("GuideAutoplay by hand", () => {
+  beforeEach(() => {
+    mockUseTranslations.mockReturnValue(translate as never);
+    stubReducedMotion(false);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  describe("GIVEN a learner who reads faster, or slower, than the loop plays", () => {
+    test("WHEN they drag towards the left THEN the next step is shown", () => {
+      render(<GuideAutoplay onDismiss={vi.fn()} />);
+
+      dragAcrossGuide({ towards: "left" });
+
+      expect(screen.getByText(MESSAGES.stepShare!)).toBeInTheDocument();
+    });
+
+    test("WHEN they drag back towards the right THEN the previous step returns", () => {
+      render(<GuideAutoplay onDismiss={vi.fn()} />);
+
+      dragAcrossGuide({ towards: "left" });
+      dragAcrossGuide({ towards: "right" });
+
+      expect(screen.getByText(MESSAGES.stepMore!)).toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN a learner who overshot the frame they wanted", () => {
+    test("WHEN they drag back from the first step THEN the result is shown", () => {
+      // Reversing has to reach the frame they just missed; a carousel that
+      // dead-ends here costs them the whole loop to come back.
+      render(<GuideAutoplay onDismiss={vi.fn()} />);
+
+      dragAcrossGuide({ towards: "right" });
+
+      expect(screen.getByText(MESSAGES.result!)).toBeInTheDocument();
+    });
+
+    test("WHEN they drag forward from the result THEN the first step is shown", () => {
+      render(<GuideAutoplay onDismiss={vi.fn()} />);
+
+      dragAcrossGuide({ towards: "right" });
+      dragAcrossGuide({ towards: "left" });
+
+      expect(screen.getByText(MESSAGES.stepMore!)).toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN a gesture is a nudge and not a takeover", () => {
+    test("WHEN they move it by hand THEN the frame they chose gets a full interval", async () => {
+      // The learner asked for this frame; taking it away a moment later
+      // punishes them for when their gesture happened to land.
+      vi.useFakeTimers();
+      render(<GuideAutoplay onDismiss={vi.fn()} />);
+      await advanceClock(STEP_INTERVAL_MS - 1);
+
+      dragAcrossGuide({ towards: "left" });
+      await advanceClock(1);
+
+      expect(screen.getByText(MESSAGES.stepShare!)).toBeInTheDocument();
+    });
+
+    test("WHEN that interval then elapses THEN it plays on by itself", async () => {
+      vi.useFakeTimers();
+      render(<GuideAutoplay onDismiss={vi.fn()} />);
+      await advanceClock(STEP_INTERVAL_MS - 1);
+
+      dragAcrossGuide({ towards: "left" });
+      await advanceClock(STEP_INTERVAL_MS + 1);
+
+      expect(screen.getByText(MESSAGES.stepAddToHomeScreen!)).toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN a viewer who asked for less motion has no timer to wait for", () => {
+    test("WHEN they drag across the guide THEN it still moves one frame", () => {
+      // Without the gesture this learner is left on the first step for good:
+      // the preference silences the timer, and the timer is the only other way
+      // the guide moves.
+      stubReducedMotion(true);
+      render(<GuideAutoplay onDismiss={vi.fn()} />);
+
+      dragAcrossGuide({ towards: "left" });
+
+      expect(screen.getByText(MESSAGES.stepShare!)).toBeInTheDocument();
+    });
+
+    test("WHEN the guide has been moved by hand THEN it still does not play on", async () => {
+      stubReducedMotion(true);
+      vi.useFakeTimers();
+      render(<GuideAutoplay onDismiss={vi.fn()} />);
+
+      dragAcrossGuide({ towards: "left" });
+      await advanceSteps(3);
+
+      expect(screen.getByText(MESSAGES.stepShare!)).toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN a drag may be aimed at scrolling rather than at the guide", () => {
+    test("WHEN a drag travels further down than sideways THEN the step is left alone", () => {
+      render(<GuideAutoplay onDismiss={vi.fn()} />);
+
+      dragAcrossGuide({ towards: "left", alsoDownBy: HORIZONTAL_TRAVEL + 1 });
+
+      expect(screen.getByText(MESSAGES.stepMore!)).toBeInTheDocument();
     });
   });
 });

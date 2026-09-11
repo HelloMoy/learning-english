@@ -10,8 +10,14 @@ import { GuideAutoplay } from "./guide-autoplay";
  * iOS control names follow it — a learner whose phone is in Spanish must be
  * told to look for «Compartir», not "Share".
  *
+ * It also answers a horizontal drag: press on the panel, move at least
+ * `SWIPE_THRESHOLD_PX` sideways and release — leftwards for the next frame,
+ * rightwards for the previous one, both ends wrapping. A drag that travels
+ * further vertically than sideways is left to the page, so try that too.
+ *
  * Under an operating system set to reduced motion it deliberately holds its
- * first step, so this story will look static on such a machine.
+ * first step, so this story will look static on such a machine — the drag is
+ * the only way to move it there, and it still works.
  */
 const meta = {
   title: "Components/AddToHomeScreenGuide/GuideAutoplay",
@@ -44,3 +50,13 @@ export const InSpanish: Story = {
 export const InPortuguese: Story = {
   parameters: { locale: "pt" },
 };
+
+/**
+ * The same guide, with the drag as the thing to try: move the frame by hand,
+ * reverse it, and watch the loop pick up again a full interval later rather
+ * than snatching the frame away mid-read.
+ *
+ * A mouse drag across the panel works exactly as a finger does — the gesture is
+ * built on pointer events, which is what makes it drivable here at all.
+ */
+export const MovedByHand: Story = {};
