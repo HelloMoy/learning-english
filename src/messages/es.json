@@ -70,9 +70,6 @@
       "titleWithNotes": "Materiales de la lección",
       "empty": "Esta lección no tiene materiales."
     },
-    "LessonNotes": {
-      "resourceTitle": "Notas de la lección (archivo)"
-    },
     "LessonBreadcrumb": {
       "ariaLabel": "Ruta de navegación"
     },

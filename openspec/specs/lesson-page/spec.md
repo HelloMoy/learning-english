@@ -31,6 +31,8 @@ The Lesson Page SHALL render the following regions, in this layout:
 
 A `Resource.url` addresses content — an absolute URL, or a site-relative path to a static asset served from `public/` — and never an in-app route. Resource links SHALL therefore be rendered with a plain anchor whose `href` is the `Resource.url` **verbatim**, and SHALL NOT be routed through the locale-aware `Link` from `@/i18n/navigation`. Applying the `localePrefix: "always"` locale segment to a `public/` asset path yields a path that does not exist and returns `404`.
 
+The Lesson's notes `Resource` — the `readme.md` the Notes tab renders inline — SHALL NOT appear in the Resources card, and the right rail SHALL NOT offer any other card or row linking to it. The rendered notes are the learner's only route to that content.
+
 The Up next link, by contrast, addresses an in-app Lesson route and SHALL remain locale-aware.
 
 #### Scenario: The page renders all regions when the view is resolved
@@ -53,9 +55,13 @@ The Up next link, by contrast, addresses an in-app Lesson route and SHALL remain
 - **WHEN** any `Resource` row is rendered
 - **THEN** the link carries `target="_blank"` and `rel="noopener noreferrer"`, so the learner does not navigate away from the lesson
 
-#### Scenario: The Lesson notes (source) card follows the same linking rule
-- **WHEN** the right rail renders the "Lesson notes (source)" card for a lesson whose notes `Resource` has a site-relative `readme.md` URL
-- **THEN** that link's `href` is the `Resource.url` verbatim, with no locale prefix — the notes card and the Resources card share one linking behavior
+#### Scenario: The notes resource is nowhere in the right rail
+- **WHEN** a lesson whose `resources` include the notes `Resource` (the `readme.md` the Notes tab renders) is opened
+- **THEN** no row anywhere in the right rail links to that `readme.md` — it is absent from the Resources card, and no separate notes card is rendered
+
+#### Scenario: The Resources card shows its empty state when notes were its only resource
+- **WHEN** a lesson's only `Resource` is the notes `readme.md`
+- **THEN** the Resources card renders its localized empty-state message and no rows, rather than a second card appearing beside it
 
 #### Scenario: The Up next card points to the next lesson
 - **WHEN** the resolved view has `nextLesson: SomeLesson`

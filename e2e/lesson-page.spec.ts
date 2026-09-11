@@ -49,20 +49,47 @@ const lessonsIn = (moduleId: string) =>
 const MODULE_A_LESSONS = lessonsIn(MODULE_A.id);
 
 /**
+ * A lesson's notes `readme.md`, identified by content key rather than by
+ * filename: `notesKeys` maps a lesson to the key its notes live under, and a
+ * `ResourceRow.url` holds that same key. The Notes tab renders this file
+ * inline, so the rail deliberately offers no link to it.
+ */
+const notesKeyOf = (lessonId: string): string | undefined => contentCatalog.notesKeys[lessonId];
+
+/** The resources of one lesson that the "Resources" card actually lists. */
+const railResourcesOf = (lessonId: string) =>
+  contentCatalog.resourceRows.filter(
+    (resource) => resource.lessonId === lessonId && resource.url !== notesKeyOf(lessonId),
+  );
+
+/**
  * The primary fixture is the first lesson in module A that carries a
- * resource — the "Resources" region assertion needs one to be meaningful,
- * and it must not be the module's last lesson so "up next stays inside the
- * module" is exercisable.
+ * resource of any kind, and is not the module's last lesson so "up next
+ * stays inside the module" is exercisable. It drives the route, breadcrumb,
+ * title, outline, and up-next assertions.
+ *
+ * Every resource in module A happens to be a notes `readme.md`, which the
+ * rail excludes — so this lesson shows the Resources card's empty state, and
+ * the fixtures that need a rendered resource row live below.
  */
 const PRIMARY_LESSON = MODULE_A_LESSONS.find(
   (lesson, index) =>
     index < MODULE_A_LESSONS.length - 1 &&
     contentCatalog.resourceRows.some((resource) => resource.lessonId === lesson.id),
 )!;
-const PRIMARY_RESOURCE = contentCatalog.resourceRows.find(
-  (resource) => resource.lessonId === PRIMARY_LESSON.id,
-)!;
 const LESSON_AFTER_PRIMARY = MODULE_A_LESSONS[MODULE_A_LESSONS.indexOf(PRIMARY_LESSON) + 1]!;
+
+/**
+ * A lesson the rail actually lists resources for, wherever in the course it
+ * lives. Module A carries only notes files, so pinning the link assertions to
+ * it would leave them asserting over an empty list.
+ */
+const LESSON_WITH_RAIL_RESOURCES = bySequence(contentCatalog.lessonRows)
+  .filter((lesson) => MODULES.some((module_) => module_.id === lesson.moduleId))
+  .find((lesson) => railResourcesOf(lesson.id).length > 0)!;
+const MODULE_OF_RAIL_RESOURCES = MODULES.find(
+  (module_) => module_.id === LESSON_WITH_RAIL_RESOURCES.moduleId,
+)!;
 
 const LAST_LESSON_OF_MODULE_A = MODULE_A_LESSONS[MODULE_A_LESSONS.length - 1]!;
 const FIRST_LESSON_OF_MODULE_B = lessonsIn(MODULE_B.id)[0]!;
@@ -104,9 +131,12 @@ test.describe("Lesson Page — happy path", () => {
     // the provider's `<video>` is an implementation detail behind it.
     await expect(page.getByRole("region", { name: /video player/i })).toBeVisible();
 
-    // Resources card lists the seed resource attached to this lesson.
-    await expect(page.getByRole("region", { name: /resources/i })).toBeVisible();
-    await expect(page.getByText(PRIMARY_RESOURCE.title)).toBeVisible();
+    // The Resources region renders. This lesson's only resource is its notes
+    // `readme.md`, which the rail excludes because the Notes tab already
+    // renders it — so the card shows its empty state rather than a row.
+    const resources = page.getByRole("region", { name: /resources/i });
+    await expect(resources).toBeVisible();
+    await expect(resources.getByRole("link")).toHaveCount(0);
 
     // Up next card points to the next lesson in the same module.
     const upNext = page.getByRole("region", { name: /up next/i });
@@ -149,23 +179,30 @@ test.describe("Lesson Page — happy path", () => {
  * assertion passes both before and after the fix. See design.md §D2.
  */
 test.describe("Lesson Page — resource links resolve", () => {
-  const RESOURCES_OF_PRIMARY_LESSON = contentCatalog.resourceRows.filter(
-    (resource) => resource.lessonId === PRIMARY_LESSON.id,
-  );
+  const NOTES_KEY_OF_PRIMARY_LESSON = notesKeyOf(PRIMARY_LESSON.id);
+  const RAIL_RESOURCES = railResourcesOf(LESSON_WITH_RAIL_RESOURCES.id);
 
   for (const locale of ["en", "es"]) {
     test(`WHEN the ${locale} lesson page is visited THEN every resource link is unprefixed and fetches 200`, async ({
       page,
     }) => {
-      await page.goto(lessonUrl(locale, MODULE_A.slug, PRIMARY_LESSON.id));
+      await page.goto(
+        lessonUrl(locale, MODULE_OF_RAIL_RESOURCES.slug, LESSON_WITH_RAIL_RESOURCES.id),
+      );
 
-      // Covers both right-rail cards: the "Resources" card and the
-      // "Lesson notes (source)" card render through the same ResourceItem,
-      // and the seed attaches a readme.md notes resource to this lesson.
-      expect(RESOURCES_OF_PRIMARY_LESSON.length).toBeGreaterThan(0);
+      // The rail has one card — "Resources" — and it lists every resource
+      // except the notes file.
+      expect(RAIL_RESOURCES.length).toBeGreaterThan(0);
 
-      for (const resource of RESOURCES_OF_PRIMARY_LESSON) {
-        const link = page.getByRole("link", { name: new RegExp(escapeRegExp(resource.title)) });
+      // Scoped to the card: a resource titled "Day" would otherwise also
+      // match the outline's fifteen "Day N" lesson links.
+      const resourcesCard = page.getByRole("region", { name: /resources|materiales/i });
+      await expect(resourcesCard).toBeVisible();
+
+      for (const resource of RAIL_RESOURCES) {
+        const link = resourcesCard.getByRole("link", {
+          name: new RegExp(escapeRegExp(resource.title)),
+        });
 
         // The seed stores a content KEY; the href is that key resolved by
         // the BlobStore the server booted with. `playwright.config.ts` sets
@@ -181,6 +218,28 @@ test.describe("Lesson Page — resource links resolve", () => {
       }
     });
   }
+
+  /**
+   * The negative half of the rule, asserted on the URL rather than on the
+   * old card's heading: a shrunken loop above would still pass if the notes
+   * link came back under a different label.
+   */
+  test("WHEN a lesson with notes is visited THEN nothing on the page links to the raw readme.md", async ({
+    page,
+  }) => {
+    expect(
+      NOTES_KEY_OF_PRIMARY_LESSON,
+      "fixture lesson must carry notes for this to assert anything",
+    ).toBeDefined();
+
+    await page.goto(lessonUrl("en", MODULE_A.slug, PRIMARY_LESSON.id));
+
+    // The notes themselves are on the page — in the Notes tab, not the rail.
+    await expect(page.getByTestId("lesson-notes-tabs")).toBeVisible();
+    await expect(page.locator(`a[href="${contentUrl(NOTES_KEY_OF_PRIMARY_LESSON!)}"]`)).toHaveCount(
+      0,
+    );
+  });
 });
 
 test.describe("Lesson Page — cross-module navigation", () => {

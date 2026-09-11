@@ -2,13 +2,15 @@
 
 ## Purpose
 
-Define the Immersion Cinema presentation of the Lesson Page. The lesson view adopts a three-column cinema layout: a left "Course outline" sidebar, a center column with a video hero (the native player, with a gold title cover shown only over an idle, poster-less lesson) followed by the lesson title, description, a Notes/Transcript tab pair, and a "Mark as complete" action, and a right rail with "Resources", "Lesson notes (source)", and an "Up next" card. Notes render in the app's active locale — one language at a time, never a side-by-side pair; the Transcript tab is present for visual parity but disabled. Existing `NativeVideoPlayer`, breadcrumb, resource list, up-next, and mark-complete behaviors are preserved.
+Define the Immersion Cinema presentation of the Lesson Page. The lesson view adopts a three-column cinema layout: a left "Course outline" sidebar, a center column with a video hero (the native player, with a gold title cover shown only over an idle, poster-less lesson) followed by the lesson title, description, a Notes/Transcript tab pair, and a "Mark as complete" action, and a right rail with a "Resources" card and an "Up next" card. Notes render in the app's active locale — one language at a time, never a side-by-side pair; the Transcript tab is present for visual parity but disabled. Existing `NativeVideoPlayer`, breadcrumb, resource list, up-next, and mark-complete behaviors are preserved.
 
 ## Requirements
 
 ### Requirement: Lesson view renders as a cinema player with tabbed notes
 
-The Lesson Page SHALL present a three-column cinema layout: a left "Course outline" sidebar, a center column with a video hero (the Vidstack player specified by the `lesson-page` capability, controls/scrubber retained, with a gold title cover over the idle player) followed by the lesson title, description, a Notes/Transcript tab pair, and a "Mark as complete" action; and a right rail with "Resources", "Lesson notes (source)", and an "Up next" card. All regions SHALL be landmarks or labelled, keyboard-reachable with visible focus, and localized. The existing breadcrumb, resource list, up-next, and mark-complete behaviors SHALL be preserved.
+The Lesson Page SHALL present a three-column cinema layout: a left "Course outline" sidebar, a center column with a video hero (the Vidstack player specified by the `lesson-page` capability, controls/scrubber retained, with a gold title cover over the idle player) followed by the lesson title, description, a Notes/Transcript tab pair, and a "Mark as complete" action; and a right rail with a "Resources" card and an "Up next" card. All regions SHALL be landmarks or labelled, keyboard-reachable with visible focus, and localized. The existing breadcrumb, resource list, up-next, and mark-complete behaviors SHALL be preserved.
+
+The right rail SHALL NOT render a "Lesson notes (source)" card. The lesson's notes are read in the Notes tab of the center column, rendered as Markdown in the learner's active locale; a rail card linking to the raw `readme.md` would send the learner to unstyled source of content the page already shows, so no such card SHALL exist. The notes `Resource` SHALL also stay out of the "Resources" card, so removing the dedicated card does not surface the same link under a different heading.
 
 The gold title cover (the lesson eyebrow, the module headline, and its gradient scrim) SHALL render only while BOTH conditions hold: **the player shows no thumbnail of its own**, AND playback has not started in the current session. The cover exists to keep an idle black frame from being blank; wherever a thumbnail already fills that frame, the thumbnail is the cover and the gold cover SHALL NOT render at all.
 
@@ -22,6 +24,14 @@ The condition SHALL therefore NOT be expressed as "the lesson has no `poster`" a
 From the player's first `play` event onward the cover SHALL NOT render, whether the video is playing or paused, and SHALL NOT reappear on `pause`, `seeking`, or `ended`. The cover SHALL remain non-interactive (`pointer-events-none`) so the player's controls stay operable beneath it, and it SHALL NOT sit above the in-player resume overlay: when both would be visible at once, the overlay SHALL be the surface the learner sees and can act on. The lesson title SHALL remain available in the breadcrumb and in the heading below the player, and the module title in the breadcrumb and the outline sidebar, so hiding the cover loses no information.
 
 In the outline, each module title SHALL be a disclosure control that expands and collapses that module's lesson list in place. The control SHALL NOT navigate. Any number of modules MAY be open at the same time; expanding one module SHALL NOT collapse another. The module containing the current lesson SHALL start expanded. Each control SHALL expose its state via `aria-expanded` and SHALL be operable by keyboard with a visible focus ring.
+
+#### Scenario: The right rail has no notes card
+- **WHEN** a lesson whose notes `Resource` is present renders
+- **THEN** the right rail contains exactly the "Resources" card and the "Up next" card — there is no "Lesson notes (source)" card and no link to the raw `readme.md` anywhere in the rail
+
+#### Scenario: The Notes tab still renders the notes
+- **WHEN** the same lesson renders
+- **THEN** the Notes tab in the center column shows the notes body in the active locale, unchanged by the rail card's absence
 
 #### Scenario: Video hero preserves the player controls
 - **WHEN** a video lesson renders

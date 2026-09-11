@@ -80,6 +80,19 @@ const fixtures = (
   };
 };
 
+/**
+ * The `readme.md` the Notes tab renders inline. It arrives in `view.resources`
+ * like any other resource, which is exactly why the rail has to filter it out.
+ */
+const notesResourceFor = (lessonId: LessonId): Resource =>
+  Resource.parse({
+    id: faker.string.uuid(),
+    lessonId,
+    title: "Vowel Sound Notes",
+    url: faker.internet.url(),
+    kind: "other",
+  });
+
 describe("LessonView", () => {
   beforeEach(() => {
     mockUseTranslations.mockReturnValue(((key: string) => key) as never);
@@ -234,5 +247,69 @@ describe("LessonView", () => {
       "aria-disabled",
       "true",
     );
+  });
+
+  test("WHEN a lesson carries a notes resource THEN the rail offers no link to the raw file", () => {
+    // Arrange
+    const { view } = fixtures();
+    const notesResource = notesResourceFor(view.lesson.id);
+
+    // Act
+    render(
+      <LessonView
+        view={{ ...view, resources: [...view.resources, notesResource] }}
+        notes={"# Intro\n\nTexto ES."}
+        notesResource={notesResource}
+        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+      />,
+    );
+
+    // Assert: no dedicated notes card, and the file is not folded into
+    // Resources under the default heading either.
+    expect(screen.queryByRole("region", { name: "resourceTitle" })).toBeNull();
+    expect(screen.queryByText(notesResource.title)).toBeNull();
+    expect(screen.queryByRole("link", { name: notesResource.title })).toBeNull();
+    expect(screen.getByText("PDF handout")).toBeInTheDocument();
+  });
+
+  test("WHEN the notes file is a lesson's only resource THEN Resources shows its empty state", () => {
+    // Arrange
+    const { view } = fixtures();
+    const notesResource = notesResourceFor(view.lesson.id);
+
+    // Act
+    render(
+      <LessonView
+        view={{ ...view, resources: [notesResource] }}
+        notes={"# Intro\n\nTexto ES."}
+        notesResource={notesResource}
+        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+      />,
+    );
+
+    // Assert: one card showing "no resources", not a second card beside it.
+    expect(screen.getByText("empty")).toBeInTheDocument();
+    expect(screen.queryByText(notesResource.title)).toBeNull();
+    expect(screen.queryByRole("region", { name: "resourceTitle" })).toBeNull();
+  });
+
+  test("WHEN a notes resource is present THEN the Notes tab still renders its body", () => {
+    // Arrange: guards against the rail removal reaching into the centre column.
+    const { view } = fixtures();
+    const notesResource = notesResourceFor(view.lesson.id);
+
+    // Act
+    render(
+      <LessonView
+        view={{ ...view, resources: [notesResource] }}
+        notes={"# Intro\n\nTexto ES."}
+        notesResource={notesResource}
+        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+      />,
+    );
+
+    // Assert
+    expect(screen.getByTestId("lesson-notes-tabs")).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "notes" })).toBeInTheDocument();
   });
 });

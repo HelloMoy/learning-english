@@ -70,9 +70,6 @@
       "titleWithNotes": "Lesson materials",
       "empty": "No resources for this lesson."
     },
-    "LessonNotes": {
-      "resourceTitle": "Lesson notes (source)"
-    },
     "LessonBreadcrumb": {
       "ariaLabel": "Breadcrumb"
     },
