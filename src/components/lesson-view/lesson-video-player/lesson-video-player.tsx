@@ -9,13 +9,7 @@ import { useEnlargedVideo } from "@/hooks/use-enlarged-video/use-enlarged-video"
 import { cn } from "@/lib/utils/utils";
 import { youtubeVideoIdFrom } from "@/lib/youtube-source/youtube-source";
 
-import {
-  Gesture,
-  MediaPlayer,
-  MediaProvider,
-  Poster,
-  type MediaPlayerInstance,
-} from "@vidstack/react";
+import { MediaPlayer, MediaProvider, Poster, type MediaPlayerInstance } from "@vidstack/react";
 import { defaultLayoutIcons, DefaultVideoLayout } from "@vidstack/react/player/layouts/default";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
@@ -23,6 +17,7 @@ import type { ComponentProps, ReactNode, Ref } from "react";
 
 import { ScrollDownHint } from "../scroll-down-hint/scroll-down-hint";
 import { VideoEnlargeButton } from "../video-enlarge-button/video-enlarge-button";
+import { PlaybackGestures } from "./playback-gestures";
 import { buildVideoPlayerTranslations } from "./video-player-translations";
 
 /**
@@ -98,7 +93,9 @@ import { buildVideoPlayerTranslations } from "./video-player-translations";
  * cross-origin frame. So the learner sees a control that promises play/pause
  * and gets a control bar instead. Making the tap act is the only fix that
  * covers both icons; the bar still shows on every tap, since the library
- * shows it on `pause` and after `play`.
+ * shows it on `pause` and after `play`. A double tap on an edge starts a
+ * seek run with an on-screen count, the YouTube app's convention — the
+ * helper's own JSDoc says how the library's gesture and the run share it.
  *
  * The element is never portalled. Moving the player in the tree would remount
  * the provider `<iframe>`, reloading the embed and resetting `currentTime`
@@ -222,49 +219,6 @@ export function LessonVideoPlayer({
         {isEnlarged && isBrowserChromeVisible ? <ScrollDownHint /> : null}
         {children}
       </MediaPlayer>
-    </>
-  );
-}
-
-/**
- * The Default Layout's gesture set, minus the one that made a tap on a phone
- * only show or hide the control bar.
- *
- * @remarks
- * Every `Gesture` listens on the provider element and checks the event's
- * coordinates against its own box, so these are regions, not targets: the
- * component sets them `pointer-events: none` itself. The geometry that
- * Vidstack's stylesheet gives gestures *inside* the layout does not reach
- * children of the player, so `lesson-video-player.css` supplies it.
- *
- * `toggle:paused` is not gated on the pointer type, which is the whole point
- * — see the "single tap" paragraph of `LessonVideoPlayer`. The double-tap
- * set is kept as shipped: the seek regions are the outer fifth of each edge
- * and out-rank the fullscreen gesture by `z-index` when both fire.
- */
-function PlaybackGestures() {
-  return (
-    <>
-      <Gesture
-        className="vds-gesture"
-        event="pointerup"
-        action="toggle:paused"
-      />
-      <Gesture
-        className="vds-gesture"
-        event="dblpointerup"
-        action="toggle:fullscreen"
-      />
-      <Gesture
-        className="vds-gesture"
-        event="dblpointerup"
-        action="seek:-10"
-      />
-      <Gesture
-        className="vds-gesture"
-        event="dblpointerup"
-        action="seek:10"
-      />
     </>
   );
 }

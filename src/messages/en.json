@@ -107,6 +107,11 @@
       "screenReaderMessage": "Scroll down to see the video on the whole screen.",
       "dismiss": "Dismiss hint"
     },
+    "SeekFeedback": {
+      "seconds": "{count, plural, one {# second} other {# seconds}}",
+      "forward": "Skipped forward {count, plural, one {# second} other {# seconds}}",
+      "backward": "Skipped back {count, plural, one {# second} other {# seconds}}"
+    },
     "VideoPlayer": {
       "announcements": "Announcements",
       "accessibility": "Accessibility",
