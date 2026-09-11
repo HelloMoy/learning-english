@@ -17,12 +17,13 @@ const mockUseTranslations = vi.mocked(useTranslations);
 const MESSAGES: Record<string, string> = {
   iosMore: "···",
   iosShare: "Compartir",
+  iosViewMore: "Ver más",
   iosAddToHomeScreen: "Añadir a pantalla de inicio",
   iosAdd: "Añadir",
   iosOpenAsWebApp: "Abrir como app web",
 };
 
-const [MORE_STEP, SHARE_STEP, ADD_TO_HOME_STEP, ADD_STEP] = INSTALL_STEPS;
+const [MORE_STEP, SHARE_STEP, VIEW_MORE_STEP, ADD_TO_HOME_STEP, ADD_STEP] = INSTALL_STEPS;
 
 /**
  * The brand, which `messages.test.ts` pins identical in every locale, so the mock
@@ -39,6 +40,7 @@ describe("GuidePhoneScreen", () => {
     test.each([
       ["the More control", MORE_STEP, MESSAGES.iosMore],
       ["Share", SHARE_STEP, MESSAGES.iosShare],
+      ["View More", VIEW_MORE_STEP, MESSAGES.iosViewMore],
       ["Add to Home Screen", ADD_TO_HOME_STEP, MESSAGES.iosAddToHomeScreen],
       ["Add", ADD_STEP, MESSAGES.iosAdd],
     ])("WHEN the step targets %s THEN the screen paints its localized label", (_, step, label) => {
@@ -59,6 +61,55 @@ describe("GuidePhoneScreen", () => {
       render(<GuidePhoneScreen step={ADD_STEP!} />);
 
       expect(screen.getByText(MESSAGES.iosOpenAsWebApp!)).toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN the share sheet opens collapsed and the learner must open it out", () => {
+    test.each([
+      ["collapsed", VIEW_MORE_STEP],
+      ["expanded", ADD_TO_HOME_STEP],
+    ])("WHEN the %s sheet is depicted THEN it is the share sheet", (_, step) => {
+      // Both states draw the one sheet, so both carry its row of actions. Without
+      // this, a surface that fell through to some other screen would still satisfy
+      // every assertion below.
+      const { container } = render(<GuidePhoneScreen step={step!} />);
+
+      expect(container.querySelector("[data-sheet-actions]")).toBeInTheDocument();
+    });
+
+    test("WHEN the collapsed sheet is depicted THEN it carries no list to choose from", () => {
+      // The step before this one is the whole reason it exists: on the sheet
+      // Share opens there is nothing to scroll, so drawing a list here would
+      // make the View More tap look optional.
+      const { container } = render(<GuidePhoneScreen step={VIEW_MORE_STEP!} />);
+
+      expect(container.querySelector("[data-sheet-list]")).not.toBeInTheDocument();
+    });
+
+    test("WHEN the expanded sheet is depicted THEN the list is there", () => {
+      const { container } = render(<GuidePhoneScreen step={ADD_TO_HOME_STEP!} />);
+
+      expect(container.querySelector("[data-sheet-list]")).toBeInTheDocument();
+    });
+
+    test.each([
+      ["collapsed", VIEW_MORE_STEP],
+      ["expanded", ADD_TO_HOME_STEP],
+    ])("WHEN the %s sheet is depicted THEN the actions row keeps its four places", (_, step) => {
+      // The learner arrived at the expanded sheet by tapping the last of these.
+      // A control that vanishes on being pressed makes the two frames read as
+      // unrelated screens rather than as one sheet growing.
+      const { container } = render(<GuidePhoneScreen step={step!} />);
+
+      expect(container.querySelector("[data-sheet-actions]")?.children).toHaveLength(4);
+    });
+
+    test("WHEN the expanded sheet is depicted THEN it does not still say View More", () => {
+      // iOS relabels that control «Ver menos» once the sheet is open, so the
+      // name belongs only on the frame where the learner has to find it.
+      render(<GuidePhoneScreen step={ADD_TO_HOME_STEP!} />);
+
+      expect(screen.queryByText(MESSAGES.iosViewMore!)).not.toBeInTheDocument();
     });
   });
 
@@ -86,6 +137,7 @@ describe("GuidePhoneScreen motion", () => {
     test.each([
       ["the More control", MORE_STEP],
       ["Share", SHARE_STEP],
+      ["View More", VIEW_MORE_STEP],
       ["Add to Home Screen", ADD_TO_HOME_STEP],
       ["Add", ADD_STEP],
     ])("WHEN the step targets %s THEN it carries a pointer and a tap indication", (_, step) => {
@@ -98,7 +150,8 @@ describe("GuidePhoneScreen motion", () => {
 
   describe("GIVEN iOS surfaces arrive rather than appear", () => {
     test.each([
-      ["the share sheet", ADD_TO_HOME_STEP],
+      ["the collapsed share sheet", VIEW_MORE_STEP],
+      ["the expanded share sheet", ADD_TO_HOME_STEP],
       ["the confirmation screen", ADD_STEP],
     ])("WHEN %s is depicted THEN it rises from the bottom edge", (_, step) => {
       const { container } = render(<GuidePhoneScreen step={step!} />);

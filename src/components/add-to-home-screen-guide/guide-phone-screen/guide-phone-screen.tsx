@@ -54,7 +54,14 @@ type GuidePhoneScreenProps = {
  * @remarks
  * Reconstructed from a screen recording of the real device, so the positions
  * are the ones the learner will actually be hunting in: iOS 26 Safari's bottom
- * bar, the menu behind "···", the share sheet, and the confirmation screen.
+ * bar, the menu behind "···", the share sheet in both the state it opens in and
+ * the state "View More" leaves it in, and the confirmation screen.
+ *
+ * The share sheet is two surfaces rather than one because the learner sees two.
+ * It opens collapsed, with no list on it at all, and the guide that drew only
+ * the expanded one was sending learners to scroll a list their phone was not
+ * showing. The two share {@link ShareSheetTop}, so the second reads as the
+ * first having grown.
  *
  * Controls the learner does not need are drawn as unlabelled grey shapes at
  * their true position and size. Dropping them would be tidier and would also
@@ -131,11 +138,19 @@ function Surface({ step }: { step: GuideFrame }) {
       </>
     );
 
+  if (step.surface === "share-sheet-collapsed")
+    return (
+      <>
+        <SheetDim />
+        <CollapsedShareSheet viewMoreLabel={targetLabel} />
+      </>
+    );
+
   if (step.surface === "share-sheet")
     return (
       <>
         <SheetDim />
-        <ShareSheet targetLabel={targetLabel} />
+        <ExpandedShareSheet targetLabel={targetLabel} />
       </>
     );
 
@@ -553,62 +568,49 @@ function Hairline() {
   return <div style={{ height: 1, background: IOS.separator, margin: "12px 14px" }} />;
 }
 
-/** iOS's share sheet, with "Add to Home Screen" down in the list where it really is. */
-function ShareSheet({ targetLabel }: { targetLabel: string }) {
+/**
+ * The share sheet as it opens: a header, an app row, and the row of actions
+ * ending in "View More". Nothing else — there is no list on it yet.
+ *
+ * @remarks
+ * This is the state iOS 26 actually opens in, and the reason the flow has a tap
+ * the guide used to skip. `Add to Home Screen` is not reachable from here.
+ */
+function CollapsedShareSheet({ viewMoreLabel }: { viewMoreLabel: string }) {
+  return (
+    <div
+      className="guide-sheet-rise"
+      // `top: auto` is what makes this a short sheet: its height is its rows,
+      // so it sits at the bottom with the page still visible above it, the way
+      // the real one does. A fixed top would be a number to keep in step with
+      // whatever the rows come to.
+      style={{ ...SHEET_BASE, top: "auto", paddingTop: 14, paddingBottom: 22 }}
+    >
+      <ShareSheetTop lastAction={<ViewMoreTarget label={viewMoreLabel} />} />
+    </div>
+  );
+}
+
+/**
+ * The same sheet once "View More" has opened it out, with "Add to Home Screen"
+ * down in the list where it really is.
+ *
+ * @remarks
+ * It renders {@link ShareSheetTop} rather than redrawing it, so that moving
+ * from the collapsed frame to this one reads as the one sheet growing. Two
+ * hand-drawn copies of those rows would drift, and the learner would see two
+ * unrelated screens.
+ */
+function ExpandedShareSheet({ targetLabel }: { targetLabel: string }) {
   return (
     <div
       className="guide-sheet-rise"
       style={{ ...SHEET_BASE, paddingTop: 14 }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 14px" }}>
-        <div
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 7,
-            background: "linear-gradient(160deg,#241d10,#0d0d12)",
-            flexShrink: 0,
-          }}
-        />
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <Muted
-            width={96}
-            height={8}
-          />
-          <Muted
-            width={58}
-            height={7}
-          />
-        </div>
-      </div>
-
-      <Hairline />
-
-      <Row>
-        {[0, 1, 2].map((i) => (
-          <Muted
-            key={i}
-            width={42}
-            height={42}
-            radius={10}
-          />
-        ))}
-      </Row>
-
-      <Hairline />
-
-      <Row>
-        {[0, 1, 2, 3].map((i) => (
-          <Muted
-            key={i}
-            width={36}
-            height={36}
-            radius={18}
-          />
-        ))}
-      </Row>
+      <ShareSheetTop lastAction={<SheetAlreadyOpenControl />} />
 
       <div
+        data-sheet-list
         style={{
           margin: "14px 12px 0",
           borderRadius: 12,
@@ -664,6 +666,172 @@ function ShareSheet({ targetLabel }: { targetLabel: string }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * The rows both states of the share sheet share: header, apps, actions.
+ *
+ * @remarks
+ * `lastAction` is the one thing the two states differ in. It is passed in
+ * rather than chosen from a flag because the difference is not a variation on
+ * one control: collapsed, it is the target and carries its name; expanded, it
+ * is a control the learner is done with, and iOS has relabelled it "View Less".
+ */
+function ShareSheetTop({ lastAction }: { lastAction: ReactNode }) {
+  return (
+    <>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 14px" }}>
+        <div
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 7,
+            background: "linear-gradient(160deg,#241d10,#0d0d12)",
+            flexShrink: 0,
+          }}
+        />
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <Muted
+            width={96}
+            height={8}
+          />
+          <Muted
+            width={58}
+            height={7}
+          />
+        </div>
+      </div>
+
+      <Hairline />
+
+      <Row>
+        {[0, 1, 2].map((i) => (
+          <Muted
+            key={i}
+            width={42}
+            height={42}
+            radius={10}
+          />
+        ))}
+      </Row>
+
+      <Hairline />
+
+      <ShareSheetActions lastAction={lastAction} />
+    </>
+  );
+}
+
+/** The row of round actions. The first three are ones the learner never needs. */
+function ShareSheetActions({ lastAction }: { lastAction: ReactNode }) {
+  return (
+    <div
+      data-sheet-actions
+      style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "0 14px" }}
+    >
+      {[0, 1, 2].map((i) => (
+        <Muted
+          key={i}
+          width={36}
+          height={36}
+          radius={18}
+        />
+      ))}
+      {lastAction}
+    </div>
+  );
+}
+
+/** The control that opens the sheet out, named and pointed at. */
+function ViewMoreTarget({ label }: { label: string }) {
+  return (
+    <div style={{ width: 36, flexShrink: 0 }}>
+      {/* The pointer centres on its positioned parent, so that parent is the
+          circle alone — wrapping the label too would land the pulse between
+          the two. */}
+      <div
+        style={{
+          position: "relative",
+          width: 36,
+          height: 36,
+          borderRadius: 18,
+          background: "rgba(231,182,76,0.28)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <SheetChevronGlyph
+          color="#8a5e0f"
+          pointing="up"
+        />
+        <Pointer radius="50%" />
+      </div>
+      <div
+        style={{
+          marginTop: 4,
+          textAlign: "center",
+          fontSize: 7,
+          lineHeight: 1.2,
+          fontWeight: 700,
+          color: "#8a5e0f",
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The same control once the sheet is open, in the same place, unnamed.
+ *
+ * @remarks
+ * Unnamed on purpose. iOS relabels it "View Less" here, so carrying the "View
+ * More" label across would put a word on the depiction that the learner's phone
+ * does not show — the exact failure the guide exists to avoid. Naming it "View
+ * Less" instead would translate a control the guide never asks anyone to tap.
+ * The place and the chevron are what carry the continuity; the chevron turns
+ * over, because on the real sheet it does.
+ */
+function SheetAlreadyOpenControl() {
+  return (
+    <div
+      style={{
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        background: IOS.muted,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+      }}
+    >
+      <SheetChevronGlyph
+        color={IOS.secondary}
+        pointing="down"
+      />
+    </div>
+  );
+}
+
+function SheetChevronGlyph({ color, pointing }: { color: string; pointing: "up" | "down" }) {
+  return (
+    <svg
+      width={15}
+      height={15}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2.2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ transform: pointing === "down" ? "rotate(180deg)" : undefined }}
+    >
+      <path d="m5 15 7-7 7 7" />
+    </svg>
   );
 }
 
