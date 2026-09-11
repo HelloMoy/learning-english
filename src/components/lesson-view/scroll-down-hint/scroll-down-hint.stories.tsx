@@ -9,7 +9,7 @@ import { ScrollDownHint } from "./scroll-down-hint";
  * to the viewport and the browser's toolbar is still on screen.
  *
  * Both animations run once per mount — the pill's entrance and the arrow's
- * bounded downward travel — so to watch them again, switch stories or toggle
+ * bounded upward travel — so to watch them again, switch stories or toggle
  * any control. Storybook remounts on both.
  *
  * There is deliberately no reduced-motion story. `motion-reduce:` is a media
@@ -18,7 +18,7 @@ import { ScrollDownHint } from "./scroll-down-hint";
  * than none. That guarantee is pinned by the component test and checked in the
  * browser's own emulation (DevTools → Rendering → Emulate
  * `prefers-reduced-motion`), where the hint should simply be there, arrow
- * pointing, from the first frame.
+ * pointing up, from the first frame.
  */
 const meta = {
   title: "LessonView/ScrollDownHint",
@@ -39,13 +39,14 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * The hint as an English learner sees it: the pill drops in from the top edge,
- * the arrow travels downward for about four and a half seconds and then rests
- * still pointing, and the × closes it for the session.
+ * The hint as an English learner sees it: the pill lifts into place, the arrow
+ * travels upward for six and a half seconds and then rests still pointing, and
+ * the × closes it for the session.
  *
- * The arrow points where the *page* goes, not where the finger goes — on an
- * iPhone those are opposite — which is why the verb is one of scrolling. Read
- * arrow and words together: they have to ask for the same thing.
+ * The arrow points where the *finger* goes, not where the page goes — on an
+ * iPhone those are opposite — which is why the verb acts on the video rather
+ * than on the page. Read arrow and words together: they have to ask for the
+ * same thing.
  */
 export const Default: Story = {};
 

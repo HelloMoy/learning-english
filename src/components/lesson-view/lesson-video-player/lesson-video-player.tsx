@@ -78,9 +78,11 @@ import { buildVideoPlayerTranslations } from "./video-player-translations";
  * of the 402 landscape points and hides only for a real swipe on the document,
  * which is why the mode never locks the page's scroll — the swipe has to travel
  * through the pinned player to the page beneath. While that toolbar is still on
- * screen a `ScrollDownHint` is drawn along the top of the box to say so.
- * `useBrowserChromeVisible` decides when, from what the page can measure, and
- * the hint is gone the moment the viewport reaches the screen's short side.
+ * screen a `ScrollDownHint` is drawn along the top of the box, asking the
+ * learner to move the video upward — the gesture, not the page's answering
+ * scroll, because the backdrop hides the page. `useBrowserChromeVisible`
+ * decides when, from what the page can measure, and the hint is gone the moment
+ * the viewport reaches the screen's short side.
  *
  * **A single tap on the video toggles playback, on every pointer.** The
  * Default Layout's own gestures are switched off (`noGestures`) and

@@ -16,13 +16,14 @@ const mockUseTranslations = vi.mocked(useTranslations);
 /**
  * Spanish, so a hint that starts rendering English defaults fails here
  * instead of in a learner's lesson. The two messages are deliberately not the
- * same sentence: the visible one names the outcome and says nothing about
- * direction — an arrow does that — while the spoken one has to say it in
- * words, because an arrow states nothing to a screen reader.
+ * same sentence: the visible one carries only the gesture, since gesture and
+ * outcome together do not hold one line at a phone's width, while the spoken
+ * one carries the outcome too — an arrow states nothing to a screen reader,
+ * and the sentence it hears is where nothing may be dropped.
  */
 const MESSAGES: Record<string, string> = {
-  message: "Baja para pantalla completa",
-  screenReaderMessage: "Desplázate hacia abajo para ver el video en pantalla completa.",
+  message: "Arroja el video hacia arriba",
+  screenReaderMessage: "Arroja el video hacia arriba para verlo en pantalla completa.",
   dismiss: "Cerrar la pista",
 };
 
@@ -38,9 +39,10 @@ describe("ScrollDownHint", () => {
       expect(screen.getByRole("status")).toHaveTextContent(MESSAGES.message!);
     });
 
-    test("WHEN rendered THEN what a screen reader hears names the direction", () => {
-      // The visible copy names only the outcome, so this sentence is the one
-      // place the direction survives for anyone who cannot see the arrow.
+    test("WHEN rendered THEN what a screen reader hears names the outcome too", () => {
+      // The visible copy carries only the gesture, so this sentence is the one
+      // place the full screen it earns survives for anyone who cannot see the
+      // arrow.
       render(<ScrollDownHint />);
 
       expect(screen.getByRole("status")).toHaveTextContent(MESSAGES.screenReaderMessage!);
@@ -83,15 +85,16 @@ describe("ScrollDownHint", () => {
   });
 
   describe("GIVEN the hint has just appeared", () => {
-    test("WHEN it enters THEN it comes from the edge the gesture points at", () => {
-      // The pill travels down into place, which states the axis of the swipe
-      // before the arrow has said anything.
+    test("WHEN it enters THEN it travels the way the gesture goes", () => {
+      // The pill lifts into place, which states the axis of the gesture before
+      // the arrow has said anything. Only the eight pixels of entrance travel
+      // reverse — the pill still rests against the player's top edge.
       render(<ScrollDownHint />);
 
       expect(screen.getByRole("status")).toHaveClass(
         "animate-in",
         "fade-in",
-        "slide-in-from-top-2",
+        "slide-in-from-bottom-2",
       );
     });
 
@@ -106,31 +109,37 @@ describe("ScrollDownHint", () => {
     const arrowOf = (container: HTMLElement) =>
       container.querySelector('[data-slot="scroll-direction-arrow"]');
 
-    test("WHEN the hint is shown THEN the glyph itself points down", () => {
-      // Down: the page scrolls down, even though the finger travels up. The
-      // arrow commits to the page, and the copy's verb commits with it.
+    test("WHEN the hint is shown THEN the glyph itself points up", () => {
+      // Up: the way the finger goes. The page travels the other way, but the
+      // page is covered by the backdrop and the learner never sees it move —
+      // so the arrow commits to the hand, and the copy's verb commits with it.
       //
       // Asserted on the drawn glyph, not on a class. A device that picks up new
-      // JS while holding a cached stylesheet must still get a downward arrow —
-      // an upward one beside this copy is the exact defect being fixed, and a
+      // JS while holding a cached stylesheet must still get an upward arrow —
+      // a downward one beside this copy is the exact defect being fixed, and a
       // class-based flip lets a stale stylesheet reintroduce it.
       const { container } = render(<ScrollDownHint />);
 
-      expect(arrowOf(container)).toHaveClass("lucide-arrow-down");
+      expect(arrowOf(container)).toHaveClass("lucide-arrow-up");
       expect(arrowOf(container)).not.toHaveClass("rotate-180");
     });
 
     test("WHEN the hint is shown THEN the arrow travels the way it points", () => {
       // A still arrow beside a sentence reads as an ornament. The travel is
       // what turns it back into an instruction, and it goes the way the glyph
-      // does — `arrow-drop` is `bounce` mirrored, since `bounce` travels up.
+      // does — `arrow-lift` travels up, like the finger.
+      //
+      // A name of its own, not a redefined `arrow-drop`: a phone holding the
+      // old stylesheet finds no such utility and leaves the arrow still, which
+      // is the failure this component accepts. Reusing the name would have that
+      // phone run downward travel beside an upward glyph.
       const { container } = render(<ScrollDownHint />);
 
-      expect(arrowOf(container)).toHaveClass("animate-arrow-drop");
+      expect(arrowOf(container)).toHaveClass("animate-arrow-lift");
     });
 
     test("WHEN the gesture has been demonstrated THEN the travel ends on its own", () => {
-      // Bounded, and bounded on a half iteration: `arrow-drop` holds the
+      // Bounded, and bounded on a half iteration: `arrow-lift` holds the
       // displaced position at both ends of a whole cycle, so stopping on one
       // would drop the arrow into place in a single frame. The half lands on
       // the resting keyframe, where the base style already is.

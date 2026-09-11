@@ -670,17 +670,17 @@ test.describe("GIVEN an iPhone held in landscape with Safari's toolbar on screen
   });
   test.skip(({ browserName }) => browserName !== "webkit", "iPhone Safari is WebKit");
 
-  const SCROLL_HINT = messages.Components.ScrollDownHint.message;
+  const GESTURE_HINT = messages.Components.ScrollDownHint.message;
   const DISMISS_HINT = messages.Components.ScrollDownHint.dismiss;
 
-  test("WHEN the video is enlarged THEN the learner is asked to scroll", async ({ page }) => {
+  test("WHEN the video is enlarged THEN the learner is asked for the gesture", async ({ page }) => {
     await openLesson(page);
     await revealControls(page);
     await expect(page.getByRole("status")).toHaveCount(0);
 
     await page.getByRole("button", { name: ENTER_FULLSCREEN }).click();
 
-    await expect(page.getByRole("status")).toContainText(SCROLL_HINT);
+    await expect(page.getByRole("status")).toContainText(GESTURE_HINT);
   });
 
   test("WHEN the viewport reaches the screen's short side THEN the hint leaves on its own", async ({
@@ -691,7 +691,7 @@ test.describe("GIVEN an iPhone held in landscape with Safari's toolbar on screen
     await openLesson(page);
     await revealControls(page);
     await page.getByRole("button", { name: ENTER_FULLSCREEN }).click();
-    await expect(page.getByRole("status")).toContainText(SCROLL_HINT);
+    await expect(page.getByRole("status")).toContainText(GESTURE_HINT);
 
     await page.setViewportSize({ width: 874, height: 402 });
 
@@ -702,7 +702,7 @@ test.describe("GIVEN an iPhone held in landscape with Safari's toolbar on screen
     await openLesson(page);
     await revealControls(page);
     await page.getByRole("button", { name: ENTER_FULLSCREEN }).click();
-    await expect(page.getByRole("status")).toContainText(SCROLL_HINT);
+    await expect(page.getByRole("status")).toContainText(GESTURE_HINT);
 
     await page.getByRole("button", { name: DISMISS_HINT }).click();
 

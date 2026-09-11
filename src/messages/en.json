@@ -100,8 +100,8 @@
       "videoPlayerLabel": "Lecture video player"
     },
     "ScrollDownHint": {
-      "message": "Scroll for full screen",
-      "screenReaderMessage": "Scroll down to see the video on the whole screen.",
+      "message": "Drag the video up",
+      "screenReaderMessage": "Drag the video up to see it on the whole screen.",
       "dismiss": "Dismiss hint"
     },
     "SeekFeedback": {

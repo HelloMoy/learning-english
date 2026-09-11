@@ -2,13 +2,13 @@
 
 import { Button } from "@/components/ui/button/button";
 
-import { ArrowDown, X } from "lucide-react";
+import { ArrowUp, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 /**
- * The scroll hint drawn over the enlarged video while the browser's own chrome
- * still takes part of the screen.
+ * The hint drawn over the enlarged video while the browser's own chrome still
+ * takes part of the screen, asking for the gesture that reclaims it.
  *
  * @remarks
  * On an iPhone the enlarged video reaches the whole screen only after a real
@@ -28,45 +28,52 @@ import { useState } from "react";
  * Dismissal is local state, so it lasts exactly as long as this instance —
  * the rest of the enlarged session — and the next one starts fresh.
  *
- * **The direction lives in the arrow, not in the words, and the arrow means the
- * page, not the finger.** Those are opposite here: the page scrolls *down*
- * because the finger travels *up*. The copy used to name the finger's
- * direction — "desliza hacia arriba" — and learners holding a phone in
- * landscape read it against the wrong axis and swiped the other way. So the
- * visible line names only the outcome, and the downward arrow is left as the
- * single channel for direction.
+ * **Every cue here names the finger's direction, never the page's.** The two are
+ * opposite — the page scrolls *down* because the finger travels *up* — and only
+ * one of them may be spoken, since a hint that names both asks for two things.
+ * It names the finger's, because the page is the one thing the learner cannot
+ * watch move: the player is pinned and the backdrop covers everything behind
+ * it, so a line about the page going down reads as an instruction to put the
+ * video back. The arrow points up, the pill enters travelling up, the arrow's
+ * travel goes up, and the copy says the same.
  *
- * That choice binds the copy: the verb has to be one of **scrolling**, never of
- * swiping. "Desliza" beside a downward arrow instructs the finger downward,
- * which reclaims nothing — two cues disagreeing, which is the whole defect this
- * component was rewritten to remove. Whoever edits `message` next inherits that
- * constraint: keep the verb about the page, and keep every direction word out.
+ * That binds the copy: the verb has to be one of **the hand moving the video**
+ * — dragging it in English, throwing it in Spanish — and never one of
+ * scrolling. Which it is per locale is that locale's call; what binds them all
+ * is that the verb acts on the video and none of them names the page. A scroll
+ * verb beside an upward arrow is the two-cues-disagreeing
+ * defect this component has twice been rewritten to remove. A direction word is
+ * allowed now, but only anchored to the video — a bare "arriba" is what a
+ * learner holding a phone in landscape reads against the wrong axis, while
+ * "arriba" said of something they can see on screen resolves in any
+ * orientation. `messages.test.ts` holds the scroll verbs out of every locale.
  *
  * **The direction lives in the glyph, not in a class.** An earlier version drew
- * `ArrowUp` and flipped it with `rotate-180`, which renders correctly in every
+ * one arrow and flipped it with `rotate-180`, which renders correctly in every
  * engine — and still shipped the bug once, on a phone that picked up the new JS
- * while holding a cached stylesheet. It drew the new copy beside an upward
- * arrow, because the rule that flipped it was new to the stylesheet and that
- * device did not have it yet. `ArrowDown` cannot fail that way. Keep it: what
+ * while holding a cached stylesheet: it drew the copy beside an arrow pointing
+ * the wrong way, because the rule that flipped it was new to the stylesheet and
+ * that device did not have it yet. `ArrowUp` cannot fail that way. Keep it: what
  * CSS carries here is the motion, and a stylesheet that never arrives should
  * cost a still arrow, never a wrong one.
  *
  * The travel is bounded rather than endless. The learner enlarged the video to
  * watch it, and a cue that never stops moving over it works against the thing
  * they asked for, so the arrow demonstrates the direction and then holds still,
- * still pointing. `arrow-drop` in `globals.css` is Tailwind's `bounce`
- * mirrored, since that one travels up; see the comment at its use site for why
- * the bound is a half iteration and not a whole one. All of the motion is
- * dropped under `prefers-reduced-motion`, which leaves exactly the still
- * pointing arrow.
+ * still pointing. `arrow-lift` in `globals.css` is Tailwind's `bounce` widened,
+ * and carries a name of its own precisely so a cached stylesheet leaves the
+ * arrow still instead of moving it the wrong way; see the comment at its use
+ * site for why the bound is a half iteration and not a whole one. All of the
+ * motion is dropped under `prefers-reduced-motion`, which leaves exactly the
+ * still pointing arrow.
  *
  * `role="status"` lets assistive technology hear the hint without focus
- * leaving the player. An arrow states nothing there, so `screenReaderMessage`
- * carries the direction in words and the visible line is `aria-hidden` — both
- * sit in the same region, and without that the promise is read twice, once
- * stripped of its direction and once with it. The glyphs are `lucide-react`'s,
- * like the resume overlay's: this is app chrome drawn over the video, not a
- * player control.
+ * leaving the player. The visible line carries only the gesture — gesture and
+ * outcome together do not hold one line at a phone's width — so
+ * `screenReaderMessage` is the one that says both, and the visible line is
+ * `aria-hidden` so the two do not stack into a doubled announcement. The glyphs
+ * are `lucide-react`'s, like the resume overlay's: this is app chrome drawn over
+ * the video, not a player control.
  *
  * @category Components
  */
@@ -79,27 +86,27 @@ export function ScrollDownHint() {
   return (
     <div
       role="status"
-      className="pointer-events-none absolute inset-x-0 top-3 z-20 flex animate-in justify-center px-3 duration-300 fade-in slide-in-from-top-2 motion-reduce:animate-none"
+      className="pointer-events-none absolute inset-x-0 top-3 z-20 flex animate-in justify-center px-3 duration-300 fade-in slide-in-from-bottom-2 motion-reduce:animate-none"
     >
       <div className="flex max-w-full min-w-0 items-center gap-2 rounded-full border border-border bg-card/90 py-1 pr-1 pl-3 text-sm text-foreground shadow-lg backdrop-blur">
         {/*
-          The glyph points down on its own — no rotation. Direction is not a
+          The glyph points up on its own — no rotation. Direction is not a
           styling concern here: a device that picks up new JS while holding a
-          cached stylesheet must still get a downward arrow, and a CSS flip
-          lets that device draw this copy beside an upward one. Missing CSS may
+          cached stylesheet must still get an upward arrow, and a CSS flip
+          lets that device draw this copy beside a downward one. Missing CSS may
           cost the motion, never the direction.
 
-          6.5 iterations, not 7: `arrow-drop` holds the displaced position at
+          6.5 iterations, not 7: `arrow-lift` holds the displaced position at
           both 0% and 100%, so a whole number ends the animation held out and
           the arrow snaps back into place in a single frame. The half iteration
           lands on the resting keyframe, where the base style already is. The
           count is generous because a learner spends the first seconds of an
           enlarged video looking at the video, not at this corner.
         */}
-        <ArrowDown
+        <ArrowUp
           data-slot="scroll-direction-arrow"
           aria-hidden="true"
-          className="size-4 shrink-0 animate-arrow-drop repeat-[6.5] motion-reduce:animate-none"
+          className="size-4 shrink-0 animate-arrow-lift repeat-[6.5] motion-reduce:animate-none"
         />
         <span
           aria-hidden="true"

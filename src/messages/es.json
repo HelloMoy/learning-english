@@ -100,8 +100,8 @@
       "videoPlayerLabel": "Reproductor de video de la lección"
     },
     "ScrollDownHint": {
-      "message": "Baja para pantalla completa",
-      "screenReaderMessage": "Desplázate hacia abajo para ver el video en pantalla completa.",
+      "message": "Arroja el video hacia arriba",
+      "screenReaderMessage": "Arroja el video hacia arriba para verlo en pantalla completa.",
       "dismiss": "Cerrar la pista"
     },
     "SeekFeedback": {

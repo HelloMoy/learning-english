@@ -346,23 +346,37 @@ leave the Player scrolled out of view once the learner is back in the page.
 **The mode SHALL tell a touch learner how to reclaim the screen.** While the mode is
 active on a touch device in landscape orientation and the viewport is shorter than the
 screen's short side — the browser's chrome is still on screen — the Player SHALL show a
-hint, drawn over the video, asking for the scroll that reclaims it. The hint SHALL
+hint, drawn over the video, asking for the gesture that reclaims it. The hint SHALL
 disappear on its own as soon as the viewport reaches the screen's short side, SHALL be
 dismissible by the learner for the rest of that enlarged session, SHALL NOT intercept the
 gesture it asks for, and SHALL be localized from `next-intl` for every locale. It SHALL
 NOT be shown in portrait, on a device without touch, or while the video is in the page.
 
-**The hint SHALL carry the direction in a moving arrow, not in a word, and that direction
-SHALL be the page's, not the finger's.** The two are opposite here — the page scrolls down
-because the finger travels up — and the hint SHALL commit to the page's: the arrow SHALL
-point down, and the visible copy SHALL use a verb of scrolling rather than of swiping, so
-that arrow and words ask for the same thing. A swipe verb beside a downward arrow would
-instruct the finger downward, which reclaims nothing.
+**The hint SHALL speak about the finger, not about the page.** The two directions are
+opposite here — the page scrolls down because the finger travels up — and only one of
+them may be named, because a hint that names both asks for two things. The hint SHALL
+name the finger's: what the learner sees is a pinned video over a covered page, so the
+page is the one thing they cannot watch move, and an instruction to send it downward
+reads as an instruction to put the video back. The visible copy's verb SHALL therefore be
+one of the hand moving the video — dragging it, throwing it — never one of scrolling, and
+the arrow SHALL point **up**, the way the finger goes. Which of those verbs a locale takes
+is that locale's own call; what binds every locale is that the verb acts on the video and
+that no locale names the page.
 
-The visible copy SHALL name the outcome the learner wants and SHALL NOT contain a
-direction word, because a learner holding a phone in landscape reads "up" and "down"
-against the wrong axis. It SHALL be short enough to hold one line at phone widths in every
-locale, so the hint covers as little of the video as possible.
+**Every directional cue the hint carries SHALL point the same way.** The arrow, the
+direction the hint enters from, the arrow's repeated travel, the visible copy and the
+sentence assistive technology hears SHALL all state the one direction the finger goes.
+A cue that disagrees with the others is worse than no cue: it is the defect the hint's
+wording has twice been rewritten to remove.
+
+The visible copy MAY contain a direction word, but only **anchored to the video**. A bare
+"up" is what a learner holding a phone in landscape reads against the wrong axis; "up"
+said of an object they can see on screen resolves in any orientation, which is why the
+copy SHALL name the video as the thing that moves. The copy SHALL be short enough to hold
+one line at phone widths in every locale, so the hint covers as little of the video as
+possible; where the gesture and the outcome cannot both fit on that line, the visible copy
+SHALL carry the gesture and the outcome SHALL be left to the sentence assistive technology
+hears.
 
 **The hint's motion SHALL demonstrate the direction and then stop.** On appearing, the
 hint SHALL enter travelling the way the arrow points, and its arrow SHALL then repeat a
@@ -375,8 +389,8 @@ leaving the pointing arrow still from the start.
 
 **The direction SHALL still reach assistive technology in words.** A moving arrow states
 nothing to a screen reader, so the hint SHALL also carry a visually hidden, localized
-sentence that names the direction, and that sentence SHALL be part of what
-the hint's status region announces.
+sentence that names the gesture, its direction and the outcome it earns, and that sentence
+SHALL be part of what the hint's status region announces.
 
 The library's own fullscreen button SHALL NOT be relied upon as the *only* affordance,
 because it hides itself wherever the Fullscreen API reports no support — which is
@@ -433,53 +447,54 @@ button remains the affordance and the fallback SHALL NOT render.
 - **THEN** the control's accessible name comes from `src/messages/es.json`, and it
   exposes whether the enlarged mode is currently active
 
-#### Scenario: The scroll hint appears while the browser chrome takes part of the screen
+#### Scenario: The hint appears while the browser chrome takes part of the screen
 - **WHEN** the mode is active on a touch device in landscape and the viewport is shorter
   than the screen's short side
-- **THEN** a hint asking for the scroll is shown over the video, localized for the active
+- **THEN** a hint asking for the gesture is shown over the video, localized for the active
   locale
 
-#### Scenario: The hint's visible copy names the outcome and no direction
+#### Scenario: The hint's visible copy names the gesture and the video it moves
 - **WHEN** the hint is shown under any locale the application serves
-- **THEN** its visible copy names what the learner gets — the video on the whole screen —
-  and contains no word for a direction
+- **THEN** its visible copy asks the learner to move the video up with their hand, naming
+  the video as the thing that moves, and its verb is one of the hand rather than one of
+  scrolling
 
 #### Scenario: The arrow and the words ask for the same thing
 - **WHEN** the hint is shown under any locale the application serves
-- **THEN** the arrow points down, the direction the page scrolls, and the visible copy's
-  verb is one of scrolling rather than of swiping
+- **THEN** the arrow points up, the direction the finger travels, and the visible copy's
+  direction word says the same
 
 #### Scenario: The direction is shown by a moving arrow
 - **WHEN** the hint appears
-- **THEN** the hint enters travelling downward, and a downward-pointing arrow is drawn
-  beside the copy and repeats a short downward travel
+- **THEN** the hint enters travelling upward, and an upward-pointing arrow is drawn
+  beside the copy and repeats a short upward travel
 
 #### Scenario: The arrow comes to rest once the direction has been demonstrated
 - **WHEN** the hint has been on screen past the bounded stretch of its arrow's travel
-- **THEN** the arrow no longer moves, sits at its resting position, and still points down
+- **THEN** the arrow no longer moves, sits at its resting position, and still points up
 
 #### Scenario: The arrow holds still where reduced motion is asked for
 - **WHEN** the hint is shown to a learner whose system asks for reduced motion
 - **THEN** neither the hint's entrance nor the arrow animates, and the arrow still points
-  down
+  up
 
-#### Scenario: A screen reader still hears which way the page goes
+#### Scenario: A screen reader hears the gesture, its direction and what it earns
 - **WHEN** the hint is announced by assistive technology
-- **THEN** the announcement includes a localized sentence naming the direction of the
-  gesture, which is not drawn on screen
+- **THEN** the announcement includes a localized sentence naming the gesture, the
+  direction it goes and the full screen it earns — none of which an arrow can state
 
-#### Scenario: The scroll hint leaves once the viewport reaches the full height
+#### Scenario: The hint leaves once the viewport reaches the full height
 - **WHEN** the hint is shown and the viewport grows to the screen's short side
 - **THEN** the hint is no longer shown, without any action from the learner
 
-#### Scenario: The scroll hint can be dismissed
+#### Scenario: The hint can be dismissed
 - **WHEN** the hint is shown and the learner activates its dismiss control
 - **THEN** the hint is no longer shown for the rest of that enlarged session
 
-#### Scenario: The scroll hint is not shown where it makes no sense
+#### Scenario: The hint is not shown where it makes no sense
 - **WHEN** the video is in the page, or the device has no touch input, or the device is in
   portrait orientation
-- **THEN** no scroll hint is rendered
+- **THEN** no hint is rendered
 
 ### Requirement: A single tap on the video toggles playback
 
