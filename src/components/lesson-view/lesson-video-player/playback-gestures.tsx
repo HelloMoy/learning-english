@@ -1,7 +1,8 @@
 "use client";
 
 import { useSeekRun } from "@/hooks/use-seek-run/use-seek-run";
-import { SEEK_STEP_SECONDS, seekRunSeconds, type SeekDirection } from "@/lib/seek-run/seek-run";
+import { useSeekStep } from "@/hooks/use-seek-step/use-seek-step";
+import { seekRunSeconds, type SeekDirection } from "@/lib/seek-run/seek-run";
 
 import {
   Gesture,
@@ -15,6 +16,19 @@ import { useCallback, useEffect, useRef, type RefObject } from "react";
 import { SeekFeedback } from "../seek-feedback/seek-feedback";
 
 /**
+ * The class that marks a gesture as one of the two edge regions.
+ *
+ * @remarks
+ * `lesson-video-player.css` sizes the regions by this class rather than by
+ * their `action`, because the action spells the learner's chosen step — a
+ * selector written against one step leaves the other two covering the whole
+ * frame. Exported so a test can find a region without knowing the step either.
+ *
+ * @category Components
+ */
+export const SEEK_ZONE_CLASS = "lesson-video-player__seek-zone";
+
+/**
  * The player's tap gestures: a single tap toggles playback, a double tap in
  * the middle toggles fullscreen, and a double tap on an edge starts a
  * **seek run** — the YouTube app's convention, where every further tap on
@@ -26,7 +40,9 @@ import { SeekFeedback } from "../seek-feedback/seek-feedback";
  * Every `Gesture` listens on the provider element and checks the event's
  * coordinates against its own box, so these are regions, not targets: the
  * component sets them `pointer-events: none` itself, and the geometry the
- * layout's stylesheet would give them comes from `lesson-video-player.css`.
+ * layout's stylesheet would give them comes from `lesson-video-player.css`,
+ * which finds the two edge regions by {@link SEEK_ZONE_CLASS} — never by the
+ * step their action spells.
  *
  * **The library detects the double tap; the run seeks.** Vidstack's `dbl`
  * gesture carries the guards a raw listener would have to copy — an open
@@ -44,6 +60,11 @@ import { SeekFeedback } from "../seek-feedback/seek-feedback";
  * the single source of the edge geometry; a tap outside both is absorbed.
  * When the run lapses the gestures come back with their counters untouched.
  *
+ * **The step is the learner's, read fresh on every tap.** `useSeekStep` holds
+ * it, `SeekStepMenu` changes it, and it reaches both the gesture actions and
+ * the run from here — no number is spelled in this file. A run already under
+ * way keeps the step it started with; `extendSeekRun` says why.
+ *
  * Pointer events are enough for the run's taps: a pan ends in `pointercancel`
  * rather than `pointerup`, and Vidstack's `touch-action: manipulation` on the
  * blocker already keeps a double tap from zooming the page.
@@ -52,16 +73,17 @@ export function PlaybackGestures() {
   const player = useMediaPlayer();
   const remote = useMediaRemote();
   const { run, tap } = useSeekRun();
+  const { stepSeconds } = useSeekStep();
   const backwardZone = useRef<GestureInstance>(null);
   const forwardZone = useRef<GestureInstance>(null);
   const isRunActive = run !== null;
 
   const seekOneStep = useCallback(
     (direction: SeekDirection, trigger: Event) => {
-      const target = tap(direction, player?.state.currentTime ?? 0);
+      const target = tap(direction, player?.state.currentTime ?? 0, stepSeconds);
       remote.seek(target, trigger);
     },
-    [tap, player, remote],
+    [tap, stepSeconds, player, remote],
   );
 
   const handOverDoubleTap = (direction: SeekDirection) => {
@@ -95,17 +117,17 @@ export function PlaybackGestures() {
       />
       <Gesture
         ref={backwardZone}
-        className="vds-gesture"
+        className={`vds-gesture ${SEEK_ZONE_CLASS}`}
         event="dblpointerup"
-        action={`seek:-${SEEK_STEP_SECONDS}`}
+        action={`seek:-${stepSeconds}`}
         disabled={isRunActive}
         onWillTrigger={handOverDoubleTap("backward")}
       />
       <Gesture
         ref={forwardZone}
-        className="vds-gesture"
+        className={`vds-gesture ${SEEK_ZONE_CLASS} ${SEEK_ZONE_CLASS}--forward`}
         event="dblpointerup"
-        action={`seek:${SEEK_STEP_SECONDS}`}
+        action={`seek:${stepSeconds}`}
         disabled={isRunActive}
         onWillTrigger={handOverDoubleTap("forward")}
       />

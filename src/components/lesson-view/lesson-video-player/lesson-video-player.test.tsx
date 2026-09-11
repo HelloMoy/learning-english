@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 
-import { SEEK_RUN_WINDOW_MS, SEEK_STEP_SECONDS } from "@/lib/seek-run/seek-run";
+import { SEEK_STEP_STORAGE_KEY } from "@/hooks/use-seek-step/use-seek-step";
+import { DEFAULT_SEEK_STEP_SECONDS, SEEK_RUN_WINDOW_MS } from "@/lib/seek-run/seek-run";
 
 import { faker } from "@faker-js/faker";
 import { act, fireEvent, render, screen } from "@testing-library/react";
@@ -11,6 +12,7 @@ import { createRef } from "react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { LessonVideoPlayer } from "./lesson-video-player";
+import { SEEK_ZONE_CLASS } from "./playback-gestures";
 
 vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
@@ -60,9 +62,16 @@ function renderPlayer(
 
 describe("LessonVideoPlayer", () => {
   beforeEach(() => {
+    // The seek step is read from storage, so a choice made by one test must
+    // not decide the step the next one gets.
+    window.localStorage.clear();
     mockUseTranslations.mockReturnValue(((key: string) => key) as never);
     mockUseTheme.mockReturnValue({ resolvedTheme: "dark" } as never);
     mockUseMediaRemote.mockReturnValue({ seek: vi.fn() } as never);
+  });
+
+  afterEach(() => {
+    window.localStorage.clear();
   });
 
   describe("GIVEN a video lesson", () => {
@@ -296,15 +305,28 @@ describe("LessonVideoPlayer", () => {
     });
 
     test("WHEN rendered THEN a double tap still seeks and toggles fullscreen", () => {
-      // The seek actions spell the step from the constant, so a change there
+      // The seek actions spell the step in force, so a learner's choice
       // reaches the gestures without a second edit.
       renderPlayer();
 
       expect(gesturesIn(screen.getByRole("region"))).toEqual(
         expect.arrayContaining([
           { event: "dblpointerup", action: "toggle:fullscreen" },
-          { event: "dblpointerup", action: `seek:-${SEEK_STEP_SECONDS}` },
-          { event: "dblpointerup", action: `seek:${SEEK_STEP_SECONDS}` },
+          { event: "dblpointerup", action: `seek:-${DEFAULT_SEEK_STEP_SECONDS}` },
+          { event: "dblpointerup", action: `seek:${DEFAULT_SEEK_STEP_SECONDS}` },
+        ]),
+      );
+    });
+
+    test("WHEN a longer step was chosen THEN the seek gestures spell that one", () => {
+      window.localStorage.setItem(SEEK_STEP_STORAGE_KEY, "10");
+
+      renderPlayer();
+
+      expect(gesturesIn(screen.getByRole("region"))).toEqual(
+        expect.arrayContaining([
+          { event: "dblpointerup", action: "seek:-10" },
+          { event: "dblpointerup", action: "seek:10" },
         ]),
       );
     });
@@ -337,23 +359,28 @@ describe("LessonVideoPlayer", () => {
     let seekRequests: ReturnType<typeof vi.fn>;
     const seek = () => seekRequests;
 
+    /**
+     * The seek zones are found by the class the stylesheet sizes them with,
+     * not by the step their action spells — the same reason that stylesheet
+     * stopped selecting on `action`. A run at a chosen step is staged by
+     * seeding storage before the render; the harness needs to know nothing
+     * about it.
+     */
     function renderPlayerWithSeekZones() {
       const ref = createRef<MediaPlayerInstance>();
       const view = renderPlayer({}, ref);
       const player = screen.getByRole("region");
-      const giveBox = (action: string, box: typeof WHOLE_BOX) => {
-        const zone = player.querySelector(
-          `[data-media-gesture][action="${action}"]`,
-        ) as HTMLElement;
+      const giveBox = (selector: string, box: typeof WHOLE_BOX) => {
+        const zone = player.querySelector(selector) as HTMLElement;
         zone.getBoundingClientRect = () => ({ ...box, toJSON: () => box });
       };
       // The fullscreen gesture keeps jsdom's empty box on purpose: without
       // the stylesheet's `z-index` the library breaks a tie between two
       // triggered gestures by document order, and it comes before the seek
       // zones. Fullscreen is not under test here.
-      giveBox("toggle:paused", WHOLE_BOX);
-      giveBox(`seek:-${SEEK_STEP_SECONDS}`, BACKWARD_ZONE);
-      giveBox(`seek:${SEEK_STEP_SECONDS}`, FORWARD_ZONE);
+      giveBox('[data-media-gesture][action="toggle:paused"]', WHOLE_BOX);
+      giveBox(`.${SEEK_ZONE_CLASS}:not(.${SEEK_ZONE_CLASS}--forward)`, BACKWARD_ZONE);
+      giveBox(`.${SEEK_ZONE_CLASS}--forward`, FORWARD_ZONE);
       const provider = player.querySelector("[data-media-provider]") as HTMLElement;
       const playRequests = vi.fn();
       player.addEventListener("media-play-request", playRequests);
@@ -424,7 +451,7 @@ describe("LessonVideoPlayer", () => {
       await doubleTapAt(provider, IN_FORWARD_ZONE);
 
       expect(seek()).toHaveBeenCalledTimes(1);
-      expect(seek()).toHaveBeenCalledWith(SEEK_STEP_SECONDS, expect.anything());
+      expect(seek()).toHaveBeenCalledWith(DEFAULT_SEEK_STEP_SECONDS, expect.anything());
     });
 
     test("WHEN the right edge is double-tapped THEN the indicator shows one step forward", async () => {
@@ -433,7 +460,7 @@ describe("LessonVideoPlayer", () => {
       await doubleTapAt(provider, IN_FORWARD_ZONE);
 
       expect(screen.getByRole("status")).toHaveAttribute("data-direction", "forward");
-      expect(screen.getByRole("status")).toHaveTextContent(`seconds:${SEEK_STEP_SECONDS}`);
+      expect(screen.getByRole("status")).toHaveTextContent(`seconds:${DEFAULT_SEEK_STEP_SECONDS}`);
     });
 
     test("WHEN the left edge is double-tapped THEN the video is asked for one step back", async () => {
@@ -441,7 +468,7 @@ describe("LessonVideoPlayer", () => {
 
       await doubleTapAt(provider, IN_BACKWARD_ZONE);
 
-      expect(seek()).toHaveBeenCalledWith(-SEEK_STEP_SECONDS, expect.anything());
+      expect(seek()).toHaveBeenCalledWith(-DEFAULT_SEEK_STEP_SECONDS, expect.anything());
       expect(screen.getByRole("status")).toHaveAttribute("data-direction", "backward");
     });
 
@@ -451,8 +478,10 @@ describe("LessonVideoPlayer", () => {
 
       tapAt(provider, IN_FORWARD_ZONE);
 
-      expect(seek()).toHaveBeenLastCalledWith(2 * SEEK_STEP_SECONDS, expect.anything());
-      expect(screen.getByRole("status")).toHaveTextContent(`seconds:${2 * SEEK_STEP_SECONDS}`);
+      expect(seek()).toHaveBeenLastCalledWith(2 * DEFAULT_SEEK_STEP_SECONDS, expect.anything());
+      expect(screen.getByRole("status")).toHaveTextContent(
+        `seconds:${2 * DEFAULT_SEEK_STEP_SECONDS}`,
+      );
     });
 
     test("WHEN a tap lands on the other edge THEN the run turns around from where it was heading", async () => {
@@ -462,9 +491,9 @@ describe("LessonVideoPlayer", () => {
 
       tapAt(provider, IN_BACKWARD_ZONE);
 
-      expect(seek()).toHaveBeenLastCalledWith(SEEK_STEP_SECONDS, expect.anything());
+      expect(seek()).toHaveBeenLastCalledWith(DEFAULT_SEEK_STEP_SECONDS, expect.anything());
       expect(screen.getByRole("status")).toHaveAttribute("data-direction", "backward");
-      expect(screen.getByRole("status")).toHaveTextContent(`seconds:${SEEK_STEP_SECONDS}`);
+      expect(screen.getByRole("status")).toHaveTextContent(`seconds:${DEFAULT_SEEK_STEP_SECONDS}`);
     });
 
     test("WHEN a tap lands in the middle during a run THEN nothing seeks and nothing plays", async () => {
@@ -496,6 +525,29 @@ describe("LessonVideoPlayer", () => {
       });
 
       expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    test("WHEN a longer step was chosen THEN the run seeks and counts in that step", async () => {
+      const CHOSEN_STEP = 10;
+      window.localStorage.setItem(SEEK_STEP_STORAGE_KEY, String(CHOSEN_STEP));
+      const { provider } = renderPlayerWithSeekZones();
+
+      await doubleTapAt(provider, IN_FORWARD_ZONE);
+
+      expect(seek()).toHaveBeenCalledWith(CHOSEN_STEP, expect.anything());
+      expect(screen.getByRole("status")).toHaveTextContent(`seconds:${CHOSEN_STEP}`);
+    });
+
+    test("WHEN a longer step was chosen THEN a further tap adds that step, not the default", async () => {
+      const CHOSEN_STEP = 10;
+      window.localStorage.setItem(SEEK_STEP_STORAGE_KEY, String(CHOSEN_STEP));
+      const { provider } = renderPlayerWithSeekZones();
+      await doubleTapAt(provider, IN_FORWARD_ZONE);
+
+      tapAt(provider, IN_FORWARD_ZONE);
+
+      expect(seek()).toHaveBeenLastCalledWith(2 * CHOSEN_STEP, expect.anything());
+      expect(screen.getByRole("status")).toHaveTextContent(`seconds:${2 * CHOSEN_STEP}`);
     });
 
     test("WHEN the run has ended THEN a single tap requests playback again", async () => {

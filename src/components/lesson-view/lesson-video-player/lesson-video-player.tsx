@@ -16,6 +16,7 @@ import { useTheme } from "next-themes";
 import type { ComponentProps, ReactNode, Ref } from "react";
 
 import { ScrollDownHint } from "../scroll-down-hint/scroll-down-hint";
+import { SeekStepMenu } from "../seek-step-menu/seek-step-menu";
 import { VideoEnlargeButton } from "../video-enlarge-button/video-enlarge-button";
 import { PlaybackGestures } from "./playback-gestures";
 import { buildVideoPlayerTranslations } from "./video-player-translations";
@@ -96,6 +97,12 @@ import { buildVideoPlayerTranslations } from "./video-player-translations";
  * shows it on `pause` and after `play`. A double tap on an edge starts a
  * seek run with an on-screen count, the YouTube app's convention — the
  * helper's own JSDoc says how the library's gesture and the run share it.
+ *
+ * **How far that seek reaches is the learner's to set**, from `SeekStepMenu`
+ * in the layout's `settingsMenuItemsEnd` slot. It rides the library's gear
+ * menu rather than a control of this app's own precisely because that menu is
+ * already placed, keyboard-navigable and touch-sized in both layouts and
+ * inside the pinned player; the component's own JSDoc has the rest.
  *
  * The element is never portalled. Moving the player in the tree would remount
  * the provider `<iframe>`, reloading the embed and resetting `currentTime`
@@ -214,6 +221,7 @@ export function LessonVideoPlayer({
                 onToggle={toggle}
               />
             ),
+            settingsMenuItemsEnd: <SeekStepMenu />,
           }}
         />
         {isEnlarged && isBrowserChromeVisible ? <ScrollDownHint /> : null}

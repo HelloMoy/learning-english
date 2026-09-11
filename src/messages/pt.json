@@ -109,6 +109,10 @@
       "forward": "Avanço de {count, plural, one {# segundo} other {# segundos}}",
       "backward": "Retrocesso de {count, plural, one {# segundo} other {# segundos}}"
     },
+    "SeekStepMenu": {
+      "label": "Salto",
+      "seconds": "{count, plural, one {# segundo} other {# segundos}}"
+    },
     "VideoPlayer": {
       "announcements": "Anúncios",
       "accessibility": "Acessibilidade",
