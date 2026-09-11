@@ -1,11 +1,21 @@
 import "@testing-library/jest-dom/vitest";
 
 import { SEEK_STEP_STORAGE_KEY } from "@/hooks/use-seek-step/use-seek-step";
+import {
+  HOLD_ARM_DELAY_MS,
+  HOLD_KEYS,
+  HOLD_PLAYBACK_RATE,
+} from "@/hooks/use-speed-hold/use-speed-hold";
 import { DEFAULT_SEEK_STEP_SECONDS, SEEK_RUN_WINDOW_MS } from "@/lib/seek-run/seek-run";
 
 import { faker } from "@faker-js/faker";
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { useMediaRemote, type MediaPlayerInstance } from "@vidstack/react";
+import {
+  MEDIA_KEY_SHORTCUTS,
+  useMediaRemote,
+  useMediaState,
+  type MediaPlayerInstance,
+} from "@vidstack/react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { createRef } from "react";
@@ -31,11 +41,13 @@ vi.mock("next-themes", () => ({
 vi.mock("@vidstack/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@vidstack/react")>()),
   useMediaRemote: vi.fn(),
+  useMediaState: vi.fn(),
 }));
 
 const mockUseTranslations = vi.mocked(useTranslations);
 const mockUseTheme = vi.mocked(useTheme);
 const mockUseMediaRemote = vi.mocked(useMediaRemote);
+const mockUseMediaState = vi.mocked(useMediaState);
 
 /**
  * These assertions stay deliberately shallow — see design.md §D3.
@@ -60,6 +72,20 @@ function renderPlayer(
   );
 }
 
+/** What the player reports before anything has played, as jsdom leaves it. */
+const PAUSED_PLAYER: Record<string, unknown> = {
+  paused: true,
+  canSetPlaybackRate: true,
+  playbackRate: 1,
+};
+
+/**
+ * The same player with a lesson rolling. jsdom loads no provider, so the
+ * player never leaves `paused` however it is driven — the state the hold
+ * gesture reads is stubbed here rather than played into existence.
+ */
+const PLAYING_PLAYER: Record<string, unknown> = { ...PAUSED_PLAYER, paused: false };
+
 describe("LessonVideoPlayer", () => {
   beforeEach(() => {
     // The seek step is read from storage, so a choice made by one test must
@@ -68,6 +94,7 @@ describe("LessonVideoPlayer", () => {
     mockUseTranslations.mockReturnValue(((key: string) => key) as never);
     mockUseTheme.mockReturnValue({ resolvedTheme: "dark" } as never);
     mockUseMediaRemote.mockReturnValue({ seek: vi.fn() } as never);
+    mockUseMediaState.mockImplementation(((prop: string) => PAUSED_PLAYER[prop]) as never);
   });
 
   afterEach(() => {
@@ -357,6 +384,7 @@ describe("LessonVideoPlayer", () => {
     const SINGLE_TAP_SETTLE_MS = 300;
 
     let seekRequests: ReturnType<typeof vi.fn>;
+    let rateChangesDuringARun: ReturnType<typeof vi.fn>;
     const seek = () => seekRequests;
 
     /**
@@ -428,7 +456,11 @@ describe("LessonVideoPlayer", () => {
       mockUseTranslations.mockReturnValue(((key: string, values?: { count: number }) =>
         values === undefined ? key : `${key}:${values.count}`) as never);
       seekRequests = vi.fn();
-      mockUseMediaRemote.mockReturnValue({ seek: seekRequests } as never);
+      rateChangesDuringARun = vi.fn();
+      mockUseMediaRemote.mockReturnValue({
+        seek: seekRequests,
+        changePlaybackRate: rateChangesDuringARun,
+      } as never);
     });
 
     afterEach(() => {
@@ -550,6 +582,21 @@ describe("LessonVideoPlayer", () => {
       expect(screen.getByRole("status")).toHaveTextContent(`seconds:${2 * CHOSEN_STEP}`);
     });
 
+    test("WHEN the video is held during a run THEN the rate never changes", async () => {
+      // The run owns the taps; a press that speeded the video up mid-run would
+      // fight the very seek the learner is chaining.
+      mockUseMediaState.mockImplementation(((prop: string) => PLAYING_PLAYER[prop]) as never);
+      const { provider } = renderPlayerWithSeekZones();
+      await doubleTapAt(provider, IN_FORWARD_ZONE);
+
+      fireEvent.pointerDown(provider, { button: 0, clientX: IN_THE_MIDDLE, clientY: 50 });
+      await act(async () => {
+        vi.advanceTimersByTime(HOLD_ARM_DELAY_MS);
+      });
+
+      expect(rateChangesDuringARun).not.toHaveBeenCalled();
+    });
+
     test("WHEN the run has ended THEN a single tap requests playback again", async () => {
       const { provider, playRequests } = renderPlayerWithSeekZones();
       await doubleTapAt(provider, IN_FORWARD_ZONE);
@@ -561,6 +608,305 @@ describe("LessonVideoPlayer", () => {
       await letSingleTapSettle();
 
       expect(playRequests).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("GIVEN a learner who holds the video", () => {
+    /*
+     * The press is timed by the app, not by a Vidstack gesture, so what is
+     * observable here is the rate the hold asks for and the indicator it
+     * draws. That the video really runs faster is Playwright's to prove.
+     *
+     * A single tap's `toggle:paused` is the one action jsdom lets through:
+     * Vidstack dispatches a play request at once while the player cannot
+     * load. So "the gestures are disabled during a hold" is observed as the
+     * absence of that request, and its presence after the hold proves the
+     * observation means something.
+     */
+    const PRESS_SPOT = { clientX: 500, clientY: 50 };
+    const SINGLE_TAP_SETTLE_MS = 300;
+    /* Under jsdom every element measures zero, and a gesture outside its own
+     * box never triggers — the tap gesture is given the frame it has in a
+     * browser so the "not toggled" assertions mean something. */
+    const WHOLE_FRAME = {
+      top: 0,
+      bottom: 100,
+      height: 100,
+      left: 0,
+      right: 1000,
+      width: 1000,
+      x: 0,
+      y: 0,
+    };
+
+    let rateChanges: ReturnType<typeof vi.fn>;
+    let togglePausedRequests: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      vi.useFakeTimers({
+        toFake: ["setTimeout", "clearTimeout", "requestAnimationFrame", "cancelAnimationFrame"],
+      });
+      mockUseTranslations.mockReturnValue(((key: string, values?: { rate: number }) =>
+        values === undefined ? key : `${key}:${values.rate}`) as never);
+      rateChanges = vi.fn();
+      togglePausedRequests = vi.fn();
+      mockUseMediaRemote.mockReturnValue({
+        seek: vi.fn(),
+        changePlaybackRate: rateChanges,
+        togglePaused: togglePausedRequests,
+      } as never);
+      playerReports(PLAYING_PLAYER);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    function playerReports(state: Record<string, unknown>) {
+      mockUseMediaState.mockImplementation(((prop: string) => state[prop]) as never);
+    }
+
+    function renderPlayingPlayer() {
+      const view = renderPlayer();
+      const player = screen.getByRole("region");
+      const provider = player.querySelector("[data-media-provider]") as HTMLElement;
+      const tapGesture = player.querySelector(
+        '[data-media-gesture][action="toggle:paused"]',
+      ) as HTMLElement;
+      tapGesture.getBoundingClientRect = () => ({ ...WHOLE_FRAME, toJSON: () => WHOLE_FRAME });
+      const playRequests = vi.fn();
+      player.addEventListener("media-play-request", playRequests);
+      // Vidstack connects its components on a zero-delay timeout, and only a
+      // connected gesture listens on the provider.
+      act(() => {
+        vi.runOnlyPendingTimers();
+      });
+      return { ...view, player, provider, playRequests };
+    }
+
+    function pressTheVideo(provider: HTMLElement) {
+      fireEvent.pointerDown(provider, { button: 0, ...PRESS_SPOT });
+    }
+
+    function keepPressingFor(elapsedMs: number) {
+      act(() => {
+        vi.advanceTimersByTime(elapsedMs);
+      });
+    }
+
+    function liftTheFinger(provider: HTMLElement) {
+      act(() => {
+        fireEvent.pointerUp(provider, PRESS_SPOT);
+      });
+      // The hold outlives the frame its release arrived in, so the gestures
+      // are still disabled while the browser finishes delivering it.
+      act(() => {
+        vi.advanceTimersByTime(20);
+      });
+    }
+
+    function holdTheVideo(provider: HTMLElement) {
+      pressTheVideo(provider);
+      keepPressingFor(HOLD_ARM_DELAY_MS);
+    }
+
+    /** The play/pause key, pressed while the player itself has focus. */
+    function pressTheKeyOn(player: HTMLElement) {
+      player.focus();
+      act(() => {
+        fireEvent.keyDown(document, { key: HOLD_KEYS[0] });
+      });
+    }
+
+    function holdTheKeyOn(player: HTMLElement) {
+      pressTheKeyOn(player);
+      keepPressingFor(HOLD_ARM_DELAY_MS);
+    }
+
+    function releaseTheKey() {
+      act(() => {
+        fireEvent.keyUp(document, { key: HOLD_KEYS[0] });
+      });
+      act(() => {
+        vi.advanceTimersByTime(20);
+      });
+    }
+
+    /** Lets the library's press timer, microtask and animation frame run. */
+    async function letSingleTapSettle() {
+      await act(async () => {
+        vi.advanceTimersByTime(SINGLE_TAP_SETTLE_MS);
+      });
+      await act(async () => {
+        await Promise.resolve();
+        vi.advanceTimersByTime(20);
+      });
+    }
+
+    test("WHEN the press lasts the delay THEN the video is asked to run at double speed", () => {
+      const { provider } = renderPlayingPlayer();
+
+      holdTheVideo(provider);
+
+      expect(rateChanges).toHaveBeenCalledWith(HOLD_PLAYBACK_RATE);
+    });
+
+    test("WHEN the press lasts the delay THEN the indicator names the rate", () => {
+      const { provider } = renderPlayingPlayer();
+
+      holdTheVideo(provider);
+
+      expect(screen.getByRole("status")).toHaveTextContent(`rate:${HOLD_PLAYBACK_RATE}`);
+    });
+
+    test("WHEN the press has not lasted the delay THEN nothing is asked for", () => {
+      const { provider } = renderPlayingPlayer();
+
+      pressTheVideo(provider);
+      keepPressingFor(HOLD_ARM_DELAY_MS - 1);
+
+      expect(rateChanges).not.toHaveBeenCalled();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    test("WHEN the finger lifts THEN the rate in force before the press comes back", () => {
+      const { provider } = renderPlayingPlayer();
+      holdTheVideo(provider);
+
+      liftTheFinger(provider);
+
+      expect(rateChanges).toHaveBeenLastCalledWith(PLAYING_PLAYER.playbackRate);
+    });
+
+    test("WHEN the finger lifts THEN the indicator leaves", () => {
+      const { provider } = renderPlayingPlayer();
+      holdTheVideo(provider);
+
+      liftTheFinger(provider);
+
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    test("WHEN the learner had chosen a faster rate THEN that is what comes back", () => {
+      // A hold snapping the learner back to normal speed would be a change
+      // they cannot undo without reopening the player's own speed menu.
+      const CHOSEN_RATE = 1.5;
+      playerReports({ ...PLAYING_PLAYER, playbackRate: CHOSEN_RATE });
+      const { provider } = renderPlayingPlayer();
+      holdTheVideo(provider);
+
+      liftTheFinger(provider);
+
+      expect(rateChanges).toHaveBeenLastCalledWith(CHOSEN_RATE);
+    });
+
+    test("WHEN a short tap lands THEN the library still requests playback", async () => {
+      // The control for the disabled-gesture assertion below.
+      const { provider, playRequests } = renderPlayingPlayer();
+
+      pressTheVideo(provider);
+      liftTheFinger(provider);
+      await letSingleTapSettle();
+
+      expect(playRequests).toHaveBeenCalledTimes(1);
+    });
+
+    test("WHEN the press that ends a hold lifts THEN playback is not toggled", async () => {
+      const { provider, playRequests } = renderPlayingPlayer();
+      holdTheVideo(provider);
+
+      liftTheFinger(provider);
+      await letSingleTapSettle();
+
+      expect(playRequests).not.toHaveBeenCalled();
+    });
+
+    test("WHEN the hold has ended THEN a later tap toggles playback again", async () => {
+      const { provider, playRequests } = renderPlayingPlayer();
+      holdTheVideo(provider);
+      liftTheFinger(provider);
+      await letSingleTapSettle();
+
+      pressTheVideo(provider);
+      liftTheFinger(provider);
+      await letSingleTapSettle();
+
+      expect(playRequests).toHaveBeenCalledTimes(1);
+    });
+
+    test("WHEN the video is paused THEN a press changes no rate", () => {
+      // A hold must never start playback.
+      playerReports(PAUSED_PLAYER);
+      const { provider } = renderPlayingPlayer();
+
+      holdTheVideo(provider);
+
+      expect(rateChanges).not.toHaveBeenCalled();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    test("WHEN the provider cannot set its rate THEN a press changes no rate", () => {
+      playerReports({ ...PLAYING_PLAYER, canSetPlaybackRate: false });
+      const { provider } = renderPlayingPlayer();
+
+      holdTheVideo(provider);
+
+      expect(rateChanges).not.toHaveBeenCalled();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    test("WHEN the play/pause key is held THEN the video runs at double speed", () => {
+      const { player } = renderPlayingPlayer();
+
+      holdTheKeyOn(player);
+
+      expect(rateChanges).toHaveBeenCalledWith(HOLD_PLAYBACK_RATE);
+      expect(screen.getByRole("status")).toHaveTextContent(`rate:${HOLD_PLAYBACK_RATE}`);
+    });
+
+    test("WHEN the key comes up THEN the rate comes back and nothing is toggled", () => {
+      const { player } = renderPlayingPlayer();
+      holdTheKeyOn(player);
+
+      releaseTheKey();
+
+      expect(rateChanges).toHaveBeenLastCalledWith(PLAYING_PLAYER.playbackRate);
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      expect(togglePausedRequests).not.toHaveBeenCalled();
+    });
+
+    test("WHEN the key is tapped THEN playback toggles and no rate changes", () => {
+      // The library no longer acts on this key, so the tap it used to handle
+      // is the player's own to perform.
+      const { player } = renderPlayingPlayer();
+
+      pressTheKeyOn(player);
+      keepPressingFor(HOLD_ARM_DELAY_MS - 1);
+      releaseTheKey();
+
+      expect(togglePausedRequests).toHaveBeenCalledTimes(1);
+      expect(rateChanges).not.toHaveBeenCalled();
+    });
+
+    test("WHEN the gesture names its keys THEN they are the player's own play/pause keys", () => {
+      // The hook spells them so it need not import the library; this is what
+      // keeps the two from drifting apart.
+      const playerKeys = String(MEDIA_KEY_SHORTCUTS.togglePaused)
+        .split(" ")
+        .map((key) => (key === "Space" ? " " : key));
+
+      expect([...HOLD_KEYS].sort()).toEqual(playerKeys.sort());
+    });
+
+    test("WHEN the press begins on an overlay THEN it is not a hold", () => {
+      const { provider } = renderPlayingPlayer();
+      const controlBar = provider.ownerDocument.createElement("div");
+      screen.getByRole("region").append(controlBar);
+
+      fireEvent.pointerDown(controlBar, { button: 0, ...PRESS_SPOT });
+      keepPressingFor(HOLD_ARM_DELAY_MS);
+
+      expect(rateChanges).not.toHaveBeenCalled();
     });
   });
 
