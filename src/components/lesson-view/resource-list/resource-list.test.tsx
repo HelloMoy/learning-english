@@ -43,11 +43,13 @@ describe("ResourceList", () => {
     expect(screen.getByText("Drill slides")).toBeInTheDocument();
   });
 
-  test("WHEN rendered with an empty array THEN it shows the empty-state message", () => {
+  test("WHEN rendered with an empty array THEN it shows its own heading and the empty-state message", () => {
     // Act
     render(<ResourceList resources={[]} />);
 
-    // Assert
+    // Assert: the heading is the component's own, in both branches — there
+    // is no caller-supplied override.
+    expect(screen.getByRole("heading", { name: "title" })).toBeInTheDocument();
     expect(screen.getByText("empty")).toBeInTheDocument();
   });
 });

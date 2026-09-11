@@ -34,6 +34,11 @@ import { UpNextCard } from "../up-next-card/up-next-card";
  * A YouTube lesson usually carries no `poster` field, yet its provider paints
  * a thumbnail anyway, and covering that with a gold headline is the very
  * watermark this cover exists to avoid.
+ *
+ * `notesResource` is not rendered. It is the identity the Resources card
+ * filters by, so the `readme.md` the Notes tab already renders inline is not
+ * also listed in the rail as a file to download — a link to unstyled source
+ * of content the learner is looking at.
  */
 export function LessonView({
   view,
@@ -53,7 +58,6 @@ export function LessonView({
   // learner is watching the frame, not the title.
   const [playbackStarted, setPlaybackStarted] = useState(false);
   const t = useTranslations("Components.LessonVideoPlayer");
-  const tLessonNotes = useTranslations("Components.LessonNotes");
   const { course, module, lesson, resources, nextLesson, modules, lessons } = view;
 
   // Precompute the lessons-by-module map for the Outline.
@@ -75,13 +79,7 @@ export function LessonView({
   const modulesById = new Map(modules.map((m) => [m.id, m]));
   const nextLessonModule = nextLesson ? (modulesById.get(nextLesson.moduleId) ?? null) : null;
 
-  // The Resources region keeps the original Markdown resource link even
-  // when notes are rendered inline, so the learner can open the file.
-  // The Markdown resource is folded into a dedicated row beneath the
-  // main Resources card so the section never appears empty when only
-  // the notes resource is present.
   const nonNotesResources = resources.filter((r) => r.id !== notesResource?.id);
-  const showNotesRow = notesResource !== null && notesResource !== undefined;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[260px_1fr_280px]">
@@ -150,12 +148,6 @@ export function LessonView({
 
       <aside className="space-y-4">
         <ResourceList resources={nonNotesResources} />
-        {showNotesRow ? (
-          <ResourceList
-            resources={[notesResource]}
-            titleOverride={tLessonNotes("resourceTitle")}
-          />
-        ) : null}
         <UpNextCard
           course={course}
           nextLesson={nextLesson}

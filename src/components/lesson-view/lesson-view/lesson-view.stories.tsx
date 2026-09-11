@@ -57,6 +57,13 @@ const resource = Resource.parse({
   url: faker.internet.url(),
   kind: "pdf",
 });
+const notesResource = Resource.parse({
+  id: faker.string.uuid(),
+  lessonId: videoLesson.id,
+  title: "Vowels: short vs. long Notes",
+  url: faker.internet.url(),
+  kind: "other",
+});
 
 const happyPathView: LessonViewData = {
   course,
@@ -112,11 +119,21 @@ export const ReadingLesson: Story = {
   },
 };
 
+/**
+ * A lesson that carries both a handout and a notes `readme.md`.
+ *
+ * @remarks
+ * The rail shows **one** card — Resources, listing the handout alone. The
+ * notes file is deliberately absent from it: its content is already in the
+ * Notes tab below the player, rendered and localized, so a rail link to the
+ * raw Markdown would only send the learner to a worse copy of what they are
+ * reading.
+ */
 export const WithInlineNotes: Story = {
   args: {
-    view: happyPathView,
+    view: { ...happyPathView, resources: [resource, notesResource] },
     notes: "# Welcome\n\nThese are the inline notes rendered safely.",
-    notesResource: resource,
+    notesResource,
     markComplete: () => Promise.resolve({ data: { completed: true } }),
   },
 };

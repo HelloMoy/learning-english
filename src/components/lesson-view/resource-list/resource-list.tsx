@@ -9,20 +9,13 @@ import { ResourceItem } from "../resource-item/resource-item";
  * heading plus one row per resource, or a localized empty-state message
  * when there are none.
  *
- * The default heading lives under `Components.ResourceList.title`. The
- * optional `titleOverride` accepts an already-translated string so the
- * caller can reuse this component for a different section (e.g. the
- * original notes resource) without crossing the i18n namespaces.
+ * The heading lives under `Components.ResourceList.title`. The rail holds
+ * exactly one of these cards, so the heading is the component's own — there
+ * is no caller-supplied override.
  */
-export function ResourceList({
-  resources,
-  titleOverride,
-}: {
-  resources: Resource[];
-  titleOverride?: string;
-}) {
+export function ResourceList({ resources }: { resources: Resource[] }) {
   const t = useTranslations("Components.ResourceList");
-  const heading = titleOverride ?? t("title");
+  const heading = t("title");
   if (resources.length === 0) {
     return (
       <section
