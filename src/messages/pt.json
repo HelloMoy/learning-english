@@ -111,6 +111,10 @@
       "forward": "Avanço de {count, plural, one {# segundo} other {# segundos}}",
       "backward": "Retrocesso de {count, plural, one {# segundo} other {# segundos}}"
     },
+    "SpeedFeedback": {
+      "rate": "{rate, number}×",
+      "speedingUp": "Reproduzindo a {rate, number}× da velocidade"
+    },
     "SeekStepMenu": {
       "label": "Salto",
       "seconds": "{count, plural, one {# segundo} other {# segundos}}"

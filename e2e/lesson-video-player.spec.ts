@@ -1,5 +1,6 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 import type { VideoLesson } from "@/domain/entities/lesson/lesson";
+import { HOLD_ARM_DELAY_MS, HOLD_PLAYBACK_RATE } from "@/hooks/use-speed-hold/use-speed-hold";
 import { DEFAULT_SEEK_STEP_SECONDS } from "@/lib/seek-run/seek-run";
 import messages from "@/messages/en.json";
 
@@ -53,6 +54,8 @@ const IPHONE = deviceWithoutEngine(devices["iPhone 13"]);
  *   - "The tap acts while the video fills the viewport"
  *   - "A click on a mouse keeps toggling playback"
  *   - "No tap merely reveals the controls"
+ *   - "Pressing and holding the video runs it at double speed" (the rate the
+ *     provider really applies, which no component test can observe)
  */
 
 const COURSE_SLUG = "basic-course";
@@ -137,26 +140,66 @@ async function startPlayback(page: Page, player: Locator) {
 }
 
 /**
- * The player's own clock, read from the `MediaPlayerInstance` that owns the
- * element. Vidstack answers a `find-media-player` event by calling the
- * function in its detail, which is the supported way to reach the instance
- * from outside React — and the only way to see where a YouTube-sourced video
- * really is, since the embed's own readout is behind a cross-origin frame.
+ * A number the player reports about itself, read from the
+ * `MediaPlayerInstance` that owns the element. Vidstack answers a
+ * `find-media-player` event by calling the function in its detail, which is
+ * the supported way to reach the instance from outside React — and the only
+ * way to see what a YouTube-sourced video is really doing, since the embed's
+ * own readouts are behind a cross-origin frame.
  */
-async function currentTimeOf(player: Locator): Promise<number> {
-  return player.evaluate((element) => {
-    let currentTime = Number.NaN;
+async function playerReports(
+  player: Locator,
+  key: "currentTime" | "playbackRate",
+): Promise<number> {
+  return player.evaluate((element, stateKey) => {
+    let value = Number.NaN;
     element.dispatchEvent(
       new CustomEvent("find-media-player", {
-        detail: (found: { state: { currentTime: number } }) => {
-          currentTime = found.state.currentTime;
+        detail: (found: { state: Record<string, number> }) => {
+          value = found.state[stateKey]!;
         },
         bubbles: true,
         composed: true,
       }),
     );
-    return currentTime;
-  });
+    return value;
+  }, key);
+}
+
+/** Where the video really is. */
+const currentTimeOf = (player: Locator) => playerReports(player, "currentTime");
+
+/** The rate it is really running at. */
+const playbackRateOf = (player: Locator) => playerReports(player, "playbackRate");
+
+/** The speed indicator's pill, whichever locale it renders in. */
+const RATE_LABEL = new RegExp(`${HOLD_PLAYBACK_RATE}\u00d7`);
+
+/** The rate a lesson plays at until something changes it. */
+const NORMAL_PLAYBACK_RATE = 1;
+
+/**
+ * Presses the video and keeps the pointer down, the way a thumb rests on it.
+ *
+ * The press is made with the pointer rather than with `page.touchscreen`,
+ * which only knows how to tap — there is no way to hold a finger down through
+ * it. What the gesture listens for is `pointerdown`, which the pointer raises
+ * on every device profile, so the same helper serves both projects. The real
+ * thumb is verified by hand on the iOS Simulator.
+ */
+/**
+ * Puts keyboard focus on the player itself, where the play/pause key is the
+ * gesture's. On a control it is that control's — a focused button keeps the
+ * key — which is the library's rule and this Player's too.
+ */
+async function focusThePlayer(player: Locator) {
+  await player.evaluate((element: HTMLElement) => element.focus());
+}
+
+async function pressAndHoldTheVideo(page: Page, player: Locator) {
+  const box = (await player.boundingBox())!;
+  await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.3);
+  await page.mouse.down();
 }
 
 /**
@@ -324,6 +367,91 @@ test.describe("GIVEN a browser that can take the player fullscreen", () => {
     await expect
       .poll(() => currentTimeOf(player))
       .toBeGreaterThanOrEqual(before + DEFAULT_SEEK_STEP_SECONDS - 0.5);
+  });
+
+  test("WHEN the video is pressed and held THEN it runs at double speed", async ({ page }) => {
+    const { player } = await openLesson(page);
+    await startPlayback(page, player);
+
+    await pressAndHoldTheVideo(page, player);
+
+    await expect(page.getByRole("status")).toHaveText(RATE_LABEL);
+    await expect.poll(() => playbackRateOf(player)).toBe(HOLD_PLAYBACK_RATE);
+  });
+
+  test("WHEN the press is released THEN the rate comes back and the video plays on", async ({
+    page,
+  }) => {
+    const { player } = await openLesson(page);
+    await startPlayback(page, player);
+    await pressAndHoldTheVideo(page, player);
+    await expect(page.getByRole("status")).toBeVisible();
+
+    await page.mouse.up();
+
+    await expect(page.getByRole("status")).toHaveCount(0);
+    await expect.poll(() => playbackRateOf(player)).toBe(NORMAL_PLAYBACK_RATE);
+    await expect(player).toHaveAttribute("data-playing", "");
+  });
+
+  test("WHEN the press drags before it is held THEN nothing speeds up", async ({ page }) => {
+    // The swipe that hides Safari's toolbar travels through the pinned player,
+    // and a finger resting on its way to that swipe must not arm a hold.
+    const { player } = await openLesson(page);
+    await startPlayback(page, player);
+    const box = (await player.boundingBox())!;
+
+    await pressAndHoldTheVideo(page, player);
+    // In steps, as a finger travels: a single jump is one `pointermove` that a
+    // busy engine can deliver after the delay has already armed the hold, and
+    // a hold ignores movement once armed.
+    await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.3 - 80, { steps: 10 });
+    await page.waitForTimeout(2 * HOLD_ARM_DELAY_MS);
+
+    await expect(page.getByRole("status")).toHaveCount(0);
+    expect(await playbackRateOf(player)).toBe(NORMAL_PLAYBACK_RATE);
+    await page.mouse.up();
+  });
+
+  test("WHEN the play/pause key is held THEN the video runs at double speed", async ({ page }) => {
+    const { player } = await openLesson(page);
+    await startPlayback(page, player);
+    await focusThePlayer(player);
+
+    await page.keyboard.down(" ");
+
+    await expect(page.getByRole("status")).toHaveText(RATE_LABEL);
+    await expect.poll(() => playbackRateOf(player)).toBe(HOLD_PLAYBACK_RATE);
+  });
+
+  test("WHEN the held key comes up THEN the rate comes back and the video plays on", async ({
+    page,
+  }) => {
+    const { player } = await openLesson(page);
+    await startPlayback(page, player);
+    await focusThePlayer(player);
+    await page.keyboard.down(" ");
+    await expect(page.getByRole("status")).toBeVisible();
+
+    await page.keyboard.up(" ");
+
+    await expect(page.getByRole("status")).toHaveCount(0);
+    await expect.poll(() => playbackRateOf(player)).toBe(NORMAL_PLAYBACK_RATE);
+    await expect(player).toHaveAttribute("data-playing", "");
+  });
+
+  test("WHEN the play/pause key is tapped THEN playback still toggles", async ({ page }) => {
+    // The library no longer acts on this key; the gesture performs the tap it
+    // used to handle, and the page must not scroll on it either.
+    const { player } = await openLesson(page);
+    await startPlayback(page, player);
+    await focusThePlayer(player);
+    const scrollBefore = await page.evaluate(() => window.scrollY);
+
+    await page.keyboard.press(" ");
+
+    await expect(player).toHaveAttribute("data-paused", "");
+    expect(await page.evaluate(() => window.scrollY)).toBe(scrollBefore);
   });
 
   test("WHEN the settings menu opens THEN the seek step is one of its entries", async ({
@@ -595,6 +723,25 @@ test.describe("GIVEN Safari on an iPhone", () => {
     await expect
       .poll(() => currentTimeOf(player))
       .toBeGreaterThanOrEqual(before + 2 * DEFAULT_SEEK_STEP_SECONDS - 0.5);
+    await expect(player).toHaveAttribute("data-playing", "");
+  });
+
+  test("WHEN the video is held THEN it runs at double speed until the press ends", async ({
+    page,
+  }) => {
+    const { player } = await openLesson(page);
+    await revealControls(page);
+    await startPlayback(page, player);
+
+    await pressAndHoldTheVideo(page, player);
+
+    await expect(page.getByRole("status")).toHaveText(RATE_LABEL);
+    await expect.poll(() => playbackRateOf(player)).toBe(HOLD_PLAYBACK_RATE);
+
+    await page.mouse.up();
+
+    await expect(page.getByRole("status")).toHaveCount(0);
+    await expect.poll(() => playbackRateOf(player)).toBe(NORMAL_PLAYBACK_RATE);
     await expect(player).toHaveAttribute("data-playing", "");
   });
 

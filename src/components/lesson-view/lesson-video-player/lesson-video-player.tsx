@@ -100,6 +100,15 @@ import { buildVideoPlayerTranslations } from "./video-player-translations";
  * seek run with an on-screen count, the YouTube app's convention — the
  * helper's own JSDoc says how the library's gesture and the run share it.
  *
+ * **A press held on the video runs the lesson at double speed**, that app's
+ * other thumb convention, and restores the learner's own rate when the finger
+ * lifts. The play/pause key carries the same gesture — `useSpeedHold` says how
+ * it is taken from the library, which acts on that key's *keydown* and would
+ * otherwise pause the lesson half a second before a hold could arm. The library has no hold event, so the press is timed against the
+ * player element; `PlaybackGestures` and `useSpeedHold` carry the reasoning,
+ * including why a press that drifts is treated as the swipe that hides
+ * Safari's toolbar rather than as a hold.
+ *
  * **How far that seek reaches is the learner's to set**, from `SeekStepMenu`
  * in the layout's `settingsMenuItemsEnd` slot. It rides the library's gear
  * menu rather than a control of this app's own precisely because that menu is

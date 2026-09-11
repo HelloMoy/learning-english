@@ -2,18 +2,22 @@
 
 import { useSeekRun } from "@/hooks/use-seek-run/use-seek-run";
 import { useSeekStep } from "@/hooks/use-seek-step/use-seek-step";
+import { HOLD_PLAYBACK_RATE, useSpeedHold } from "@/hooks/use-speed-hold/use-speed-hold";
 import { seekRunSeconds, type SeekDirection } from "@/lib/seek-run/seek-run";
+import { isPrimaryPointerOnTheVideo } from "@/lib/video-pointer/video-pointer";
 
 import {
   Gesture,
   useMediaPlayer,
   useMediaRemote,
+  useMediaState,
   type GestureInstance,
   type GestureWillTriggerEvent,
 } from "@vidstack/react";
 import { useCallback, useEffect, useRef, type RefObject } from "react";
 
 import { SeekFeedback } from "../seek-feedback/seek-feedback";
+import { SpeedFeedback } from "../speed-feedback/speed-feedback";
 
 /**
  * The class that marks a gesture as one of the two edge regions.
@@ -29,10 +33,12 @@ import { SeekFeedback } from "../seek-feedback/seek-feedback";
 export const SEEK_ZONE_CLASS = "lesson-video-player__seek-zone";
 
 /**
- * The player's tap gestures: a single tap toggles playback, a double tap in
- * the middle toggles fullscreen, and a double tap on an edge starts a
- * **seek run** — the YouTube app's convention, where every further tap on
- * that edge adds a step and an indicator counts them.
+ * The player's pointer gestures: a single tap toggles playback, a double tap
+ * in the middle toggles fullscreen, a double tap on an edge starts a **seek
+ * run** — where every further tap on that edge adds a step and an indicator
+ * counts them — and a press held on the frame runs the lesson at double speed
+ * until it is released. All four are the YouTube app's conventions, which the
+ * learner's thumbs already know.
  *
  * @remarks
  * This is the Default Layout's gesture set minus the one that made a tap on
@@ -68,6 +74,16 @@ export const SEEK_ZONE_CLASS = "lesson-video-player__seek-zone";
  * Pointer events are enough for the run's taps: a pan ends in `pointercancel`
  * rather than `pointerup`, and Vidstack's `touch-action: manipulation` on the
  * blocker already keeps a double tap from zooming the page.
+ *
+ * **The hold is this app's own gesture, and it disables the others the same
+ * way.** The library has no press-and-hold event — `useSpeedHold` says why it
+ * is timed here — so this component only decides *when one may start* and
+ * *what it does*. It may start while the lesson is playing, while the
+ * provider will take a rate change, and while no seek run owns the taps;
+ * `useDoubleSpeedWhileHolding` applies the rate and puts the learner's own
+ * one back. While a hold is armed every `Gesture` is `disabled`, so the
+ * release that ends it is never counted as a tap and never toggles playback
+ * — the same mechanism, and the same reason, as during a run.
  */
 export function PlaybackGestures() {
   const player = useMediaPlayer();
@@ -77,6 +93,17 @@ export function PlaybackGestures() {
   const backwardZone = useRef<GestureInstance>(null);
   const forwardZone = useRef<GestureInstance>(null);
   const isRunActive = run !== null;
+  const isPaused = useMediaState("paused");
+  const canSetPlaybackRate = useMediaState("canSetPlaybackRate");
+  const isHolding = useSpeedHold({
+    player,
+    enabled: !isRunActive && !isPaused && canSetPlaybackRate,
+    // The library no longer acts on the play/pause key — the shortcut table
+    // hands it to the hold — so the tap it used to handle is performed here.
+    onKeyTap: () => remote.togglePaused(),
+  });
+
+  useDoubleSpeedWhileHolding(isHolding);
 
   const seekOneStep = useCallback(
     (direction: SeekDirection, trigger: Event) => {
@@ -107,20 +134,20 @@ export function PlaybackGestures() {
         className="vds-gesture"
         event="pointerup"
         action="toggle:paused"
-        disabled={isRunActive}
+        disabled={isRunActive || isHolding}
       />
       <Gesture
         className="vds-gesture"
         event="dblpointerup"
         action="toggle:fullscreen"
-        disabled={isRunActive}
+        disabled={isRunActive || isHolding}
       />
       <Gesture
         ref={backwardZone}
         className={`vds-gesture ${SEEK_ZONE_CLASS}`}
         event="dblpointerup"
         action={`seek:-${stepSeconds}`}
-        disabled={isRunActive}
+        disabled={isRunActive || isHolding}
         onWillTrigger={handOverDoubleTap("backward")}
       />
       <Gesture
@@ -128,7 +155,7 @@ export function PlaybackGestures() {
         className={`vds-gesture ${SEEK_ZONE_CLASS} ${SEEK_ZONE_CLASS}--forward`}
         event="dblpointerup"
         action={`seek:${stepSeconds}`}
-        disabled={isRunActive}
+        disabled={isRunActive || isHolding}
         onWillTrigger={handOverDoubleTap("forward")}
       />
       {run !== null ? (
@@ -137,8 +164,42 @@ export function PlaybackGestures() {
           seconds={seekRunSeconds(run)}
         />
       ) : null}
+      {isHolding ? <SpeedFeedback rate={HOLD_PLAYBACK_RATE} /> : null}
     </>
   );
+}
+
+/**
+ * Runs the video at {@link HOLD_PLAYBACK_RATE} while a hold is armed and puts
+ * the learner's own rate back when it ends.
+ *
+ * @remarks
+ * The rate to put back is remembered while no hold is in flight, because by
+ * the time the hold ends the player is reporting the hold's own rate. Reading
+ * the player's rate inside the effect instead would be one line shorter and
+ * wrong for the same reason.
+ *
+ * The restore rides the effect's cleanup, so every way a hold can end — the
+ * finger lifting, the browser cancelling the pointer, the gesture leaving the
+ * tree — puts the rate back through one path.
+ */
+function useDoubleSpeedWhileHolding(isHolding: boolean) {
+  const remote = useMediaRemote();
+  const playbackRate = useMediaState("playbackRate");
+  const rateBeforeTheHold = useRef(playbackRate);
+
+  useEffect(() => {
+    if (!isHolding) rateBeforeTheHold.current = playbackRate;
+  }, [isHolding, playbackRate]);
+
+  useEffect(() => {
+    if (!isHolding) return;
+    const rateToRestore = rateBeforeTheHold.current;
+    remote.changePlaybackRate(HOLD_PLAYBACK_RATE);
+    return () => {
+      remote.changePlaybackRate(rateToRestore);
+    };
+  }, [isHolding, remote]);
 }
 
 /**
@@ -167,7 +228,7 @@ function useRunTaps({
     if (!enabled || player === null) return;
 
     const onPointerUp = (event: PointerEvent) => {
-      if (!isPrimaryTapOnTheVideo(event)) return;
+      if (!isPrimaryPointerOnTheVideo(event)) return;
       const direction = sideTapped(event, backwardZone.current?.el, forwardZone.current?.el);
       if (direction !== null) seekOneStep(direction, event);
     };
@@ -175,14 +236,6 @@ function useRunTaps({
     player.addEventListener("pointerup", onPointerUp);
     return () => player.removeEventListener("pointerup", onPointerUp);
   }, [enabled, player, backwardZone, forwardZone, seekOneStep]);
-}
-
-function isPrimaryTapOnTheVideo(event: PointerEvent): boolean {
-  return (
-    event.button === 0 &&
-    event.target instanceof Element &&
-    event.target.closest("[data-media-provider]") !== null
-  );
 }
 
 function sideTapped(

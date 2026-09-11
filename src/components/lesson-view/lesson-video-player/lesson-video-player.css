@@ -120,6 +120,23 @@
 }
 
 /*
+ * What the platform does with a long press, undone.
+ *
+ * A press held on the video is a gesture here — it runs the lesson at double
+ * speed — and every platform already has its own answer to one. iOS Safari
+ * raises the callout sheet over the frame and starts a selection; a desktop
+ * browser raises the context menu, which the gesture cancels in JS. Neither
+ * is reachable from JS on iOS, so the two properties that switch them off
+ * belong here, on the video area only: the control bar, the menus and the
+ * lesson's own text keep their normal selection behaviour.
+ */
+[data-media-provider] {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/*
  * The viewport-filling mode.
  *
  * This cannot be a set of Tailwind utilities on the element. Vidstack's own
