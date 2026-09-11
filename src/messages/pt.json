@@ -107,6 +107,11 @@
       "screenReaderMessage": "Role para baixo para ver o vídeo em tela cheia.",
       "dismiss": "Fechar a dica"
     },
+    "SeekFeedback": {
+      "seconds": "{count, plural, one {# segundo} other {# segundos}}",
+      "forward": "Avanço de {count, plural, one {# segundo} other {# segundos}}",
+      "backward": "Retrocesso de {count, plural, one {# segundo} other {# segundos}}"
+    },
     "VideoPlayer": {
       "announcements": "Anúncios",
       "accessibility": "Acessibilidade",

@@ -298,3 +298,26 @@
     }
   }
 }
+
+/*
+ * The seek indicator's chevrons light up one after another, like the YouTube
+ * app's, so three identical glyphs read as motion in one direction. Each
+ * chevron runs the same loop offset by a delay the component sets; a whole
+ * loop is under a second so the sequence completes within the run's own
+ * window. `@theme` for the same reason as `arrow-drop`: a real utility, so
+ * `motion-reduce:animate-none` can switch it off.
+ */
+@theme {
+  --animate-seek-pulse: seek-pulse 0.75s infinite;
+
+  @keyframes seek-pulse {
+    0%,
+    100% {
+      opacity: 0.3;
+    }
+
+    33% {
+      opacity: 1;
+    }
+  }
+}

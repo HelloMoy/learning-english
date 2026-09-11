@@ -1,5 +1,6 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 import type { VideoLesson } from "@/domain/entities/lesson/lesson";
+import { SEEK_STEP_SECONDS } from "@/lib/seek-run/seek-run";
 import messages from "@/messages/en.json";
 
 import { devices, expect, test, type Locator, type Page } from "@playwright/test";
@@ -125,6 +126,53 @@ async function startPlayback(page: Page, player: Locator) {
   await expect(player).toHaveAttribute("data-playing", "", { timeout: 15_000 });
 }
 
+/**
+ * The player's own clock, read from the `MediaPlayerInstance` that owns the
+ * element. Vidstack answers a `find-media-player` event by calling the
+ * function in its detail, which is the supported way to reach the instance
+ * from outside React — and the only way to see where a YouTube-sourced video
+ * really is, since the embed's own readout is behind a cross-origin frame.
+ */
+async function currentTimeOf(player: Locator): Promise<number> {
+  return player.evaluate((element) => {
+    let currentTime = Number.NaN;
+    element.dispatchEvent(
+      new CustomEvent("find-media-player", {
+        detail: (found: { state: { currentTime: number } }) => {
+          currentTime = found.state.currentTime;
+        },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+    return currentTime;
+  });
+}
+
+/**
+ * Spots on the video, in page coordinates, for the emulated touchscreen: the
+ * right fifth is where a double tap seeks forward, and the middle band is
+ * where it toggles fullscreen and a single tap toggles playback. Both sit
+ * above the compact layout's centre button row.
+ */
+async function touchSpotsOn(player: Locator) {
+  const box = (await player.boundingBox())!;
+  const y = box.y + box.height * 0.3;
+  return {
+    forwardEdge: { x: box.x + box.width * 0.9, y },
+    middle: { x: box.x + box.width * 0.5, y },
+  };
+}
+
+/** Two taps on the same spot, close enough together to be one double tap. */
+async function doubleTap(page: Page, spot: { x: number; y: number }) {
+  await page.touchscreen.tap(spot.x, spot.y);
+  await page.touchscreen.tap(spot.x, spot.y);
+}
+
+/** Matches the indicator's label when it counts this many seconds. */
+const countOf = (seconds: number) => new RegExp(`\\b${seconds}\\b`);
+
 test.describe("GIVEN a YouTube-sourced lesson", () => {
   test("WHEN the provider builds its embed frame THEN that frame is out of the layout flow", async ({
     page,
@@ -206,6 +254,25 @@ test.describe("GIVEN a browser that can take the player fullscreen", () => {
     await page.locator("[data-media-provider]").click({ position: await spotOnTheVideo(player) });
 
     await expect(player).toHaveAttribute("data-paused", "");
+  });
+
+  test("WHEN the right edge is double-clicked THEN the video seeks and says so", async ({
+    page,
+  }) => {
+    const { player } = await openLesson(page);
+    await startPlayback(page, player);
+    const before = await currentTimeOf(player);
+    const box = (await player.boundingBox())!;
+
+    await page
+      .locator("[data-media-provider]")
+      .dblclick({ position: { x: box.width * 0.9, y: box.height * 0.3 } });
+
+    await expect(page.getByRole("status")).toHaveAttribute("data-direction", "forward");
+    await expect(page.getByRole("status")).toHaveText(countOf(SEEK_STEP_SECONDS));
+    await expect
+      .poll(() => currentTimeOf(player))
+      .toBeGreaterThanOrEqual(before + SEEK_STEP_SECONDS - 0.5);
   });
 });
 
@@ -371,6 +438,74 @@ test.describe("GIVEN Safari on an iPhone", () => {
     await startPlayback(page, player);
 
     await page.locator("[data-media-provider]").tap({ position: await spotOnTheVideo(player) });
+
+    await expect(player).toHaveAttribute("data-paused", "");
+  });
+
+  test("WHEN the right edge is double-tapped THEN the video seeks ten seconds and says so", async ({
+    page,
+  }) => {
+    const { player } = await openLesson(page);
+    await revealControls(page);
+    await startPlayback(page, player);
+    const before = await currentTimeOf(player);
+    const { forwardEdge } = await touchSpotsOn(player);
+
+    await doubleTap(page, forwardEdge);
+
+    await expect(page.getByRole("status")).toHaveAttribute("data-direction", "forward");
+    await expect(page.getByRole("status")).toHaveText(countOf(SEEK_STEP_SECONDS));
+    await expect
+      .poll(() => currentTimeOf(player))
+      .toBeGreaterThanOrEqual(before + SEEK_STEP_SECONDS - 0.5);
+  });
+
+  test("WHEN a third tap follows THEN another ten seconds are added", async ({ page }) => {
+    // The library resets its press counter after a double tap; left to it,
+    // this tap would be a single one and pause the video 250 ms later.
+    const { player } = await openLesson(page);
+    await revealControls(page);
+    await startPlayback(page, player);
+    const before = await currentTimeOf(player);
+    const { forwardEdge } = await touchSpotsOn(player);
+    await doubleTap(page, forwardEdge);
+    await expect(page.getByRole("status")).toHaveText(countOf(SEEK_STEP_SECONDS));
+
+    await page.touchscreen.tap(forwardEdge.x, forwardEdge.y);
+
+    await expect(page.getByRole("status")).toHaveText(countOf(2 * SEEK_STEP_SECONDS));
+    await expect
+      .poll(() => currentTimeOf(player))
+      .toBeGreaterThanOrEqual(before + 2 * SEEK_STEP_SECONDS - 0.5);
+    await expect(player).toHaveAttribute("data-playing", "");
+  });
+
+  test("WHEN the middle is tapped during a run THEN the video keeps playing", async ({ page }) => {
+    const { player } = await openLesson(page);
+    await revealControls(page);
+    await startPlayback(page, player);
+    const { forwardEdge, middle } = await touchSpotsOn(player);
+    await doubleTap(page, forwardEdge);
+    await expect(page.getByRole("status")).toBeVisible();
+
+    await page.touchscreen.tap(middle.x, middle.y);
+
+    // The run lapsing is the deterministic point after which a pause, had the
+    // tap caused one, would already show on the player.
+    await expect(page.getByRole("status")).toHaveCount(0);
+    await expect(player).toHaveAttribute("data-playing", "");
+  });
+
+  test("WHEN the run has ended THEN a tap pauses again", async ({ page }) => {
+    const { player } = await openLesson(page);
+    await revealControls(page);
+    await startPlayback(page, player);
+    const { forwardEdge, middle } = await touchSpotsOn(player);
+    await doubleTap(page, forwardEdge);
+    await expect(page.getByRole("status")).toBeVisible();
+    await expect(page.getByRole("status")).toHaveCount(0);
+
+    await page.touchscreen.tap(middle.x, middle.y);
 
     await expect(player).toHaveAttribute("data-paused", "");
   });
