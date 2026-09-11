@@ -269,27 +269,36 @@
 }
 
 /*
- * `bounce`, mirrored and widened. Tailwind's own travels up, and the scroll
- * hint's arrow points down — the glyph and its motion have to agree. Displaced
- * at both ends of the cycle and at rest in the middle, so a run stopped on a
- * half iteration ends where the base style already is, without a jump.
+ * `bounce`, widened. The hint's arrow points up, the way the finger goes, and
+ * the glyph and its motion have to agree. Displaced at both ends of the cycle
+ * and at rest in the middle, so a run stopped on a half iteration ends where
+ * the base style already is, without a jump.
  *
  * 60%, not `bounce`'s 25%: a quarter of a 16px glyph is four pixels, which
- * measured on a phone reads as no animation at all. Keep this generous.
+ * measured on a phone reads as no animation at all. Keep this generous — it is
+ * the whole reason this is a keyframe of its own and not Tailwind's.
  *
- * Declared through `@theme` rather than as a plain `.animate-arrow-drop` rule
+ * The name is `arrow-lift` and not the `arrow-drop` this replaced, because the
+ * rename is what makes a stale stylesheet safe. A phone that picks up new JS
+ * against cached CSS finds no `arrow-lift`, and the arrow simply holds still,
+ * pointing. Had the old name been redefined instead, that phone would run
+ * downward travel beside an upward glyph — two cues disagreeing, which is the
+ * defect this hint has twice been rewritten to remove. Missing CSS may cost the
+ * motion, never the direction; renaming is how CSS inherits that rule.
+ *
+ * Declared through `@theme` rather than as a plain `.animate-arrow-lift` rule
  * so it is generated as a real utility. An unlayered rule outranks every
  * utility, which would leave `repeat-*` unable to bound the run and the arrow
  * moving forever.
  */
 @theme {
-  --animate-arrow-drop: arrow-drop 1s infinite;
+  --animate-arrow-lift: arrow-lift 1s infinite;
 
-  @keyframes arrow-drop {
+  @keyframes arrow-lift {
     0%,
     100% {
       animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-      transform: translateY(60%);
+      transform: translateY(-60%);
     }
 
     50% {
@@ -304,7 +313,7 @@
  * app's, so three identical glyphs read as motion in one direction. Each
  * chevron runs the same loop offset by a delay the component sets; a whole
  * loop is under a second so the sequence completes within the run's own
- * window. `@theme` for the same reason as `arrow-drop`: a real utility, so
+ * window. `@theme` for the same reason as `arrow-lift`: a real utility, so
  * `motion-reduce:animate-none` can switch it off.
  */
 @theme {

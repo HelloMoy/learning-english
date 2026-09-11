@@ -100,8 +100,8 @@
       "videoPlayerLabel": "Reprodutor de vídeo da aula"
     },
     "ScrollDownHint": {
-      "message": "Role para tela cheia",
-      "screenReaderMessage": "Role para baixo para ver o vídeo em tela cheia.",
+      "message": "Arremesse o vídeo para cima",
+      "screenReaderMessage": "Arremesse o vídeo para cima para vê-lo em tela cheia.",
       "dismiss": "Fechar a dica"
     },
     "SeekFeedback": {

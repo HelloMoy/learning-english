@@ -71,6 +71,34 @@ describe("message catalogues", () => {
     expect(new Set(names)).toEqual(new Set(["English Course"]));
   });
 
+  /**
+   * Guards the enlarged-video hint's single direction.
+   *
+   * The hint carries direction in several places at once — an upward arrow, an
+   * upward entrance, upward travel, and the words. They have to agree, and the
+   * words are the one part a translator can change without seeing the arrow.
+   * A verb of scrolling is the specific way they come apart: it names the page,
+   * which travels the opposite way to the finger the arrow points for.
+   *
+   * This is the only place the copy can be read under every locale. The
+   * component's own test mocks `next-intl`, so it renders its fixture and never
+   * opens a catalogue.
+   */
+  it.each(Object.entries(CATALOGUES))("%s moves the video, never the page", (_locale, m) => {
+    // Normalized first: `Desplázate` and `desplaza` are the same verb, and only
+    // the stripped form lets one pattern catch both.
+    const withoutDiacritics = (value: string) =>
+      value.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+    const scrollVerbs = /\b(scroll|baja|baje|desplaza|role|rola)/i;
+
+    const hint = (m as typeof en).Components.ScrollDownHint;
+    const offenders = [hint.message, hint.screenReaderMessage].filter((line) =>
+      scrollVerbs.test(withoutDiacritics(line)),
+    );
+
+    expect(offenders).toEqual([]);
+  });
+
   it.each(Object.entries(CATALOGUES))("%s exposes the course vocabulary keys", (_locale, m) => {
     const overview = (m as typeof en).CourseCatalog.courseOverview;
     expect(Object.keys(overview)).toEqual(
