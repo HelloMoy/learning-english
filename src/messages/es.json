@@ -95,7 +95,9 @@
       "currentLessonAria": "Lección actual"
     },
     "Outline": {
-      "title": "Contenido del curso"
+      "title": "Contenido del curso",
+      "positionLabel": "{module} · Lección {position} de {total}",
+      "completionAriaLabel": "{percent} del curso completado"
     },
     "LessonVideoPlayer": {
       "playbackRate": "Velocidad de reproducción",
