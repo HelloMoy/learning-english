@@ -75,15 +75,17 @@ Boundary enforcement SHALL be scoped to `src/domain/**` only. Files outside that
 
 ### Requirement: The `next-themes` warning is acknowledged in the codebase
 
+The codebase SHALL acknowledge the `next-themes` React 19 console warning in the
+source code (a JSDoc note on the theme consumer) and SHALL NOT replace the provider
+with a custom re-implementation.
+
 The application uses `next-themes` for theme management. `next-themes@0.4.6`
 emits a React 19 console warning of the form
 `"Encountered a script tag while rendering React component"` because its
 `<ThemeProvider>` injects a FOUC-prevention `<script>` via
-`React.createElement("script", { dangerouslySetInnerHTML })`. The codebase
-SHALL acknowledge this warning in the source code (a JSDoc note on the
-theme consumer) and SHALL NOT replace the provider with a custom
-re-implementation. The warning is non-blocking and is tracked upstream
-in the `next-themes` repository for the post-0.4 series.
+`React.createElement("script", { dangerouslySetInnerHTML })`. The warning is
+non-blocking and is tracked upstream in the `next-themes` repository for the
+post-0.4 series.
 
 #### Scenario: The theme consumer's source file documents the warning
 - **WHEN** a developer reads `src/components/theme-toggle/theme-toggle.tsx`

@@ -162,8 +162,8 @@ intended default.
 
 ### Requirement: The flag is removable in two independent steps
 
-This capability is temporary: the draft course is expected to be published. Its
-implementation SHALL be shaped so that removal never requires reading unrelated code.
+This capability's implementation SHALL be shaped so that removal never requires reading
+unrelated code. The capability is temporary: the draft course is expected to be published.
 
 Publishing a course SHALL be a one-line data edit. Deleting `"draft": true` from a
 manifest SHALL make that course visible in every environment, with the flag machinery
