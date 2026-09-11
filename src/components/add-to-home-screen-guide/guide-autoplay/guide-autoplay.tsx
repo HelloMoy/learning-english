@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button/button";
 import { useFitScale } from "@/hooks/use-fit-scale/use-fit-scale";
+import { useHorizontalSwipe } from "@/hooks/use-horizontal-swipe/use-horizontal-swipe";
 
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -37,11 +38,22 @@ type GuideAutoplayProps = {
   onDismiss: () => void;
 };
 
+/**
+ * The frame `delta` away, both ends wrapping.
+ *
+ * @remarks
+ * The `+ FRAMES.length` is what makes stepping back from the first frame land
+ * on the last instead of on `-1`.
+ */
+const frameAfter = (index: number, delta: number) =>
+  (index + delta + FRAMES.length) % FRAMES.length;
+
 const prefersReducedMotion = () =>
   window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 
 /**
- * The install guide, playing itself: the four steps on a loop.
+ * The install guide, playing itself: the four steps on a loop, and a drag to
+ * move it by hand.
  *
  * @remarks
  * It is the prototype video's pacing, rebuilt from components so that the iOS
@@ -49,17 +61,26 @@ const prefersReducedMotion = () =>
  * never do. A self-paced stepper was built alongside it and compared; this one
  * was kept, and the other deleted.
  *
- * What it buys is that the learner does nothing: the flow just runs. What it
- * costs is that a learner who looks away, or who taps «···» and loses the
- * screen to Safari's own menu, comes back to a guide that has moved on — which
- * is why it says which step is showing and how many there are, rather than
- * looping anonymously.
+ * What it buys is that the learner does nothing: the flow just runs. What that
+ * costs is the learner who looks away — at the «···» they were sent to find, or
+ * at Safari's own menu covering the page — and comes back to a guide that has
+ * moved on. Two things answer that. It says which step is showing and how many
+ * there are, rather than looping anonymously; and a horizontal drag moves it a
+ * frame either way, so the frame they missed is one gesture back rather than a
+ * whole loop away.
+ *
+ * The gesture is a nudge, not a takeover. There is no pause, and no manual mode
+ * to get stranded in: the loop plays on, and the frame the learner landed on
+ * simply gets a full interval of its own before it does — which is what the
+ * per-frame timer below is for.
  *
  * The steps come from {@link INSTALL_STEPS}.
  *
  * Under `prefers-reduced-motion` it does not advance at all. The preference is
  * read after mount — it cannot be known while rendering on the server — so the
- * first step is painted either way and only the movement is conditional.
+ * first step is painted either way and only the movement is conditional. The
+ * drag keeps working there, and is the only thing that does: the preference
+ * silences motion the learner did not ask for, and this is the motion they did.
  *
  * It holds no dismissal state; `onDismiss` hands that to the caller.
  *
@@ -69,27 +90,38 @@ const prefersReducedMotion = () =>
  * ```
  *
  * @param props - See {@link GuideAutoplayProps}
- * @returns The guide as a labelled group, cycling through the steps
+ * @returns The guide as a labelled group, cycling through the steps and
+ * answering a horizontal drag
  * @category Components
  */
 export function GuideAutoplay({ onDismiss }: GuideAutoplayProps) {
   const t = useTranslations("Components.AddToHomeScreenGuide");
   const labelId = useId();
-  const [stepIndex, setStepIndex] = useState(0);
+  const [frameIndex, setFrameIndex] = useState(0);
   const { ref: depictionRef, scale: depictionScale } = useFitScale(PHONE_HEIGHT);
 
+  const showNextFrame = () => setFrameIndex((current) => frameAfter(current, 1));
+  const showPreviousFrame = () => setFrameIndex((current) => frameAfter(current, -1));
+
+  // Leftwards is forwards: the finger travels the way the dots are laid out.
+  const swipeHandlers = useHorizontalSwipe({
+    onSwipeLeft: showNextFrame,
+    onSwipeRight: showPreviousFrame,
+  });
+
+  // One timer per frame rather than one interval for the whole loop: the wait
+  // starts again whenever the frame changes, so a learner who moves the guide
+  // by hand gets the frame they chose for its full time instead of for
+  // whatever was left of the tick they interrupted.
   useEffect(() => {
     if (prefersReducedMotion()) return;
 
-    const timer = setInterval(
-      () => setStepIndex((current) => (current + 1) % FRAMES.length),
-      STEP_INTERVAL_MS,
-    );
+    const timer = setTimeout(() => setFrameIndex(frameAfter(frameIndex, 1)), STEP_INTERVAL_MS);
 
-    return () => clearInterval(timer);
-  }, []);
+    return () => clearTimeout(timer);
+  }, [frameIndex]);
 
-  const frame = FRAMES[stepIndex]!;
+  const frame = FRAMES[frameIndex]!;
   const isResult = frame.surface === "home-screen";
 
   // The height bound is in viewport units rather than `max-h-full`: a
@@ -99,6 +131,7 @@ export function GuideAutoplay({ onDismiss }: GuideAutoplayProps) {
   return (
     <section
       aria-labelledby={labelId}
+      {...swipeHandlers}
       className="relative flex max-h-[calc(100svh-2rem)] flex-col items-center gap-4 rounded-2xl border border-border bg-card p-5 pt-6 text-foreground shadow-lg"
     >
       <header className="w-full pr-8 text-center">
@@ -138,7 +171,7 @@ export function GuideAutoplay({ onDismiss }: GuideAutoplayProps) {
       >
         {isResult ? null : (
           <span className="mr-1.5 font-semibold text-primary">
-            {t("progress", { current: stepIndex + 1, total: INSTALL_STEPS.length })}
+            {t("progress", { current: frameIndex + 1, total: INSTALL_STEPS.length })}
           </span>
         )}
         {t(frame.messageKey)}
@@ -150,7 +183,7 @@ export function GuideAutoplay({ onDismiss }: GuideAutoplayProps) {
             key={each.messageKey}
             aria-hidden="true"
             className={
-              index === stepIndex
+              index === frameIndex
                 ? "h-1.5 w-5 rounded-full bg-primary transition-all"
                 : "size-1.5 rounded-full bg-muted-foreground/40 transition-all"
             }
