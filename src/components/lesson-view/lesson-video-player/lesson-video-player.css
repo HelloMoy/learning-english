@@ -92,6 +92,13 @@
  * When two gestures accept the same event Vidstack keeps the one with the
  * highest computed `z-index`, so the seek regions carry 1 and the whole-box
  * ones an explicit 0 — a comparison between numbers, never `auto`.
+ *
+ * The seek regions are found by a class of this component's own, never by
+ * their `action` attribute. The action spells the learner's chosen step, so a
+ * selector like `[action="seek:10"]` matches only one of the three settings —
+ * and the other two silently lose their 20% width and their `z-index`, which
+ * is a seek gesture that covers the whole frame and never wins a tap. The
+ * class says "this is an edge region" regardless of how far it seeks.
  */
 [data-media-player] > .vds-gesture {
   position: absolute;
@@ -102,13 +109,12 @@
   z-index: 0;
 }
 
-[data-media-player] > .vds-gesture[action="seek:-10"],
-[data-media-player] > .vds-gesture[action="seek:10"] {
+[data-media-player] > .lesson-video-player__seek-zone {
   width: 20%;
   z-index: 1;
 }
 
-[data-media-player] > .vds-gesture[action="seek:10"] {
+[data-media-player] > .lesson-video-player__seek-zone--forward {
   left: unset;
   right: 0;
 }

@@ -1,4 +1,4 @@
-import { SEEK_STEP_SECONDS } from "@/lib/seek-run/seek-run";
+import { DEFAULT_SEEK_STEP_SECONDS } from "@/lib/seek-run/seek-run";
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
@@ -25,9 +25,11 @@ const meta = {
   parameters: { layout: "fullscreen" },
   argTypes: {
     direction: { control: { type: "radio" }, options: ["forward", "backward"] },
-    seconds: { control: { type: "number", min: SEEK_STEP_SECONDS, step: SEEK_STEP_SECONDS } },
+    seconds: {
+      control: { type: "number", min: DEFAULT_SEEK_STEP_SECONDS, step: DEFAULT_SEEK_STEP_SECONDS },
+    },
   },
-  args: { direction: "forward", seconds: SEEK_STEP_SECONDS },
+  args: { direction: "forward", seconds: DEFAULT_SEEK_STEP_SECONDS },
   decorators: [
     (Story) => (
       <div className="min-h-svh bg-black p-6">
@@ -52,17 +54,17 @@ export const Backward: Story = {
 
 /** Three taps in a row on the same edge — the label counts the whole run. */
 export const Accumulated: Story = {
-  args: { seconds: 3 * SEEK_STEP_SECONDS },
+  args: { seconds: 3 * DEFAULT_SEEK_STEP_SECONDS },
 };
 
 /** The count and the spoken sentence in Spanish, through `Components.SeekFeedback`. */
 export const InSpanish: Story = {
   parameters: { locale: "es" },
-  args: { seconds: 2 * SEEK_STEP_SECONDS },
+  args: { seconds: 2 * DEFAULT_SEEK_STEP_SECONDS },
 };
 
 /** The same in Portuguese. */
 export const InPortuguese: Story = {
   parameters: { locale: "pt" },
-  args: { direction: "backward", seconds: 2 * SEEK_STEP_SECONDS },
+  args: { direction: "backward", seconds: 2 * DEFAULT_SEEK_STEP_SECONDS },
 };

@@ -1,6 +1,6 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 import type { VideoLesson } from "@/domain/entities/lesson/lesson";
-import { SEEK_STEP_SECONDS } from "@/lib/seek-run/seek-run";
+import { DEFAULT_SEEK_STEP_SECONDS } from "@/lib/seek-run/seek-run";
 import messages from "@/messages/en.json";
 
 import { devices, expect, test, type Locator, type Page } from "@playwright/test";
@@ -73,6 +73,16 @@ function isYouTubeSourced(source: string): boolean {
 }
 
 const LESSON_URL = `/en/courses/${COURSE_SLUG}/modules/${MODULE.slug}/lessons/${LESSON.id}`;
+
+/** A lesson in a different module, for the rules that are not per-lesson. */
+const ANOTHER_MODULE = modulesOfCourse(COURSE_SLUG)[1]!;
+const ANOTHER_LESSON = contentCatalog.lessonRows.find(
+  (lesson): lesson is VideoLesson =>
+    lesson.moduleId === ANOTHER_MODULE.id &&
+    lesson.kind === "video" &&
+    isYouTubeSourced(lesson.source),
+)!;
+const ANOTHER_LESSON_URL = `/en/courses/${COURSE_SLUG}/modules/${ANOTHER_MODULE.slug}/lessons/${ANOTHER_LESSON.id}`;
 
 /**
  * Opens the lesson and waits for the provider to build its embed frame. The
@@ -170,8 +180,49 @@ async function doubleTap(page: Page, spot: { x: number; y: number }) {
   await page.touchscreen.tap(spot.x, spot.y);
 }
 
-/** Matches the indicator's label when it counts this many seconds. */
+/** Matches a label that counts this many seconds — the indicator's, or an option's. */
 const countOf = (seconds: number) => new RegExp(`\\b${seconds}\\b`);
+
+const SETTINGS = messages.Components.VideoPlayer.settings;
+
+/**
+ * The submenu button's accessible name is its label followed by the hint that
+ * names the step in force, so it is matched by the label alone.
+ */
+const SEEK_STEP_ENTRY = new RegExp(messages.Components.SeekStepMenu.label);
+
+/** Opens the player's settings menu and steps into the seek-step submenu. */
+async function openSeekStepMenu(page: Page) {
+  await page.getByRole("button", { name: SETTINGS }).click();
+  await page.getByRole("menuitem", { name: SEEK_STEP_ENTRY }).click();
+}
+
+/**
+ * Picks a step the way a learner does — through the gear menu — and closes the
+ * menu again, so the next gesture reaches the video rather than the popover.
+ */
+async function chooseSeekStep(page: Page, seconds: number) {
+  await openSeekStepMenu(page);
+  await page.getByRole("menuitemradio", { name: countOf(seconds) }).click();
+  // Two presses, and the second one matters: the first steps out of the
+  // submenu and leaves the settings menu itself open. While any menu is open
+  // the player rejects every gesture, so a double click after one press is
+  // swallowed — and the radio options are already gone by then, which makes
+  // their absence a liar. The button's own `aria-expanded` is the honest
+  // signal that the player is listening again.
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: SETTINGS })).toHaveAttribute(
+    "aria-expanded",
+    "false",
+  );
+}
+
+/** The step the submenu reports as chosen, read from the radio group. */
+async function stepShownAsChosen(page: Page, seconds: number) {
+  await openSeekStepMenu(page);
+  return page.getByRole("menuitemradio", { name: countOf(seconds) });
+}
 
 test.describe("GIVEN a YouTube-sourced lesson", () => {
   test("WHEN the provider builds its embed frame THEN that frame is out of the layout flow", async ({
@@ -269,10 +320,77 @@ test.describe("GIVEN a browser that can take the player fullscreen", () => {
       .dblclick({ position: { x: box.width * 0.9, y: box.height * 0.3 } });
 
     await expect(page.getByRole("status")).toHaveAttribute("data-direction", "forward");
-    await expect(page.getByRole("status")).toHaveText(countOf(SEEK_STEP_SECONDS));
+    await expect(page.getByRole("status")).toHaveText(countOf(DEFAULT_SEEK_STEP_SECONDS));
     await expect
       .poll(() => currentTimeOf(player))
-      .toBeGreaterThanOrEqual(before + SEEK_STEP_SECONDS - 0.5);
+      .toBeGreaterThanOrEqual(before + DEFAULT_SEEK_STEP_SECONDS - 0.5);
+  });
+
+  test("WHEN the settings menu opens THEN the seek step is one of its entries", async ({
+    page,
+  }) => {
+    // The slot the entry is mounted in only exists once the layout has loaded,
+    // which jsdom never reaches — this is the only place that wiring is proved.
+    await openLesson(page);
+
+    await page.getByRole("button", { name: SETTINGS }).click();
+
+    await expect(page.getByRole("menuitem", { name: SEEK_STEP_ENTRY })).toBeVisible();
+    // The hint is its own element; the button's text runs the label straight
+    // into it ("Seek step5 seconds"), where no word boundary separates them.
+    await expect(
+      page.getByRole("menuitem", { name: SEEK_STEP_ENTRY }).locator(".vds-menu-item-hint"),
+    ).toHaveText(countOf(DEFAULT_SEEK_STEP_SECONDS));
+  });
+
+  test("WHEN nothing was ever chosen THEN the default step is the checked option", async ({
+    page,
+  }) => {
+    await openLesson(page);
+
+    const option = await stepShownAsChosen(page, DEFAULT_SEEK_STEP_SECONDS);
+
+    await expect(option).toHaveAttribute("aria-checked", "true");
+  });
+
+  test("WHEN a longer step is chosen THEN a double click seeks by that step", async ({ page }) => {
+    const CHOSEN = 10;
+    const { player } = await openLesson(page);
+    await startPlayback(page, player);
+    await chooseSeekStep(page, CHOSEN);
+    const before = await currentTimeOf(player);
+    const box = (await player.boundingBox())!;
+
+    await page
+      .locator("[data-media-provider]")
+      .dblclick({ position: { x: box.width * 0.9, y: box.height * 0.3 } });
+
+    await expect(page.getByRole("status")).toHaveText(countOf(CHOSEN));
+    await expect.poll(() => currentTimeOf(player)).toBeGreaterThanOrEqual(before + CHOSEN - 0.5);
+  });
+
+  test("WHEN a step is chosen THEN a reload finds it still chosen", async ({ page }) => {
+    const CHOSEN = 10;
+    await openLesson(page);
+    await chooseSeekStep(page, CHOSEN);
+
+    await page.reload();
+    await expect(page.locator("[data-media-player]")).toBeVisible();
+
+    await expect(await stepShownAsChosen(page, CHOSEN)).toHaveAttribute("aria-checked", "true");
+  });
+
+  test("WHEN a step is chosen THEN another lesson is governed by it too", async ({ page }) => {
+    // The preference is the learner's, not the lesson's — its storage key
+    // carries no lesson id.
+    const CHOSEN = 10;
+    await openLesson(page);
+    await chooseSeekStep(page, CHOSEN);
+
+    await page.goto(ANOTHER_LESSON_URL);
+    await expect(page.locator("[data-media-player]")).toBeVisible();
+
+    await expect(await stepShownAsChosen(page, CHOSEN)).toHaveAttribute("aria-checked", "true");
   });
 });
 
@@ -442,7 +560,7 @@ test.describe("GIVEN Safari on an iPhone", () => {
     await expect(player).toHaveAttribute("data-paused", "");
   });
 
-  test("WHEN the right edge is double-tapped THEN the video seeks ten seconds and says so", async ({
+  test("WHEN the right edge is double-tapped THEN the video seeks one step and says so", async ({
     page,
   }) => {
     const { player } = await openLesson(page);
@@ -454,13 +572,13 @@ test.describe("GIVEN Safari on an iPhone", () => {
     await doubleTap(page, forwardEdge);
 
     await expect(page.getByRole("status")).toHaveAttribute("data-direction", "forward");
-    await expect(page.getByRole("status")).toHaveText(countOf(SEEK_STEP_SECONDS));
+    await expect(page.getByRole("status")).toHaveText(countOf(DEFAULT_SEEK_STEP_SECONDS));
     await expect
       .poll(() => currentTimeOf(player))
-      .toBeGreaterThanOrEqual(before + SEEK_STEP_SECONDS - 0.5);
+      .toBeGreaterThanOrEqual(before + DEFAULT_SEEK_STEP_SECONDS - 0.5);
   });
 
-  test("WHEN a third tap follows THEN another ten seconds are added", async ({ page }) => {
+  test("WHEN a third tap follows THEN another step is added", async ({ page }) => {
     // The library resets its press counter after a double tap; left to it,
     // this tap would be a single one and pause the video 250 ms later.
     const { player } = await openLesson(page);
@@ -469,15 +587,43 @@ test.describe("GIVEN Safari on an iPhone", () => {
     const before = await currentTimeOf(player);
     const { forwardEdge } = await touchSpotsOn(player);
     await doubleTap(page, forwardEdge);
-    await expect(page.getByRole("status")).toHaveText(countOf(SEEK_STEP_SECONDS));
+    await expect(page.getByRole("status")).toHaveText(countOf(DEFAULT_SEEK_STEP_SECONDS));
 
     await page.touchscreen.tap(forwardEdge.x, forwardEdge.y);
 
-    await expect(page.getByRole("status")).toHaveText(countOf(2 * SEEK_STEP_SECONDS));
+    await expect(page.getByRole("status")).toHaveText(countOf(2 * DEFAULT_SEEK_STEP_SECONDS));
     await expect
       .poll(() => currentTimeOf(player))
-      .toBeGreaterThanOrEqual(before + 2 * SEEK_STEP_SECONDS - 0.5);
+      .toBeGreaterThanOrEqual(before + 2 * DEFAULT_SEEK_STEP_SECONDS - 0.5);
     await expect(player).toHaveAttribute("data-playing", "");
+  });
+
+  test("WHEN the settings menu opens THEN the seek step is reachable from the small layout", async ({
+    page,
+  }) => {
+    // The phone gets the small layout, whose settings menu is a sheet rather
+    // than a popover — a different code path in the library to the desktop's.
+    await openLesson(page);
+    await revealControls(page);
+
+    await page.getByRole("button", { name: SETTINGS }).click();
+
+    await expect(page.getByRole("menuitem", { name: SEEK_STEP_ENTRY })).toBeVisible();
+  });
+
+  test("WHEN a longer step is chosen THEN the double tap seeks by that step", async ({ page }) => {
+    const CHOSEN = 10;
+    const { player } = await openLesson(page);
+    await revealControls(page);
+    await chooseSeekStep(page, CHOSEN);
+    await startPlayback(page, player);
+    const before = await currentTimeOf(player);
+    const { forwardEdge } = await touchSpotsOn(player);
+
+    await doubleTap(page, forwardEdge);
+
+    await expect(page.getByRole("status")).toHaveText(countOf(CHOSEN));
+    await expect.poll(() => currentTimeOf(player)).toBeGreaterThanOrEqual(before + CHOSEN - 0.5);
   });
 
   test("WHEN the middle is tapped during a run THEN the video keeps playing", async ({ page }) => {

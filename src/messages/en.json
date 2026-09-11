@@ -109,6 +109,10 @@
       "forward": "Skipped forward {count, plural, one {# second} other {# seconds}}",
       "backward": "Skipped back {count, plural, one {# second} other {# seconds}}"
     },
+    "SeekStepMenu": {
+      "label": "Seek step",
+      "seconds": "{count, plural, one {# second} other {# seconds}}"
+    },
     "VideoPlayer": {
       "announcements": "Announcements",
       "accessibility": "Accessibility",
