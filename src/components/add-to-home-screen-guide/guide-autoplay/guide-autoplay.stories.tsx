@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { GuideAutoplay } from "./guide-autoplay";
 
 /**
- * The install guide: the four steps play on a loop.
+ * The install guide: the five steps play on a loop.
  *
  * This is the prototype video's pacing, rebuilt from components so its iOS
  * labels can be translated. Use the toolbar locale switcher to check that the

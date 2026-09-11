@@ -22,12 +22,14 @@ const MESSAGES: Record<string, string> = {
   payoff: "Añádelo a tu pantalla de inicio y se abre como una app, sin buscar la pestaña.",
   iosMore: "···",
   iosShare: "Compartir",
+  iosViewMore: "Ver más",
   iosAddToHomeScreen: "Añadir a pantalla de inicio",
   iosAdd: "Añadir",
   iosOpenAsWebApp: "Abrir como app web",
   stepMore: "Toca «···» en la barra de abajo, a la derecha de la dirección.",
   stepShare: "Elige «Compartir», la primera opción del menú.",
-  stepAddToHomeScreen: "Baja en la lista y elige «Añadir a pantalla de inicio».",
+  stepViewMore: "La hoja se abre a medias. Toca «Ver más», al final de la fila, para desplegarla.",
+  stepAddToHomeScreen: "En la lista que aparece, elige «Añadir a pantalla de inicio».",
   stepAdd: "Toca «Añadir». Deja activado «Abrir como app web».",
   progress: "Paso {current} de {total}",
   result: "Listo: el curso queda en tu pantalla de inicio, como cualquier otra app.",
@@ -332,7 +334,7 @@ describe("GuideAutoplay by hand", () => {
       dragAcrossGuide({ towards: "left" });
       await advanceClock(STEP_INTERVAL_MS + 1);
 
-      expect(screen.getByText(MESSAGES.stepAddToHomeScreen!)).toBeInTheDocument();
+      expect(screen.getByText(MESSAGES.stepViewMore!)).toBeInTheDocument();
     });
   });
 

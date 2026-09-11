@@ -1,3 +1,5 @@
+import { INSTALL_STEPS } from "@/components/add-to-home-screen-guide/install-steps/install-steps";
+
 import en from "./en.json";
 import es from "./es.json";
 import pt from "./pt.json";
@@ -97,6 +99,24 @@ describe("message catalogues", () => {
     );
 
     expect(offenders).toEqual([]);
+  });
+
+  /**
+   * Guards the install guide against a step whose copy nobody wrote.
+   *
+   * Key parity above only says the locales agree with each other; three
+   * catalogues can agree perfectly on a key that no step names, or miss one
+   * that every step does. The guide renders `t(messageKey)` and `t(targetKey)`
+   * for whatever {@link INSTALL_STEPS} holds, so reading the expectation from
+   * that array is what makes this survive the next tap iOS adds.
+   */
+  it.each(Object.entries(CATALOGUES))("%s names every install step", (_locale, m) => {
+    const guide = (m as typeof en).Components.AddToHomeScreenGuide as Record<string, string>;
+    const required = INSTALL_STEPS.flatMap((step) => [step.messageKey, step.targetKey]);
+
+    const unwritten = required.filter((key) => !guide[key]);
+
+    expect(unwritten).toEqual([]);
   });
 
   it.each(Object.entries(CATALOGUES))("%s exposes the course vocabulary keys", (_locale, m) => {
