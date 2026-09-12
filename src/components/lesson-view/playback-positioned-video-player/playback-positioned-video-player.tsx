@@ -6,11 +6,12 @@ import { usePersistPlaybackPosition } from "@/hooks/use-persist-playback-positio
 import { usePlaybackPosition } from "@/hooks/use-playback-position/use-playback-position";
 import { useResumeOnFirstPlay } from "@/hooks/use-resume-on-first-play/use-resume-on-first-play";
 
-import type { MediaPlayerInstance } from "@vidstack/react";
+import { useMediaState, type MediaPlayerInstance } from "@vidstack/react";
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 
 import { LessonVideoPlayer } from "../lesson-video-player/lesson-video-player";
 import { LessonVideoResumeOverlay } from "../lesson-video-resume-overlay/lesson-video-resume-overlay";
+import { LessonVideoSkeleton } from "../lesson-video-skeleton/lesson-video-skeleton";
 
 /**
  * The lesson player with its memory: it remembers where the learner stopped,
@@ -47,6 +48,15 @@ import { LessonVideoResumeOverlay } from "../lesson-video-resume-overlay/lesson-
  * own keyboard shortcuts are disabled: otherwise `Space` on the Resume button
  * would press it *and* toggle playback underneath.
  *
+ * **`LessonVideoSkeleton` is a sibling, not a child, and that is the point.**
+ * Children of the player mount when the player does, which is exactly the gap
+ * the placeholder exists to cover; a sibling ships inside the server-rendered
+ * HTML and dresses the frame from the first paint. It is retired on
+ * `useMediaState("canPlay")` rather than on hydration — this component owns the
+ * player ref, so it is the only place that can read readiness — and the hook
+ * answers `false` both on the server and on the client's hydration render,
+ * which is what keeps the two in agreement.
+ *
  * @param lessonId - Keys the stored position
  * @param source - The lesson's video URL
  * @param poster - The lesson's thumbnail, when it has one
@@ -78,6 +88,10 @@ export function PlaybackPositionedVideoPlayer({
 }) {
   const ownPlayerRef = useRef<MediaPlayerInstance | null>(null);
   const playerRef = ref ?? ownPlayerRef;
+  // Readiness, not hydration. React can finish hydrating seconds before a
+  // provider driving a third-party embed has a frame to show, and retiring the
+  // placeholder then just restores the black box it was covering.
+  const canPlay = useMediaState("canPlay", playerRef);
   const position = usePlaybackPosition(lessonId);
   const [savedPositionSeconds, setSavedPositionSeconds] = useState<number | null>(null);
 
@@ -120,37 +134,41 @@ export function PlaybackPositionedVideoPlayer({
   const isOfferOpen = resume.offeredSeconds !== null;
 
   return (
-    <LessonVideoPlayer
-      ref={playerRef}
-      source={source}
-      poster={poster}
-      title={title}
-      ariaLabel={ariaLabel}
-      keyDisabled={isOfferOpen}
-      onPlay={() => {
-        persistence.openWriteGate();
-        completion.handlePlaybackStarted();
-        onPlaybackStart?.();
-      }}
-      onPlaying={resume.handlePlaybackStarted}
-      onPause={persistence.handleImmediateWrite}
-      onSeeking={persistence.handleImmediateWrite}
-      onEnded={() => {
-        persistence.handleImmediateWrite();
-        completion.handleProgress();
-      }}
-      onTimeUpdate={() => {
-        persistence.handleTimeUpdate();
-        completion.handleProgress();
-      }}
-    >
-      {resume.offeredSeconds !== null ? (
-        <LessonVideoResumeOverlay
-          positionSeconds={resume.offeredSeconds}
-          onResume={resume.resumeFromSavedPosition}
-          onRestart={resume.restartFromBeginning}
-        />
-      ) : null}
-    </LessonVideoPlayer>
+    <>
+      <LessonVideoPlayer
+        ref={playerRef}
+        source={source}
+        poster={poster}
+        title={title}
+        ariaLabel={ariaLabel}
+        keyDisabled={isOfferOpen}
+        onPlay={() => {
+          persistence.openWriteGate();
+          completion.handlePlaybackStarted();
+          onPlaybackStart?.();
+        }}
+        onPlaying={resume.handlePlaybackStarted}
+        onPause={persistence.handleImmediateWrite}
+        onSeeking={persistence.handleImmediateWrite}
+        onEnded={() => {
+          persistence.handleImmediateWrite();
+          completion.handleProgress();
+        }}
+        onTimeUpdate={() => {
+          persistence.handleTimeUpdate();
+          completion.handleProgress();
+        }}
+      >
+        {resume.offeredSeconds !== null ? (
+          <LessonVideoResumeOverlay
+            positionSeconds={resume.offeredSeconds}
+            onResume={resume.resumeFromSavedPosition}
+            onRestart={resume.restartFromBeginning}
+          />
+        ) : null}
+      </LessonVideoPlayer>
+
+      {canPlay ? null : <LessonVideoSkeleton poster={poster} />}
+    </>
   );
 }

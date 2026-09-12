@@ -192,4 +192,50 @@ describe("ContinueWatching", () => {
       expect(screen.queryByTestId("continue-watching")).toBeNull();
     });
   });
+  describe("GIVEN a stored record whose round-trip has not answered", () => {
+    /** A resolver that never settles, so the pending window stays observable. */
+    const neverResolves = () => new Promise<never>(() => {});
+
+    test("WHEN a location is stored THEN the panel's slot is reserved", async () => {
+      renderPanel({ resolve: neverResolves });
+
+      expect(await screen.findByTestId("continue-watching-skeleton")).toBeInTheDocument();
+    });
+
+    test("WHEN the slot is reserved THEN it names no lesson and shows no progress", async () => {
+      renderPanel({ resolve: neverResolves });
+      await screen.findByTestId("continue-watching-skeleton");
+
+      // Reserving asserts "there is something here, still resolving" — which the
+      // record's existence makes true. It must not imply which lesson, or how
+      // far in, because neither is known until the round-trip answers.
+      expect(screen.queryByText(videoPanel.lessonTitle)).toBeNull();
+      expect(screen.queryByTestId("continue-watching-progress")).toBeNull();
+    });
+
+    test("WHEN no location is stored THEN nothing is reserved", async () => {
+      renderPanel({ stored: null, resolve: neverResolves });
+
+      await waitFor(() => {
+        expect(screen.queryByTestId("continue-watching-skeleton")).toBeNull();
+      });
+      expect(screen.queryByTestId("continue-watching")).toBeNull();
+    });
+
+    test("WHEN the record resolves THEN the reservation gives way to the panel", async () => {
+      renderPanel();
+
+      expect(await screen.findByTestId("continue-watching")).toBeInTheDocument();
+      expect(screen.queryByTestId("continue-watching-skeleton")).toBeNull();
+    });
+
+    test("WHEN the record turns out to be dead THEN the reservation collapses", async () => {
+      renderPanel({ panel: null });
+
+      await waitFor(() => {
+        expect(screen.queryByTestId("continue-watching-skeleton")).toBeNull();
+      });
+      expect(screen.queryByTestId("continue-watching")).toBeNull();
+    });
+  });
 });

@@ -248,4 +248,56 @@ describe("CourseLadder", () => {
       }
     });
   });
+  describe("GIVEN a stored record whose round-trip has not answered", () => {
+    /** A resolver that never settles, so the pending window stays observable. */
+    const neverResolves = () => new Promise<never>(() => {});
+
+    const renderPending = (stored: ContinueWatchingLocation | null) =>
+      render(
+        <CourseLadder
+          levels={levels}
+          continueWatching={makeRepository(stored)}
+          resolve={neverResolves}
+        />,
+      );
+
+    test("WHEN a location is stored THEN every card reserves its mark and action", async () => {
+      renderPending(locationIn(basic));
+
+      await waitFor(() => {
+        expect(screen.getAllByTestId("course-level-state-skeleton")).toHaveLength(levels.length);
+      });
+      expect(screen.getAllByTestId("course-level-cta-skeleton")).toHaveLength(levels.length);
+    });
+
+    test("WHEN cards are reserved THEN none of them asserts either state", async () => {
+      renderPending(locationIn(basic));
+
+      await waitFor(() => {
+        expect(screen.queryAllByTestId("course-level-state-skeleton")).not.toHaveLength(0);
+      });
+      // Which card is in progress is precisely what is not yet known; guessing
+      // is the assertion the reservation exists to avoid.
+      expect(screen.queryByTestId("course-level-state")).toBeNull();
+      expect(screen.queryByTestId("course-level-cta")).toBeNull();
+    });
+
+    test("WHEN no location is stored THEN every card reads as not started", async () => {
+      renderPending(null);
+
+      await waitFor(() => {
+        expect(screen.getAllByTestId("course-level-cta")).toHaveLength(levels.length);
+      });
+      expect(screen.queryByTestId("course-level-state-skeleton")).toBeNull();
+    });
+
+    test("WHEN the record resolves THEN the reservation gives way to the real states", async () => {
+      renderLadder(locationIn(basic), panelFor(basic));
+
+      await waitFor(() => {
+        expect(screen.getAllByTestId("course-level-cta")).toHaveLength(levels.length);
+      });
+      expect(screen.queryByTestId("course-level-state-skeleton")).toBeNull();
+    });
+  });
 });

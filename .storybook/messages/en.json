@@ -13,6 +13,10 @@
       "eyebrow": "Now playing",
       "title": "Speak with confidence",
       "subtitle": "A cinematic course that trains your ear before it trains your tongue."
+    },
+    "LessonVideoSkeleton": {
+      "before": "Before — reads as broken",
+      "after": "After — reads as loading"
     }
   }
 }
