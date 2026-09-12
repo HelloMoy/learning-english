@@ -11,6 +11,12 @@ vi.mock("@/hooks/use-lesson-completion/use-lesson-completion", () => ({
   markLessonComplete: vi.fn(async () => {}),
 }));
 
+const celebrate = vi.hoisted(() => vi.fn());
+
+vi.mock("@/lib/celebrate-completion/celebrate-completion", () => ({
+  celebrateLessonCompletion: celebrate,
+}));
+
 const { markLessonComplete } = await import("@/hooks/use-lesson-completion/use-lesson-completion");
 
 const LESSON_DURATION_SECONDS = 600;
@@ -158,5 +164,64 @@ describe("useCompleteWhenWatched", () => {
 
       expect(markLessonComplete).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe("useCompleteWhenWatched — celebrating the finish", () => {
+  beforeEach(() => {
+    celebrate.mockReset();
+  });
+
+  test("WHEN playback crosses the finish threshold THEN the lesson is celebrated", () => {
+    // Arrange
+    const player = makePlayer(0);
+    const { result } = renderAutoCompletion({ player });
+
+    // Act
+    act(() => {
+      result.current.handlePlaybackStarted();
+      player.currentTime = finishThresholdSeconds(LESSON_DURATION_SECONDS) + 1;
+      result.current.handleProgress();
+    });
+
+    // Assert — the same burst the manual control fires: to the learner it
+    // is the same moment.
+    expect(celebrate).toHaveBeenCalledTimes(1);
+  });
+
+  test("WHEN playback continues past the threshold THEN it is celebrated once", () => {
+    // Arrange — `time-update` fires several times a second; the last
+    // seconds of a lesson must not fire fifty bursts.
+    const player = makePlayer(0);
+    const { result } = renderAutoCompletion({ player });
+
+    // Act
+    act(() => {
+      result.current.handlePlaybackStarted();
+      player.currentTime = finishThresholdSeconds(LESSON_DURATION_SECONDS) + 1;
+      result.current.handleProgress();
+      player.currentTime += 2;
+      result.current.handleProgress();
+      player.currentTime += 2;
+      result.current.handleProgress();
+    });
+
+    // Assert
+    expect(celebrate).toHaveBeenCalledTimes(1);
+  });
+
+  test("WHEN a lesson is opened past the threshold without playing THEN nothing is celebrated", () => {
+    // Arrange — a stored position past the threshold fires `time-update` on
+    // open; the learner has finished nothing on this visit.
+    const player = makePlayer(finishThresholdSeconds(LESSON_DURATION_SECONDS) + 5);
+    const { result } = renderAutoCompletion({ player });
+
+    // Act
+    act(() => {
+      result.current.handleProgress();
+    });
+
+    // Assert
+    expect(celebrate).not.toHaveBeenCalled();
   });
 });

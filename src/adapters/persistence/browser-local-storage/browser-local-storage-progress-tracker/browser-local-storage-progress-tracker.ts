@@ -25,11 +25,13 @@ const buildKey = (lessonId: LessonId): string => `${STORAGE_KEY_PREFIX}${lessonI
  * no authentication, so nothing syncs across browsers. The port contract is
  * unchanged when a server-backed adapter replaces this one.
  *
- * Both methods are defensive about storage being unusable. `localStorage`
+ * All three methods are defensive about storage being unusable. `localStorage`
  * is undefined during SSR and in some restricted environments, and `setItem`
  * throws outright when the quota is exceeded or storage is blocked (Safari
- * private mode). Neither may break the page: a completion mark is not worth
- * an exception, so a failed write is simply a mark that does not stick.
+ * private mode), and `removeItem` can throw for the same reasons. None of
+ * them may break the page: a completion mark is not worth an exception, so a
+ * failed write is simply a mark that does not stick — or one that does not
+ * lift.
  * The optional `localStorage` parameter is the dependency-injection seam
  * tests use to simulate those environments without monkey-patching globals.
  */
@@ -54,6 +56,18 @@ export class BrowserLocalStorageProgressTracker implements ProgressTracker {
     } catch {
       // Quota exceeded or storage blocked. The mark is lost, which is the
       // correct degradation: the learner keeps browsing.
+    }
+  }
+
+  async unmarkComplete(lessonId: LessonId): Promise<void> {
+    if (this.#storage === undefined) {
+      return;
+    }
+    try {
+      this.#storage.removeItem(buildKey(lessonId));
+    } catch {
+      // Storage blocked. The lesson stays marked, which is the correct
+      // degradation: the learner keeps browsing.
     }
   }
 

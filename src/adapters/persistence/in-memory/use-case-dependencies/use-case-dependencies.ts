@@ -25,6 +25,7 @@ import { makeFindNextLesson } from "@/domain/use-cases/find-next-lesson/find-nex
 import { makeGetPlaybackPosition } from "@/domain/use-cases/get-playback-position/get-playback-position";
 import { makeMarkLessonComplete } from "@/domain/use-cases/mark-lesson-complete/mark-lesson-complete";
 import { makeRecordPlaybackPosition } from "@/domain/use-cases/record-playback-position/record-playback-position";
+import { makeUnmarkLessonComplete } from "@/domain/use-cases/unmark-lesson-complete/unmark-lesson-complete";
 
 /**
  * The shape every driving adapter (Next.js page, Storybook) uses to consume
@@ -48,6 +49,7 @@ export type CoursePlatformDeps = {
     findNextLesson: ReturnType<typeof makeFindNextLesson>;
     findLessonForView: ReturnType<typeof makeFindLessonForView>;
     markLessonComplete: ReturnType<typeof makeMarkLessonComplete>;
+    unmarkLessonComplete: ReturnType<typeof makeUnmarkLessonComplete>;
     findCourseCatalog: ReturnType<typeof makeFindCourseCatalog>;
     findContinueWatching: ReturnType<typeof makeFindContinueWatching>;
     findCourseForView: ReturnType<typeof makeFindCourseForView>;
@@ -154,6 +156,10 @@ function assemble({
     lessons: lessonsRepo,
     progress,
   });
+  const unmarkLessonComplete = makeUnmarkLessonComplete({
+    lessons: lessonsRepo,
+    progress,
+  });
   const findCourseCatalog = makeFindCourseCatalog({
     courses: coursesRepo,
     modules: modulesRepo,
@@ -193,6 +199,7 @@ function assemble({
       findNextLesson,
       findLessonForView,
       markLessonComplete,
+      unmarkLessonComplete,
       findCourseCatalog,
       findContinueWatching,
       findCourseForView,

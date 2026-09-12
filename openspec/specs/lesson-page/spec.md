@@ -29,11 +29,13 @@ The Lesson Page SHALL render the following regions, in this layout:
 - **Main (center)**: the **Player** — an HTML5 `<video controls>` element with the Lesson video's `source` and `poster` (if present). Below the Player, the Lesson title, description, and a **Mark as complete** button.
 - **Aside (right)**: a **Resources** card listing the Lesson `Resource` entries, and an **Up next** card pointing to the next Lesson or showing "Course completed" if the current is the last Lesson of the last Module.
 
+On phone-class viewports — below the `lg` breakpoint, where the three columns stack into one — the **Up next** card SHALL NOT be rendered in the stacked rail. Its content is carried instead by the closing block specified by the `lesson-close-card` capability, which sits at the end of the Main column together with the **Mark as complete** button. The regions above are otherwise unchanged, and from `lg` up the layout is exactly as described.
+
 A `Resource.url` addresses content — an absolute URL, or a site-relative path to a static asset served from `public/` — and never an in-app route. Resource links SHALL therefore be rendered with a plain anchor whose `href` is the `Resource.url` **verbatim**, and SHALL NOT be routed through the locale-aware `Link` from `@/i18n/navigation`. Applying the `localePrefix: "always"` locale segment to a `public/` asset path yields a path that does not exist and returns `404`.
 
 The Lesson's notes `Resource` — the `readme.md` the Notes tab renders inline — SHALL NOT appear in the Resources card, and the right rail SHALL NOT offer any other card or row linking to it. The rendered notes are the learner's only route to that content.
 
-The Up next link, by contrast, addresses an in-app Lesson route and SHALL remain locale-aware.
+The Up next link, by contrast, addresses an in-app Lesson route and SHALL remain locale-aware — in the rail card and in the closing block alike.
 
 #### Scenario: The page renders all regions when the view is resolved
 - **WHEN** the `findLessonForView` use case resolves to `{ ok: true, value: { course, module, lesson, resources, nextLesson } }`
@@ -70,6 +72,10 @@ The Up next link, by contrast, addresses an in-app Lesson route and SHALL remain
 #### Scenario: The Up next card shows the terminal state when the course is complete
 - **WHEN** the resolved view has `nextLesson: null`
 - **THEN** the Up next card displays the message "You've reached the end of the course" (translated via `next-intl`)
+
+#### Scenario: The stacked rail drops the Up next card on a phone
+- **WHEN** the Lesson Page is rendered at a 390px viewport width
+- **THEN** the stacked rail shows the Resources card and no Up next card, and the next lesson is offered by the closing block at the end of the Main column instead
 
 ### Requirement: The Outline shows the course's modules and lessons with the current lesson indicated
 
@@ -229,22 +235,6 @@ dark page.
 - **THEN** there is no Mark as complete button inside the Player chrome; the Mark as
   complete affordance lives in the page footer, next to the Player
 
-### Requirement: The Mark as complete button is a manual, ephemeral action
-
-The Lesson Page SHALL render a **Mark as complete** button below the Player. Clicking the button SHALL call the `markLessonComplete` use case via a Next.js Server Action. The button SHALL toggle its label between "Mark as complete" and "Marked complete" (translated via `next-intl`). The completed state is **ephemeral** — refreshing the page or restarting the server resets the button to "Mark as complete". This is the v1 limitation; persistence arrives with a follow-up change.
-
-#### Scenario: The button starts in the "Mark as complete" state
-- **WHEN** the page loads
-- **THEN** the button label is "Mark as complete"
-
-#### Scenario: Clicking the button changes the label
-- **WHEN** the user clicks the button
-- **THEN** the button label becomes "Marked complete"
-
-#### Scenario: The completed state is lost on reload
-- **WHEN** the user clicks the button, then refreshes the page
-- **THEN** the button label is "Mark as complete" again (in-memory state was lost)
-
 ### Requirement: The breadcrumb shows Course › Module › Lesson
 
 The Lesson Page SHALL render a breadcrumb at the top with three segments: the Course title (linking to the course root, deferred — for v1 the link is the course slug), the Module title (linking to the module's first lesson, or just a label — implementation choice), and the current Lesson title (not a link).
@@ -275,7 +265,7 @@ When `findLessonForView` returns an error (course not found, module not in cours
 
 ### Requirement: Components are colocated in `src/components/lesson-view/` and each has a Storybook story
 
-Every component introduced by this capability (Outline, ModuleList, LessonList, NativeVideoPlayer, ResourceList, ResourceItem, UpNextCard, MarkAsCompleteButton, LessonBreadcrumb, LessonView) SHALL live under `src/components/lesson-view/<component-name>/` with its implementation, its Vitest + RTL test, and its Storybook story. Each component SHALL be importable from a barrel `@/components/lesson-view`.
+Every component introduced by this capability (Outline, ModuleList, LessonList, NativeVideoPlayer, ResourceList, ResourceItem, UpNextCard, LessonCompletionToggle, LessonBreadcrumb, LessonView) SHALL live under `src/components/lesson-view/<component-name>/` with its implementation, its Vitest + RTL test, and its Storybook story. Each component SHALL be importable from a barrel `@/components/lesson-view`.
 
 #### Scenario: Each component has at least one Storybook story
 - **WHEN** a Storybook build runs
@@ -891,3 +881,26 @@ the visible label hidden from it so the rate is not read twice.
 #### Scenario: The indicator is localized
 - **WHEN** the indicator renders in each supported locale
 - **THEN** its label is that locale's copy, with no English fallback text
+
+### Requirement: The completion control is a manual, reversible action
+
+The Lesson Page SHALL render a completion control below the Player, inside the closing card. While the lesson is incomplete the control SHALL be a primary **Mark as complete** button, and activating it SHALL call the `markLessonComplete` use case via a Next.js Server Action. Once the lesson is complete the control SHALL state that it is complete and SHALL offer a **non-primary, enabled** un-mark action, which SHALL call the `unmarkLessonComplete` use case via its own Server Action after the learner confirms in a dialog. The control SHALL NOT express completion by disabling itself.
+
+Every label SHALL be translated via `next-intl`. Whether completion survives is a property of the bound adapter: the server's in-memory tracker forgets it, the browser's `localStorage` adapter does not, and the control reads the browser's — see the `lesson-progress` and `lesson-completion-toggle` capabilities.
+
+#### Scenario: The control starts in the "Mark as complete" state
+- **WHEN** the page loads for a lesson that is not recorded complete on this device
+- **THEN** the control shows the primary "Mark as complete" button
+
+#### Scenario: Marking swaps the control to its completed state
+- **WHEN** the learner activates "Mark as complete"
+- **THEN** the control states the lesson is complete and offers the un-mark action instead of the primary button
+
+#### Scenario: The completed state survives a reload on the device that recorded it
+- **WHEN** the learner marks a lesson complete and then refreshes the page
+- **THEN** the control is still in its completed state, because the browser adapter recorded it
+
+#### Scenario: No control is left disabled to express completion
+- **WHEN** the control is in its completed state
+- **THEN** nothing in it is disabled — the un-mark action is activatable
+

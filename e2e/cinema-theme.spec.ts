@@ -80,11 +80,11 @@ test.describe("Immersion Cinema — lesson notes tabs", () => {
       "true",
     );
 
-    // Mark-as-complete is keyboard-reachable and toggles on activation.
+    // Mark-as-complete is keyboard-reachable and swaps state on activation.
     const button = page.getByRole("button", { name: /mark as complete/i });
     await button.focus();
     await expect(button).toBeFocused();
     await button.click();
-    await expect(page.getByRole("button", { name: /marked complete/i })).toBeVisible();
+    await expect(page.getByText(/lesson completed/i)).toBeVisible();
   });
 });

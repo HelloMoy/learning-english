@@ -7,7 +7,7 @@ import type { LessonView as LessonViewData } from "@/domain/use-cases/find-lesso
 import { emitPlayerEvent, findPlayerIn } from "@/test-setup/stubs/vidstack-player";
 
 import { faker } from "@faker-js/faker";
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -110,15 +110,90 @@ describe("LessonView", () => {
         notes={null}
         notesResource={null}
         markComplete={markComplete}
+        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
 
     // Assert
     expect(screen.getByRole("heading", { name: "Lecture title" })).toBeInTheDocument();
     expect(screen.getByText("Lecture description")).toBeInTheDocument();
-    expect(screen.getByText("PDF handout")).toBeInTheDocument();
-    expect(screen.getByText("courseCompleted")).toBeInTheDocument();
+    expect(within(screen.getByRole("main")).getByText("PDF handout")).toBeInTheDocument();
+    expect(screen.getAllByText("courseCompleted")).not.toHaveLength(0);
     expect(screen.getByRole("button", { name: "markComplete" })).toBeInTheDocument();
+  });
+
+  test("WHEN there is a next lesson THEN main closes with it and the rail keeps its card", () => {
+    // Arrange — the two affordances are one per breakpoint: the closing card
+    // is the phone's, the rail card is the desktop's.
+    const { view } = fixtures();
+    const nextLesson = Lesson.parse({
+      kind: "reading",
+      id: LessonId.parse(faker.string.uuid()),
+      courseId: view.course.id,
+      moduleId: view.module.id,
+      sequence: 2,
+      title: "Next lesson title",
+      body: "body",
+    });
+
+    // Act
+    render(
+      <LessonView
+        view={{ ...view, nextLesson, lessons: [view.lesson, nextLesson] }}
+        notes={null}
+        notesResource={null}
+        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
+      />,
+    );
+
+    // Assert — the closing card ends the center column, wrapping the action.
+    const main = screen.getByRole("main");
+    const closingLink = within(main).getByRole("link", { name: /Next lesson title/ });
+    expect(closingLink).toBeInTheDocument();
+    expect(within(main).getByText("prompt")).toBeInTheDocument();
+    expect(closingLink.closest("section")).toContainElement(
+      screen.getByRole("button", { name: "markComplete" }),
+    );
+
+    // The rail still carries its own card, outside the center column.
+    const railLink = screen
+      .getAllByRole("link", { name: /Next lesson title/ })
+      .find((link) => !main.contains(link));
+    expect(railLink).toBeDefined();
+
+    // And the action itself is mounted exactly once on the page.
+    expect(screen.getAllByRole("button", { name: "markComplete" })).toHaveLength(1);
+  });
+
+  test("WHEN stacked on a phone THEN the materials come before the closing block", () => {
+    // Arrange — the rail follows `main` in the stack, so the rail's own copy
+    // would land *after* the block that ends the lesson.
+    const { view } = fixtures();
+
+    // Act
+    render(
+      <LessonView
+        view={view}
+        notes={null}
+        notesResource={null}
+        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
+      />,
+    );
+
+    // Assert — the phone copy sits inside the center column, ahead of the
+    // closing card.
+    const main = screen.getByRole("main");
+    const materials = within(main).getByText("PDF handout");
+    const closingCard = screen.getByTestId("lesson-close-card");
+    expect(
+      materials.compareDocumentPosition(closingCard) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+
+    // The rail still carries its own, for the widths where the rail exists.
+    const railCopy = screen.getAllByText("PDF handout").find((node) => !main.contains(node));
+    expect(railCopy).toBeDefined();
   });
 
   test("WHEN rendered for a reading lesson THEN it shows the body in an article and no video element", () => {
@@ -143,6 +218,7 @@ describe("LessonView", () => {
         notes={null}
         notesResource={null}
         markComplete={markComplete}
+        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
 
@@ -159,6 +235,7 @@ describe("LessonView", () => {
         notes={null}
         notesResource={null}
         markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
     // Without a poster the frame is black, so the cover is the only cover
@@ -177,6 +254,7 @@ describe("LessonView", () => {
         notes={null}
         notesResource={null}
         markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
     // The thumbnail is the cover; painting titles over it would be the
@@ -196,6 +274,7 @@ describe("LessonView", () => {
         notes={null}
         notesResource={null}
         markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
 
@@ -211,6 +290,7 @@ describe("LessonView", () => {
         notes={null}
         notesResource={null}
         markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
     const player = findPlayerIn(screen.getByRole("region", { name: "videoPlayerLabel" }));
@@ -239,6 +319,7 @@ describe("LessonView", () => {
         notes={"# Intro\n\nTexto ES.\n\nEnglish text."}
         notesResource={null}
         markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
     expect(screen.getByTestId("lesson-notes-tabs")).toBeInTheDocument();
@@ -261,6 +342,7 @@ describe("LessonView", () => {
         notes={"# Intro\n\nTexto ES."}
         notesResource={notesResource}
         markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
 
@@ -269,7 +351,7 @@ describe("LessonView", () => {
     expect(screen.queryByRole("region", { name: "resourceTitle" })).toBeNull();
     expect(screen.queryByText(notesResource.title)).toBeNull();
     expect(screen.queryByRole("link", { name: notesResource.title })).toBeNull();
-    expect(screen.getByText("PDF handout")).toBeInTheDocument();
+    expect(within(screen.getByRole("main")).getByText("PDF handout")).toBeInTheDocument();
   });
 
   test("WHEN the notes file is a lesson's only resource THEN Resources shows its empty state", () => {
@@ -284,11 +366,12 @@ describe("LessonView", () => {
         notes={"# Intro\n\nTexto ES."}
         notesResource={notesResource}
         markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
 
     // Assert: one card showing "no resources", not a second card beside it.
-    expect(screen.getByText("empty")).toBeInTheDocument();
+    expect(within(screen.getByRole("main")).getByText("empty")).toBeInTheDocument();
     expect(screen.queryByText(notesResource.title)).toBeNull();
     expect(screen.queryByRole("region", { name: "resourceTitle" })).toBeNull();
   });
@@ -305,6 +388,7 @@ describe("LessonView", () => {
         notes={"# Intro\n\nTexto ES."}
         notesResource={notesResource}
         markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
 

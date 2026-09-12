@@ -20,6 +20,11 @@ export class InMemoryProgressTracker implements ProgressTracker {
     return Promise.resolve();
   }
 
+  unmarkComplete(lessonId: LessonId): Promise<void> {
+    this.#completed.delete(lessonId);
+    return Promise.resolve();
+  }
+
   isComplete(lessonId: LessonId): Promise<boolean> {
     return Promise.resolve(this.#completed.has(lessonId));
   }

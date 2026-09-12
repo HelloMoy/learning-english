@@ -75,13 +75,27 @@
     "LessonBreadcrumb": {
       "ariaLabel": "Trilha de navegação"
     },
+    "UnmarkLessonModal": {
+      "title": "Desmarcar esta lição?",
+      "consequence": "Ela voltará a contar como pendente: seu progresso do curso e do módulo vai cair e a marca de concluída sumirá do índice e das listas de lições.",
+      "rewatch": "Se você assisti-la até o fim de novo, ela será marcada como concluída outra vez.",
+      "positionKept": "Sua posição de reprodução salva não é apagada.",
+      "confirm": "Desmarcar lição",
+      "cancel": "Cancelar"
+    },
+    "LessonCloseCard": {
+      "upNext": "A seguir",
+      "courseCompleted": "Você chegou ao fim do curso."
+    },
     "UpNextCard": {
       "title": "A seguir",
       "courseCompleted": "Você chegou ao fim do curso."
     },
-    "MarkAsCompleteButton": {
+    "LessonCompletionToggle": {
+      "prompt": "Terminou esta lição? Marque-a e siga para a próxima.",
       "markComplete": "Marcar como concluída",
-      "markedComplete": "Concluída"
+      "completed": "Lição concluída",
+      "unmark": "Desmarcar"
     },
     "LessonVideoResumeOverlay": {
       "dialogLabel": "Retomar reprodução",

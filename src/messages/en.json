@@ -75,13 +75,27 @@
     "LessonBreadcrumb": {
       "ariaLabel": "Breadcrumb"
     },
+    "UnmarkLessonModal": {
+      "title": "Unmark this lesson?",
+      "consequence": "It will count as pending again: your course and module progress will go down and its completion mark will disappear from the outline and the lesson lists.",
+      "rewatch": "If you watch it to the end again, it will be marked complete once more.",
+      "positionKept": "Your saved playback position is not erased.",
+      "confirm": "Unmark lesson",
+      "cancel": "Cancel"
+    },
+    "LessonCloseCard": {
+      "upNext": "Up next",
+      "courseCompleted": "You've reached the end of the course."
+    },
     "UpNextCard": {
       "title": "Up next",
       "courseCompleted": "You've reached the end of the course."
     },
-    "MarkAsCompleteButton": {
+    "LessonCompletionToggle": {
+      "prompt": "Finished this lesson? Mark it complete and keep going.",
       "markComplete": "Mark as complete",
-      "markedComplete": "Marked complete"
+      "completed": "Lesson completed",
+      "unmark": "Unmark"
     },
     "LessonVideoResumeOverlay": {
       "dialogLabel": "Resume playback",

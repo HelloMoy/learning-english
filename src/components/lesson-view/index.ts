@@ -1,10 +1,11 @@
 export { LessonBreadcrumb } from "./lesson-breadcrumb/lesson-breadcrumb";
+export { LessonCloseCard } from "./lesson-close-card/lesson-close-card";
 export { LessonList } from "./lesson-list/lesson-list";
 export { LessonVideoPlayer } from "./lesson-video-player/lesson-video-player";
 export { LessonVideoResumeOverlay } from "./lesson-video-resume-overlay/lesson-video-resume-overlay";
 export { LessonPageError } from "./lesson-page-error/lesson-page-error";
 export { LessonView } from "./lesson-view/lesson-view";
-export { MarkAsCompleteButton } from "./mark-as-complete-button/mark-as-complete-button";
+export { LessonCompletionToggle } from "./lesson-completion-toggle/lesson-completion-toggle";
 export { ModuleList } from "./module-list/module-list";
 export { Outline } from "./outline/outline";
 export { OutlineDrawer } from "./outline-drawer/outline-drawer";
