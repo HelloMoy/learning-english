@@ -241,6 +241,9 @@
       "ariaLabel": "{completed} of {total} videos completed",
       "completedLabel": "Lesson completed",
       "completedAriaLabel": "All {total} videos completed"
+    },
+    "LoadingStatus": {
+      "label": "Loading"
     }
   },
   "CourseCatalog": {

@@ -75,6 +75,10 @@ export function CourseLadder({
   const isHydrated = useIsHydrated();
   const locations = useContinueWatching(continueWatching);
   const [inProgress, setInProgress] = useState<CourseInProgress | null>(null);
+  // Storage answers "a record exists" long before the round-trip answers which
+  // course it points at. Between the two, no card can honestly take either
+  // state, so all of them reserve.
+  const [isResolving, setIsResolving] = useState(false);
 
   useEffect(() => {
     let isCurrent = true;
@@ -82,17 +86,24 @@ export function CourseLadder({
       if (!location || !isCurrent) {
         return;
       }
+      setIsResolving(true);
       const panel = await resolve(location);
       if (isCurrent) {
         setInProgress(
           panel ? { courseSlug: location.courseSlug, lessonHref: panel.lessonHref } : null,
         );
+        setIsResolving(false);
       }
     });
     return () => {
       isCurrent = false;
     };
   }, [locations, resolve]);
+
+  // The server render and the hydration pass both read as not-started, exactly
+  // as they did before: `useIsHydrated` gates the reservation for the same
+  // reason it gates the resume href — neither may differ across hydration.
+  const isReserving = isHydrated && isResolving;
 
   const resumeHrefFor = (course: Course): string | null =>
     isHydrated && inProgress?.courseSlug === course.slug ? inProgress.lessonHref : null;
@@ -160,6 +171,7 @@ export function CourseLadder({
               course={level.course}
               leadingModules={level.leadingModules}
               resumeHref={resumeHrefFor(level.course)}
+              isResolving={isReserving}
             />
           </li>
         ))}

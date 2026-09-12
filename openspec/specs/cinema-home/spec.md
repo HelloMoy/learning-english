@@ -132,7 +132,11 @@ Because that primary action gives up the course overview, the in-progress card S
 
 A not-started card SHALL keep exactly one call to action, to the course overview, and SHALL NOT render the secondary action.
 
-Before the client has read the record, and whenever there is no record, every card SHALL render the not-started state — the honest one — rather than flashing a mark it cannot yet justify. The in-progress state SHALL therefore be asserted only once a lesson href is known, so no card ever offers a resume action with nowhere to resume to.
+Whenever there is no stored record, every card SHALL render the not-started state — the honest one — rather than flashing a mark it cannot yet justify. The in-progress state SHALL therefore be asserted only once a lesson href is known, so no card ever offers a resume action with nowhere to resume to.
+
+When a stored record **does** exist and the round-trip that resolves it has not yet answered, the card's progress mark and its call-to-action area SHALL be reserved with a placeholder of their own dimensions instead of asserting the not-started state. The record's existence is known synchronously, before the round-trip; the course it belongs to is not. Reserving says "one of these cards is in progress and we are finding out which", which is true, and it stops the primary action's wording from changing under the learner's thumb. Every card SHALL reserve alike during that window, because guessing which one to reserve is the assertion being avoided.
+
+When the round-trip answers, the resolved card SHALL take the in-progress state and every other card SHALL take the not-started state. When it answers that the record no longer resolves, every card SHALL take the not-started state.
 
 #### Scenario: The in-progress course is marked
 - **WHEN** the stored location points at a lesson of the first course
@@ -158,6 +162,11 @@ Before the client has read the record, and whenever there is no record, every ca
 - **WHEN** no location is stored
 - **THEN** every card shows the not-started state
 
-#### Scenario: The mark resolves after hydration
-- **WHEN** the home is server-rendered
-- **THEN** the markup contains the not-started state for every card, and the mark appears only after the client has read the record
+#### Scenario: A pending record reserves every card's mark and action
+- **WHEN** the client has read a stored location and the round-trip that resolves it has not answered
+- **THEN** every card shows a placeholder in place of its progress mark and its call-to-action area, and no card asserts either state
+
+#### Scenario: The server-rendered card asserts nothing it cannot know
+- **WHEN** the home is server-rendered, before `localStorage` can be read
+- **THEN** every card renders the not-started state, as it does today
+

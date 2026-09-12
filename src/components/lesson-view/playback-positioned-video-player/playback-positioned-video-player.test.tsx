@@ -24,6 +24,21 @@ vi.mock("@/lib/celebrate-completion/celebrate-completion", () => ({
   celebrateLessonCompletion: vi.fn(async () => {}),
 }));
 
+/**
+ * The gate under test, not the library. jsdom loads no media provider, so the
+ * real `useMediaState("canPlay")` answers `false` forever — which is the right
+ * default here, and is what every test below inherits. A test that needs a
+ * ready player flips this instead of pretending an embed loaded.
+ *
+ * A partial mock on purpose: `MediaPlayer` and the rest of the package must
+ * stay real, or the component under test no longer renders a player at all.
+ */
+let canPlay = false;
+vi.mock("@vidstack/react", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@vidstack/react")>()),
+  useMediaState: (prop: string) => (prop === "canPlay" ? canPlay : false),
+}));
+
 vi.mock("@/hooks/use-lesson-completion/use-lesson-completion", () => ({
   markLessonComplete: vi.fn(async () => {}),
   useLessonCompletion: () => false,
@@ -55,13 +70,20 @@ function renderPlayer({
   lessonId = LessonId.parse(faker.string.uuid()),
   durationSeconds = DURATION_SECONDS,
   source = "/videos/lesson.mp4",
-}: { lessonId?: LessonId; durationSeconds?: number; source?: string } = {}) {
+  poster,
+}: {
+  lessonId?: LessonId;
+  durationSeconds?: number;
+  source?: string;
+  poster?: string;
+} = {}) {
   const playerRef = { current: null as MediaPlayerInstance | null };
 
   const view = render(
     <PlaybackPositionedVideoPlayer
       lessonId={lessonId}
       source={source}
+      poster={poster}
       title="Long vs short vowels"
       durationSeconds={durationSeconds}
       ref={playerRef}
@@ -122,6 +144,7 @@ beforeEach(() => {
 
 afterEach(() => {
   mockStorage.clear();
+  canPlay = false;
 });
 
 describe("PlaybackPositionedVideoPlayer", () => {
@@ -438,6 +461,68 @@ describe("PlaybackPositionedVideoPlayer", () => {
       await settle();
 
       expect(markLessonComplete).not.toHaveBeenCalled();
+    });
+  });
+  describe("GIVEN a player that has not finished booting", () => {
+    const placeholder = () => document.querySelector('[data-testid="lesson-video-skeleton"]');
+
+    test("WHEN the player cannot yet play THEN the frame carries a placeholder", async () => {
+      renderPlayer();
+      await settle();
+
+      expect(placeholder()).toBeInTheDocument();
+    });
+
+    test("WHEN the lesson declares a poster THEN the placeholder shows it", async () => {
+      const poster = "/local-filesystem-lesson/basic-course/1-introduction/thumbnail.jpeg";
+
+      renderPlayer({ poster });
+      await settle();
+
+      expect(placeholder()?.querySelector("img")).toHaveAttribute("src", poster);
+    });
+
+    test("WHEN the page has hydrated but the player still cannot play THEN the placeholder stays", async () => {
+      // A plain RTL render IS a client render — hydration is already behind us
+      // here — so a placeholder still present after `settle()` is proof the gate
+      // reads readiness and not hydration.
+      renderPlayer();
+      await settle();
+
+      expect(placeholder()).toBeInTheDocument();
+    });
+
+    test("WHEN the player reports it can play THEN the placeholder is gone", async () => {
+      canPlay = true;
+
+      renderPlayer();
+      await settle();
+
+      expect(placeholder()).not.toBeInTheDocument();
+    });
+
+    test("WHEN the placeholder is shown THEN it does not obstruct the player", async () => {
+      renderPlayer();
+      await settle();
+
+      // Pointer events pass straight through, so the tap that starts playback
+      // reaches the player the moment it is ready.
+      expect(placeholder()).toHaveClass("pointer-events-none");
+      expect(placeholder()).toHaveAttribute("aria-hidden", "true");
+    });
+
+    test("WHEN the player is ready THEN the resume overlay still takes the frame", async () => {
+      canPlay = true;
+      const lessonId = LessonId.parse(faker.string.uuid());
+      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
+
+      const { playerRef } = renderPlayer({ lessonId });
+      await settle();
+      emit(playerRef.current, "playing");
+      await settle();
+
+      expect(placeholder()).not.toBeInTheDocument();
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
   });
 });

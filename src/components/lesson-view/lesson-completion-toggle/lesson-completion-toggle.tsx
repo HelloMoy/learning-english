@@ -1,7 +1,9 @@
 "use client";
 
 import { UnmarkLessonModal } from "@/components/modals/unmark-lesson-modal/unmark-lesson-modal";
+import { Skeleton } from "@/components/ui/skeleton/skeleton";
 import type { LessonId } from "@/domain/entities/ids/ids";
+import { useIsHydrated } from "@/hooks/use-is-hydrated/use-is-hydrated";
 import {
   markLessonComplete,
   unmarkLessonComplete,
@@ -14,12 +16,22 @@ import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 
 /**
- * The lesson's completion control, in both of its states.
+ * The lesson's completion control, in both of its states — and in the third
+ * one, which says nothing.
  *
  * @remarks
  * Its state is read from the durable browser store, not from local state
  * seeded to `false` — a lesson completed last week shows as completed on
  * arrival, and a mark survives a reload and a server restart.
+ *
+ * **Before the browser has read that store, neither state is true.** The
+ * control used to render the invitation across that window, which told a
+ * learner who had already finished the lesson something false about their own
+ * progress — and did it in the page's closing call to action, the last thing
+ * they look at. It now reserves the control's space instead, and commits to a
+ * state only once there is one. Every other progress-bearing component in this
+ * codebase already refuses to assert what it cannot justify; this is that rule
+ * applied to the loudest of them.
  *
  * While the lesson is incomplete it invites the learner to finish it and
  * offers the primary "Mark as complete" button. Once complete it says so
@@ -71,6 +83,11 @@ export function LessonCompletionToggle({
 }) {
   const t = useTranslations("Components.LessonCompletionToggle");
   const completed = useLessonCompletion(lessonId);
+  // Completion lives in `localStorage`, which the server cannot read. Until the
+  // browser has, the control knows neither state — and rendering the incomplete
+  // one tells a learner who already finished the lesson something false, in the
+  // page's closing call to action, where it is least likely to go unnoticed.
+  const isHydrated = useIsHydrated();
   const [isPending, startTransition] = useTransition();
 
   const onMark = () => {
@@ -93,6 +110,10 @@ export function LessonCompletionToggle({
       }
     });
   };
+
+  if (!isHydrated) {
+    return <UnknownState />;
+  }
 
   if (completed) {
     return (
@@ -128,6 +149,28 @@ export function LessonCompletionToggle({
         <span aria-hidden="true">✓</span>
         {t("markComplete")}
       </button>
+    </div>
+  );
+}
+
+/**
+ * The control's shape, held while completion is still unknown.
+ *
+ * @remarks
+ * Sized against the incomplete state — the taller of the two — so the closing
+ * card does not change height when the real control resolves. Silent and
+ * unfocusable: there is nothing here to announce and nothing to press, and a
+ * tab stop on a placeholder would strand a keyboard learner on it.
+ */
+function UnknownState() {
+  return (
+    <div
+      data-testid="lesson-completion-toggle-skeleton"
+      aria-hidden="true"
+      className="flex flex-col items-stretch gap-2 lg:items-start"
+    >
+      <Skeleton className="h-5 w-3/4 max-w-xs lg:hidden" />
+      <Skeleton className="h-11 w-full rounded-lg lg:w-44" />
     </div>
   );
 }

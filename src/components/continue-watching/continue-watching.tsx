@@ -6,6 +6,7 @@ import {
   type ResolveContinueWatching,
 } from "@/app/[locale]/resolve-continue-watching";
 import { Eyebrow } from "@/components/eyebrow/eyebrow";
+import { Skeleton } from "@/components/ui/skeleton/skeleton";
 import { LessonId } from "@/domain/entities/ids/ids";
 import type { ContinueWatchingRepository } from "@/domain/ports/continue-watching-repository/continue-watching-repository";
 import type { PlaybackPositionRepository } from "@/domain/ports/playback-position-repository/playback-position-repository";
@@ -30,6 +31,20 @@ type Progress = {
 };
 
 /**
+ * What the panel knows so far.
+ *
+ * The four states exist because "nothing stored" and "stored but not yet
+ * resolved" are different facts, and collapsing them is what made the panel
+ * appear out of nowhere and shove the ladder down. Only `resolving` reserves a
+ * slot, and it is reached only after storage has answered that a record exists.
+ */
+type PanelState =
+  | { status: "reading-storage" }
+  | { status: "resolving" }
+  | { status: "nothing-to-continue" }
+  | { status: "resolved"; panel: ContinueWatchingPanel; lessonId: LessonId };
+
+/**
  * The home's "Continue watching" panel: the lesson the learner opened last,
  * with how far into it they got and one action to go back to it.
  *
@@ -46,6 +61,16 @@ type Progress = {
  * can be read. That silence is deliberate — a learner who has watched
  * nothing has done nothing wrong, and the ladder below reaches every course
  * without this panel's help.
+ *
+ * **Between those two, the slot is held open.** Storage answers in the same
+ * tick; the server action does not, and on a slow connection the gap is
+ * seconds. Rendering nothing across it meant the whole section — heading, card
+ * and primary action — appeared out of nowhere and shoved the ladder down,
+ * which is the worst thing to do to a learner who has just started reading it.
+ * The reservation is gated on the record's **existence**, the cheap half of
+ * the answer: it claims "there is something here, still resolving" and nothing
+ * more. A learner with no record still sees exactly what they saw before —
+ * nothing, and no gap where the panel would be.
  *
  * The progress indicator appears only for a video lesson with a saved
  * position. A reading lesson has nothing to measure, and drawing a bar at
@@ -67,29 +92,41 @@ export function ContinueWatching({
 }) {
   const t = useTranslations("Components.ContinueWatching");
   const locations = useContinueWatching(continueWatching);
-  const [panel, setPanel] = useState<ContinueWatchingPanel | null>(null);
-  const [lessonId, setLessonId] = useState<LessonId | null>(null);
+  const [state, setState] = useState<PanelState>({ status: "reading-storage" });
 
   useEffect(() => {
     let isCurrent = true;
     void locations.get().then(async (location) => {
-      if (!location || !isCurrent) {
+      if (!isCurrent) return;
+      if (!location) {
+        setState({ status: "nothing-to-continue" });
         return;
       }
+      // The record exists — that much is now known, and it is the whole basis
+      // for reserving the slot while the round-trip below runs.
+      setState({ status: "resolving" });
       const resolved = await resolve(location);
-      if (isCurrent) {
-        setPanel(resolved);
-        setLessonId(resolved ? location.lessonId : null);
-      }
+      if (!isCurrent) return;
+      setState(
+        resolved
+          ? { status: "resolved", panel: resolved, lessonId: location.lessonId }
+          : { status: "nothing-to-continue" },
+      );
     });
     return () => {
       isCurrent = false;
     };
   }, [locations, resolve]);
 
-  if (!panel || !lessonId) {
+  if (state.status === "resolving") {
+    return <ReservedSlot t={t} />;
+  }
+
+  if (state.status !== "resolved") {
     return null;
   }
+
+  const { panel, lessonId } = state;
 
   return (
     <Panel
@@ -98,6 +135,43 @@ export function ContinueWatching({
       positions={positions}
       t={t}
     />
+  );
+}
+
+/**
+ * The panel's slot, held open while the server action resolves the record.
+ *
+ * @remarks
+ * The shapes are the panel's own: the breadcrumb line, the lesson title, and
+ * the resume action. It names nothing, because at this point nothing is known
+ * beyond "a record exists" — which is exactly what a reserved slot claims.
+ *
+ * The heading is real rather than a shape. It is the section's own copy, it is
+ * true the moment a record exists, and rendering it means the section does not
+ * grow a heading later.
+ */
+function ReservedSlot({
+  t,
+}: {
+  t: ReturnType<typeof useTranslations<"Components.ContinueWatching">>;
+}) {
+  return (
+    <section
+      data-testid="continue-watching-skeleton"
+      className="flex flex-col gap-6"
+    >
+      <Eyebrow as="h2">{t("heading")}</Eyebrow>
+
+      <div
+        aria-hidden="true"
+        className="flex min-w-0 flex-col gap-4 rounded-2xl border border-border p-7"
+        style={{ background: PANEL_GLOW }}
+      >
+        <Skeleton className="h-3 w-48" />
+        <Skeleton className="h-8 w-2/3 sm:h-9" />
+        <Skeleton className="h-11 w-36 rounded-lg" />
+      </div>
+    </section>
   );
 }
 

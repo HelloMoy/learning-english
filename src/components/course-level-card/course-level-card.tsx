@@ -1,5 +1,6 @@
 import { Eyebrow } from "@/components/eyebrow/eyebrow";
 import { GoldBadge } from "@/components/gold-badge/gold-badge";
+import { Skeleton } from "@/components/ui/skeleton/skeleton";
 import type { Course } from "@/domain/entities/course/course";
 import type { Module } from "@/domain/entities/module/module";
 import { courseOverviewPath } from "@/i18n/lesson-routes";
@@ -14,8 +15,14 @@ import { useTranslations } from "next-intl";
  * continue-watching record rather than from aggregate progress: the record
  * names one lesson, and the course that lesson belongs to is the one in
  * progress.
+ *
+ * `resolving` is the honest third answer, not a loading flag bolted on. Storage
+ * answers "a record exists" in the same tick; which course it belongs to takes
+ * a server round-trip. Between the two the card knows that one of the ladder's
+ * cards is in progress and not which, so it asserts neither state rather than
+ * claiming `not-started` and correcting itself under the learner's thumb.
  */
-export type CourseLevelState = "in-progress" | "not-started";
+export type CourseLevelState = "in-progress" | "not-started" | "resolving";
 
 /**
  * Extends a link's pointer target to its positioned ancestor without adding a
@@ -87,16 +94,22 @@ export function CourseLevelCard({
   course,
   leadingModules,
   resumeHref,
+  isResolving = false,
 }: {
   course: Course;
   leadingModules: ReadonlyArray<Module>;
   resumeHref: string | null;
+  isResolving?: boolean;
 }) {
   const t = useTranslations("Components.CourseLevelCard");
   const tCounts = useTranslations("CourseCatalog.card");
   const href = courseOverviewPath(course);
   const inProgress = resumeHref !== null;
-  const state: CourseLevelState = inProgress ? "in-progress" : "not-started";
+  const state: CourseLevelState = isResolving
+    ? "resolving"
+    : inProgress
+      ? "in-progress"
+      : "not-started";
   const remainingModules = course.moduleCount - leadingModules.length;
 
   return (
@@ -115,12 +128,19 @@ export function CourseLevelCard({
         <Eyebrow data-testid="course-level-ordinal">
           {t("levelOrdinal", { number: course.sequence })}
         </Eyebrow>
-        <GoldBadge
-          data-testid="course-level-state"
-          variant={inProgress ? "gold" : "neutral"}
-        >
-          {inProgress ? t("inProgress") : t("notStarted")}
-        </GoldBadge>
+        {isResolving ? (
+          <Skeleton
+            data-testid="course-level-state-skeleton"
+            className="h-6 w-24 rounded-full"
+          />
+        ) : (
+          <GoldBadge
+            data-testid="course-level-state"
+            variant={inProgress ? "gold" : "neutral"}
+          >
+            {inProgress ? t("inProgress") : t("notStarted")}
+          </GoldBadge>
+        )}
       </div>
 
       <h3 className="font-sans text-2xl leading-tight font-extrabold tracking-tight text-foreground">
@@ -183,29 +203,41 @@ export function CourseLevelCard({
       </div>
 
       <div className={cn("mt-auto flex flex-col gap-2", ACTIONS_ABOVE_HIT_AREA)}>
-        <Link
-          href={(resumeHref ?? href) as never}
-          data-testid="course-level-cta"
-          className={cn(ACTION, inProgress ? PRIMARY_ACTION : QUIET_ACTION)}
-        >
-          {inProgress ? (
-            <Play
-              className="size-4"
-              fill="currentColor"
-            />
-          ) : null}
-          {inProgress ? t("continueCourse") : t("startCourse")}
-        </Link>
+        {isResolving ? (
+          // One bar, not two. The secondary action belongs to the in-progress
+          // state alone, and reserving for it would promise a card shape that
+          // three of four cards will never take.
+          <Skeleton
+            data-testid="course-level-cta-skeleton"
+            className="h-11 w-full rounded-lg"
+          />
+        ) : (
+          <>
+            <Link
+              href={(resumeHref ?? href) as never}
+              data-testid="course-level-cta"
+              className={cn(ACTION, inProgress ? PRIMARY_ACTION : QUIET_ACTION)}
+            >
+              {inProgress ? (
+                <Play
+                  className="size-4"
+                  fill="currentColor"
+                />
+              ) : null}
+              {inProgress ? t("continueCourse") : t("startCourse")}
+            </Link>
 
-        {inProgress ? (
-          <Link
-            href={href as never}
-            data-testid="course-level-secondary-cta"
-            className={cn(ACTION, QUIET_ACTION)}
-          >
-            {t("viewCourseContent")}
-          </Link>
-        ) : null}
+            {inProgress ? (
+              <Link
+                href={href as never}
+                data-testid="course-level-secondary-cta"
+                className={cn(ACTION, QUIET_ACTION)}
+              >
+                {t("viewCourseContent")}
+              </Link>
+            ) : null}
+          </>
+        )}
       </div>
     </div>
   );

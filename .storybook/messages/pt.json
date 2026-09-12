@@ -13,6 +13,10 @@
       "eyebrow": "Em reprodução",
       "title": "Fale com confiança",
       "subtitle": "Um curso cinematográfico que treina seu ouvido antes da sua fala."
+    },
+    "LessonVideoSkeleton": {
+      "before": "Antes — parece quebrado",
+      "after": "Depois — parece carregando"
     }
   }
 }

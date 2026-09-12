@@ -26,6 +26,24 @@ vi.mock("next-intl", () => ({
 
 const mockUseTranslations = vi.mocked(useTranslations);
 
+/**
+ * The gate under test, not the hook: a plain RTL `render()` is a client render
+ * rather than a hydration pass, so the real `useIsHydrated` returns `true` on
+ * its first call and leaves no un-hydrated frame to observe. The hook's own
+ * behavior has `use-is-hydrated.test.ts`.
+ */
+let isHydrated = true;
+vi.mock("@/hooks/use-is-hydrated/use-is-hydrated", () => ({
+  useIsHydrated: () => isHydrated,
+}));
+
+// Module scope, not inside a describe: this file has several top-level
+// describes with their own `beforeEach`, and a reset in one of them would leave
+// the others reading whichever value the previous test happened to set.
+beforeEach(() => {
+  isHydrated = true;
+});
+
 describe("LessonCompletionToggle", () => {
   beforeEach(() => {
     mockUseTranslations.mockReturnValue(((key: string) => key) as never);
@@ -424,5 +442,52 @@ describe("LessonCompletionToggle — celebrating the finish", () => {
     // Assert
     await screen.findByRole("button", { name: "markComplete" });
     expect(celebrate).not.toHaveBeenCalled();
+  });
+  describe("GIVEN completion cannot be known yet", () => {
+    const renderToggle = (lessonId = LessonId.parse(faker.string.uuid())) =>
+      render(
+        <LessonCompletionToggle
+          lessonId={lessonId}
+          markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+          unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
+        />,
+      );
+
+    test("WHEN the control renders before hydration THEN it asserts neither state", () => {
+      isHydrated = false;
+
+      renderToggle();
+
+      // Rendering the incomplete state here tells a learner who already finished
+      // the lesson something false, in the page's closing call to action.
+      expect(screen.queryByRole("button")).toBeNull();
+      expect(screen.queryByText("invitation")).toBeNull();
+      expect(screen.queryByText("completed")).toBeNull();
+    });
+
+    test("WHEN the control renders before hydration THEN it reserves the control's space", () => {
+      isHydrated = false;
+
+      renderToggle();
+
+      expect(screen.getByTestId("lesson-completion-toggle-skeleton")).toBeInTheDocument();
+    });
+
+    test("WHEN the unknown state is shown THEN it is silent and unfocusable", () => {
+      isHydrated = false;
+
+      renderToggle();
+
+      const unknown = screen.getByTestId("lesson-completion-toggle-skeleton");
+      expect(unknown).toHaveAttribute("aria-hidden", "true");
+      expect(unknown.querySelectorAll("button, a, input, [tabindex]")).toHaveLength(0);
+    });
+
+    test("WHEN completion becomes known THEN the reservation gives way to a real state", () => {
+      renderToggle();
+
+      expect(screen.queryByTestId("lesson-completion-toggle-skeleton")).toBeNull();
+      expect(screen.getByRole("button")).toBeInTheDocument();
+    });
   });
 });
