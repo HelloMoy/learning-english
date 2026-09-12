@@ -33,6 +33,29 @@ describe("InMemoryProgressTracker", () => {
       expect(result).toBe(true);
     });
 
+    test("WHEN `unmarkComplete` is called THEN the lesson is no longer complete", async () => {
+      // Arrange
+      const tracker = new InMemoryProgressTracker();
+      const lessonId = LessonId.parse(faker.string.uuid());
+      await tracker.markComplete(lessonId);
+
+      // Act
+      await tracker.unmarkComplete(lessonId);
+
+      // Assert
+      expect(await tracker.isComplete(lessonId)).toBe(false);
+    });
+
+    test("WHEN `unmarkComplete` is called for an unmarked lesson THEN it is idempotent", async () => {
+      // Arrange
+      const tracker = new InMemoryProgressTracker();
+      const lessonId = LessonId.parse(faker.string.uuid());
+
+      // Act & Assert
+      await expect(tracker.unmarkComplete(lessonId)).resolves.toBeUndefined();
+      expect(await tracker.isComplete(lessonId)).toBe(false);
+    });
+
     test("WHEN `markComplete` is called twice with the same lesson THEN it is idempotent", async () => {
       // Arrange
       const tracker = new InMemoryProgressTracker();

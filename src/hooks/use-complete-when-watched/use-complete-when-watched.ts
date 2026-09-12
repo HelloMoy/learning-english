@@ -2,6 +2,7 @@
 
 import type { LessonId } from "@/domain/entities/ids/ids";
 import { markLessonComplete } from "@/hooks/use-lesson-completion/use-lesson-completion";
+import { celebrateLessonCompletion } from "@/lib/celebrate-completion/celebrate-completion";
 import { hasFinishedWatching } from "@/lib/watch-progress/watch-progress";
 
 import { useCallback, useEffect, useRef } from "react";
@@ -48,7 +49,9 @@ export type WatchedCompletion = {
  *   fifty times.
  *
  * The write goes through `markLessonComplete` — the same path the manual
- * button uses — so there is one stored notion of "done" rather than two.
+ * button uses — so there is one stored notion of "done" rather than two. The
+ * same "written" flag makes the celebration fire once: the burst belongs to
+ * the moment the lesson is finished, not to every progress event after it.
  * Completion is never withdrawn here: rewinding a finished lesson leaves the
  * mark standing.
  *
@@ -94,6 +97,7 @@ export function useCompleteWhenWatched({
     if (!hasFinishedWatching(playerRef.current.currentTime, runtime)) return;
     hasMarkedRef.current = true;
     void markLessonComplete(lessonId);
+    void celebrateLessonCompletion();
   }, [durationSeconds, lessonId]);
 
   return { handlePlaybackStarted, handleProgress };

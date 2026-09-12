@@ -81,6 +81,7 @@ describe("markLessonComplete", () => {
         markComplete: async () => {
           throw new Error("tracker write failed");
         },
+        unmarkComplete: async () => undefined,
         isComplete: async () => false,
       };
       const useCase = makeMarkLessonComplete({

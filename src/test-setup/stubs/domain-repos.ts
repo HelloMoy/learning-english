@@ -129,6 +129,9 @@ export function makeStubProgressTracker(): ProgressTracker {
     markComplete: async (lessonId: LessonId) => {
       completed.add(lessonId);
     },
+    unmarkComplete: async (lessonId: LessonId) => {
+      completed.delete(lessonId);
+    },
     isComplete: async (lessonId: LessonId) => completed.has(lessonId),
   };
 }

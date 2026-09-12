@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, test } from "vitest";
 import {
   markLessonComplete,
   serverCompletionSnapshot,
+  unmarkLessonComplete,
   useLessonCompletion,
 } from "./use-lesson-completion";
 
@@ -81,6 +82,42 @@ describe("useLessonCompletion", () => {
     });
 
     expect(result.current).toBe(false);
+  });
+});
+
+describe("unmarkLessonComplete", () => {
+  test("WHEN a completed lesson is unmarked THEN every subscriber sees it incomplete", async () => {
+    const lessonId = LessonId.parse(faker.string.uuid());
+    const first = renderHook(() => useLessonCompletion(lessonId));
+    const second = renderHook(() => useLessonCompletion(lessonId));
+
+    await act(async () => {
+      await markLessonComplete(lessonId);
+    });
+    expect(first.result.current).toBe(true);
+
+    await act(async () => {
+      await unmarkLessonComplete(lessonId);
+    });
+
+    // The undo travels through the same shared snapshot the mark does, so
+    // no surface is left claiming the lesson is complete.
+    expect(first.result.current).toBe(false);
+    expect(second.result.current).toBe(false);
+  });
+
+  test("WHEN a lesson is unmarked THEN the others stay complete", async () => {
+    const unmarked = LessonId.parse(faker.string.uuid());
+    const kept = LessonId.parse(faker.string.uuid());
+    const { result } = renderHook(() => useLessonCompletion(kept));
+
+    await act(async () => {
+      await markLessonComplete(unmarked);
+      await markLessonComplete(kept);
+      await unmarkLessonComplete(unmarked);
+    });
+
+    expect(result.current).toBe(true);
   });
 });
 

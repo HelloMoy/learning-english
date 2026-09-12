@@ -134,7 +134,9 @@ test.describe("Lesson Page — happy path", () => {
     // The Resources region renders. This lesson's only resource is its notes
     // `readme.md`, which the rail excludes because the Notes tab already
     // renders it — so the card shows its empty state rather than a row.
-    const resources = page.getByRole("region", { name: /resources/i });
+    const resources = page
+      .getByRole("region", { name: /resources/i })
+      .and(page.locator(":visible"));
     await expect(resources).toBeVisible();
     await expect(resources.getByRole("link")).toHaveCount(0);
 
@@ -151,18 +153,17 @@ test.describe("Lesson Page — happy path", () => {
     await expect(markComplete).toBeVisible();
   });
 
-  test("WHEN mark-as-complete is clicked THEN the label toggles", async ({ page }) => {
+  test("WHEN mark-as-complete is clicked THEN the control states the lesson is complete", async ({
+    page,
+  }) => {
     await page.goto(lessonUrl("en", MODULE_A.slug, PRIMARY_LESSON.id));
 
-    const button = page.getByRole("button", { name: /mark as complete/i });
-    await button.click();
+    await page.getByRole("button", { name: /mark as complete/i }).click();
 
-    // After click, the label changes and the button is pressed.
-    await expect(page.getByRole("button", { name: /marked complete/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /marked complete/i })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
+    // The state is stated once, and the primary button gives way to the undo.
+    await expect(page.getByText(/lesson completed/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: /mark as complete/i })).toBeHidden();
+    await expect(page.getByRole("button", { name: /^unmark$/i })).toBeEnabled();
   });
 });
 
@@ -196,7 +197,9 @@ test.describe("Lesson Page — resource links resolve", () => {
 
       // Scoped to the card: a resource titled "Day" would otherwise also
       // match the outline's fifteen "Day N" lesson links.
-      const resourcesCard = page.getByRole("region", { name: /resources|materiales/i });
+      const resourcesCard = page
+        .getByRole("region", { name: /resources|materiales/i })
+        .and(page.locator(":visible"));
       await expect(resourcesCard).toBeVisible();
 
       for (const resource of RAIL_RESOURCES) {
@@ -363,5 +366,131 @@ test.describe("Lesson Page — the outline shows where the learner is", () => {
     // Positioning the outline must not have dragged the learner away from
     // the player they just opened.
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  });
+});
+
+/**
+ * Coverage for the `lesson-close-card` capability.
+ *
+ * Which of the two next-lesson affordances a learner can reach is decided by
+ * a CSS breakpoint, so only a real browser can answer it: jsdom applies no
+ * stylesheet and sees both.
+ */
+test.describe("Lesson Page — the lesson closes with the next one on a phone", () => {
+  const nextLessonHref = `/lessons/${LESSON_AFTER_PRIMARY.id}`;
+
+  test.describe("on a phone", () => {
+    test.use({ viewport: { width: 390, height: 844 } });
+
+    test("WHEN a lesson opens THEN the closing card offers the next lesson and the rail card is gone", async ({
+      page,
+    }) => {
+      await page.goto(lessonUrl("en", MODULE_A.slug, PRIMARY_LESSON.id));
+
+      // The closing card sits at the end of the center column, right after
+      // the lesson's own content.
+      const closingRow = page
+        .getByTestId("lesson-close-card")
+        .locator(`a[href*="${nextLessonHref}"]`);
+      await expect(closingRow).toBeVisible();
+      await expect(closingRow).toHaveAttribute(
+        "href",
+        new RegExp(`/modules/${MODULE_A.slug}/lessons/${LESSON_AFTER_PRIMARY.id}`),
+      );
+      await expect(closingRow).toHaveAccessibleName(
+        new RegExp(escapeRegExp(LESSON_AFTER_PRIMARY.title)),
+      );
+
+      // It is the only one in the center column, and it is a tappable target.
+      await expect(closingRow).toHaveCount(1);
+      expect((await closingRow.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+
+      // The stacked rail no longer carries the "Up next" card.
+      await expect(page.getByRole("region", { name: /up next/i })).toBeHidden();
+
+      // The lesson's materials come before the block that ends the lesson,
+      // and only one copy of that card is on screen.
+      const materials = page
+        .getByRole("region", { name: /resources|materiales/i })
+        .and(page.locator(":visible"));
+      await expect(materials).toHaveCount(1);
+      const materialsBox = (await materials.boundingBox())!;
+      const closingBox = (await page.getByTestId("lesson-close-card").boundingBox())!;
+      expect(materialsBox.y + materialsBox.height).toBeLessThanOrEqual(closingBox.y);
+
+      // The action it wraps still works.
+      await page.getByRole("button", { name: /mark as complete/i }).click();
+      await expect(page.getByText(/lesson completed/i)).toBeVisible();
+    });
+  });
+
+  test("WHEN the same lesson opens on a desktop viewport THEN the rail card is the only next-lesson affordance", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(lessonUrl("en", MODULE_A.slug, PRIMARY_LESSON.id));
+
+    await expect(page.getByRole("region", { name: /up next/i })).toBeVisible();
+    await expect(
+      page.getByTestId("lesson-close-card").locator(`a[href*="${nextLessonHref}"]`),
+    ).toBeHidden();
+
+    // The rail's copy of the materials is the visible one at this width.
+    const materials = page
+      .getByRole("region", { name: /resources|materiales/i })
+      .and(page.locator(":visible"));
+    await expect(materials).toHaveCount(1);
+    const materialsBox = (await materials.boundingBox())!;
+    const closingBox = (await page.getByTestId("lesson-close-card").boundingBox())!;
+    expect(materialsBox.x).toBeGreaterThan(closingBox.x + closingBox.width);
+  });
+});
+
+/**
+ * Coverage for the `lesson-completion-toggle` capability.
+ *
+ * The undo is a dialog away, and the dialog is a real browser affordance:
+ * jsdom can prove the wiring, only a browser proves the learner can reach it.
+ */
+test.describe("Lesson Page — undoing a completion", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("WHEN a completed lesson is un-marked THEN it is asked first and then cleared", async ({
+    page,
+  }) => {
+    await page.goto(lessonUrl("en", MODULE_A.slug, PRIMARY_LESSON.id));
+    await page.getByRole("button", { name: /mark as complete/i }).click();
+    await expect(page.getByText(/lesson completed/i)).toBeVisible();
+
+    // The undo is quiet but tappable, and nothing about it is disabled.
+    const unmark = page.getByRole("button", { name: /^unmark$/i });
+    await expect(unmark).toBeEnabled();
+    const unmarkBox = (await unmark.boundingBox())!;
+    expect(unmarkBox.height).toBeGreaterThanOrEqual(44);
+
+    // It sits beside the statement, not under it, and hugs the right edge.
+    const statementBox = (await page.getByText(/lesson completed/i).boundingBox())!;
+    const rowCentre = (box: { y: number; height: number }) => box.y + box.height / 2;
+    expect(Math.abs(rowCentre(unmarkBox) - rowCentre(statementBox))).toBeLessThan(
+      statementBox.height,
+    );
+    expect(unmarkBox.x).toBeGreaterThan(statementBox.x + statementBox.width);
+
+    // Cancelling leaves the lesson complete.
+    await unmark.click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toContainText(/progress/i);
+    await dialog.getByRole("button", { name: /cancel/i }).click();
+    await expect(page.getByText(/lesson completed/i)).toBeVisible();
+
+    // Confirming returns the lesson to its incomplete state.
+    await unmark.click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /unmark lesson/i })
+      .click();
+    await expect(page.getByRole("button", { name: /mark as complete/i })).toBeVisible();
+    await expect(page.getByText(/lesson completed/i)).toBeHidden();
   });
 });

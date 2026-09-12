@@ -132,3 +132,24 @@ export async function markLessonComplete(lessonId: LessonId): Promise<void> {
   await tracker.markComplete(lessonId);
   refresh();
 }
+
+/**
+ * Clears a lesson's completion and notifies every subscriber.
+ *
+ * @remarks
+ * The learner's own undo of {@link markLessonComplete}, and the only thing
+ * that clears a mark — playback never does. Writes through the same
+ * `ProgressTracker` port, so no component reaches `window.localStorage` to
+ * remove a key, and refreshes the one shared snapshot so the outline, the
+ * lesson rows and the progress meters stop showing the lesson as complete
+ * without a reload.
+ *
+ * Deliberately not a hook: the completion toggle calls it from inside a
+ * transition, once the learner has confirmed.
+ *
+ * @param lessonId - The lesson to un-mark
+ */
+export async function unmarkLessonComplete(lessonId: LessonId): Promise<void> {
+  await tracker.unmarkComplete(lessonId);
+  refresh();
+}

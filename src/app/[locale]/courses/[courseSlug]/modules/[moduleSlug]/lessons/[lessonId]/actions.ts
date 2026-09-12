@@ -37,6 +37,27 @@ export const markLessonCompleteAction = actionClient
   });
 
 /**
+ * Server Action invoked when the learner confirms un-marking a lesson.
+ *
+ * The inverse of {@link markLessonCompleteAction}, validated by the same
+ * schema and delegating to `unmarkLessonComplete`. It reports whether the
+ * clear landed rather than the lesson's new state: `{ completed: false }`
+ * would read the same whether the write succeeded or the lesson was never
+ * found, and the caller needs to tell those apart before it touches the
+ * browser's own record.
+ *
+ * @returns `{ data: { unmarked } }` on success; `validationErrors` when the
+ *          input fails the schema
+ */
+export const unmarkLessonCompleteAction = actionClient
+  .inputSchema(lessonIdSchema)
+  .action(async ({ parsedInput }) => {
+    const deps = getCoursePlatformDeps();
+    const result = await deps.useCases.unmarkLessonComplete({ lessonId: parsedInput.lessonId });
+    return { unmarked: result.isOk() };
+  });
+
+/**
  * Server Action invoked by the video player wrapper on debounced and
  * lifecycle events. Persists the playback position for the current lesson
  * through the `PlaybackPositionRepository` port.

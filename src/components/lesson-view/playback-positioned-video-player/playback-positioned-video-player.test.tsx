@@ -16,6 +16,14 @@ vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
 }));
 
+// Driving playback past the finish threshold fires the celebration for
+// real, and jsdom's canvas has no 2D context: the library's next animation
+// frame then throws *after* this file has finished, failing the run at
+// random. Nothing in the suite should draw confetti.
+vi.mock("@/lib/celebrate-completion/celebrate-completion", () => ({
+  celebrateLessonCompletion: vi.fn(async () => {}),
+}));
+
 vi.mock("@/hooks/use-lesson-completion/use-lesson-completion", () => ({
   markLessonComplete: vi.fn(async () => {}),
   useLessonCompletion: () => false,

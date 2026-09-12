@@ -11,8 +11,9 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { LessonBreadcrumb } from "../lesson-breadcrumb/lesson-breadcrumb";
+import { LessonCloseCard } from "../lesson-close-card/lesson-close-card";
+import { LessonCompletionToggle } from "../lesson-completion-toggle/lesson-completion-toggle";
 import { LessonNotesTabs } from "../lesson-notes-tabs/lesson-notes-tabs";
-import { MarkAsCompleteButton } from "../mark-as-complete-button/mark-as-complete-button";
 import { OutlineDrawer } from "../outline-drawer/outline-drawer";
 import { PlaybackPositionedVideoPlayer } from "../playback-positioned-video-player/playback-positioned-video-player";
 import { ResourceList } from "../resource-list/resource-list";
@@ -35,6 +36,17 @@ import { UpNextCard } from "../up-next-card/up-next-card";
  * a thumbnail anyway, and covering that with a gold headline is the very
  * watermark this cover exists to avoid.
  *
+ * The center column ends with `LessonCloseCard`, which wraps the
+ * "Mark as complete" action and — below `lg` — the next lesson. The rail's
+ * `UpNextCard` is hidden at those widths, so the stacked page offers the next
+ * lesson once, where the learner already is, instead of at the very bottom.
+ *
+ * `ResourceList` is split the same way. Below `lg` the columns stack and the
+ * rail follows the center column, which would put the lesson's materials
+ * *after* the block that ends the lesson; the phone copy therefore renders
+ * inside the center column, ahead of that block, and the rail's is hidden.
+ * Exactly one of the two is visible at any width.
+ *
  * `notesResource` is not rendered. It is the identity the Resources card
  * filters by, so the `readme.md` the Notes tab already renders inline is not
  * also listed in the rail as a file to download — a link to unstyled source
@@ -45,6 +57,7 @@ export function LessonView({
   notes,
   notesResource,
   markComplete,
+  unmarkComplete,
 }: {
   view: LessonViewData;
   notes: string | null;
@@ -52,6 +65,9 @@ export function LessonView({
   markComplete: (input: {
     lessonId: LessonId;
   }) => Promise<{ data?: { completed: boolean } } | undefined>;
+  unmarkComplete: (input: {
+    lessonId: LessonId;
+  }) => Promise<{ data?: { unmarked: boolean } } | undefined>;
 }) {
   // A one-way latch: set on the first `play`, never reset. Pausing or
   // seeking must NOT bring the cover back — once playback has begun the
@@ -140,19 +156,33 @@ export function LessonView({
           </>
         )}
         {notes ? <LessonNotesTabs markdown={notes} /> : null}
-        <MarkAsCompleteButton
-          lessonId={lesson.id}
-          markComplete={markComplete}
-        />
-      </main>
-
-      <aside className="space-y-4">
-        <ResourceList resources={nonNotesResources} />
-        <UpNextCard
+        <div className="lg:hidden">
+          <ResourceList resources={nonNotesResources} />
+        </div>
+        <LessonCloseCard
           course={course}
           nextLesson={nextLesson}
           nextLessonModule={nextLessonModule}
-        />
+        >
+          <LessonCompletionToggle
+            lessonId={lesson.id}
+            markComplete={markComplete}
+            unmarkComplete={unmarkComplete}
+          />
+        </LessonCloseCard>
+      </main>
+
+      <aside className="space-y-4">
+        <div className="hidden lg:block">
+          <ResourceList resources={nonNotesResources} />
+        </div>
+        <div className="hidden lg:block">
+          <UpNextCard
+            course={course}
+            nextLesson={nextLesson}
+            nextLessonModule={nextLessonModule}
+          />
+        </div>
       </aside>
     </div>
   );
