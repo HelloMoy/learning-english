@@ -6,6 +6,7 @@ import "./lesson-video-player.css";
 
 import { useBrowserChromeVisible } from "@/hooks/use-browser-chrome-visible/use-browser-chrome-visible";
 import { useEnlargedVideo } from "@/hooks/use-enlarged-video/use-enlarged-video";
+import { isCompactChrome } from "@/lib/player-layout/player-layout";
 import { cn } from "@/lib/utils/utils";
 import { youtubeVideoIdFrom } from "@/lib/youtube-source/youtube-source";
 
@@ -17,6 +18,7 @@ import type { ComponentProps, ReactNode, Ref } from "react";
 
 import { ScrollDownHint } from "../scroll-down-hint/scroll-down-hint";
 import { SeekStepMenu } from "../seek-step-menu/seek-step-menu";
+import { VideoCenterPlayButton } from "../video-center-play-button/video-center-play-button";
 import { VideoEnlargeButton } from "../video-enlarge-button/video-enlarge-button";
 import { PlaybackGestures } from "./playback-gestures";
 import { buildVideoPlayerTranslations } from "./video-player-translations";
@@ -84,21 +86,25 @@ import { buildVideoPlayerTranslations } from "./video-player-translations";
  * decides when, from what the page can measure, and the hint is gone the moment
  * the viewport reaches the screen's short side.
  *
- * **A single tap on the video toggles playback, on every pointer.** The
- * Default Layout's own gestures are switched off (`noGestures`) and
- * `PlaybackGestures` supplies the set, because on a touch device the library
- * swaps the tap's meaning from play/pause to show/hide controls — the YouTube
- * app's convention — and here that convention is a trap. Safari on iPhone
- * gets YouTube's *mobile* skin, which draws a centred play/pause icon through
- * this chrome even with the embed's controls disabled; the provider's blocker
- * keeps every tap from reaching it (rightly — the same overlay carries links
- * out of the lesson); and the icon cannot be hidden from outside a
- * cross-origin frame. So the learner sees a control that promises play/pause
- * and gets a control bar instead. Making the tap act is the only fix that
- * covers both icons; the bar still shows on every tap, since the library
- * shows it on `pause` and after `play`. A double tap on an edge starts a
- * seek run with an on-screen count, the YouTube app's convention — the
- * helper's own JSDoc says how the library's gesture and the run share it.
+ * **A single tap on the video means what the pointer's convention says.**
+ * The Default Layout's own gestures are switched off (`noGestures`) and
+ * `PlaybackGestures` supplies the set, because the layout picks a tap's
+ * meaning with a media query in its stylesheet and this Player needs its own
+ * seek run and speed hold beside it. With a mouse a click toggles playback;
+ * with a finger a tap brings the control bar in or out, as every video app on
+ * a phone does, and only a play/pause control pauses.
+ *
+ * That leaves one trap to answer. Safari on iPhone gets YouTube's *mobile*
+ * skin, which draws a centred play/pause icon through this chrome even with
+ * the embed's controls disabled; the provider's blocker keeps every tap from
+ * reaching it (rightly — the same overlay carries links out of the lesson);
+ * and the icon cannot be hidden from outside a cross-origin frame. The
+ * compact chrome covers it with a centre button of its own, but the full
+ * chrome — the one this Player wears enlarged in landscape — has none, so
+ * `VideoCenterPlayButton` draws one over the icon while the controls are in
+ * view. A double tap on an edge starts a seek run with an on-screen count, the
+ * YouTube app's convention — the helper's own JSDoc says how the library's
+ * gesture and the run share it.
  *
  * **A press held on the video runs the lesson at double speed**, that app's
  * other thumb convention, and restores the learner's own rate when the finger
@@ -134,7 +140,8 @@ import { buildVideoPlayerTranslations } from "./video-player-translations";
  * - **The layout breaks on width alone.** The default also switches to the
  *   compact mobile layout below 380px of *height*, and a 16:9 player in the
  *   lesson column is ~360px tall on a desktop — every desktop learner would
- *   get the phone chrome.
+ *   get the phone chrome. `isCompactChrome` holds the threshold, so the
+ *   centre play control asks the same question the layout does.
  *
  * Captions, chapters, thumbnails, quality menus, and Cast are all available
  * from this layout and none are wired up here; adding one is a change to this
@@ -223,7 +230,7 @@ export function LessonVideoPlayer({
           icons={defaultLayoutIcons}
           translations={buildVideoPlayerTranslations(t)}
           colorScheme={resolvedTheme === "light" ? "light" : "dark"}
-          smallLayoutWhen={({ width }) => width < 576}
+          smallLayoutWhen={({ width }) => isCompactChrome(width)}
           noGestures
           slots={{
             afterFullscreenButton: (
@@ -235,6 +242,7 @@ export function LessonVideoPlayer({
             settingsMenuItemsEnd: <SeekStepMenu />,
           }}
         />
+        <VideoCenterPlayButton />
         {isEnlarged && isBrowserChromeVisible ? <ScrollDownHint /> : null}
         {children}
       </MediaPlayer>

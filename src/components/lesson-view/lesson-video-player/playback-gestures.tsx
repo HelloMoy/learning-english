@@ -12,6 +12,7 @@ import {
   useMediaRemote,
   useMediaState,
   type GestureInstance,
+  type GestureTriggerEvent,
   type GestureWillTriggerEvent,
 } from "@vidstack/react";
 import { useCallback, useEffect, useRef, type RefObject } from "react";
@@ -33,16 +34,28 @@ import { SpeedFeedback } from "../speed-feedback/speed-feedback";
 export const SEEK_ZONE_CLASS = "lesson-video-player__seek-zone";
 
 /**
- * The player's pointer gestures: a single tap toggles playback, a double tap
- * in the middle toggles fullscreen, a double tap on an edge starts a **seek
- * run** — where every further tap on that edge adds a step and an indicator
- * counts them — and a press held on the frame runs the lesson at double speed
- * until it is released. All four are the YouTube app's conventions, which the
+ * The player's pointer gestures: a single tap toggles playback with a mouse
+ * and brings the control bar in or out with a finger, a double tap in the
+ * middle toggles fullscreen, a double tap on an edge starts a **seek run** —
+ * where every further tap on that edge adds a step and an indicator counts
+ * them — and a press held on the frame runs the lesson at double speed until
+ * it is released. All of them are the YouTube app's conventions, which the
  * learner's thumbs already know.
  *
  * @remarks
- * This is the Default Layout's gesture set minus the one that made a tap on
- * a phone only show or hide the control bar; `LessonVideoPlayer` says why.
+ * The single tap's action is chosen **here, from the pointer the player
+ * reports**, not by the two media queries the Default Layout uses to show one
+ * of a pair of gestures. A meaning left to a stylesheet is lost with it: a
+ * missing or stale sheet leaves both gestures live, and one tap then pauses
+ * the lesson *and* toggles the bar. `LessonVideoPlayer` says why touch needs
+ * a centre play control beside it.
+ *
+ * **A tap that brings the bar in gives it back to the idle timer.** The
+ * library's `toggle:controls` shows the bar with `show(0)`, which clears that
+ * timer, and flags the tap as a gesture so the idle tracker ignores it — so
+ * over a playing lesson the bar would stay up for good. `onTrigger` re-arms
+ * the hide at the library's own `defaultDelay`, and only while the lesson
+ * plays: a paused player keeps its controls in view.
  * Every `Gesture` listens on the provider element and checks the event's
  * coordinates against its own box, so these are regions, not targets: the
  * component sets them `pointer-events: none` itself, and the geometry the
@@ -83,7 +96,8 @@ export const SEEK_ZONE_CLASS = "lesson-video-player__seek-zone";
  * `useDoubleSpeedWhileHolding` applies the rate and puts the learner's own
  * one back. While a hold is armed every `Gesture` is `disabled`, so the
  * release that ends it is never counted as a tap and never toggles playback
- * — the same mechanism, and the same reason, as during a run.
+ * or the control bar — the same mechanism, and the same reason, as during a
+ * run.
  */
 export function PlaybackGestures() {
   const player = useMediaPlayer();
@@ -94,6 +108,7 @@ export function PlaybackGestures() {
   const forwardZone = useRef<GestureInstance>(null);
   const isRunActive = run !== null;
   const isPaused = useMediaState("paused");
+  const pointer = useMediaState("pointer");
   const canSetPlaybackRate = useMediaState("canSetPlaybackRate");
   const isHolding = useSpeedHold({
     player,
@@ -120,6 +135,11 @@ export function PlaybackGestures() {
     };
   };
 
+  const handBarToIdleTimer = (_action: string, event: GestureTriggerEvent) => {
+    if (isPaused || !player?.controls.showing) return;
+    player.controls.hide(player.controls.defaultDelay, event.trigger ?? event);
+  };
+
   useRunTaps({
     enabled: isRunActive,
     player: player?.el ?? null,
@@ -133,8 +153,9 @@ export function PlaybackGestures() {
       <Gesture
         className="vds-gesture"
         event="pointerup"
-        action="toggle:paused"
+        action={pointer === "coarse" ? "toggle:controls" : "toggle:paused"}
         disabled={isRunActive || isHolding}
+        onTrigger={pointer === "coarse" ? handBarToIdleTimer : undefined}
       />
       <Gesture
         className="vds-gesture"

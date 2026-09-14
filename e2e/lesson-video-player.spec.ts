@@ -49,11 +49,12 @@ const IPHONE = deviceWithoutEngine(devices["iPhone 13"]);
  *   - "Enlarging pins the player to the viewport"
  *   - "Enlarging does not interrupt playback" (the element is never replaced)
  *   - "Escape leaves the mode"
- *   - "A tap pauses the video on a phone" / "A second tap resumes it" (under
- *     iPhone emulation — the gesture path, not YouTube's mobile skin itself)
- *   - "The tap acts while the video fills the viewport"
+ *   - "A tap reveals the controls on a phone" / "A second tap hides them again" /
+ *     "Controls brought in by a tap leave on their own" (under iPhone emulation —
+ *     the gesture path, not YouTube's mobile skin itself)
+ *   - "The tap acts while the video fills the viewport" and "It covers the
+ *     embed's own icon" (the Player's centre play/pause control)
  *   - "A click on a mouse keeps toggling playback"
- *   - "No tap merely reveals the controls"
  *   - "Pressing and holding the video runs it at double speed" (the rate the
  *     provider really applies, which no component test can observe)
  */
@@ -133,6 +134,22 @@ async function spotOnTheVideo(player: Locator) {
   return { x: box.width * 0.5, y: box.height * 0.3 };
 }
 
+/** The iPhone 13's own viewport, turned on its side. */
+const IPHONE_IN_LANDSCAPE = {
+  width: devices["iPhone 13"].viewport.height,
+  height: devices["iPhone 13"].viewport.width,
+};
+
+/** The layout's control bar, whose `data-visible` says whether it is in view. */
+function controlBarOf(page: Page) {
+  return page.locator("[data-media-player] .vds-controls");
+}
+
+/** Waits out the library's idle delay, after which a playing video's bar leaves. */
+async function waitForTheControlsToHide(page: Page) {
+  await expect(controlBarOf(page)).not.toHaveAttribute("data-visible", "", { timeout: 10_000 });
+}
+
 /** Starts playback from the control bar and waits until frames roll. */
 async function startPlayback(page: Page, player: Locator) {
   await page.locator(".vds-play-button").click();
@@ -205,7 +222,7 @@ async function pressAndHoldTheVideo(page: Page, player: Locator) {
 /**
  * Spots on the video, in page coordinates, for the emulated touchscreen: the
  * right fifth is where a double tap seeks forward, and the middle band is
- * where it toggles fullscreen and a single tap toggles playback. Both sit
+ * where it toggles fullscreen and a single tap toggles the controls. Both sit
  * above the compact layout's centre button row.
  */
 async function touchSpotsOn(player: Locator) {
@@ -316,10 +333,12 @@ test.describe("GIVEN a YouTube-sourced lesson", () => {
     expect(wrapperHeight).toBeLessThanOrEqual(playerHeight + WRAPPER_BORDER_PX);
   });
 
-  test("WHEN the chrome renders THEN no gesture only reveals the controls", async ({ page }) => {
-    // On a phone the Default Layout's own set turned a tap into show/hide
-    // controls, which left YouTube's centre icon dead. The player's set has
-    // exactly one single-tap gesture, and it toggles playback.
+  test("WHEN the chrome renders for a mouse THEN a click toggles playback, not the controls", async ({
+    page,
+  }) => {
+    // The player's set has exactly one single-tap gesture, and the pointer
+    // decides its action. These projects are desktop devices, so it is the
+    // mouse's; the iPhone block asserts the other one.
     const { player } = await openLesson(page);
 
     await expect(player.locator('.vds-gesture[action="toggle:controls"]')).toHaveCount(0);
@@ -629,12 +648,12 @@ test.describe("GIVEN Safari on an iPhone", () => {
     await revealControls(page);
     await startPlayback(page, player);
 
-    // Buffering can outlast the bar's auto-hide. A tap on the video brings
-    // the bar back — and, by design, pauses — so playback is resumed from the
-    // bar, which stays up long enough to reach the enlarge control.
+    // Buffering can outlast the bar's auto-hide, so the bar is let go and a
+    // tap brings it back — which on a phone leaves the video playing — to
+    // reach the enlarge control.
+    await waitForTheControlsToHide(page);
     await player.tap({ position: await spotOnTheVideo(player) });
-    await expect(player).toHaveAttribute("data-paused", "");
-    await startPlayback(page, player);
+    await expect(controlBarOf(page)).toHaveAttribute("data-visible", "");
     await page.getByRole("button", { name: ENTER_FULLSCREEN }).click();
     await expect(player).toHaveAttribute("data-playing", "");
 
@@ -653,38 +672,76 @@ test.describe("GIVEN Safari on an iPhone", () => {
     await expect(player).toHaveCSS("position", "relative");
   });
 
-  test("WHEN the video is tapped THEN it pauses, and a second tap resumes it", async ({ page }) => {
-    // Safari on iPhone shows YouTube's own centre play/pause icon through the
-    // chrome, and the provider's blocker keeps every tap from reaching it. The
-    // tap has to do what that icon promises — not, as the Default Layout had
-    // it on a touch device, merely show or hide the control bar.
+  test("WHEN the chrome renders THEN a tap toggles the controls, not playback", async ({
+    page,
+  }) => {
     const { player } = await openLesson(page);
-    await revealControls(page);
-    await startPlayback(page, player);
-    const spot = await spotOnTheVideo(player);
 
-    await page.locator("[data-media-provider]").tap({ position: spot });
-    await expect(player).toHaveAttribute("data-paused", "");
-    await expect(page.locator("[data-media-player] .vds-controls")).toHaveAttribute(
-      "data-visible",
-      "",
-    );
-
-    await page.locator("[data-media-provider]").tap({ position: spot });
-    await expect(player).toHaveAttribute("data-playing", "", { timeout: 15_000 });
+    await expect(player.locator('.vds-gesture[action="toggle:controls"]')).toHaveCount(1);
+    await expect(player.locator('.vds-gesture[action="toggle:paused"]')).toHaveCount(0);
   });
 
-  test("WHEN the video is enlarged THEN a tap still toggles playback", async ({ page }) => {
-    // Enlarged and in landscape is where the report came from: the box is
-    // wide enough for the large layout, which has no centre play button of
-    // its own, so YouTube's is the only one on screen.
+  test("WHEN the playing video is tapped THEN the controls come in and it keeps playing", async ({
+    page,
+  }) => {
+    // The convention of every video app on a phone: the first tap brings the
+    // chrome, and only a play/pause control pauses. A tap that paused the
+    // lesson cost the learner their place whenever they reached for the
+    // scrubber.
     const { player } = await openLesson(page);
     await revealControls(page);
-    await page.getByRole("button", { name: ENTER_FULLSCREEN }).click();
     await startPlayback(page, player);
+    await waitForTheControlsToHide(page);
 
     await page.locator("[data-media-provider]").tap({ position: await spotOnTheVideo(player) });
 
+    await expect(controlBarOf(page)).toHaveAttribute("data-visible", "");
+    await expect(player).toHaveAttribute("data-playing", "");
+    // And they leave on their own again, as they do after any other touch.
+    await waitForTheControlsToHide(page);
+  });
+
+  test("WHEN the controls are in view and the video is tapped THEN they leave and it keeps playing", async ({
+    page,
+  }) => {
+    const { player } = await openLesson(page);
+    await revealControls(page);
+    await startPlayback(page, player);
+    await waitForTheControlsToHide(page);
+    const spot = await spotOnTheVideo(player);
+    await page.locator("[data-media-provider]").tap({ position: spot });
+    await expect(controlBarOf(page)).toHaveAttribute("data-visible", "");
+
+    await page.locator("[data-media-provider]").tap({ position: spot });
+
+    await expect(controlBarOf(page)).not.toHaveAttribute("data-visible", "");
+    await expect(player).toHaveAttribute("data-playing", "");
+  });
+
+  test("WHEN the enlarged video is tapped in landscape THEN the player's own centre control comes in and pauses it", async ({
+    page,
+  }) => {
+    // Enlarged and in landscape is where the embed's centre icon used to be
+    // alone: the box is wide enough for the full chrome, which draws no centre
+    // control of its own. The player's control is placed over that icon.
+    // Playback starts in the page: enlarged in landscape, the bar's own play
+    // button sits under the dev server's corner badge.
+    await page.setViewportSize(IPHONE_IN_LANDSCAPE);
+    const { player } = await openLesson(page);
+    await revealControls(page);
+    await startPlayback(page, player);
+    await waitForTheControlsToHide(page);
+    await page.locator("[data-media-provider]").tap({ position: await spotOnTheVideo(player) });
+    await page.getByRole("button", { name: ENTER_FULLSCREEN }).click();
+    await waitForTheControlsToHide(page);
+    const centreControl = page.locator(".lesson-video-player__center-play-button");
+    await expect(centreControl).toHaveCount(0);
+
+    await page.locator("[data-media-provider]").tap({ position: await spotOnTheVideo(player) });
+    await expect(centreControl).toBeVisible();
+    await expect(player).toHaveAttribute("data-playing", "");
+
+    await centreControl.tap();
     await expect(player).toHaveAttribute("data-paused", "");
   });
 
@@ -789,7 +846,7 @@ test.describe("GIVEN Safari on an iPhone", () => {
     await expect(player).toHaveAttribute("data-playing", "");
   });
 
-  test("WHEN the run has ended THEN a tap pauses again", async ({ page }) => {
+  test("WHEN the run has ended THEN a tap brings the controls in again", async ({ page }) => {
     const { player } = await openLesson(page);
     await revealControls(page);
     await startPlayback(page, player);
@@ -797,10 +854,12 @@ test.describe("GIVEN Safari on an iPhone", () => {
     await doubleTap(page, forwardEdge);
     await expect(page.getByRole("status")).toBeVisible();
     await expect(page.getByRole("status")).toHaveCount(0);
+    await waitForTheControlsToHide(page);
 
     await page.touchscreen.tap(middle.x, middle.y);
 
-    await expect(player).toHaveAttribute("data-paused", "");
+    await expect(controlBarOf(page)).toHaveAttribute("data-visible", "");
+    await expect(player).toHaveAttribute("data-playing", "");
   });
 });
 
