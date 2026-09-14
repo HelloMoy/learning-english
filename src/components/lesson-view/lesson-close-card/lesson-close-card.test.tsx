@@ -113,6 +113,35 @@ describe("LessonCloseCard", () => {
   });
 });
 
+describe("LessonCloseCard — one closing surface at every width", () => {
+  beforeEach(() => {
+    mockUseTranslations.mockReturnValue(((key: string) => key) as never);
+  });
+
+  test("WHEN the card renders THEN its chrome and its next-lesson row switch on no breakpoint", () => {
+    // Act
+    render(
+      <LessonCloseCard
+        course={course}
+        nextLesson={nextLesson}
+        nextLessonModule={nextModule}
+      >
+        <button type="button">Mark as complete</button>
+      </LessonCloseCard>,
+    );
+
+    // Assert — the desktop used to strip the surface and hide the row; the
+    // card is now the page's only closing surface at every width.
+    const breakpointVariant = /\b(?:sm|md|lg|xl|2xl):/;
+    const card = screen.getByTestId("lesson-close-card");
+    expect(card).toHaveClass("rounded-xl", "border", "bg-card");
+    expect(card.className).not.toMatch(breakpointVariant);
+    for (const part of card.children) {
+      expect(part.className).not.toMatch(breakpointVariant);
+    }
+  });
+});
+
 describe("LessonCloseCard — last lesson of the course", () => {
   beforeEach(() => {
     mockUseTranslations.mockReturnValue(((key: string) => key) as never);

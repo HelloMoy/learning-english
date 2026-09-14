@@ -93,6 +93,13 @@ const notesResourceFor = (lessonId: LessonId): Resource =>
     kind: "other",
   });
 
+/** The right rail: the `<aside>` the closing card ends, as opposed to the outline's. */
+const rail = (): HTMLElement => {
+  const aside = screen.getByTestId("lesson-close-card").closest("aside");
+  if (aside === null) throw new Error("the closing card is not inside the rail");
+  return aside;
+};
+
 describe("LessonView", () => {
   beforeEach(() => {
     mockUseTranslations.mockReturnValue(((key: string) => key) as never);
@@ -117,14 +124,14 @@ describe("LessonView", () => {
     // Assert
     expect(screen.getByRole("heading", { name: "Lecture title" })).toBeInTheDocument();
     expect(screen.getByText("Lecture description")).toBeInTheDocument();
-    expect(within(screen.getByRole("main")).getByText("PDF handout")).toBeInTheDocument();
+    expect(within(rail()).getByText("PDF handout")).toBeInTheDocument();
     expect(screen.getAllByText("courseCompleted")).not.toHaveLength(0);
     expect(screen.getByRole("button", { name: "markComplete" })).toBeInTheDocument();
   });
 
-  test("WHEN there is a next lesson THEN main closes with it and the rail keeps its card", () => {
-    // Arrange — the two affordances are one per breakpoint: the closing card
-    // is the phone's, the rail card is the desktop's.
+  test("WHEN there is a next lesson THEN the rail closes with it and nothing else offers it", () => {
+    // Arrange — the closing card is the page's only next-lesson affordance
+    // at every width, and it lives in the rail, under the lesson's materials.
     const { view } = fixtures();
     const nextLesson = Lesson.parse({
       kind: "reading",
@@ -147,28 +154,27 @@ describe("LessonView", () => {
       />,
     );
 
-    // Assert — the closing card ends the center column, wrapping the action.
-    const main = screen.getByRole("main");
-    const closingLink = within(main).getByRole("link", { name: /Next lesson title/ });
+    // Assert — the closing card ends the rail, wrapping the action.
+    const closingLink = within(rail()).getByRole("link", { name: /Next lesson title/ });
     expect(closingLink).toBeInTheDocument();
-    expect(within(main).getByText("prompt")).toBeInTheDocument();
+    expect(within(rail()).getByText("prompt")).toBeInTheDocument();
     expect(closingLink.closest("section")).toContainElement(
       screen.getByRole("button", { name: "markComplete" }),
     );
 
-    // The rail still carries its own card, outside the center column.
-    const railLink = screen
+    // Outside the rail only the outline may name that lesson.
+    const strayLinks = screen
       .getAllByRole("link", { name: /Next lesson title/ })
-      .find((link) => !main.contains(link));
-    expect(railLink).toBeDefined();
+      .filter((link) => !rail().contains(link) && link.closest("nav") === null);
+    expect(strayLinks).toHaveLength(0);
 
     // And the action itself is mounted exactly once on the page.
     expect(screen.getAllByRole("button", { name: "markComplete" })).toHaveLength(1);
   });
 
-  test("WHEN stacked on a phone THEN the materials come before the closing block", () => {
-    // Arrange — the rail follows `main` in the stack, so the rail's own copy
-    // would land *after* the block that ends the lesson.
+  test("WHEN rendered THEN the materials come once, right before the closing block", () => {
+    // Arrange — both live in the rail, materials first; below `lg` the rail
+    // follows `main`, so the order holds on a phone without a second copy.
     const { view } = fixtures();
 
     // Act
@@ -182,18 +188,14 @@ describe("LessonView", () => {
       />,
     );
 
-    // Assert — the phone copy sits inside the center column, ahead of the
-    // closing card.
-    const main = screen.getByRole("main");
-    const materials = within(main).getByText("PDF handout");
+    // Assert — one copy, in the rail, ahead of the closing card.
+    const materials = screen.getByText("PDF handout");
     const closingCard = screen.getByTestId("lesson-close-card");
+    expect(rail()).toContainElement(materials);
     expect(
       materials.compareDocumentPosition(closingCard) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
-
-    // The rail still carries its own, for the widths where the rail exists.
-    const railCopy = screen.getAllByText("PDF handout").find((node) => !main.contains(node));
-    expect(railCopy).toBeDefined();
+    expect(screen.getByRole("main")).not.toContainElement(materials);
   });
 
   test("WHEN rendered for a reading lesson THEN it shows the body in an article and no video element", () => {
@@ -351,7 +353,7 @@ describe("LessonView", () => {
     expect(screen.queryByRole("region", { name: "resourceTitle" })).toBeNull();
     expect(screen.queryByText(notesResource.title)).toBeNull();
     expect(screen.queryByRole("link", { name: notesResource.title })).toBeNull();
-    expect(within(screen.getByRole("main")).getByText("PDF handout")).toBeInTheDocument();
+    expect(within(rail()).getByText("PDF handout")).toBeInTheDocument();
   });
 
   test("WHEN the notes file is a lesson's only resource THEN Resources shows its empty state", () => {
@@ -371,7 +373,7 @@ describe("LessonView", () => {
     );
 
     // Assert: one card showing "no resources", not a second card beside it.
-    expect(within(screen.getByRole("main")).getByText("empty")).toBeInTheDocument();
+    expect(within(rail()).getByText("empty")).toBeInTheDocument();
     expect(screen.queryByText(notesResource.title)).toBeNull();
     expect(screen.queryByRole("region", { name: "resourceTitle" })).toBeNull();
   });

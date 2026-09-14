@@ -7,9 +7,11 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { LessonCompletionToggle } from "./lesson-completion-toggle";
 
 /**
- * The lesson's completion control. The invitation above the button is
- * phone-only, so review this at `mobile1`; the completed state — the
- * statement and the quiet "Unmark" action — shows at every width.
+ * The lesson's completion control, as it renders inside the closing card at
+ * every width: the invitation above the full-width button while the lesson is
+ * pending, and the statement beside the quiet "Unmark" action once complete.
+ * `mobile1` is the tighter canvas, so it is the default; the desktop shows
+ * the same thing wider.
  */
 const meta = {
   title: "LessonView/LessonCompletionToggle",

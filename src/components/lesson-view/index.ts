@@ -11,4 +11,3 @@ export { Outline } from "./outline/outline";
 export { OutlineDrawer } from "./outline-drawer/outline-drawer";
 export { ResourceItem } from "./resource-item/resource-item";
 export { ResourceList } from "./resource-list/resource-list";
-export { UpNextCard } from "./up-next-card/up-next-card";

@@ -110,12 +110,12 @@ test.describe("Course catalog navigation", () => {
     );
   });
 
-  test("WHEN the second lesson in the same module is opened THEN up next points to it", async ({
+  test("WHEN the second lesson in the same module is opened THEN the closing card offers the next one", async ({
     page,
   }) => {
     await page.goto(lessonUrl("en", COURSE_SLUG, FIRST_MODULE.slug, SECOND_LESSON.id));
-    const upNext = page.getByRole("region", { name: /up next/i });
-    await expect(upNext).toBeVisible();
+    const closingRow = page.getByTestId("lesson-close-card").getByRole("link");
+    await expect(closingRow).toBeVisible();
   });
 
   test("WHEN an unknown course is requested THEN the recovery error state is shown", async ({

@@ -17,7 +17,6 @@ import { LessonNotesTabs } from "../lesson-notes-tabs/lesson-notes-tabs";
 import { OutlineDrawer } from "../outline-drawer/outline-drawer";
 import { PlaybackPositionedVideoPlayer } from "../playback-positioned-video-player/playback-positioned-video-player";
 import { ResourceList } from "../resource-list/resource-list";
-import { UpNextCard } from "../up-next-card/up-next-card";
 
 /**
  * The composition the Lesson Page renders. Receives the resolved `View`
@@ -36,16 +35,12 @@ import { UpNextCard } from "../up-next-card/up-next-card";
  * a thumbnail anyway, and covering that with a gold headline is the very
  * watermark this cover exists to avoid.
  *
- * The center column ends with `LessonCloseCard`, which wraps the
- * "Mark as complete" action and — below `lg` — the next lesson. The rail's
- * `UpNextCard` is hidden at those widths, so the stacked page offers the next
- * lesson once, where the learner already is, instead of at the very bottom.
- *
- * `ResourceList` is split the same way. Below `lg` the columns stack and the
- * rail follows the center column, which would put the lesson's materials
- * *after* the block that ends the lesson; the phone copy therefore renders
- * inside the center column, ahead of that block, and the rail's is hidden.
- * Exactly one of the two is visible at any width.
+ * The right rail is the lesson's materials followed by `LessonCloseCard`,
+ * which wraps the "Mark as complete" action and the next lesson. Both render
+ * once and at every width: below `lg` the columns stack and the rail follows
+ * the center column, so the learner still meets the materials right after
+ * the lesson's own content and the closing card last. Nothing else on the
+ * page offers the next lesson.
  *
  * `notesResource` is not rendered. It is the identity the Resources card
  * filters by, so the `readme.md` the Notes tab already renders inline is not
@@ -156,9 +151,10 @@ export function LessonView({
           </>
         )}
         {notes ? <LessonNotesTabs markdown={notes} /> : null}
-        <div className="lg:hidden">
-          <ResourceList resources={nonNotesResources} />
-        </div>
+      </main>
+
+      <aside className="space-y-4">
+        <ResourceList resources={nonNotesResources} />
         <LessonCloseCard
           course={course}
           nextLesson={nextLesson}
@@ -170,19 +166,6 @@ export function LessonView({
             unmarkComplete={unmarkComplete}
           />
         </LessonCloseCard>
-      </main>
-
-      <aside className="space-y-4">
-        <div className="hidden lg:block">
-          <ResourceList resources={nonNotesResources} />
-        </div>
-        <div className="hidden lg:block">
-          <UpNextCard
-            course={course}
-            nextLesson={nextLesson}
-            nextLessonModule={nextLessonModule}
-          />
-        </div>
       </aside>
     </div>
   );
