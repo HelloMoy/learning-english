@@ -97,7 +97,13 @@ The Outline SHALL render Modules in `sequence` order. Each Module SHALL list its
 
 The Player SHALL be a Vidstack `<MediaPlayer>` containing a `<MediaProvider>` and
 Vidstack's Default Video Layout chrome. The player's `poster` SHALL be set when the
-Lesson has a `poster`. The Default Layout SHALL provide, at minimum, play/pause, a
+Lesson has a `poster`, and the Player SHALL render Vidstack's `Poster` element for
+**every** lesson, whatever its source and whether or not it declares a `poster`: the
+element paints the lesson's own `poster` where there is one, otherwise the thumbnail the
+provider discovers for the video, and hides itself when it has neither. It SHALL stay
+painted over the video frame until frames actually roll, so a YouTube-sourced lesson
+never shows the embed's own cued chrome — its red play button over its thumbnail — before
+the first play. The Default Layout SHALL provide, at minimum, play/pause, a
 seekable time slider, elapsed and total time, volume, and playback rate. Enlarging the
 video to fill the viewport is specified separately, by the viewport-filling mode
 requirement below, because the browser's Fullscreen API is not available on every
@@ -200,8 +206,19 @@ dark page.
 
 #### Scenario: A YouTube lecture without a `poster` still shows a thumbnail
 - **WHEN** the resolved view's lesson is YouTube-sourced and has no `poster`
-- **THEN** the idle frame shows the provider's own thumbnail rather than an empty black
-  frame, and no `Poster` element is rendered from the lesson's absent `poster`
+- **THEN** the Player's `Poster` element is rendered and paints the provider's discovered
+  thumbnail over the embed frame before playback begins, so the idle frame shows that
+  thumbnail and none of the embed's own cued chrome
+
+#### Scenario: The poster leaves when frames roll
+- **WHEN** the learner starts playback of a YouTube-sourced lesson
+- **THEN** the Poster element stays painted while the embed loads and buffers, and is gone
+  once the video is playing
+
+#### Scenario: A self-hosted lecture without a `poster` paints nothing extra
+- **WHEN** the resolved view's lesson is a project-hosted video with no `poster`
+- **THEN** the Poster element renders but hides itself, having nothing to paint, and the
+  idle frame is exactly as it was
 
 #### Scenario: The oversized embed frame is not laid out in flow
 - **WHEN** a YouTube-sourced lesson renders and the provider's `<iframe>` is sized far
@@ -954,6 +971,28 @@ Its hit area SHALL be at least 44 by 44 CSS pixels. Its accessible name SHALL na
 action it performs — play while paused, pause while playing — and SHALL come from
 `next-intl` for every supported locale.
 
+**Whichever centre control is on screen SHALL hide the embed's icon, not merely sit on
+it.** The embed paints its centre play/pause icon in a 56 by 56 CSS pixel box on the
+frame's centre, and a smaller or translucent control lets it show through or around the
+control, so the learner sees two. The centre control — the Player's own in the full
+chrome, and the compact chrome's centre button, which the Player SHALL restyle to the
+same geometry — SHALL therefore be a disc at least 64 by 64 CSS pixels, painted with a
+fully opaque background, whose centre coincides with the centre of the video frame. The
+geometry SHALL be stated once and shared by both, so the two chromes offer one control,
+not two designs.
+
+#### Scenario: The control hides the embed's icon completely
+- **WHEN** a YouTube-sourced lesson is playing on a phone, the controls are visible, and
+  the embed paints its centre play/pause icon
+- **THEN** the centre control on screen is at least 64 by 64 CSS pixels, its background is
+  fully opaque, and its centre is the centre of the frame, so no part of the embed's icon
+  is visible
+
+#### Scenario: The compact chrome's button has the same geometry
+- **WHEN** the Player renders its compact chrome on a phone and the controls are visible
+- **THEN** the layout's centre button is the same size, the same opaque disc, and centred
+  on the frame in the same way as the Player's own control in the full chrome
+
 #### Scenario: The centre control appears with the controls
 - **WHEN** a lesson is playing on a phone in the Player's full chrome and the learner
   taps the video once, revealing the control bar
@@ -986,3 +1025,33 @@ action it performs — play while paused, pause while playing — and SHALL come
 - **THEN** its accessible name is that locale's word for the action it performs, with no
   English fallback text
 
+### Requirement: The buffering indicator hides the embed's own spinner
+
+The Player SHALL draw a single buffering indicator at the centre of the video frame while
+it is waiting for media — before it can play, and whenever playback stalls for more data.
+A YouTube-sourced lesson's embed paints its own 36 by 36 CSS pixel spinner on the
+same spot in exactly those moments, because the Player's waiting state is derived from the
+embed's own Buffering state, so the indicator SHALL carry a **fully opaque core** at least
+44 by 44 CSS pixels wide, centred on the frame, that hides the embed's spinner. The ring
+the Default Layout draws SHALL stay, in the brand colour, around that core.
+
+The core SHALL be visible only while the Player is buffering. Over a video that is playing
+or paused without waiting, nothing of the indicator SHALL be seen, so an uninterrupted
+lesson has nothing drawn over it.
+
+The indicator SHALL be the same for every source, so a self-hosted and a YouTube-sourced
+lesson show the same loading treatment.
+
+#### Scenario: One spinner while a YouTube lecture buffers
+- **WHEN** a YouTube-sourced lesson is loading or stalls, and the embed paints its own
+  spinner at the centre
+- **THEN** the Player's indicator is drawn over it with an opaque core at least 44 CSS
+  pixels wide, so the embed's spinner is not visible and one indicator is seen
+
+#### Scenario: Nothing is drawn over a rolling video
+- **WHEN** the lesson is playing and not waiting for data
+- **THEN** neither the ring nor the core of the indicator is visible
+
+#### Scenario: A self-hosted lecture shows the same indicator
+- **WHEN** a project-hosted lesson buffers
+- **THEN** the same ring and opaque core are drawn at the centre of the frame

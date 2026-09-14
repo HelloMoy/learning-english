@@ -1,4 +1,5 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
+import { BUFFERING_CORE_CLASS } from "@/components/lesson-view/video-buffering-indicator/video-buffering-indicator";
 import type { VideoLesson } from "@/domain/entities/lesson/lesson";
 import { HOLD_ARM_DELAY_MS, HOLD_PLAYBACK_RATE } from "@/hooks/use-speed-hold/use-speed-hold";
 import { DEFAULT_SEEK_STEP_SECONDS } from "@/lib/seek-run/seek-run";
@@ -55,6 +56,14 @@ const IPHONE = deviceWithoutEngine(devices["iPhone 13"]);
  *   - "The tap acts while the video fills the viewport" and "It covers the
  *     embed's own icon" (the Player's centre play/pause control)
  *   - "A click on a mouse keeps toggling playback"
+ *   - "A YouTube lecture without a `poster` still shows a thumbnail" / "The
+ *     poster leaves when frames roll" (the Player's poster covers the embed's
+ *     cued chrome)
+ *   - "The control hides the embed's icon completely" / "The compact chrome's
+ *     button has the same geometry" (size, opacity and centring, which only a
+ *     laid-out chrome can show)
+ *   - "The buffering indicator hides the embed's own spinner" (the core's
+ *     geometry and its visibility rule)
  *   - "Pressing and holding the video runs it at double speed" (the rate the
  *     provider really applies, which no component test can observe)
  */
@@ -139,6 +148,45 @@ const IPHONE_IN_LANDSCAPE = {
   width: devices["iPhone 13"].viewport.height,
   height: devices["iPhone 13"].viewport.width,
 };
+
+/** The box the YouTube embed paints its centre play/pause icon in. */
+const EMBED_ICON_PX = 56;
+
+/** The box the YouTube embed paints its buffering spinner in. */
+const EMBED_SPINNER_PX = 36;
+
+/**
+ * The alpha of an element's computed background, so a test can tell an opaque
+ * disc from a translucent one. `rgb(...)` is alpha 1; `rgba(..., a)` reports `a`.
+ */
+async function backgroundAlphaOf(element: Locator): Promise<number> {
+  return element.evaluate((node) => {
+    const channels = getComputedStyle(node).backgroundColor.match(/\(([^)]+)\)/)?.[1] ?? "";
+    const parts = channels.split(/[\s,/]+/).filter(Boolean);
+    return parts.length === 4 ? Number.parseFloat(parts[3]!) : 1;
+  });
+}
+
+/** The element's computed opacity, as a number. */
+async function opacityOf(element: Locator): Promise<number> {
+  return element.evaluate((node) => Number.parseFloat(getComputedStyle(node).opacity));
+}
+
+/**
+ * Asserts that a control hides what the embed paints under it: at least as
+ * large as the embed's box, fully opaque, and centred where the embed centres
+ * its own chrome — the middle of the frame.
+ */
+async function expectToCoverTheFrameCentre(control: Locator, player: Locator, atLeastPx: number) {
+  const box = (await control.boundingBox())!;
+  const frame = (await player.boundingBox())!;
+
+  expect(box.width).toBeGreaterThanOrEqual(atLeastPx);
+  expect(box.height).toBeGreaterThanOrEqual(atLeastPx);
+  expect(Math.abs(box.x + box.width / 2 - (frame.x + frame.width / 2))).toBeLessThanOrEqual(1);
+  expect(Math.abs(box.y + box.height / 2 - (frame.y + frame.height / 2))).toBeLessThanOrEqual(1);
+  expect(await backgroundAlphaOf(control)).toBe(1);
+}
 
 /** The layout's control bar, whose `data-visible` says whether it is in view. */
 function controlBarOf(page: Page) {
@@ -343,6 +391,48 @@ test.describe("GIVEN a YouTube-sourced lesson", () => {
 
     await expect(player.locator('.vds-gesture[action="toggle:controls"]')).toHaveCount(0);
     await expect(player.locator('.vds-gesture[action="toggle:paused"]')).toHaveCount(1);
+  });
+
+  test("WHEN the lesson opens THEN the Player's poster covers the embed until frames roll", async ({
+    page,
+  }) => {
+    // The embed paints a red play button over its thumbnail until the first
+    // play. The Player's own poster — the same thumbnail, painted over the
+    // frame — is what hides it, and it must leave once the video is rolling.
+    // Rolling is the slow part: the embed has to fetch and start real media,
+    // and Firefox has needed more than the default budget for that.
+    test.slow();
+    const { player } = await openLesson(page);
+    const poster = player.locator(".vds-poster");
+
+    // The poster element is the `<img>` itself. The picture is the lesson's
+    // own where it declares one, else the thumbnail the provider discovers;
+    // what matters here is that one is painted, over the embed, before
+    // anything has played.
+    await expect(poster).toHaveAttribute("data-visible", "", { timeout: 15_000 });
+    await expect(poster).toHaveAttribute("src", /\S/);
+
+    await startPlayback(page, player);
+
+    await expect(poster).not.toHaveAttribute("data-visible", "");
+  });
+
+  test("WHEN the video plays THEN the buffering core is centred, opaque, and unseen until the player waits", async ({
+    page,
+  }) => {
+    // The embed's own spinner sits at the frame's centre in exactly the
+    // moments the player reports waiting. The core hides it; over a rolling
+    // video nothing of it may show.
+    const { player } = await openLesson(page);
+    const core = player.locator(`.${BUFFERING_CORE_CLASS}`);
+    await startPlayback(page, player);
+
+    await expectToCoverTheFrameCentre(core, player, EMBED_SPINNER_PX);
+    expect(await opacityOf(core)).toBe(0);
+
+    await player.evaluate((element) => element.setAttribute("data-buffering", ""));
+
+    await expect.poll(() => opacityOf(core)).toBe(1);
   });
 });
 
@@ -743,6 +833,40 @@ test.describe("GIVEN Safari on an iPhone", () => {
 
     await centreControl.tap();
     await expect(player).toHaveAttribute("data-paused", "");
+  });
+
+  test("WHEN the controls are in view in portrait THEN the compact chrome's centre button hides the embed's icon", async ({
+    page,
+  }) => {
+    // Portrait is the compact chrome, whose centre button is the layout's
+    // own. It is restyled to the shared geometry: at least as large as the
+    // icon the embed paints under it, opaque, and on the frame's centre.
+    const { player } = await openLesson(page);
+    await revealControls(page);
+
+    await expectToCoverTheFrameCentre(
+      page.locator(".vds-video-layout .vds-controls .vds-play-button"),
+      player,
+      EMBED_ICON_PX,
+    );
+  });
+
+  test("WHEN the controls are in view enlarged in landscape THEN the Player's centre control hides the embed's icon", async ({
+    page,
+  }) => {
+    await page.setViewportSize(IPHONE_IN_LANDSCAPE);
+    const { player } = await openLesson(page);
+    await revealControls(page);
+    await startPlayback(page, player);
+    await waitForTheControlsToHide(page);
+    await page.locator("[data-media-provider]").tap({ position: await spotOnTheVideo(player) });
+    await page.getByRole("button", { name: ENTER_FULLSCREEN }).click();
+    await waitForTheControlsToHide(page);
+    await page.locator("[data-media-provider]").tap({ position: await spotOnTheVideo(player) });
+    const centreControl = page.locator(".lesson-video-player__center-play-button");
+    await expect(centreControl).toBeVisible();
+
+    await expectToCoverTheFrameCentre(centreControl, player, EMBED_ICON_PX);
   });
 
   test("WHEN the right edge is double-tapped THEN the video seeks one step and says so", async ({

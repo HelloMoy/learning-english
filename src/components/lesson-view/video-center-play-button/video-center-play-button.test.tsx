@@ -93,7 +93,7 @@ describe("VideoCenterPlayButton", () => {
 
   describe("GIVEN the chrome the library already gives a centre control", () => {
     test("WHEN the player is narrow enough for the compact chrome THEN nothing is drawn", () => {
-      // The compact chrome draws a 45px centre play button of its own.
+      // The compact chrome draws a centre play button of its own.
       // Exactly one centre control may ever be on screen.
       renderButton({ width: A_PHONE_IN_PORTRAIT });
 

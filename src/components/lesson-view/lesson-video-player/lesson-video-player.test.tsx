@@ -16,11 +16,13 @@ import {
   useMediaState,
   type MediaPlayerInstance,
 } from "@vidstack/react";
+import { DefaultVideoLayout } from "@vidstack/react/player/layouts/default";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { createRef } from "react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
+import { VideoBufferingIndicator } from "../video-buffering-indicator/video-buffering-indicator";
 import { LessonVideoPlayer } from "./lesson-video-player";
 import { SEEK_ZONE_CLASS } from "./playback-gestures";
 
@@ -44,8 +46,20 @@ vi.mock("@vidstack/react", async (importOriginal) => ({
   useMediaState: vi.fn(),
 }));
 
+/**
+ * The layout is the real one, wrapped so its props can be read. jsdom never
+ * fires the `IntersectionObserver` the player defers loading behind, so the
+ * layout renders none of its slots and what fills them is only observable as
+ * the prop it was handed.
+ */
+vi.mock("@vidstack/react/player/layouts/default", async (importOriginal) => {
+  const layouts = await importOriginal<typeof import("@vidstack/react/player/layouts/default")>();
+  return { ...layouts, DefaultVideoLayout: vi.fn(layouts.DefaultVideoLayout) };
+});
+
 const mockUseTranslations = vi.mocked(useTranslations);
 const mockUseTheme = vi.mocked(useTheme);
+const mockDefaultVideoLayout = vi.mocked(DefaultVideoLayout);
 const mockUseMediaRemote = vi.mocked(useMediaRemote);
 const mockUseMediaState = vi.mocked(useMediaState);
 
@@ -164,13 +178,14 @@ describe("LessonVideoPlayer", () => {
       expect(ref.current?.state.sources).toEqual([{ src: source, type: "video/mp4" }]);
     });
 
-    test("WHEN a YouTube lesson has no poster THEN none is painted over the provider's own", () => {
-      // The YouTube provider discovers its own thumbnail, so the black idle
-      // frame that makes an explicit `Poster` necessary for a self-hosted
-      // lesson never happens here.
+    test("WHEN a YouTube lesson has no poster THEN an element is rendered to paint the provider's own", () => {
+      // The embed paints a red play button over its thumbnail until the first
+      // play. Vidstack's `Poster`, given no source, paints the thumbnail the
+      // provider discovers *over* the embed until frames roll — the one thing
+      // that hides that button — so it must be in the tree here too.
       const { container } = renderPlayer({ source: `https://youtu.be/${VIDEO_ID}` });
 
-      expect(container.querySelector(".vds-poster")).toBeNull();
+      expect(container.querySelector(".vds-poster")).not.toBeNull();
     });
 
     test("WHEN a YouTube lesson has a poster THEN the lesson's own thumbnail still wins", () => {
@@ -200,6 +215,14 @@ describe("LessonVideoPlayer", () => {
       expect(ref.current?.state.poster).toBe("");
     });
 
+    test("WHEN no poster is provided for a self-hosted lesson THEN the element renders hidden", () => {
+      // The element is always in the tree now; with nothing to paint it hides
+      // itself, so the idle frame of a poster-less MP4 lesson is unchanged.
+      const { container } = renderPlayer();
+
+      expect(container.querySelector(".vds-poster")).toHaveAttribute("data-hidden");
+    });
+
     test("WHEN a poster is provided THEN an element is rendered to paint it", () => {
       // The Default Layout does not draw the poster itself — it has no
       // `Poster` in its tree — so a player without an explicit one shows a
@@ -207,6 +230,19 @@ describe("LessonVideoPlayer", () => {
       const { container } = renderPlayer({ poster: "/thumbnails/lecture.jpg" });
 
       expect(container.querySelector(".vds-poster")).not.toBeNull();
+    });
+  });
+
+  describe("GIVEN the layout's buffering indicator slot", () => {
+    test("WHEN rendered THEN the Player's own indicator fills it", () => {
+      // The Default Layout's ring is hollow; the Player's indicator adds the
+      // opaque core that hides the YouTube embed's own spinner. It must be the
+      // one the layout draws, in every chrome, or two spinners show.
+      renderPlayer();
+
+      const layoutProps = mockDefaultVideoLayout.mock.lastCall?.[0];
+      const indicator = layoutProps?.slots?.bufferingIndicator as React.ReactElement | undefined;
+      expect(indicator?.type).toBe(VideoBufferingIndicator);
     });
   });
 

@@ -18,6 +18,7 @@ import type { ComponentProps, ReactNode, Ref } from "react";
 
 import { ScrollDownHint } from "../scroll-down-hint/scroll-down-hint";
 import { SeekStepMenu } from "../seek-step-menu/seek-step-menu";
+import { VideoBufferingIndicator } from "../video-buffering-indicator/video-buffering-indicator";
 import { VideoCenterPlayButton } from "../video-center-play-button/video-center-play-button";
 import { VideoEnlargeButton } from "../video-enlarge-button/video-enlarge-button";
 import { PlaybackGestures } from "./playback-gestures";
@@ -125,15 +126,28 @@ import { buildVideoPlayerTranslations } from "./video-player-translations";
  * the provider `<iframe>`, reloading the embed and resetting `currentTime`
  * under the resume overlay and the position writes; a class costs none of that.
  *
- * Three of the player's defaults are wrong for this app and are overridden
+ * **The buffering indicator is the Player's own**, in the layout's
+ * `bufferingIndicator` slot. The Default Layout's ring is hollow, and a
+ * YouTube-sourced lesson's embed paints its own spinner inside it at the very
+ * same moments — the player's `waiting` is derived from the embed's Buffering
+ * state — so `VideoBufferingIndicator` draws the same ring over an opaque
+ * core that hides it. For the same reason the centre play/pause control, in
+ * both chromes, is an opaque disc larger than the icon the embed paints under
+ * it; `lesson-video-player.css` holds that geometry once.
+ *
+ * Four of the player's defaults are wrong for this app and are overridden
  * here rather than worked around by callers:
  *
- * - **The poster is drawn explicitly.** The Default Layout renders no `Poster`
- *   of its own, so a self-hosted lesson with a perfectly good thumbnail would
- *   show a black idle frame. It belongs inside `<MediaProvider>`, which is the
- *   outlet the provider paints behind the video. A YouTube lesson needs none —
- *   the provider finds its own thumbnail — so an absent `poster` there means
- *   "already covered", not "show black".
+ * - **The poster is drawn explicitly, for every lesson.** The Default Layout
+ *   renders no `Poster` of its own, so a self-hosted lesson with a perfectly
+ *   good thumbnail would show a black idle frame. It belongs inside
+ *   `<MediaProvider>`, which is the outlet the provider paints behind the
+ *   video. It is rendered whether or not the lesson has a `poster`, because
+ *   the element resolves its own picture — the lesson's, else the thumbnail
+ *   the provider discovers — and hides itself when there is neither. For a
+ *   YouTube lesson that is not a nicety: the embed paints a red play button
+ *   over its thumbnail until the first play, and this element, painted over
+ *   the frame until frames roll, is the one thing that hides it.
  * - **The color scheme follows the app, not the OS.** Vidstack defaults to
  *   `system`; this app has its own toggle that ignores the OS, so the chrome
  *   would sit in light mode inside a dark page.
@@ -217,13 +231,11 @@ export function LessonVideoPlayer({
         {...lifecycle}
       >
         <MediaProvider>
-          {poster !== undefined ? (
-            <Poster
-              className="vds-poster"
-              src={poster}
-              alt=""
-            />
-          ) : null}
+          <Poster
+            className="vds-poster"
+            src={poster}
+            alt=""
+          />
         </MediaProvider>
         <PlaybackGestures />
         <DefaultVideoLayout
@@ -240,6 +252,7 @@ export function LessonVideoPlayer({
               />
             ),
             settingsMenuItemsEnd: <SeekStepMenu />,
+            bufferingIndicator: <VideoBufferingIndicator />,
           }}
         />
         <VideoCenterPlayButton />
