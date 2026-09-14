@@ -82,8 +82,9 @@
  * The player's own tap gestures.
  *
  * They are children of the player, not of `.vds-video-layout`, because the
- * layout's set is switched off (`noGestures`) — on a touch device it swapped
- * play/pause for show/hide controls. Vidstack's geometry for gestures is
+ * layout's set is switched off (`noGestures`) — this Player picks the single
+ * tap's action in markup and adds its own seek run and hold. Vidstack's
+ * geometry for gestures is
  * scoped to the layout, so it is restated here: a gesture is a region the
  * component compares the tap's coordinates against, and without a size it
  * matches nothing. The elements are `pointer-events: none` (set by Vidstack)
@@ -159,4 +160,29 @@
   margin: auto;
   width: 100dvw;
   max-width: calc(100dvh * 16 / 9);
+}
+
+/*
+ * The centre play/pause control a touch device gets in the full chrome.
+ *
+ * Centred on the frame, where the YouTube embed paints its own play/pause icon
+ * on an iPhone, so the tap aimed at that icon lands here. It is drawn after
+ * the layout and above the gesture regions, and it takes its own pointer, so
+ * the tap never reaches the provider and never toggles the control bar.
+ *
+ * Sized and painted as the compact chrome's own centre button — 45px on a
+ * translucent dark disc — so the two chromes offer one control, not two
+ * designs. The 45px box is also the hit area, above the 44px touch minimum.
+ */
+[data-media-player] > .lesson-video-player__center-play-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  width: 45px;
+  height: 45px;
+  margin: -22.5px 0 0 -22.5px;
+  border-radius: 100%;
+  background-color: rgb(0 0 0 / 0.6);
+  color: var(--media-controls-color, #f4f1ea);
 }

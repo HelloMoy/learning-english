@@ -306,22 +306,55 @@ describe("LessonVideoPlayer", () => {
         action: gesture.getAttribute("action"),
       }));
 
-    test("WHEN rendered THEN a single tap toggles playback", () => {
-      renderPlayer();
+    const tapActionsIn = (player: HTMLElement) =>
+      gesturesIn(player)
+        .filter((gesture) => gesture.event === "pointerup")
+        .map((gesture) => gesture.action);
 
-      expect(gesturesIn(screen.getByRole("region"))).toContainEqual({
-        event: "pointerup",
-        action: "toggle:paused",
-      });
+    const renderPlayerFor = (pointer: "fine" | "coarse") => {
+      mockUseMediaState.mockImplementation(
+        ((prop: string) => ({ ...PAUSED_PLAYER, pointer })[prop]) as never,
+      );
+      renderPlayer();
+      return screen.getByRole("region");
+    };
+
+    test("WHEN the pointer is a mouse THEN a single click toggles playback", () => {
+      expect(tapActionsIn(renderPlayerFor("fine"))).toEqual(["toggle:paused"]);
     });
 
-    test("WHEN rendered THEN no gesture merely reveals the controls", () => {
-      // On a touch device Vidstack's own set swaps play/pause for show/hide
-      // controls, which is what left YouTube's centre icon dead on iPhone.
+    test("WHEN the pointer is a finger THEN a single tap toggles the controls instead", () => {
+      // The convention of every video app on a phone. The meaning is decided
+      // in markup, never by a media query, so a stale stylesheet can never
+      // leave both gestures live and a tap both pausing and toggling the bar.
+      expect(tapActionsIn(renderPlayerFor("coarse"))).toEqual(["toggle:controls"]);
+    });
+
+    test("WHEN a finger has brought the controls into the full chrome THEN a centre play control is drawn", () => {
+      // Which cases draw nothing is the control's own test; this asserts only
+      // that the player mounts it, over the frame, where the leaked YouTube
+      // icon sits.
+      mockUseMediaState.mockImplementation(
+        ((prop: string) =>
+          ({ ...PAUSED_PLAYER, pointer: "coarse", controlsVisible: true, width: 1000 })[
+            prop
+          ]) as never,
+      );
+
       renderPlayer();
 
-      expect(gesturesIn(screen.getByRole("region")).map((gesture) => gesture.action)).not.toContain(
-        "toggle:controls",
+      expect(screen.getByRole("region")).toContainElement(
+        screen.getByRole("button", { name: "play" }),
+      );
+    });
+
+    test("WHEN the pointer is a finger THEN the frame's other gestures are unchanged", () => {
+      expect(gesturesIn(renderPlayerFor("coarse"))).toEqual(
+        expect.arrayContaining([
+          { event: "dblpointerup", action: "toggle:fullscreen" },
+          { event: "dblpointerup", action: `seek:-${DEFAULT_SEEK_STEP_SECONDS}` },
+          { event: "dblpointerup", action: `seek:${DEFAULT_SEEK_STEP_SECONDS}` },
+        ]),
       );
     });
 
@@ -356,6 +389,82 @@ describe("LessonVideoPlayer", () => {
           { event: "dblpointerup", action: "seek:10" },
         ]),
       );
+    });
+  });
+
+  describe("GIVEN a finger that taps the video to bring the controls in", () => {
+    /*
+     * The library's `toggle:controls` shows the bar with `show(0)`, which
+     * clears its idle timer, and the tap that caused it is flagged as a
+     * gesture so the idle tracker ignores it — measured under iPhone
+     * emulation, the bar then stayed up for good over a playing lesson. The
+     * gesture hands the bar back to that timer itself, and this is what is
+     * observable: the hide it schedules, at the library's own delay.
+     */
+    const WHOLE_FRAME = {
+      top: 0,
+      bottom: 100,
+      height: 100,
+      left: 0,
+      right: 1000,
+      width: 1000,
+      x: 0,
+      y: 0,
+    };
+    const TAP_SPOT = { button: 0, clientX: 500, clientY: 50 };
+    const SINGLE_TAP_SETTLE_MS = 300;
+
+    beforeEach(() => {
+      vi.useFakeTimers({
+        toFake: ["setTimeout", "clearTimeout", "requestAnimationFrame", "cancelAnimationFrame"],
+      });
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    function tapTheVideoOfA(player: Record<string, unknown>) {
+      mockUseMediaState.mockImplementation(
+        ((prop: string) => ({ ...player, pointer: "coarse" })[prop]) as never,
+      );
+      const ref = createRef<MediaPlayerInstance>();
+      renderPlayer({}, ref);
+      const region = screen.getByRole("region");
+      const tapGesture = region.querySelector(
+        '[data-media-gesture][action="toggle:controls"]',
+      ) as HTMLElement;
+      tapGesture.getBoundingClientRect = () => ({ ...WHOLE_FRAME, toJSON: () => WHOLE_FRAME });
+      act(() => {
+        vi.runOnlyPendingTimers();
+      });
+      const controls = ref.current!.controls;
+      const hide = vi.spyOn(controls, "hide");
+
+      act(() => {
+        fireEvent.pointerUp(region.querySelector("[data-media-provider]")!, TAP_SPOT);
+      });
+      act(() => {
+        vi.advanceTimersByTime(SINGLE_TAP_SETTLE_MS);
+      });
+
+      return { controls, hide };
+    }
+
+    test("WHEN the lesson is playing THEN the bar is handed back to the idle timer", () => {
+      const { controls, hide } = tapTheVideoOfA(PLAYING_PLAYER);
+
+      expect(controls.showing).toBe(true);
+      expect(hide).toHaveBeenCalledWith(controls.defaultDelay, expect.anything());
+    });
+
+    test("WHEN the lesson is paused THEN the bar stays up", () => {
+      // A paused player keeps its controls in view; that is the library's
+      // rule and the one stable state a learner reads the scrubber in.
+      const { controls, hide } = tapTheVideoOfA(PAUSED_PLAYER);
+
+      expect(controls.showing).toBe(true);
+      expect(hide).not.toHaveBeenCalledWith(controls.defaultDelay, expect.anything());
     });
   });
 

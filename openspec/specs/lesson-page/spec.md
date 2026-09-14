@@ -486,73 +486,6 @@ button remains the affordance and the fallback SHALL NOT render.
   portrait orientation
 - **THEN** no hint is rendered
 
-### Requirement: A single tap on the video toggles playback
-
-A single tap or click on the video area of the Player SHALL toggle between playing and
-paused, on every pointer type, in the Player's compact and full chrome alike, and both
-while the video is in the page and while it fills the viewport.
-
-The rule exists because a YouTube-sourced Lesson on a phone shows the embed's own centre
-play/pause icon through the Player's chrome: the mobile YouTube skin draws it even with
-the embed's controls disabled, the Player deliberately lets no pointer event reach the
-embed, and the icon cannot be hidden from outside a cross-origin frame. The Player SHALL
-NOT let the tap through to the embed — the embed's overlay also carries links that leave
-the Lesson — and SHALL NOT rely on the pointer type to decide whether the tap acts. A tap
-on a touch device that only reveals the control bar SHALL NOT be the Player's behaviour.
-
-The Player's control bar SHALL still become visible on that tap, so a learner who tapped
-to reach the scrubber finds it on screen.
-
-A tap here means a press that ends **before** the threshold named by "Pressing and
-holding the video runs it at double speed". A press held past that threshold is a hold,
-and the release that ends it SHALL NOT toggle playback or fullscreen.
-
-A double tap or double click on the middle band of the frame SHALL keep toggling the
-browser's fullscreen. A double tap on the left or right fifth of the frame seeks, as
-stated by "A double tap on an edge seeks in visible, repeatable steps"; while a seek run
-from that requirement is active, a tap on the video SHALL NOT toggle playback or
-fullscreen.
-
-A tap on an element drawn over the video that takes the pointer — the control bar, the
-in-player resume overlay, the scroll hint's dismiss control — SHALL NOT toggle playback.
-
-#### Scenario: A tap pauses the video on a phone
-- **WHEN** a YouTube-sourced lesson is playing in Safari on an iPhone and the learner
-  taps once on the video, away from the control bar
-- **THEN** the video pauses and the control bar is shown
-
-#### Scenario: A second tap resumes it
-- **WHEN** the video is paused after such a tap and the learner taps the video again
-- **THEN** the video resumes playing
-
-#### Scenario: The tap acts while the video fills the viewport
-- **WHEN** the video is enlarged on an iPhone held in landscape, so the embed's own
-  centre icon is the only one on screen, and the learner taps that icon
-- **THEN** playback toggles exactly as it would in the page
-
-#### Scenario: A click on a mouse keeps toggling playback
-- **WHEN** a lesson is playing in a desktop browser and the learner clicks once on the
-  video
-- **THEN** the video pauses, as before this requirement existed
-
-#### Scenario: No tap merely reveals the controls
-- **WHEN** the Player's chrome renders on any device
-- **THEN** it carries no gesture whose only effect is to show or hide the control bar
-
-#### Scenario: A middle double tap still toggles fullscreen
-- **WHEN** no seek run is active and the learner double-taps the middle band of the
-  video
-- **THEN** the browser's fullscreen is toggled
-
-#### Scenario: A released hold does not toggle playback
-- **WHEN** the learner presses the video, holds past the speed-up threshold, and lifts
-- **THEN** the video keeps playing and neither playback nor fullscreen is toggled
-
-#### Scenario: Overlays that take the pointer do not toggle playback
-- **WHEN** the learner taps a control in the control bar, a button of the resume
-  overlay, or the scroll hint's dismiss control
-- **THEN** that control acts and playback is not toggled by the tap
-
 ### Requirement: A double tap on an edge seeks in visible, repeatable steps
 
 A double tap or double click on the right fifth of the video SHALL seek the video
@@ -584,12 +517,13 @@ the next run instead, so the indicator can never contradict a seek it already cl
 A single tap on the **opposite edge** while a run is active SHALL start a new run in
 that direction, anchored at the target of the run it replaces, with its label starting
 again at one step. A single tap on the **middle band** while a run is active SHALL be
-absorbed: it SHALL NOT toggle playback, SHALL NOT toggle fullscreen, and SHALL NOT seek.
+absorbed: it SHALL NOT toggle playback, SHALL NOT toggle fullscreen, SHALL NOT toggle
+the control bar, and SHALL NOT seek.
 
 A run SHALL end on its own a short, fixed time after its last tap — long enough to
 chain taps at a natural pace, short enough that the next deliberate tap after a pause is
 a fresh single tap. When it ends the indicator SHALL leave, and the next tap SHALL mean
-what "A single tap on the video toggles playback" says.
+what "A single tap on the video acts by pointer type" says.
 
 The indicator's copy SHALL come from `next-intl` for every locale, SHALL be
 plural-aware through an ICU plural, and SHALL be exposed to assistive technology as a
@@ -645,13 +579,12 @@ not pulse.
 
 #### Scenario: A middle tap during a run is absorbed
 - **WHEN** an indicator is up and the learner taps the middle band of the video once
-- **THEN** playback does not toggle, fullscreen does not toggle, and the video does not
-  seek
+- **THEN** playback does not toggle, fullscreen does not toggle, the control bar does
+  not toggle, and the video does not seek
 
 #### Scenario: The run ends and the single tap is back
 - **WHEN** the learner stops tapping after a run and the run's window elapses
-- **THEN** the indicator is no longer shown and a single tap on the video toggles
-  playback
+- **THEN** the indicator is no longer shown and a single tap on the video means what "A single tap on the video acts by pointer type" says — the control bar on a touch device, playback on a mouse
 
 #### Scenario: The step is read from one source
 - **WHEN** the learner's step changes
@@ -775,7 +708,8 @@ A hold already under way SHALL end when the browser cancels the pointer, as it d
 it takes the touch over for a scroll, and the rate SHALL be restored then as on a normal
 release.
 
-The press that became a hold SHALL NOT also toggle playback or fullscreen when it ends.
+The press that became a hold SHALL NOT also toggle playback, fullscreen or the control
+bar when it ends.
 Releasing a hold SHALL leave the video playing.
 
 The gesture SHALL work in the Player's compact and full chrome alike, both while the
@@ -815,10 +749,10 @@ the visible label hidden from it so the rate is not read twice.
 - **THEN** the video runs at double speed during the hold and returns to that other
   rate, not to normal speed
 
-#### Scenario: A short tap still toggles playback
+#### Scenario: A short tap keeps the meaning a tap has
 - **WHEN** the learner presses and lifts before the threshold
-- **THEN** playback toggles, exactly as "A single tap on the video toggles playback"
-  says, and the rate never changes
+- **THEN** the tap means exactly what "A single tap on the video acts by pointer type" says — the control bar on a touch device,
+  playback on a mouse — and the rate never changes
 
 #### Scenario: A hold never pauses the video
 - **WHEN** the learner holds past the threshold and then releases
@@ -903,4 +837,152 @@ Every label SHALL be translated via `next-intl`. Whether completion survives is 
 #### Scenario: No control is left disabled to express completion
 - **WHEN** the control is in its completed state
 - **THEN** nothing in it is disabled — the un-mark action is activatable
+
+### Requirement: A single tap on the video acts by pointer type
+
+A single tap or click on the video area of the Player SHALL act according to the pointer
+that made it.
+
+**On a fine pointer** — a mouse, a trackpad, a pen — a click SHALL toggle between
+playing and paused, in the Player's compact and full chrome alike, and both while the
+video is in the page and while it fills the viewport. That is the desktop convention and
+is unchanged.
+
+**On a coarse pointer** — a finger — a tap SHALL reveal the control bar when it is
+hidden, SHALL hide it when it is visible, and SHALL NOT toggle playback. A control bar
+brought in by that tap over a playing video SHALL leave on its own after the Player's
+usual idle delay, as it does after any other touch; over a paused video it SHALL stay in
+view. Playback on
+touch SHALL be toggled by a play/pause control alone: the control bar's own, or the
+centre control stated by "The Player draws a centre play/pause control on touch". That
+is the convention of every video app the learner already uses on a phone, and a tap that
+paused the lesson cost them their place whenever they reached for the scrubber.
+
+The Player SHALL NOT let the tap through to the embed — the embed's overlay carries
+links that leave the Lesson. A YouTube-sourced Lesson on a phone shows the embed's own
+centre play/pause icon through the Player's chrome: the mobile YouTube skin draws it even
+with the embed's controls disabled, and the icon cannot be hidden from outside a
+cross-origin frame. The answer to that icon SHALL be a control of the Player's own drawn
+over it, as "The Player draws a centre play/pause control on touch" requires — never the
+tap's meaning, and never letting the pointer reach the embed.
+
+A tap here means a press that ends **before** the threshold named by "Pressing and
+holding the video runs it at double speed". A press held past that threshold is a hold,
+and the release that ends it SHALL NOT toggle playback, fullscreen or the control bar.
+
+A double tap or double click on the middle band of the frame SHALL keep toggling the
+browser's fullscreen. A double tap on the left or right fifth of the frame seeks, as
+stated by "A double tap on an edge seeks in visible, repeatable steps"; while a seek run
+from that requirement is active, a tap on the video SHALL NOT toggle playback,
+fullscreen or the control bar.
+
+A tap on an element drawn over the video that takes the pointer — the control bar, the
+centre play/pause control, the in-player resume overlay, the scroll hint's dismiss
+control — SHALL NOT toggle playback or the control bar.
+
+#### Scenario: A tap reveals the controls on a phone
+- **WHEN** a YouTube-sourced lesson is playing in Safari on an iPhone with the control
+  bar hidden and the learner taps once on the video, away from any control
+- **THEN** the control bar appears and the video keeps playing
+
+#### Scenario: Controls brought in by a tap leave on their own
+- **WHEN** a tap has brought the control bar in over a playing video and the learner
+  does nothing more
+- **THEN** the control bar leaves after the Player's usual idle delay and the video
+  keeps playing
+
+#### Scenario: A second tap hides them again
+- **WHEN** the control bar is visible and the learner taps the video again, away from
+  any control
+- **THEN** the control bar hides and the video keeps playing
+
+#### Scenario: Only a control pauses the video on touch
+- **WHEN** the control bar is visible and the learner taps the centre play/pause control
+  or the control bar's play/pause button
+- **THEN** the video pauses
+
+#### Scenario: A click on a mouse keeps toggling playback
+- **WHEN** a lesson is playing in a desktop browser and the learner clicks once on the
+  video
+- **THEN** the video pauses, as it did before this requirement was rewritten
+
+#### Scenario: The tap acts while the video fills the viewport
+- **WHEN** the video is enlarged on an iPhone held in landscape, so the embed's own
+  centre icon is the only thing drawn at the centre, and the learner taps it
+- **THEN** the control bar appears, together with the Player's own centre play/pause
+  control, and a second tap on that control toggles playback
+
+#### Scenario: A middle double tap still toggles fullscreen
+- **WHEN** no seek run is active and the learner double-taps the middle band of the
+  video
+- **THEN** the browser's fullscreen is toggled
+
+#### Scenario: A released hold changes nothing
+- **WHEN** the learner presses the video, holds past the speed-up threshold, and lifts
+- **THEN** the video keeps playing and neither playback, nor fullscreen, nor the control
+  bar is toggled
+
+#### Scenario: Overlays that take the pointer do not toggle the controls
+- **WHEN** the learner taps a control in the control bar, a button of the resume
+  overlay, or the scroll hint's dismiss control
+- **THEN** that control acts, playback is not toggled by the tap, and the control bar
+  does not hide
+
+### Requirement: The Player draws a centre play/pause control on touch
+
+Whenever the Player's control bar is visible on a **coarse pointer**, the Player SHALL
+draw a **play/pause control at the centre of the video frame**, over the video, in the
+Player's compact and full chrome alike and both while the video is in the page and while
+it fills the viewport. Activating it SHALL toggle playback.
+
+The control exists because the tap no longer toggles playback on touch, and because a
+YouTube-sourced Lesson on a phone paints the embed's own centre play/pause icon through
+the Player's chrome. It SHALL be placed over the region where that icon is drawn, so a
+learner reaching for the icon lands on a control that acts. The Player's full chrome
+draws no centre control of its own, which is why the one place the leaked icon used to
+be alone — the video filling the viewport in landscape — is covered by this requirement.
+
+Exactly one centre play/pause control SHALL ever be on screen: where the Player's own
+layout already draws one, as its compact chrome does, the Player SHALL NOT draw a second.
+
+The control SHALL take the pointer, and a tap on it SHALL NOT also toggle the control
+bar. It SHALL leave with the control bar, so a learner watching an uninterrupted lesson
+sees nothing drawn over the video. It SHALL NOT be drawn on a fine pointer, where a
+click on the frame already toggles playback.
+
+Its hit area SHALL be at least 44 by 44 CSS pixels. Its accessible name SHALL name the
+action it performs — play while paused, pause while playing — and SHALL come from
+`next-intl` for every supported locale.
+
+#### Scenario: The centre control appears with the controls
+- **WHEN** a lesson is playing on a phone in the Player's full chrome and the learner
+  taps the video once, revealing the control bar
+- **THEN** a play/pause control is drawn at the centre of the frame
+
+#### Scenario: Tapping it pauses the lesson
+- **WHEN** that control is on screen and the learner taps it
+- **THEN** the video pauses and the control bar stays visible
+
+#### Scenario: It leaves with the controls
+- **WHEN** the control bar hides again
+- **THEN** no centre control is drawn over the video
+
+#### Scenario: The compact chrome is not given two
+- **WHEN** the Player renders its compact chrome on a phone, which draws a centre
+  play/pause button of its own, and the controls are visible
+- **THEN** exactly one centre play/pause control is on screen
+
+#### Scenario: A mouse gets no centre control
+- **WHEN** a lesson is watched with a mouse and the control bar is visible
+- **THEN** no centre control is drawn, and a click on the frame toggles playback
+
+#### Scenario: It covers the embed's own icon
+- **WHEN** a YouTube-sourced lesson fills the viewport on an iPhone held in landscape,
+  the controls are visible, and the learner taps the icon the embed paints at the centre
+- **THEN** the Player's own centre control receives the tap and playback toggles
+
+#### Scenario: Its name is localized
+- **WHEN** the control renders in each supported locale
+- **THEN** its accessible name is that locale's word for the action it performs, with no
+  English fallback text
 
