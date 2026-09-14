@@ -1,41 +1,4 @@
-# Capability: cinema-module-overview
-
-## Purpose
-
-Define the Immersion Cinema presentation of the module overview route (`/[locale]/courses/[courseSlug]/modules/[moduleSlug]`). The module is presented as a video list: a header carrying the back link, the module's video count and ordinal, and its title, followed by an ordered list of video rows — one per lesson — each showing a thumbnail/play affordance, a "Video N" eyebrow, the lesson title, duration when known, and a trailing action, naming the video it opens, that links to the Lesson Page.
-## Requirements
-### Requirement: Video rows mark lessons the learner has already completed
-
-A step's state SHALL be derived from the learner's stored progress, using the existing
-completion rule of the `lesson-progress` and `watch-progress` capabilities: a lesson is
-**finished** when it counts as complete; otherwise it has a watched fraction between 0
-and 1.
-
-The finished marker SHALL carry a localized accessible name, so the finished state is
-announced and does not rest on the marker's colour or glyph alone. A step whose lesson
-is partly watched and is not the current step SHALL NOT render a progress bar; partial
-progress is shown on the current step only.
-
-Because completion and playback position are read in the browser after hydration while
-the module's lessons are resolved on the server, the route and the progress panel SHALL
-be client-rendered from lesson data the server resolves; the header and back link SHALL
-remain server-rendered. No explicit "not completed" marker text SHALL be rendered.
-
-#### Scenario: A completed lesson is distinguishable on the route
-- **WHEN** the module overview renders a lesson the learner has completed
-- **THEN** that step shows the finished marker with its localized accessible name, and steps for lessons never opened show the upcoming marker
-
-#### Scenario: A lesson watched to the end counts as finished without the button
-- **WHEN** a lesson has a stored position past its finish threshold and was never marked complete
-- **THEN** its step renders as finished
-
-#### Scenario: The header stays server-rendered
-- **WHEN** the module overview is rendered
-- **THEN** the back link, eyebrow, title and videos-and-runtime line are produced on the server, and only the route and the progress panel are client-rendered
-
-#### Scenario: The indicator is announced, not merely coloured
-- **WHEN** a screen reader reaches a finished step
-- **THEN** the finished state is announced through a localized accessible name
+## MODIFIED Requirements
 
 ### Requirement: Module overview renders as a video list
 
@@ -96,50 +59,40 @@ A thumbnail SHALL render the lesson's `poster` artwork when the lesson has one, 
 - **WHEN** the module overview renders in any supported locale
 - **THEN** no step or eyebrow is labelled with an episode or season term
 
-### Requirement: Video row titles stay legible on narrow viewports
+### Requirement: Video rows mark lessons the learner has already completed
 
-In the module overview's video list, a lesson title too long for the space available SHALL remain legible rather than being cut to a prefix. On narrow viewports the title SHALL wrap onto as many lines as it needs; the single-line treatment is reserved for rows wide enough to show a title that distinguishes it from its neighbours.
+A step's state SHALL be derived from the learner's stored progress, using the existing
+completion rule of the `lesson-progress` and `watch-progress` capabilities: a lesson is
+**finished** when it counts as complete; otherwise it has a watched fraction between 0
+and 1.
 
-This exists because these lesson titles share long prefixes. In the largest module every
-title begins `Exercise N Pronunciation Step By Step Lesson`; truncated to the width of a
-phone they all read `Exercise 1 Pronunciati…`, `Exercise 2 Pronunciati…`, and the list
-stops being a way to choose a lesson. Truncation is only safe where enough of the title
-survives to tell one row from the next.
+The finished marker SHALL carry a localized accessible name, so the finished state is
+announced and does not rest on the marker's colour or glyph alone. A step whose lesson
+is partly watched and is not the current step SHALL NOT render a progress bar; partial
+progress is shown on the current step only.
 
-Wrapping a title SHALL NOT change the row's other contents or their order — the eyebrow,
-the completion mark, and the trailing action stay as they are; the row simply grows taller.
+Because completion and playback position are read in the browser after hydration while
+the module's lessons are resolved on the server, the route and the progress panel SHALL
+be client-rendered from lesson data the server resolves; the header and back link SHALL
+remain server-rendered. No explicit "not completed" marker text SHALL be rendered.
 
-#### Scenario: A long title wraps rather than truncates on a phone
-- **WHEN** the module overview renders at a 320px or 390px viewport width for a module whose lesson titles exceed one line
-- **THEN** each title wraps across multiple lines and is readable in full, with no ellipsis
+#### Scenario: A completed lesson is distinguishable on the route
+- **WHEN** the module overview renders a lesson the learner has completed
+- **THEN** that step shows the finished marker with its localized accessible name, and steps for lessons never opened show the upcoming marker
 
-#### Scenario: Rows with shared prefixes stay distinguishable
-- **WHEN** a module's lesson titles share a long common prefix and the list renders on a phone
-- **THEN** the part of each title that differs from its neighbours is visible, so a learner can tell the rows apart
+#### Scenario: A lesson watched to the end counts as finished without the button
+- **WHEN** a lesson has a stored position past its finish threshold and was never marked complete
+- **THEN** its step renders as finished
 
-#### Scenario: The row keeps its structure when a title wraps
-- **WHEN** a title wraps onto several lines
-- **THEN** the row still shows its `Video N` eyebrow, its completion mark when the lesson is complete, and its trailing action, and that action remains fully within the viewport
+#### Scenario: The header stays server-rendered
+- **WHEN** the module overview is rendered
+- **THEN** the back link, eyebrow, title and videos-and-runtime line are produced on the server, and only the route and the progress panel are client-rendered
 
-### Requirement: A video row is clickable across its whole area
+#### Scenario: The indicator is announced, not merely coloured
+- **WHEN** a screen reader reaches a finished step
+- **THEN** the finished state is announced through a localized accessible name
 
-A video row is one object — a full-width band holding one lesson's thumbnail, ordinal, title, progress and duration — so a pointer landing anywhere in the row SHALL navigate to that lesson's page, not only a pointer landing on the trailing action.
-
-The extended hit area SHALL be an extension of that trailing action, not a new control. The row SHALL therefore continue to expose exactly one announced and tabbable link, and its accessible name SHALL remain the action's own label rather than the row's whole text.
-
-The row SHALL show a pointer-driven hover treatment, so the area that responds to a click is the area that looks like it will.
-
-#### Scenario: Clicking the row body opens the lesson
-- **WHEN** the user clicks the row's title, its ordinal, its progress bar or its duration
-- **THEN** they navigate to that row's lesson for the active locale — the same destination as the row's trailing action
-
-#### Scenario: The row still exposes exactly one control
-- **WHEN** a screen reader or keyboard user traverses a video row
-- **THEN** exactly one link is announced and reachable for that row, as before the hit area was extended, and the row itself is not announced as a link
-
-#### Scenario: The row shows it is clickable
-- **WHEN** the pointer moves over any part of a row
-- **THEN** the row shows a hover treatment covering the whole band rather than only under the trailing action
+## ADDED Requirements
 
 ### Requirement: The current lesson is featured on the route
 
@@ -274,4 +227,3 @@ another. Once both are read, the route and panel SHALL update to the derived sta
 #### Scenario: Progress appears after hydration
 - **WHEN** the page hydrates on a device holding progress for the module
 - **THEN** the finished steps, the featured card and the panel figures appear
-
