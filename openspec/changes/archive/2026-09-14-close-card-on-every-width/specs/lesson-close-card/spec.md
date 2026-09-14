@@ -1,8 +1,5 @@
-# lesson-close-card Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change lesson-close-complete-and-continue. Update Purpose after archive.
-## Requirements
 ### Requirement: The Lesson Page closes with one "complete and continue" block on phone-class viewports
 
 At every viewport width the Lesson Page SHALL end its right rail — directly below
@@ -41,57 +38,6 @@ write, the same completed and pending states.
 - **WHEN** the learner activates the "Mark as complete" button inside the closing block
 - **THEN** the lesson is recorded exactly as it is today and the button moves to its completed state, with the next-lesson row unaffected
 
-### Requirement: The next-lesson row is a control-sized target that names its destination
-
-The next-lesson row SHALL be a single locale-aware link whose activatable area is at
-least 44px tall, so it can be tapped on a phone without precision. The whole row —
-glyph, eyebrow, title and chevron — SHALL belong to that one link; the row SHALL NOT
-render a second, competing link to the same lesson.
-
-The link's accessible name SHALL name the destination lesson, so a learner using a
-screen reader hears which lesson comes next rather than "link, chevron".
-
-The row SHALL link to the next Lesson's own module route — the next Lesson MAY belong to
-a different Module than the current one — built with the shared lesson route builder
-rather than a concatenated string, and routed through the locale-aware `Link` so the
-active locale segment is preserved.
-
-The title SHALL remain readable when it is long: it wraps rather than being clipped, and
-the row grows to fit it.
-
-#### Scenario: The row links to the next lesson's own module
-- **WHEN** the next lesson belongs to a different module than the current lesson
-- **THEN** the row's `href` addresses the next lesson under *that* module's slug, prefixed with the active locale
-
-#### Scenario: The row is one link with an accessible name
-- **WHEN** the closing block renders with a next lesson
-- **THEN** the row is a single link whose accessible name contains the next lesson's title
-
-#### Scenario: A long title wraps instead of being clipped
-- **WHEN** the next lesson's title is longer than the row's width
-- **THEN** the title wraps onto further lines and no part of it is truncated out of reach
-
-### Requirement: The closing block shows the terminal state on the last lesson
-
-When the view resolves with no next Lesson, the closing block SHALL render the same
-localized "you've reached the end of the course" message the "Up next" card renders
-today, in place of the next-lesson row, and SHALL NOT render a link.
-
-#### Scenario: The last lesson shows the end-of-course message
-- **WHEN** a lesson whose resolved view has `nextLesson: null` is rendered at phone width
-- **THEN** the closing block shows the localized end-of-course message and contains no next-lesson link
-
-### Requirement: The closing block's copy is localized in every supported locale
-
-Every string the closing block renders — the prompt and the "Up next" eyebrow — SHALL be
-resolved through `next-intl` from the `Components.*` namespaces and SHALL be present in
-every locale message file (`en`, `es`, `pt`). No string SHALL be hardcoded in the
-component.
-
-#### Scenario: The prompt is translated in every locale
-- **WHEN** the Lesson Page is rendered in `en`, `es` and `pt`
-- **THEN** the closing block's prompt and eyebrow render in that locale, and no message key is rendered raw
-
 ### Requirement: The Resources card precedes the closing block on phone-class viewports
 
 The page SHALL render the lesson's **Resources** card exactly once, in the right rail,
@@ -109,3 +55,15 @@ Resources card for any breakpoint.
 - **WHEN** the same lesson is rendered at 390px and at 1280px
 - **THEN** exactly one Resources card is on the page at each width, in the rail directly above the closing block
 
+## REMOVED Requirements
+
+### Requirement: The closing block's next-lesson affordance is phone-only
+
+**Reason**: The closing block now renders at every viewport width, and the rail's "Up next"
+card is removed, so the block is the page's only next-lesson affordance and there is no
+breakpoint at which its chrome should collapse.
+
+**Migration**: The "offered exactly once" invariant moves into the `lesson-page` and
+`cinema-lesson-view` layout requirements, which now place the next lesson in the closing
+block alone. Browser tests that located the rail's `Up next` region locate the closing
+block's link instead.

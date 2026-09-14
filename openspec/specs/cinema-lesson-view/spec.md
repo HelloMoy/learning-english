@@ -2,13 +2,13 @@
 
 ## Purpose
 
-Define the Immersion Cinema presentation of the Lesson Page. The lesson view adopts a three-column cinema layout: a left "Course outline" sidebar, a center column with a video hero (the native player, with a gold title cover shown only over an idle, poster-less lesson) followed by the lesson title, description, a Notes/Transcript tab pair, and a "Mark as complete" action, and a right rail with a "Resources" card and an "Up next" card. Notes render in the app's active locale — one language at a time, never a side-by-side pair; the Transcript tab is present for visual parity but disabled. Existing `NativeVideoPlayer`, breadcrumb, resource list, up-next, and mark-complete behaviors are preserved.
+Define the Immersion Cinema presentation of the Lesson Page. The lesson view adopts a three-column cinema layout: a left "Course outline" sidebar, a center column with a video hero (the native player, with a gold title cover shown only over an idle, poster-less lesson) followed by the lesson title, description, and a Notes/Transcript tab pair, and a right rail with a "Resources" card followed by the closing block that pairs the "Mark as complete" action with the next lesson. Notes render in the app's active locale — one language at a time, never a side-by-side pair; the Transcript tab is present for visual parity but disabled. Existing `NativeVideoPlayer`, breadcrumb, resource list, up-next, and mark-complete behaviors are preserved.
 ## Requirements
 ### Requirement: Lesson view renders as a cinema player with tabbed notes
 
-The Lesson Page SHALL present a three-column cinema layout: a left "Course outline" sidebar, a center column with a video hero (the Vidstack player specified by the `lesson-page` capability, controls/scrubber retained, with a gold title cover over the idle player) followed by the lesson title, description, a Notes/Transcript tab pair, and a "Mark as complete" action; and a right rail with a "Resources" card and an "Up next" card. All regions SHALL be landmarks or labelled, keyboard-reachable with visible focus, and localized. The existing breadcrumb, resource list, up-next, and mark-complete behaviors SHALL be preserved.
+The Lesson Page SHALL present a three-column cinema layout: a left "Course outline" sidebar, a center column with a video hero (the Vidstack player specified by the `lesson-page` capability, controls/scrubber retained, with a gold title cover over the idle player) followed by the lesson title, description, and a Notes/Transcript tab pair; and a right rail with a "Resources" card followed by the closing block specified by the `lesson-close-card` capability — the "Mark as complete" action paired with the next lesson. All regions SHALL be landmarks or labelled, keyboard-reachable with visible focus, and localized. The existing breadcrumb, resource list, up-next, and mark-complete behaviors SHALL be preserved.
 
-The three-column layout is the presentation from the `lg` breakpoint up. Below `lg` the columns stack, and there the right rail SHALL carry the "Resources" card alone: the "Up next" card SHALL NOT be rendered in the stacked rail, because the center column already ends with the closing block specified by the `lesson-close-card` capability, which pairs "Mark as complete" with the next lesson. The next lesson SHALL therefore be offered exactly once at every viewport width.
+The three-column layout is the presentation from the `lg` breakpoint up; below `lg` the columns stack, the rail after the center column. At every viewport width the right rail SHALL be the "Resources" card followed by the closing block, and SHALL NOT render a separate "Up next" card: the closing block pairs "Mark as complete" with the next lesson at every width. The next lesson SHALL therefore be offered exactly once, and the page SHALL NOT render a standalone "Mark as complete" button outside the closing block.
 
 The right rail SHALL NOT render a "Lesson notes (source)" card. The lesson's notes are read in the Notes tab of the center column, rendered as Markdown in the learner's active locale; a rail card linking to the raw `readme.md` would send the learner to unstyled source of content the page already shows, so no such card SHALL exist. The notes `Resource` SHALL also stay out of the "Resources" card, so removing the dedicated card does not surface the same link under a different heading.
 
@@ -27,11 +27,11 @@ In the outline, each module title SHALL be a disclosure control that expands and
 
 #### Scenario: The right rail has no notes card
 - **WHEN** a lesson whose notes `Resource` is present renders at a viewport of `lg` or wider
-- **THEN** the right rail contains exactly the "Resources" card and the "Up next" card — there is no "Lesson notes (source)" card and no link to the raw `readme.md` anywhere in the rail
+- **THEN** the right rail contains exactly the "Resources" card and, below it, the closing block — there is no separate "Up next" card, no "Lesson notes (source)" card and no link to the raw `readme.md` anywhere in the rail
 
-#### Scenario: The stacked rail carries Resources alone on a phone
-- **WHEN** the same lesson renders at a 390px viewport width
-- **THEN** the stacked rail shows the "Resources" card and no "Up next" card, and the next lesson is offered once, by the closing block at the end of the center column
+#### Scenario: The rail is Resources then the closing block at every width
+- **WHEN** the same lesson renders at a 390px and at a 1440px viewport width
+- **THEN** at both widths the rail shows the "Resources" card followed by the closing block and no separate "Up next" card, and the next lesson is offered once, by that block
 
 #### Scenario: The Notes tab still renders the notes
 - **WHEN** the same lesson renders
@@ -435,3 +435,4 @@ shown. The cover answers "this lesson has no carátula of its own"; the placehol
 #### Scenario: The ready player is unobstructed
 - **WHEN** the player reports it can play
 - **THEN** the placeholder is gone and every player control, gesture and overlay behaves as it does today
+
