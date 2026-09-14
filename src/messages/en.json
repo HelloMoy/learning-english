@@ -276,9 +276,20 @@
       "moduleNotInCourse": "We couldn't find this module in the course.",
       "goHome": "Go to home",
       "backToCourse": "Back to course",
-      "moduleLabel": "Lesson {number}",
       "videoOrdinal": "Video {number}",
-      "watchVideo": "Watch video"
+      "watchVideo": "Watch video",
+      "moduleEyebrow": "Lesson {number} · {courseTitle}",
+      "runtime": "{hours, plural, =0 {{minutes} min} other {# h {minutes} min}}",
+      "stats": "{count, plural, one {# video} other {# videos}} · {runtime}",
+      "youAreHere": "You are here · Video {number}",
+      "continue": "Continue",
+      "start": "Start video",
+      "watchAgain": "Watch again",
+      "minutesLeft": "{minutes} min left",
+      "progressHeading": "Your progress",
+      "videosFinished": "{finished} of {total} videos",
+      "timeLeft": "{runtime} left",
+      "moduleCompleted": "Lesson completed"
     }
   },
   "PageNotFound": {

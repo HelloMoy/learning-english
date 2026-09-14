@@ -1,0 +1,180 @@
+import { expect, test, type Page } from "@playwright/test";
+
+import { lessonsOfModule, moduleOfCourse } from "./content-seed-fixtures";
+
+/**
+ * E2E coverage for the module overview's route (capability:
+ * `cinema-module-overview`).
+ *
+ * The component tests cover step states, the featured card and the panel
+ * against mocked translations. What only a real browser can confirm is the
+ * layout the route depends on — the panel beside the route on a desktop and
+ * above it on a phone, with nothing scrolling sideways — and that progress
+ * stored by the real stores reaches the page after hydration.
+ */
+const COURSE_SLUG = "basic-course";
+const MODULE = moduleOfCourse(COURSE_SLUG, "2-vowels");
+const LESSONS = lessonsOfModule(MODULE.id);
+const FINISHED_COUNT = 5;
+const CURRENT_LESSON = LESSONS[FINISHED_COUNT]!;
+const CURRENT_FRACTION = 0.4;
+const COLD_ROUTE = { timeout: 60_000 };
+/** Roughly three short words at the step title's phone size — below this a title reads word by word. */
+const MIN_READABLE_TITLE_WIDTH = 150;
+
+const MODULE_URL = `/en/courses/${COURSE_SLUG}/modules/${MODULE.slug}`;
+
+async function seedReturningLearner(page: Page): Promise<void> {
+  const finishedIds = LESSONS.slice(0, FINISHED_COUNT).map((lesson) => lesson.id);
+  const currentDuration = CURRENT_LESSON.kind === "video" ? CURRENT_LESSON.durationSeconds : 0;
+  await page.addInitScript(
+    ({ finishedIds, currentId, currentSeconds }) => {
+      for (const id of finishedIds)
+        window.localStorage.setItem(`learning-english:completed:${id}`, "1");
+      window.localStorage.setItem(`learning-english:playback:${currentId}`, String(currentSeconds));
+    },
+    {
+      finishedIds,
+      currentId: CURRENT_LESSON.id,
+      currentSeconds: currentDuration * CURRENT_FRACTION,
+    },
+  );
+}
+
+/**
+ * A learner who skipped ahead to videos 12–14, then went back to the start and
+ * finished videos 1–2. The lesson page records the lesson opened last, so the
+ * record points at video 2.
+ */
+async function seedLearnerWhoReturnedToTheStart(page: Page): Promise<void> {
+  const finishedIds = [...LESSONS.slice(11, 14), ...LESSONS.slice(0, 2)].map((lesson) => lesson.id);
+  await page.addInitScript(
+    ({ finishedIds, record }) => {
+      for (const id of finishedIds)
+        window.localStorage.setItem(`learning-english:completed:${id}`, "1");
+      window.localStorage.setItem("learning-english:continue-watching", JSON.stringify(record));
+    },
+    {
+      finishedIds,
+      record: { courseSlug: COURSE_SLUG, moduleSlug: MODULE.slug, lessonId: LESSONS[1]!.id },
+    },
+  );
+}
+
+const route = (page: Page) => page.getByTestId("module-overview").getByRole("list");
+const panelHeading = (page: Page) => page.getByRole("heading", { name: "Your progress" });
+
+test.describe("Module overview route", () => {
+  test.beforeEach(async ({ page }) => {
+    await seedReturningLearner(page);
+  });
+
+  test("WHEN a returning learner opens the module THEN the first unfinished video is featured and the rest are placed on the route", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(MODULE_URL);
+
+    const current = page.locator('[data-state="current"]');
+    await expect(current).toHaveCount(1, COLD_ROUTE);
+    await expect(current).toContainText(CURRENT_LESSON.title);
+    await expect(current.getByRole("link", { name: "Continue" })).toBeVisible();
+    await expect(page.locator('[data-state="finished"]')).toHaveCount(FINISHED_COUNT);
+    await expect(page.locator('[data-state="upcoming"]')).toHaveCount(
+      LESSONS.length - FINISHED_COUNT - 1,
+    );
+  });
+
+  test("WHEN a returning learner opens the module THEN the panel states the finished share of the module", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(MODULE_URL);
+
+    await expect(page.getByText(`${FINISHED_COUNT} of ${LESSONS.length} videos`)).toBeVisible(
+      COLD_ROUTE,
+    );
+    await expect(page.getByText("29%")).toBeVisible();
+  });
+
+  test("WHEN the page is 1440px wide THEN the panel sits beside the route", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(MODULE_URL);
+    await expect(page.locator('[data-state="current"]')).toHaveCount(1, COLD_ROUTE);
+
+    const panelBox = await panelHeading(page).boundingBox();
+    const routeBox = await route(page).boundingBox();
+
+    expect(panelBox!.x).toBeGreaterThan(routeBox!.x + routeBox!.width);
+  });
+
+  test("WHEN the page is 390px wide THEN the panel sits above the route and nothing scrolls sideways", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(MODULE_URL);
+    await expect(page.locator('[data-state="current"]')).toHaveCount(1, COLD_ROUTE);
+
+    const panelBox = await panelHeading(page).boundingBox();
+    const routeBox = await route(page).boundingBox();
+    expect(panelBox!.y).toBeLessThan(routeBox!.y);
+
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBeLessThanOrEqual(0);
+  });
+
+  test("WHEN the page is 390px wide THEN a step's title keeps a readable width beside its thumbnail", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(MODULE_URL);
+    await expect(page.locator('[data-state="current"]')).toHaveCount(1, COLD_ROUTE);
+
+    const upcomingTitle = page.getByText(LESSONS[LESSONS.length - 1]!.title, { exact: true });
+    const finishedTitle = page.getByText(LESSONS[0]!.title, { exact: true });
+
+    expect((await upcomingTitle.boundingBox())!.width).toBeGreaterThanOrEqual(
+      MIN_READABLE_TITLE_WIDTH,
+    );
+    expect((await finishedTitle.boundingBox())!.width).toBeGreaterThanOrEqual(
+      MIN_READABLE_TITLE_WIDTH,
+    );
+  });
+
+  test("WHEN the learner clicks an upcoming step's title THEN its lesson opens", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(MODULE_URL);
+
+    const upcoming = LESSONS[LESSONS.length - 1]!;
+    await expect(page.locator('[data-state="current"]')).toHaveCount(1, COLD_ROUTE);
+
+    // Aimed by coordinates, not at the title element: the step action's
+    // stretched overlay sits on top of the title, so Playwright's actionability
+    // check would call a locator click intercepted. Landing on the title's
+    // pixels is exactly what proves the overlay carries the click.
+    const title = page.getByText(upcoming.title, { exact: true });
+    await title.scrollIntoViewIfNeeded();
+    const box = (await title.boundingBox())!;
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+
+    await page.waitForURL(`**${MODULE_URL}/lessons/${upcoming.id}`, COLD_ROUTE);
+  });
+});
+
+test.describe("Module overview route — a learner who returned to the start", () => {
+  test("WHEN they finished 12–14, went back and finished 1–2 THEN video 3 is featured, not video 15", async ({
+    page,
+  }) => {
+    await seedLearnerWhoReturnedToTheStart(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(MODULE_URL);
+
+    const current = page.locator('[data-state="current"]');
+    await expect(current).toHaveCount(1, COLD_ROUTE);
+    await expect(current).toContainText(LESSONS[2]!.title);
+  });
+});
