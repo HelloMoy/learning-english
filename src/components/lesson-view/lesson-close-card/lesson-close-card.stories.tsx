@@ -40,9 +40,9 @@ const nextLesson = Lesson.parse({
 });
 
 /**
- * The closing block of the Lesson Page. Its chrome is phone-only, so review it
- * at `mobile1`: from `lg` up the card collapses to the bare "Mark as complete"
- * button and the rail's `UpNextCard` takes the next lesson back.
+ * The closing block of the Lesson Page, the same at every width. `mobile1` is
+ * the tighter canvas, so it is the default; `OnDesktop` shows the identical
+ * chrome at the width where it used to collapse to a bare button.
  */
 const meta = {
   title: "LessonView/LessonCloseCard",
@@ -96,7 +96,7 @@ export const CourseCompleted: Story = {
   args: { nextLesson: null, nextLessonModule: null },
 };
 
-/** From `lg` up the chrome is gone and only the action remains. */
+/** The desktop renders the same card: surface, prompt, full-width action, next-lesson row. */
 export const OnDesktop: Story = {
   args: { nextLesson, nextLessonModule: nextModule },
   parameters: { viewport: { defaultViewport: "desktop" } },

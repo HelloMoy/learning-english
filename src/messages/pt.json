@@ -87,10 +87,6 @@
       "upNext": "A seguir",
       "courseCompleted": "Você chegou ao fim do curso."
     },
-    "UpNextCard": {
-      "title": "A seguir",
-      "courseCompleted": "Você chegou ao fim do curso."
-    },
     "LessonCompletionToggle": {
       "prompt": "Terminou esta lição? Marque-a e siga para a próxima.",
       "markComplete": "Marcar como concluída",

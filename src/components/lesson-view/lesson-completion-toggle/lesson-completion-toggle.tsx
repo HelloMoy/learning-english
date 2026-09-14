@@ -138,13 +138,13 @@ export function LessonCompletionToggle({
   }
 
   return (
-    <div className="flex flex-col items-stretch gap-2 lg:items-start">
-      <p className="text-sm text-pretty text-muted-foreground lg:hidden">{t("prompt")}</p>
+    <div className="flex flex-col items-stretch gap-2">
+      <p className="text-sm text-pretty text-muted-foreground">{t("prompt")}</p>
       <button
         type="button"
         onClick={onMark}
         disabled={isPending}
-        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 text-sm font-bold tracking-wide text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-70 lg:w-auto"
+        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 text-sm font-bold tracking-wide text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-70"
       >
         <span aria-hidden="true">✓</span>
         {t("markComplete")}
@@ -167,10 +167,10 @@ function UnknownState() {
     <div
       data-testid="lesson-completion-toggle-skeleton"
       aria-hidden="true"
-      className="flex flex-col items-stretch gap-2 lg:items-start"
+      className="flex flex-col items-stretch gap-2"
     >
-      <Skeleton className="h-5 w-3/4 max-w-xs lg:hidden" />
-      <Skeleton className="h-11 w-full rounded-lg lg:w-44" />
+      <Skeleton className="h-5 w-3/4 max-w-xs" />
+      <Skeleton className="h-11 w-full rounded-lg" />
     </div>
   );
 }

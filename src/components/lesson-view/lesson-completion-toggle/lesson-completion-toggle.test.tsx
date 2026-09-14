@@ -26,6 +26,9 @@ vi.mock("next-intl", () => ({
 
 const mockUseTranslations = vi.mocked(useTranslations);
 
+/** Any Tailwind `lg:` (or wider) variant — the control must not switch on one. */
+const BREAKPOINT_VARIANT = /\b(?:sm|md|lg|xl|2xl):/;
+
 /**
  * The gate under test, not the hook: a plain RTL `render()` is a client render
  * rather than a hydration pass, so the real `useIsHydrated` returns `true` on
@@ -106,9 +109,10 @@ describe("LessonCompletionToggle", () => {
     expect(screen.queryByRole("button", { name: "markComplete" })).toBeNull();
   });
 
-  test("WHEN rendered THEN the button is full width on a phone and intrinsic from `lg` up", () => {
-    // Arrange — inside the closing card the button is the block's primary
-    // action, so it spans it; the desktop rendering must not change.
+  test("WHEN rendered THEN the invitation and the full-width button are the same at every width", () => {
+    // Arrange — the closing card is the page's only completion control at
+    // every width, so nothing in the incomplete state may switch on a
+    // breakpoint: the desktop used to collapse this to a lone button.
     const markComplete = vi.fn().mockResolvedValue({ data: { completed: true } });
 
     // Act
@@ -122,8 +126,11 @@ describe("LessonCompletionToggle", () => {
 
     // Assert
     const button = screen.getByRole("button");
-    expect(button).toHaveClass("w-full", "lg:w-auto");
-    expect(button.parentElement).toHaveClass("items-stretch", "lg:items-start");
+    expect(button).toHaveClass("w-full");
+    expect(button.className).not.toMatch(BREAKPOINT_VARIANT);
+    expect(button.parentElement).toHaveClass("items-stretch");
+    expect(button.parentElement?.className).not.toMatch(BREAKPOINT_VARIANT);
+    expect(screen.getByText("prompt").className).not.toMatch(BREAKPOINT_VARIANT);
   });
 
   test("WHEN the lesson is complete THEN it states so once, announced, and disables nothing", async () => {
@@ -481,6 +488,20 @@ describe("LessonCompletionToggle — celebrating the finish", () => {
       const unknown = screen.getByTestId("lesson-completion-toggle-skeleton");
       expect(unknown).toHaveAttribute("aria-hidden", "true");
       expect(unknown.querySelectorAll("button, a, input, [tabindex]")).toHaveLength(0);
+    });
+
+    test("WHEN the unknown state is shown THEN it reserves the same shape at every width", () => {
+      isHydrated = false;
+
+      renderToggle();
+
+      // The skeleton is sized against the incomplete state, which no longer
+      // changes with the viewport — so neither may the skeleton.
+      const unknown = screen.getByTestId("lesson-completion-toggle-skeleton");
+      expect(unknown.className).not.toMatch(BREAKPOINT_VARIANT);
+      for (const bone of unknown.children) {
+        expect(bone.className).not.toMatch(BREAKPOINT_VARIANT);
+      }
     });
 
     test("WHEN completion becomes known THEN the reservation gives way to a real state", () => {

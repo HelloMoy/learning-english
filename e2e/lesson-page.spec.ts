@@ -17,8 +17,8 @@ import { modulesOfCourse } from "./content-seed-fixtures";
  * Spec coverage:
  *   - "A valid route renders the Lesson Page"
  *   - "The page renders all regions when the view is resolved"
- *   - "The Up next card points to the next lesson"
- *   - "The Up next card shows the terminal state when the course is complete"
+ *   - "The closing block points to the next lesson"
+ *   - "The closing block shows the terminal state when the course is complete"
  *   - "The button starts in the 'Mark as complete' state"
  *   - "Clicking the button changes the label"
  *   - "An unknown course renders an error state" (via Next.js notFound())
@@ -140,17 +140,21 @@ test.describe("Lesson Page — happy path", () => {
     await expect(resources).toBeVisible();
     await expect(resources.getByRole("link")).toHaveCount(0);
 
-    // Up next card points to the next lesson in the same module.
-    const upNext = page.getByRole("region", { name: /up next/i });
-    await expect(upNext).toBeVisible();
-    await expect(upNext.getByRole("link")).toHaveAttribute(
+    // The closing block points to the next lesson in the same module, and
+    // nothing else on the page does — the rail carries no "Up next" card.
+    const closingCard = page.getByTestId("lesson-close-card");
+    await expect(closingCard.getByRole("link")).toHaveAttribute(
       "href",
       new RegExp(`/modules/${MODULE_A.slug}/lessons/${LESSON_AFTER_PRIMARY.id}`),
     );
+    await expect(page.getByRole("region", { name: /up next/i })).toHaveCount(0);
 
-    // Mark as complete button starts in the incomplete state.
+    // Mark as complete button starts in the incomplete state, inside the
+    // closing block, and is the only one on the page.
     const markComplete = page.getByRole("button", { name: /mark as complete/i });
     await expect(markComplete).toBeVisible();
+    await expect(markComplete).toHaveCount(1);
+    await expect(closingCard.getByRole("button", { name: /mark as complete/i })).toBeVisible();
   });
 
   test("WHEN mark-as-complete is clicked THEN the control states the lesson is complete", async ({
@@ -251,8 +255,7 @@ test.describe("Lesson Page — cross-module navigation", () => {
   }) => {
     await page.goto(lessonUrl("en", MODULE_A.slug, LAST_LESSON_OF_MODULE_A.id));
 
-    const upNext = page.getByRole("region", { name: /up next/i });
-    const link = upNext.getByRole("link");
+    const link = page.getByTestId("lesson-close-card").getByRole("link");
     await expect(link).toHaveAttribute(
       "href",
       new RegExp(`/modules/${MODULE_B.slug}/lessons/${FIRST_LESSON_OF_MODULE_B.id}`),
@@ -264,9 +267,9 @@ test.describe("Lesson Page — cross-module navigation", () => {
   }) => {
     await page.goto(lessonUrl("en", LAST_MODULE.slug, FINAL_LESSON.id));
 
-    const upNext = page.getByRole("region", { name: /up next/i });
-    await expect(upNext.getByRole("link")).toHaveCount(0);
-    await expect(upNext).toContainText(/end of the course/i);
+    const closingCard = page.getByTestId("lesson-close-card");
+    await expect(closingCard.getByRole("link")).toHaveCount(0);
+    await expect(closingCard).toContainText(/end of the course/i);
   });
 });
 
@@ -372,23 +375,23 @@ test.describe("Lesson Page — the outline shows where the learner is", () => {
 /**
  * Coverage for the `lesson-close-card` capability.
  *
- * Which of the two next-lesson affordances a learner can reach is decided by
- * a CSS breakpoint, so only a real browser can answer it: jsdom applies no
- * stylesheet and sees both.
+ * Where the closing card lands and which copy of the materials is on screen
+ * are decided by a CSS breakpoint, so only a real browser can answer it:
+ * jsdom applies no stylesheet and sees everything.
  */
-test.describe("Lesson Page — the lesson closes with the next one on a phone", () => {
+test.describe("Lesson Page — the lesson closes with the next one at every width", () => {
   const nextLessonHref = `/lessons/${LESSON_AFTER_PRIMARY.id}`;
 
   test.describe("on a phone", () => {
     test.use({ viewport: { width: 390, height: 844 } });
 
-    test("WHEN a lesson opens THEN the closing card offers the next lesson and the rail card is gone", async ({
+    test("WHEN a lesson opens THEN the closing card offers the next lesson after the materials", async ({
       page,
     }) => {
       await page.goto(lessonUrl("en", MODULE_A.slug, PRIMARY_LESSON.id));
 
-      // The closing card sits at the end of the center column, right after
-      // the lesson's own content.
+      // The closing card ends the stacked rail, right after the lesson's
+      // own content and its materials.
       const closingRow = page
         .getByTestId("lesson-close-card")
         .locator(`a[href*="${nextLessonHref}"]`);
@@ -401,12 +404,12 @@ test.describe("Lesson Page — the lesson closes with the next one on a phone", 
         new RegExp(escapeRegExp(LESSON_AFTER_PRIMARY.title)),
       );
 
-      // It is the only one in the center column, and it is a tappable target.
+      // It is the only one on the page, and it is a tappable target.
       await expect(closingRow).toHaveCount(1);
       expect((await closingRow.boundingBox())!.height).toBeGreaterThanOrEqual(44);
 
-      // The stacked rail no longer carries the "Up next" card.
-      await expect(page.getByRole("region", { name: /up next/i })).toBeHidden();
+      // The rail carries no "Up next" card.
+      await expect(page.getByRole("region", { name: /up next/i })).toHaveCount(0);
 
       // The lesson's materials come before the block that ends the lesson,
       // and only one copy of that card is on screen.
@@ -424,25 +427,43 @@ test.describe("Lesson Page — the lesson closes with the next one on a phone", 
     });
   });
 
-  test("WHEN the same lesson opens on a desktop viewport THEN the rail card is the only next-lesson affordance", async ({
+  test("WHEN the same lesson opens on a desktop viewport THEN the same closing card is the only next-lesson affordance", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(lessonUrl("en", MODULE_A.slug, PRIMARY_LESSON.id));
 
-    await expect(page.getByRole("region", { name: /up next/i })).toBeVisible();
-    await expect(
-      page.getByTestId("lesson-close-card").locator(`a[href*="${nextLessonHref}"]`),
-    ).toBeHidden();
+    // The card keeps its chrome: the prompt, the row and the full-width
+    // button are all visible, and the desktop no longer renders a lone
+    // button or a rail card instead.
+    const closingCard = page.getByTestId("lesson-close-card");
+    const closingRow = closingCard.locator(`a[href*="${nextLessonHref}"]`);
+    await expect(closingRow).toBeVisible();
+    await expect(closingRow).toHaveCount(1);
+    await expect(closingCard.getByText(/finished this lesson/i)).toBeVisible();
+    await expect(page.getByRole("region", { name: /up next/i })).toHaveCount(0);
 
-    // The rail's copy of the materials is the visible one at this width.
+    const markComplete = page.getByRole("button", { name: /mark as complete/i });
+    await expect(markComplete).toHaveCount(1);
+    const buttonBox = (await markComplete.boundingBox())!;
+    const closingBox = (await closingCard.boundingBox())!;
+    expect(buttonBox.width).toBeGreaterThan(closingBox.width * 0.8);
+
+    // The card sits in the right rail, directly under the materials, to the
+    // right of the player — not at the foot of the center column.
     const materials = page
       .getByRole("region", { name: /resources|materiales/i })
       .and(page.locator(":visible"));
     await expect(materials).toHaveCount(1);
     const materialsBox = (await materials.boundingBox())!;
-    const closingBox = (await page.getByTestId("lesson-close-card").boundingBox())!;
-    expect(materialsBox.x).toBeGreaterThan(closingBox.x + closingBox.width);
+    const playerBox = (await page.getByRole("region", { name: /video player/i }).boundingBox())!;
+    expect(closingBox.x).toBeGreaterThanOrEqual(playerBox.x + playerBox.width);
+    expect(Math.abs(closingBox.x - materialsBox.x)).toBeLessThan(1);
+    expect(materialsBox.y + materialsBox.height).toBeLessThanOrEqual(closingBox.y);
+
+    // The action it wraps still works from inside the card.
+    await markComplete.click();
+    await expect(page.getByText(/lesson completed/i)).toBeVisible();
   });
 });
 

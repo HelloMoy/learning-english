@@ -13,15 +13,16 @@ import { useTranslations } from "next-intl";
  * as one closing surface.
  *
  * @remarks
- * On a phone the Lesson Page's three columns stack, so the right rail — and
- * with it the "Up next" card — lands below everything else. This card pulls
- * that link up to where the learner already is when the lesson ends, and gives
- * it a control-sized tap target instead of a line of text.
+ * Finishing a lesson and starting the next one are one moment for the learner,
+ * so they share one surface: the card sits at the end of the center column,
+ * right after the lesson's own content, and offers the next lesson as a
+ * control-sized target instead of a line of text in the rail.
  *
- * The closing chrome (the card surface, the prompt, the divider and the
- * next-lesson row) is phone-only: from `lg` up it collapses to a transparent
- * wrapper and the rail's `UpNextCard` is the page's next-lesson affordance
- * again, so the next lesson is never offered twice at the same width.
+ * The card is the page's only next-lesson affordance and renders the same at
+ * every width. It began as a phone-only block — the desktop collapsed it to a
+ * bare button and pointed at a rail card instead — until the learner asked for
+ * the same closing surface everywhere; the rail card went with the collapse,
+ * so the next lesson is still offered exactly once.
  *
  * The completion control arrives as `children` rather than being rendered
  * here, so this component stays presentational — it knows nothing of the
@@ -49,10 +50,10 @@ export function LessonCloseCard({
   return (
     <section
       data-testid="lesson-close-card"
-      className="rounded-xl border border-border bg-card lg:rounded-none lg:border-0 lg:bg-transparent"
+      className="rounded-xl border border-border bg-card"
     >
-      <div className="p-4 lg:p-0">{children}</div>
-      <div className="border-t border-border lg:hidden">
+      <div className="p-4">{children}</div>
+      <div className="border-t border-border">
         {nextLesson && nextLessonModule ? (
           <NextLessonRow
             course={course}
