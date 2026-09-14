@@ -44,8 +44,11 @@ import { useTranslations } from "next-intl";
  * already uses — so the action keeps one name across the app and every locale
  * already has it.
  *
- * The geometry is a rule in `lesson-video-player.css`, which centres it on
- * the frame and gives it a touch-sized hit area.
+ * The geometry is a rule in `lesson-video-player.css`, shared with the
+ * compact chrome's centre button: a disc of at least 64px, fully opaque,
+ * centred exactly on the frame. Those three facts are what hide the embed's
+ * 56px icon rather than merely sit on it — a smaller or translucent control
+ * lets it show through, and the learner sees two.
  *
  * @category Components
  */

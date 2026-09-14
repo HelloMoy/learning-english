@@ -32,6 +32,33 @@
   --media-menu-text-secondary-color: var(--muted-foreground);
   --media-menu-border-radius: var(--radius-lg);
   --media-menu-border: 1px solid var(--border);
+
+  /* The compact chrome's centre play button reads the layout's own knobs; they
+     are pointed at the shared centre-control geometry declared on the player
+     below, so both chromes draw the one disc. */
+  --video-sm-play-button-size: var(--lesson-player-centre-control-size);
+  --video-sm-play-button-bg: var(--lesson-player-centre-control-bg);
+}
+
+/*
+ * One geometry for whatever sits at the centre of the frame.
+ *
+ * A YouTube-sourced lesson paints the embed's own centre play/pause icon —
+ * a 56px box, white glyph — through this chrome, and nothing outside the
+ * cross-origin frame can hide it. What can be done is to make sure it is never
+ * *seen*: the control drawn over it is at least 64px, a 4px margin on every
+ * side for sub-pixel drift between the iframe and the player box, and its
+ * disc is fully opaque — any alpha below 1 shows a white ghost of the icon.
+ * Black, because the frame's own background is black: the disc reads as a
+ * hole in the video, the treatment the YouTube app gives its own controls.
+ *
+ * Declared once, on the player, and read by the Player's own centre control
+ * (full chrome) and the layout's centre button (compact chrome) alike, so a
+ * measurement that changes is changed in one place.
+ */
+[data-media-player] {
+  --lesson-player-centre-control-size: 64px;
+  --lesson-player-centre-control-bg: #000;
 }
 
 /*
@@ -121,6 +148,41 @@
 }
 
 /*
+ * The opaque core of the buffering indicator.
+ *
+ * The Default Layout's ring is hollow, and a YouTube-sourced lesson's embed
+ * paints its own 36px spinner inside it at exactly the same moments — the
+ * player's `waiting` comes from the embed's Buffering state. The core is a
+ * 44px opaque disc under the ring that hides it. `VideoBufferingIndicator`
+ * says why it is a component of this app's own rather than a pseudo-element.
+ *
+ * The indicator is a flex box that centres its children, so the core is
+ * centred by taking it out of flow at the box's centre; the ring stays the
+ * flex item. Its visibility copies the ring's own rule — hidden until the
+ * player carries `data-buffering`, with the same transition — so the two
+ * appear and leave as one picture, and nothing is drawn over a rolling video.
+ */
+.vds-buffering-indicator .lesson-video-player__buffering-core {
+  --size: 44px;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--size);
+  height: var(--size);
+  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+  border-radius: 100%;
+  background-color: var(--lesson-player-centre-control-bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--media-buffering-transition, opacity 200ms ease);
+}
+
+[data-media-player][data-buffering] .lesson-video-player__buffering-core {
+  opacity: 1;
+}
+
+/*
  * What the platform does with a long press, undone.
  *
  * A press held on the video is a gesture here — it runs the lesson at double
@@ -165,24 +227,61 @@
 /*
  * The centre play/pause control a touch device gets in the full chrome.
  *
- * Centred on the frame, where the YouTube embed paints its own play/pause icon
- * on an iPhone, so the tap aimed at that icon lands here. It is drawn after
- * the layout and above the gesture regions, and it takes its own pointer, so
- * the tap never reaches the provider and never toggles the control bar.
- *
- * Sized and painted as the compact chrome's own centre button — 45px on a
- * translucent dark disc — so the two chromes offer one control, not two
- * designs. The 45px box is also the hit area, above the 44px touch minimum.
+ * Centred on the frame, where the YouTube embed paints its own play/pause
+ * icon, so the tap aimed at that icon lands here and the icon itself is
+ * hidden behind the disc (the geometry block above says how big and why
+ * opaque). It is drawn after the layout and above the gesture regions, and it
+ * takes its own pointer, so the tap never reaches the provider and never
+ * toggles the control bar. The disc is also the hit area, above the 44px
+ * touch minimum.
  */
 [data-media-player] > .lesson-video-player__center-play-button {
   position: absolute;
   top: 50%;
   left: 50%;
   z-index: 2;
-  width: 45px;
-  height: 45px;
-  margin: -22.5px 0 0 -22.5px;
+  width: var(--lesson-player-centre-control-size);
+  height: var(--lesson-player-centre-control-size);
+  margin: calc(var(--lesson-player-centre-control-size) / -2) 0 0
+    calc(var(--lesson-player-centre-control-size) / -2);
   border-radius: 100%;
-  background-color: rgb(0 0 0 / 0.6);
+  background-color: var(--lesson-player-centre-control-bg);
   color: var(--media-controls-color, #f4f1ea);
+}
+
+/*
+ * The compact chrome's centre button, given the same geometry.
+ *
+ * Vidstack lays it out in the middle group of a flex column and nudges it
+ * down by a quarter of its height to approximate the frame's centre — close,
+ * but not the point the embed's icon is drawn on (measured 12px above it on
+ * an iPhone). The group is the button's containing block and is itself
+ * `position: relative`, so the group is what is stretched over the whole
+ * frame: it is the third of the column's groups — the selector Vidstack's own
+ * stylesheet uses for it — and it carries nothing but this button and two
+ * spacers in the compact chrome. Inside it the button is placed the same way
+ * the Player's own control is: centred by half-size margins, hover transform
+ * off so a fine pointer at compact width cannot slide it off the icon. The
+ * size and disc come from the layout knobs mapped above.
+ *
+ * The stretched group takes no pointer of its own — a tap on the frame must
+ * still reach the provider and the gestures — and the button takes it back.
+ */
+.vds-video-layout[data-sm] .vds-controls > .vds-controls-group:nth-child(3) {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+.vds-video-layout[data-sm] .vds-controls .vds-play-button {
+  --media-button-hover-transform: none;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: calc(var(--lesson-player-centre-control-size) / -2) 0 0
+    calc(var(--lesson-player-centre-control-size) / -2);
+  transform: none;
+  pointer-events: auto;
 }
