@@ -11,9 +11,8 @@ import type { FindCourseCatalogErrors } from "./find-course-catalog.errors";
 /**
  * How many modules a catalog entry previews.
  *
- * Three is what `ModuleShowcaseCard`'s deck already leads with, so the home
- * and the course overview agree on how much of a container is worth showing
- * before deferring to a `+N more`.
+ * Three keeps the home card's preview short: enough to show a course is a
+ * container of modules before deferring the rest to a `+N more`.
  */
 const LEADING_MODULE_PREVIEW_COUNT = 3;
 

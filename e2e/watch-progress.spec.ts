@@ -24,8 +24,8 @@ import { modulesOfCourse } from "./content-seed-fixtures";
  *     shows a partial bar" (watch-progress R5)
  *   - "A completed lesson is distinguishable in the video list"
  *     (cinema-module-overview)
- *   - "The meter counts past the gallery's preview" and "A partly completed
- *     module shows its count" (cinema-course-overview)
+ *   - "A module in progress offers to continue" and "The server render
+ *     asserts no progress" (cinema-course-overview progress panel)
  *   - "A lesson watched to the end before the rule existed is complete"
  *     (watch-progress R4) — the seeded position is never marked
  */
@@ -120,19 +120,18 @@ test.describe("watch progress", () => {
     await expect(row.getByRole("progressbar")).toHaveCount(0);
   });
 
-  test("the module's card on the course overview counts the finished lesson", async ({ page }) => {
+  test("the course overview's progress panel counts the finished lesson", async ({ page }) => {
     await page.goto(courseUrl("en"));
 
-    const card = page
-      .getByRole("listitem")
-      .filter({ has: page.getByRole("heading", { name: MODULE.title }) })
-      .first();
-    const meter = card.getByRole("progressbar");
-    await expect(meter).toHaveAttribute("aria-valuenow", "1");
-    await expect(meter).toHaveAttribute("aria-valuemax", String(MODULE_LESSONS.length));
+    // The seeded positions put the learner part-way through the first module,
+    // so the carousel opens on it and the panel reads its progress.
+    const panel = page.getByTestId("lesson-progress-panel");
+    await expect(panel).toHaveAttribute("data-state", "in-progress", { timeout: 60_000 });
+    await expect(panel).toContainText(`1 of ${MODULE_LESSONS.length} videos`);
+    await expect(panel).toContainText(`Pick up ${PARTLY_WATCHED_LESSON.title}`);
   });
 
-  test("a course the learner has not started shows no meters", async ({ context, page }) => {
+  test("a course the learner has not started shows no progress", async ({ context, page }) => {
     await context.addInitScript(() => {
       try {
         window.localStorage.clear();
@@ -142,8 +141,12 @@ test.describe("watch progress", () => {
     });
 
     await page.goto(courseUrl("en"));
-    await expect(page.getByTestId("course-module-list")).toBeVisible();
+    await expect(page.getByTestId("course-overview")).toBeVisible();
 
+    await expect(page.getByTestId("lesson-progress-panel")).toHaveAttribute(
+      "data-state",
+      "not-started",
+    );
     await expect(page.getByRole("progressbar")).toHaveCount(0);
   });
 });

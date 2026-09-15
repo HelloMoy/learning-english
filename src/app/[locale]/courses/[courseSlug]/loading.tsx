@@ -5,82 +5,88 @@ import { Skeleton } from "@/components/ui/skeleton/skeleton";
  * The course overview's loading shell.
  *
  * @remarks
- * The heaviest document in the app — the course overview ships around 166 KB —
- * so this is the navigation that sits longest on the previous page without one.
- *
- * The shapes trace `CourseOverview`: the title and its badges, the description,
- * and the stack of `ModuleShowcaseCard`s with their poster deck. The cards keep
- * the real card's `lg:flex-row` switch, so the copy column and the deck land
- * where they will be at both breakpoints rather than reflowing on arrival.
+ * The shapes trace `CourseOverview`: the compact hero (eyebrow, title, meta line
+ * and Start course), the poster carousel with its selected poster between
+ * shrinking neighbours and its dots, and the progress panel beneath. Sizes match
+ * the real carousel at both breakpoints so nothing reflows when it arrives.
  */
 export default function Loading() {
   return (
     <main
       id="main"
-      className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-11 sm:py-16"
+      className="w-full"
     >
       <LoadingStatus />
 
       <div
         data-testid="course-shell-shapes"
         aria-hidden="true"
-        className="flex flex-col gap-10"
+        className="flex flex-col gap-4 pb-16 sm:gap-6 sm:pb-24"
       >
-        <header
-          data-testid="course-shell-header"
-          className="flex flex-col gap-4"
-        >
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <Skeleton className="h-11 w-80 sm:h-14" />
-            <div className="flex items-center gap-2 pt-2">
-              <Skeleton className="h-7 w-24 rounded-full" />
-              <Skeleton className="h-7 w-20 rounded-full" />
-            </div>
-          </div>
-          <div className="flex max-w-3xl flex-col gap-2">
-            <Skeleton className="h-5 w-full" />
-            <Skeleton className="h-5 w-4/5" />
-          </div>
-        </header>
-
-        <div
-          data-testid="course-shell-modules"
-          className="flex flex-col gap-10"
-        >
-          {[0, 1, 2].map((card) => (
-            <ModuleCardShape key={card} />
-          ))}
+        <HeroShape />
+        <CarouselShape />
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-11">
+          <Skeleton
+            data-testid="course-shell-panel"
+            className="h-[520px] w-full rounded-[22px] lg:h-[300px]"
+          />
         </div>
       </div>
     </main>
   );
 }
 
-/**
- * One module showcase: a copy column that takes 30% of the row from `lg` up,
- * and the deck of lesson posters beside it.
- */
-function ModuleCardShape() {
+function HeroShape() {
   return (
-    <div className="flex flex-col gap-3">
-      <div
-        data-testid="course-shell-module-card"
-        className="flex flex-col gap-8 rounded-2xl border border-border p-6 lg:flex-row lg:items-center lg:gap-10 lg:p-8"
-      >
-        <div className="flex flex-col gap-4 lg:w-[30%] lg:shrink-0">
-          <Skeleton className="h-8 w-3/4" />
-          <Skeleton className="h-4 w-28" />
-          <Skeleton className="h-11 w-32 rounded-lg" />
-        </div>
+    <div
+      data-testid="course-shell-hero"
+      className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pt-8 sm:px-11 sm:pt-12 lg:flex-row lg:items-end lg:justify-between"
+    >
+      <div className="flex flex-col gap-3">
+        <Skeleton className="h-3 w-48" />
+        <Skeleton className="h-11 w-64 sm:h-14 sm:w-96" />
+        <Skeleton className="h-4 w-40" />
+      </div>
+      <Skeleton className="h-12 w-full rounded-lg lg:w-44" />
+    </div>
+  );
+}
 
-        <div className="flex min-w-0 flex-1 items-stretch gap-3">
-          {[0, 1, 2].map((poster) => (
-            <Skeleton
-              key={poster}
-              className="aspect-video min-w-0 flex-1 rounded-xl"
-            />
-          ))}
-        </div>
+function CarouselShape() {
+  return (
+    <div className="flex flex-col gap-6">
+      <div
+        data-testid="course-shell-carousel"
+        className="flex h-[400px] items-center justify-center gap-5 overflow-x-clip lg:h-[500px]"
+      >
+        <Skeleton
+          data-testid="course-shell-poster"
+          className="hidden h-[270px] w-[180px] shrink-0 rounded-2xl lg:block"
+        />
+        <Skeleton
+          data-testid="course-shell-poster"
+          className="h-[300px] w-[200px] shrink-0 rounded-2xl lg:h-[345px] lg:w-[230px]"
+        />
+        <Skeleton
+          data-testid="course-shell-poster"
+          className="h-[360px] w-[240px] shrink-0 rounded-[18px] lg:h-[450px] lg:w-[300px]"
+        />
+        <Skeleton
+          data-testid="course-shell-poster"
+          className="h-[300px] w-[200px] shrink-0 rounded-2xl lg:h-[345px] lg:w-[230px]"
+        />
+        <Skeleton
+          data-testid="course-shell-poster"
+          className="hidden h-[270px] w-[180px] shrink-0 rounded-2xl lg:block"
+        />
+      </div>
+      <div className="flex h-11 items-center justify-center gap-2">
+        {[0, 1, 2, 3, 4].map((dot) => (
+          <Skeleton
+            key={dot}
+            className="size-2 rounded-full"
+          />
+        ))}
       </div>
     </div>
   );
