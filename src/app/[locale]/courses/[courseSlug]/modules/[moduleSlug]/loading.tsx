@@ -21,7 +21,7 @@ export default function Loading() {
   return (
     <main
       id="main"
-      className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-11 sm:py-16"
+      className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-11 sm:py-12"
     >
       <LoadingStatus />
 
