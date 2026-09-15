@@ -330,3 +330,23 @@
     }
   }
 }
+
+/*
+ * The vowel-length card's duration bar fills from the left while its word
+ * plays, so a long vowel visibly takes longer to reach its end than a short
+ * one. `@theme` for the same reason as `arrow-lift`: a real utility, so
+ * `motion-reduce:animate-none` leaves the fill in place without the motion.
+ */
+@theme {
+  --animate-vowel-fill: vowel-fill 420ms ease-out both;
+
+  @keyframes vowel-fill {
+    from {
+      transform: scaleX(0);
+    }
+
+    to {
+      transform: scaleX(1);
+    }
+  }
+}

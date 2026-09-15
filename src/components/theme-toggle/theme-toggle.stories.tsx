@@ -102,10 +102,10 @@ export const MigratingFromSystem: Story = {
 };
 
 /**
- * The phone variant: below `sm` the theme name is hidden and only the `◐` icon
- * remains, in a 44×44 hit area. The button keeps its full `Theme: <name>`
- * accessible name, so what a screen reader announces does not change with the
- * viewport.
+ * The phone variant: below `sm` the chip and the theme name drop away and only
+ * the 44px switch remains, in a 44×44 hit area. The switch keeps its full
+ * `Theme: <name>` accessible name, so what a screen reader announces does not
+ * change with the viewport.
  */
 export const NarrowPhone: Story = {
   parameters: {

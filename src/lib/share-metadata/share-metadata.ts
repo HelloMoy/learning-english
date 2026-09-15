@@ -107,6 +107,38 @@ export type ShareMetadataInput = {
  * @category Metadata
  */
 export function shareMetadata(input: ShareMetadataInput): Metadata {
+  return composeMetadata(input, input.href);
+}
+
+/**
+ * Composes the metadata of a personal learner route — onboarding, My learning,
+ * Profile.
+ *
+ * @remarks
+ * These routes describe one learner on one device, not catalog content, so
+ * they ask search engines not to index them (while still following their
+ * links) and they have no sharing image of their own: a link to one previews
+ * as the home card for its locale. Canonical and alternates are declared as on
+ * every route.
+ *
+ * @param input - The route's own copy, path and locale
+ * @returns A Next `Metadata` object marked `noindex, follow`
+ * @throws If `locale` is not one of the application's supported locales
+ * @category Metadata
+ */
+export function personalRouteMetadata(
+  input: Omit<ShareMetadataInput, "videoDurationSeconds">,
+): Metadata {
+  return { ...composeMetadata(input, "/"), robots: { index: false, follow: true } };
+}
+
+/**
+ * The shared body of both builders.
+ *
+ * @param input - The route's own copy, path and locale
+ * @param imageHref - Unprefixed path of the route whose `opengraph-image` the card uses
+ */
+function composeMetadata(input: ShareMetadataInput, imageHref: string): Metadata {
   const { href, title, description, siteName, imageAlt, videoDurationSeconds } = input;
 
   // Middleware and the locale layout both reject unknown locales before a page
@@ -134,7 +166,12 @@ export function shareMetadata(input: ShareMetadataInput): Metadata {
   // origin keeps one home. The path is the route's own `opengraph-image` file
   // convention, which sits directly under the route it illustrates.
   const images = [
-    { url: `${pathFor(locale)}/opengraph-image`, width: 1200, height: 630, alt: imageAlt },
+    {
+      url: `${localePath(locale, imageHref)}/opengraph-image`,
+      width: 1200,
+      height: 630,
+      alt: imageAlt,
+    },
   ];
 
   return {

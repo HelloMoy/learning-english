@@ -6,10 +6,42 @@
     "catalogEmpty": "Nenhum curso disponível no momento.",
     "eyebrow": "Agora em exibição · Inglês falado",
     "heading": "Comece onde seu ouvido está",
-    "intro": "Cursos focados em pronúncia, em ordem. Cada um assume os sons do anterior — então a única pergunta real é por onde você entra.",
-    "coursesEyebrow": "Cursos disponíveis",
-    "coursesHeading": "{count, plural, one {Um nível, em ordem} other {# níveis, em ordem}}",
-    "coursesCount": "{count, plural, one {# curso} other {# cursos}}"
+    "coursesCount": "{count, plural, one {# curso} other {# cursos}}",
+    "newVisitor": {
+      "eyebrow": "Do primeiro som ao inglês real",
+      "heading": "Aprenda o inglês americano som por som.",
+      "intro": "Comece pelas vogais e consoantes e avance até as contrações, a entonação e a fala rápida, com notas em espanhol e em inglês.",
+      "primaryActionNote": "{videos, plural, one {# vídeo} other {# vídeos}} · {course}",
+      "bandEyebrow": "Comece aqui",
+      "bandHeading": "{minutes, plural, one {Um minuto} other {# minutos}} para descobrir o que seu ouvido tem perdido.",
+      "bandHeadingNoDuration": "Descubra o que seu ouvido tem perdido."
+    },
+    "questions": {
+      "eyebrow": "Antes de começar",
+      "heading": "Três perguntas que todos fazem primeiro",
+      "items": {
+        "sounds": {
+          "question": "Já sei gramática. Por que começar pelos sons?",
+          "answer": "Porque você não entende uma palavra que não ouve. Cada curso assume os sons do anterior, então o Curso Básico prepara seu ouvido para o que a fala rápida vai exigir depois."
+        },
+        "time": {
+          "question": "E se eu tiver só alguns minutos por dia?",
+          "answer": "Cada som tem seu próprio vídeo, então cada sessão é uma só ideia. Pare quando quiser: a página inicial leva você de volta ao segundo exato em que parou."
+        },
+        "phone": {
+          "question": "Posso praticar pelo celular?",
+          "answer": "Sim. Adicione à tela inicial e ele abre como um app, em inglês, espanhol ou português."
+        }
+      }
+    },
+    "levels": {
+      "eyebrow": "Cursos disponíveis",
+      "heading": "{count, plural, one {Um nível, em ordem} other {# níveis, em ordem}}"
+    },
+    "continueBand": {
+      "eyebrow": "Continue aprendendo",
+      "heading": "Continue de onde parou, {name}."
+    }
   },
   "SiteHeader": {
     "navLabel": "Principal",
@@ -17,7 +49,13 @@
     "sectionHome": "Início",
     "sectionCourse": "Curso",
     "sectionModule": "Módulo",
-    "sectionLesson": "Aula"
+    "sectionLesson": "Aula",
+    "sectionStart": "Começar",
+    "sectionLearning": "Meu aprendizado",
+    "sectionProfile": "Perfil",
+    "learnerMenuLabel": "Menu de aluno de {name}",
+    "myLearning": "Meu aprendizado",
+    "profile": "Perfil"
   },
   "LocaleSwitcher": {
     "label": "Idioma",
@@ -206,28 +244,37 @@
     "LessonCompletion": {
       "completed": "Concluída"
     },
-    "CourseLadder": {
-      "listLabel": "Cursos disponíveis, em ordem",
-      "trackLabel": "Níveis do curso"
+    "VowelLengthCard": {
+      "eyebrow": {
+        "hearTheDifference": "Ouça a diferença",
+        "quickReview": "Revisão rápida"
+      },
+      "playBoth": "Tocar as duas",
+      "playWord": "Tocar {word}",
+      "shortVowel": "Curta · relaxada",
+      "longVowel": "Mais longa · tensa, lábios esticados",
+      "anchorLanguage": "PT",
+      "anchorNote": "<ipa>/i/</ipa> parece o <b>i</b> de <i>vi</i>, um pouco mais longo. <ipa>/ɪ/</ipa> fica entre o <b>i</b> de <i>vi</i> e o <b>ê</b> de <i>vê</i>."
     },
-    "CourseLevelCard": {
+    "LevelsTable": {
+      "tableLabel": "Cursos disponíveis, em ordem",
       "levelOrdinal": "Nível {number}",
-      "inProgress": "Em andamento",
-      "notStarted": "Não iniciado",
+      "counts": "{lessons, plural, one {# lição} other {# lições}} · {videos, plural, one {# vídeo} other {# vídeos}}",
+      "viewCourse": "Ver curso",
       "continueCourse": "Continuar curso",
-      "startCourse": "Começar curso",
-      "moduleOrdinal": "Lição {number}",
-      "moreModules": "+{count} mais",
-      "moduleListLabel": "Lições deste curso",
-      "viewCourseContent": "Ver conteúdo do curso"
+      "inProgress": "Em andamento",
+      "progress": "{completed} de {total} vídeos"
     },
-    "ContinueWatching": {
-      "heading": "Continuar assistindo",
-      "breadcrumb": "{course} · {module}",
-      "resume": "Retomar",
-      "courseOutline": "Índice do curso",
-      "remaining": "Faltam {remaining} de {total}",
-      "progressLabel": "Progresso da reprodução"
+    "CourseProgressList": {
+      "eyebrow": "Seu progresso",
+      "watched": "{completed} de {total} vídeos assistidos",
+      "listLabel": "Lições de {course}",
+      "moduleOrdinal": "Lição {number}",
+      "moduleCount": "{completed} de {total, plural, one {# vídeo} other {# vídeos}}",
+      "current": "Atual",
+      "progressPercent": "{percent, number, percent}",
+      "leftOffAt": "Você parou em: <video>{title}</video>",
+      "continue": "Continuar"
     },
     "LessonWatchProgress": {
       "ariaLabel": "{percent} assistido"
@@ -240,6 +287,50 @@
     },
     "LoadingStatus": {
       "label": "Carregando"
+    },
+    "LearnerAvatar": {
+      "label": "Avatar de {name}",
+      "labelUnnamed": "Avatar"
+    },
+    "LearnerCard": {
+      "tag": "Aluno",
+      "namePlaceholder": "Seu nome",
+      "level": "Nível {number} · {course}",
+      "subject": "Inglês americano · pronúncia",
+      "progress": "{completed} de {total, plural, one {# vídeo} other {# vídeos}}",
+      "progressPercent": "{percent, number, percent}",
+      "progressRemaining": "{count, plural, one {Falta # em {course}} other {Faltam # em {course}}}",
+      "progressComplete": "{course} concluído"
+    },
+    "AvatarPicker": {
+      "label": "Avatar",
+      "initials": "Iniciais",
+      "illustrations": {
+        "sun": "Sol",
+        "wave": "Onda",
+        "leaf": "Broto",
+        "plum": "Ameixa",
+        "ember": "Brasa",
+        "echo": "Eco",
+        "night": "Noite",
+        "schwa": "Schwa"
+      }
+    },
+    "StartCourseLink": {
+      "label": "Começar o curso",
+      "continueLabel": "Continuar"
+    },
+    "ResumePanel": {
+      "position": "{course} · Lição {moduleNumber} · {moduleTitle} · Vídeo {lessonNumber} de {total}",
+      "resume": "Retomar",
+      "viewCourse": "Ver conteúdo do curso",
+      "progressLabel": "Progresso da reprodução"
+    },
+    "StartPanel": {
+      "heading": "Seu primeiro vídeo está pronto.",
+      "note": "{course} · {minutes, plural, one {# minuto} other {# minutos}}",
+      "noteNoDuration": "{course}",
+      "action": "Assistir ao primeiro vídeo"
     }
   },
   "CourseCatalog": {
@@ -300,6 +391,45 @@
     "lessonFact": "{count, plural, one {# aula} other {# aulas}}",
     "levelFact": "Nível {level}",
     "imageAlt": "{title} — English Course",
-    "lessonBadge": "Aula {sequence}"
+    "lessonBadge": "Aula {sequence}",
+    "startTitle": "Crie seu cartão de aluno",
+    "startDescription": "Adicione seu nome e escolha um avatar para começar o curso.",
+    "learningTitle": "Meu aprendizado",
+    "learningDescription": "Retome sua última lição e veja seu progresso neste dispositivo.",
+    "profileTitle": "Perfil",
+    "profileDescription": "Mude o nome e o avatar do seu cartão de aluno."
+  },
+  "MyLearning": {
+    "eyebrow": "Meu aprendizado",
+    "greeting": "Que bom te ver de novo, {name}.",
+    "coursesEyebrow": "Seus cursos",
+    "coursesHeading": "{count, plural, one {Um curso, em ordem} other {# cursos, em ordem}}",
+    "catalogEmpty": "Nenhum curso disponível no momento."
+  },
+  "Onboarding": {
+    "stepLabel": "Passo {step} de {total}",
+    "name": {
+      "heading": "Vamos criar seu cartão de aluno",
+      "fieldLabel": "Seu nome",
+      "placeholder": "Seu nome e sobrenome",
+      "continue": "Continuar"
+    },
+    "avatar": {
+      "heading": "Agora escolha seu avatar",
+      "intro": "Toque em um para colocá-lo no seu cartão, ou fique com suas iniciais.",
+      "continue": "Continuar"
+    }
+  },
+  "Profile": {
+    "eyebrow": "Perfil",
+    "heading": "Edite seu cartão de aluno",
+    "intro": "Seu nome e seu avatar ficam salvos neste dispositivo.",
+    "nameLabel": "Nome",
+    "avatarLabel": "Avatar",
+    "discard": "Descartar",
+    "save": "Salvar alterações",
+    "saved": "Cartão atualizado",
+    "previewLabel": "Seu cartão de aluno",
+    "previewNote": "As mudanças aparecem no seu cartão enquanto você edita."
   }
 }

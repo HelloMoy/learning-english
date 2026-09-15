@@ -1,30 +1,21 @@
 "use client";
 
-import { useIsHydrated } from "@/hooks/use-is-hydrated/use-is-hydrated";
+import { ThemeSwitchTrack } from "@/components/theme-switch-track/theme-switch-track";
+import { useThemeChoice } from "@/hooks/use-theme-choice/use-theme-choice";
+import { cn } from "@/lib/utils/utils";
 
 import { useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
-
-type Theme = "light" | "dark";
 
 /**
- * Resolve whatever `next-themes` hands us into one of the two themes the app
- * recognises.
- *
- * An earlier build ran with `enableSystem` and persisted `"system"` to real
- * browsers, so that value is still in learners' `localStorage` and is what
- * `useTheme()` returns on their next visit. Disabling `enableSystem` governs
- * what the library will *write*; it does not sanitise what is already stored.
- *
- * The rule is deliberately "light, or else dark" rather than a list of the
- * invalid inputs: dark is the default, so anything that is not an explicit
- * choice of light lands there — which keeps this correct against a corrupted
- * or hand-edited storage entry, not just against the one legacy value.
+ * The header control's shape: a bare 44×44 switch on a phone, a chip with the
+ * theme's name from `sm` up — the header's phone width budget has no room for
+ * a chip.
  */
-const resolveTheme = (stored: string | undefined): Theme => (stored === "light" ? "light" : "dark");
+const CONTROL_CLASSES =
+  "inline-flex min-h-11 min-w-11 items-center justify-center gap-2.5 rounded-md text-xs text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none sm:border sm:border-border sm:bg-foreground/5 sm:px-3";
 
 /**
- * Theme switcher backed by `next-themes`.
+ * Theme switch backed by `next-themes`.
  *
  * Note: `next-themes@0.4.6` emits a React 19 warning of the form
  * "Encountered a script tag while rendering React component" because
@@ -34,51 +25,64 @@ const resolveTheme = (stored: string | undefined): Theme => (stored === "light" 
  * post-0.4. We keep `next-themes` rather than reimplementing the
  * provider. See `openspec/changes/polish-lesson-view-ux/design.md` §D6.
  *
- * `next-themes`'s `useTheme()` returns `undefined` on the server, but by
- * the client's *hydration* render the provider has already read
- * `localStorage` — so `theme` is populated there. Gating on
- * `theme === undefined` alone therefore renders the placeholder on the
- * server and the real button during hydration, which is exactly the
- * mismatch it was meant to prevent. {@link useIsHydrated} closes the gap:
- * it reports `false` for both the server render and the hydration render,
- * so the placeholder is what both passes emit.
+ * A `role="switch"`, checked while dark is active, wearing
+ * {@link ThemeSwitchTrack}. The accessible name keeps naming the current theme
+ * (`Theme: Dark`) at every width, as the header requires. Pressing it slides
+ * the thumb first and applies the theme once the slide has played — see
+ * `useThemeChoice`.
  *
- * Swaps between `dark` and `light` on click — one press always reaches the
- * other theme. There is no third state: Immersion Cinema is a dark design, so
- * dark is the default and light is the alternate a learner opts into, rather
- * than either being selected on their behalf by an OS setting. Keyboard
- * accessible via the native `<button>` element.
+ * Until the theme is known on the client — the server render, the hydration
+ * render, and before the provider has read storage — a disabled placeholder of
+ * the same shape renders, so both passes emit the same HTML.
+ *
+ * One press always reaches the other theme. There is no third state:
+ * Immersion Cinema is a dark design, so dark is the default and light is the
+ * alternate a learner opts into.
  */
 export function ThemeToggle() {
   const t = useTranslations("ThemeToggle");
-  const { theme, setTheme } = useTheme();
-  const isHydrated = useIsHydrated();
+  const choice = useThemeChoice();
 
-  if (!isHydrated || theme === undefined) {
+  if (!choice) {
     return (
       <button
         type="button"
         aria-label={t("label")}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-md border border-border bg-foreground/5 px-3 text-xs text-muted-foreground"
+        className={CONTROL_CLASSES}
         disabled
       >
-        …
+        <span
+          aria-hidden="true"
+          className="h-6 w-11 rounded-full border border-border bg-secondary"
+        />
       </button>
     );
   }
 
-  const currentTheme = resolveTheme(theme);
-  const nextTheme: Theme = currentTheme === "dark" ? "light" : "dark";
+  const isDark = choice.currentTheme === "dark";
 
   return (
     <button
       type="button"
-      aria-label={`${t("label")}: ${t(currentTheme)}`}
-      onClick={() => setTheme(nextTheme)}
-      className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-border bg-foreground/5 px-3 text-xs text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+      role="switch"
+      aria-checked={isDark}
+      aria-label={`${t("label")}: ${t(choice.currentTheme)}`}
+      onClick={choice.toggle}
+      className={cn(
+        CONTROL_CLASSES,
+        "cursor-pointer transition-colors hover:text-foreground sm:hover:bg-foreground/10",
+      )}
     >
-      <span aria-hidden="true">◐</span>
-      <span className="hidden sm:inline">{t(currentTheme)}</span>
+      <ThemeSwitchTrack isDark={isDark} />
+      {/* Both names share one grid cell so the chip keeps the width of the
+          longer one and never jumps while the thumb slides. */}
+      <span
+        aria-hidden="true"
+        className="hidden grid-cols-1 grid-rows-1 text-left sm:grid"
+      >
+        <span className={cn("col-start-1 row-start-1", !isDark && "invisible")}>{t("dark")}</span>
+        <span className={cn("col-start-1 row-start-1", isDark && "invisible")}>{t("light")}</span>
+      </span>
     </button>
   );
 }
