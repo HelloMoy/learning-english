@@ -1,38 +1,4 @@
-# Capability: cinema-theme-tokens
-
-## Purpose
-
-Define the "Immersion Cinema" design tokens and the shared presentational primitives that the four locale views (home, course overview, module overview, lesson view) compose. The token layer wires the application's color palette as CSS custom properties in `src/app/globals.css`, exposing a warm light variant on `:root` and a warm dark variant on `.dark`, both derived from the gold/amber hue family. The primitives layer provides reusable, accessible building blocks (`CinemaBackground`, `Brand`, section eyebrow, `PosterCard`, `GoldBadge`, `PlayButton`) so the views compose a coherent cinematic experience without re-implementing its visual language.
-## Requirements
-### Requirement: Immersion Cinema token layer with two accessible variants
-
-The application SHALL define its color tokens as an "Immersion Cinema" palette in `src/app/globals.css`, exposing a warm light variant on `:root` and a warm dark variant on `.dark`, both derived from the gold/amber hue family. The dark variant SHALL use the mockup values (`bg #08080b`, `ink #f4f1ea`, `gold #e7b64c`, `amber #f0c869`). Existing semantic utilities (`bg-background`, `text-foreground`, `text-ink`, `bg-card`, `text-muted-foreground`, `bg-signal-yellow`) SHALL resolve to cinema colors without requiring per-component className changes.
-
-All color pairs used for text SHALL meet WCAG 2.1 AA (≥ 4.5:1 for body text, ≥ 3:1 for large text and non-text UI). Gold accents used as text on light backgrounds SHALL use a darkened bronze token rather than `#e7b64c`.
-
-The dark variant SHALL be the default. A visitor with no stored preference SHALL be served the dark palette, and the application SHALL NOT read the operating system's `prefers-color-scheme` to choose between the variants — Immersion Cinema is a dark design, and the light variant is the alternate a learner opts into rather than one an OS setting selects for them.
-
-The application SHALL recognise exactly two themes, `dark` and `light`. `system` SHALL NOT be a state the application can hold, and SHALL NOT appear in any user-facing copy.
-
-#### Scenario: Dark variant matches the cinema mockup
-- **WHEN** the app renders under the `.dark` theme
-- **THEN** the background resolves to near-black `#08080b`, primary text to cream `#f4f1ea`, and the accent to gold `#e7b64c`/amber `#f0c869`
-
-#### Scenario: Light variant stays contrast-safe
-- **WHEN** the app renders under the light (`:root`) theme
-- **THEN** body text and accent-on-surface pairs meet WCAG AA, using a bronze accent for text rather than the bright amber
-
-#### Scenario: Existing utilities inherit the new palette
-- **WHEN** a component already using `bg-card`/`text-muted-foreground`/`bg-signal-yellow` is rendered
-- **THEN** it displays cinema colors with no change to its className list
-
-#### Scenario: A first-time visitor lands in dark
-- **WHEN** someone opens the app with no theme stored
-- **THEN** the dark variant renders, whatever their operating system prefers
-
-#### Scenario: The OS preference does not override a stored choice
-- **WHEN** a learner has chosen light and their operating system prefers dark
-- **THEN** the app renders light, because the stored choice is the only input
+## MODIFIED Requirements
 
 ### Requirement: Shared Immersion Cinema primitives
 
@@ -76,4 +42,3 @@ Because an earlier build persisted `system` as a theme, the control SHALL treat 
 #### Scenario: The toggle never names a third theme
 - **WHEN** the theme toggle renders in any locale, in either state
 - **THEN** its visible text and its accessible name read either the dark or the light theme's name, and no "system" wording appears
-
