@@ -3,7 +3,7 @@ import { routing } from "@/i18n/routing";
 import { faker } from "@faker-js/faker";
 import { describe, expect, test } from "vitest";
 
-import { shareMetadata } from "./share-metadata";
+import { personalRouteMetadata, shareMetadata } from "./share-metadata";
 
 /**
  * Guards the `site-metadata` capability's "every route publishes Open Graph and
@@ -128,5 +128,37 @@ describe("shareMetadata", () => {
 
     expect(metadata.openGraph).toMatchObject({ type: "website" });
     expect(metadata).not.toHaveProperty("other");
+  });
+});
+
+/**
+ * Guards the `search-discoverability` requirement that personal learner routes
+ * stay out of search, and the `site-metadata` rule that they share the home card.
+ */
+describe("personalRouteMetadata", () => {
+  const aPersonalInput = (overrides: { locale?: string } = {}) =>
+    anInput({ href: "/learning", ...overrides });
+
+  test("asks search engines not to index the route while following its links", () => {
+    const metadata = personalRouteMetadata(aPersonalInput());
+
+    expect(metadata.robots).toEqual({ index: false, follow: true });
+  });
+
+  test("shares the home card for its locale instead of an image of its own", () => {
+    const input = aPersonalInput({ locale: "es" });
+    const metadata = personalRouteMetadata(input);
+
+    const expected = [
+      { url: "/es/opengraph-image", width: 1200, height: 630, alt: input.imageAlt },
+    ];
+    expect(metadata.openGraph).toMatchObject({ images: expected });
+    expect(metadata.twitter).toMatchObject({ images: expected });
+  });
+
+  test("still declares its own canonical URL", () => {
+    const metadata = personalRouteMetadata(aPersonalInput({ locale: "pt" }));
+
+    expect(metadata.alternates?.canonical).toBe("/pt/learning");
   });
 });

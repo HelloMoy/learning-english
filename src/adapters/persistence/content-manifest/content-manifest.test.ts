@@ -78,6 +78,14 @@ describe("contentCatalog", () => {
 
       expect(new Set(ids).size).toBe(ids.length);
     });
+
+    test("WHEN loaded THEN no course is described by the generator's placeholder sentence", () => {
+      const placeholders = contentCatalog.courses.filter((course) =>
+        course.description.startsWith("Course content generated from"),
+      );
+
+      expect(placeholders.map((course) => course.slug)).toEqual([]);
+    });
   });
 });
 

@@ -97,7 +97,7 @@ describe("findCourseCatalog", () => {
     }
   });
 
-  it("previews the course's leading modules in sequence order", async () => {
+  it("projects every module of the course in sequence order", async () => {
     const laterModule = Module.parse({
       id: ModuleId.parse("22222222-2222-4222-8222-222222222223"),
       courseId: course.id,
@@ -120,14 +120,14 @@ describe("findCourseCatalog", () => {
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
-      expect(result.value.entries[0]?.leadingModules.map((m) => m.id)).toEqual([
+      expect(result.value.entries[0]?.modules.map((m) => m.id)).toEqual([
         module_.id,
         laterModule.id,
       ]);
     }
   });
 
-  it("caps the module preview so a ten-module course does not list them all", async () => {
+  it("does not cap the modules, so a ten-module course lists all ten", async () => {
     const modules = Array.from({ length: 10 }, (_, index) =>
       Module.parse({
         id: ModuleId.parse(`22222222-2222-4222-8222-22222222220${index}`),
@@ -147,13 +147,45 @@ describe("findCourseCatalog", () => {
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
-      const leading = result.value.entries[0]?.leadingModules ?? [];
-      expect(leading.length).toBeLessThan(modules.length);
-      expect(leading.map((m) => m.sequence)).toEqual([1, 2, 3]);
+      expect(result.value.entries[0]?.modules.map((m) => m.sequence)).toEqual(
+        modules.map((m) => m.sequence),
+      );
     }
   });
 
-  it("returns an empty module preview when the course has no modules", async () => {
+  it("projects each lesson's id, module and runtime for progress accounting", async () => {
+    const readingLesson = Lesson.parse({
+      kind: "reading",
+      id: LessonId.parse("55555555-5555-4555-8555-555555555555"),
+      courseId: course.id,
+      moduleId: module_.id,
+      sequence: 3,
+      title: "Reading",
+      body: "Body",
+    });
+    const useCase = makeFindCourseCatalog({
+      courses: makeStubCourseRepository({ available: [course] }),
+      modules: makeStubModuleRepository({ listByCourse: { [course.id]: [module_] } }),
+      lessons: makeStubLessonRepository({
+        lessons: [lesson1, readingLesson],
+        listByCourse: { [course.id]: [lesson1, readingLesson] },
+      }),
+    });
+
+    const result = await useCase();
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      // A reading lesson has nothing to watch to the end, so it reports zero —
+      // the same convention `findCourseForView` uses for its lesson runtimes.
+      expect(result.value.entries[0]?.lessonRuntimes).toEqual([
+        { id: lesson1.id, moduleId: module_.id, durationSeconds: 10 },
+        { id: readingLesson.id, moduleId: module_.id, durationSeconds: 0 },
+      ]);
+    }
+  });
+
+  it("returns no modules and no runtimes when the course has none", async () => {
     const useCase = makeFindCourseCatalog({
       courses: makeStubCourseRepository({ available: [course] }),
       modules: makeStubModuleRepository({ listByCourse: { [course.id]: [] } }),
@@ -165,11 +197,12 @@ describe("findCourseCatalog", () => {
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value.entries).toHaveLength(1);
-      expect(result.value.entries[0]?.leadingModules).toEqual([]);
+      expect(result.value.entries[0]?.modules).toEqual([]);
+      expect(result.value.entries[0]?.lessonRuntimes).toEqual([]);
     }
   });
 
-  it("derives the preview from the modules it already loads, without a second call", async () => {
+  it("derives the modules from the ones it already loads, without a second call", async () => {
     let listByCourseCalls = 0;
     const modules = makeStubModuleRepository({ listByCourse: { [course.id]: [module_] } });
     const countingModules = {

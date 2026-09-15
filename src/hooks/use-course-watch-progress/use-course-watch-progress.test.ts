@@ -1,5 +1,9 @@
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Lesson } from "@/domain/entities/lesson/lesson";
+import {
+  toLessonProgressSlice,
+  type LessonProgressSlice,
+} from "@/domain/use-cases/find-course-catalog/find-course-catalog";
 import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
 import { finishThresholdSeconds } from "@/lib/watch-progress/watch-progress";
 
@@ -39,8 +43,11 @@ const makeReadingLesson = (moduleId: ModuleId, sequence: number): Lesson =>
     body: faker.lorem.sentence(),
   });
 
-const makeModuleLessons = (moduleId: ModuleId, lessonCount: number): Lesson[] =>
-  Array.from({ length: lessonCount }, (_, index) => makeVideoLesson(moduleId, index + 1));
+/** A module's video lessons, reduced to the slices the hook counts over. */
+const makeModuleLessons = (moduleId: ModuleId, lessonCount: number): LessonProgressSlice[] =>
+  Array.from({ length: lessonCount }, (_, index) =>
+    toLessonProgressSlice(makeVideoLesson(moduleId, index + 1)),
+  );
 
 const markCompleteInStorage = (lessonId: LessonId): void => {
   window.localStorage.setItem(`learning-english:completed:${lessonId}`, "1");
@@ -98,6 +105,28 @@ describe("useCourseWatchProgress", () => {
       const { result } = renderHook(() => useCourseWatchProgress(lessons));
 
       expect(result.current.completedCount).toBe(0);
+    });
+  });
+
+  describe("GIVEN only the progress slice of each lesson", () => {
+    test("WHEN a lesson was watched to the end THEN it is counted from its runtime alone", () => {
+      // The home receives `{ id, moduleId, durationSeconds }` from the catalog,
+      // not whole lessons, and must count exactly as the outline does.
+      const moduleId = makeModuleId();
+      const slices = [
+        { id: LessonId.parse(faker.string.uuid()), moduleId, durationSeconds: 600 },
+        { id: LessonId.parse(faker.string.uuid()), moduleId, durationSeconds: 600 },
+      ];
+      storePosition(slices[0]!.id, finishThresholdSeconds(600));
+      announceStorageChange();
+
+      const { result } = renderHook(() => useCourseWatchProgress(slices));
+
+      expect(result.current.completedCount).toBe(1);
+      expect(result.current.byModuleId.get(moduleId)).toEqual({
+        completedCount: 1,
+        lessonCount: 2,
+      });
     });
   });
 
@@ -162,7 +191,9 @@ describe("useCourseWatchProgress", () => {
       markCompleteInStorage(marked.id);
       announceStorageChange();
 
-      const { result } = renderHook(() => useCourseWatchProgress([marked, unmarked]));
+      const slices = [marked, unmarked].map(toLessonProgressSlice);
+
+      const { result } = renderHook(() => useCourseWatchProgress(slices));
 
       expect(result.current.completedCount).toBe(1);
       expect(result.current.lessonCount).toBe(2);

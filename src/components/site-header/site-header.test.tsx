@@ -1,8 +1,12 @@
+import { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
 import { useCanInstallToHomeScreen } from "@/hooks/use-can-install-to-home-screen/use-can-install-to-home-screen";
+import { useLearnerProfile } from "@/hooks/use-learner-profile/use-learner-profile";
 import { usePathname } from "@/i18n/navigation";
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { sectionKey, SiteHeader } from "./site-header";
@@ -27,6 +31,10 @@ vi.mock("next-intl", () => ({
   useLocale: vi.fn(() => "en"),
 }));
 
+vi.mock("@/hooks/use-learner-profile/use-learner-profile", () => ({
+  useLearnerProfile: vi.fn(),
+}));
+
 vi.mock("next-themes", () => ({
   useTheme: vi.fn(() => ({ theme: "light", setTheme: vi.fn() })),
 }));
@@ -34,13 +42,31 @@ vi.mock("next-themes", () => ({
 vi.mock("@/i18n/navigation", () => ({
   usePathname: vi.fn(),
   useRouter: vi.fn(() => ({ replace: vi.fn(), push: vi.fn() })),
-  Link: ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
+  // Props are spread so a menu item rendered `asChild` keeps its role on the anchor.
+  Link: ({
+    children,
+    href,
+    ...rest
+  }: { children: React.ReactNode; href: string } & React.ComponentProps<"a">) => (
+    <a
+      href={href}
+      {...rest}
+    >
+      {children}
+    </a>
   ),
 }));
 
 const mockUseTranslations = vi.mocked(useTranslations);
 const mockUsePathname = vi.mocked(usePathname);
+const mockUseLearnerProfile = vi.mocked(useLearnerProfile);
+
+const withoutProfile = { status: "absent", save: vi.fn() } as const;
+
+beforeEach(() => {
+  mockUseTranslations.mockReturnValue(((key: string) => key) as never);
+  mockUseLearnerProfile.mockReturnValue(withoutProfile);
+});
 
 describe("sectionKey", () => {
   describe("GIVEN a lesson route", () => {
@@ -142,6 +168,124 @@ describe("SiteHeader install control", () => {
 
       expect(screen.queryByRole("button", { name: "openGuide" })).not.toBeInTheDocument();
     });
+  });
+});
+
+describe("sectionKey for the learner's own routes", () => {
+  test.each([
+    ["/start", "sectionStart"],
+    ["/start/avatar", "sectionStart"],
+    ["/learning", "sectionLearning"],
+    ["/profile", "sectionProfile"],
+  ])("derives %s → %s", (path, expected) => {
+    expect(sectionKey(path)).toBe(expected);
+  });
+});
+
+describe("SiteHeader learner menu", () => {
+  beforeEach(() => {
+    mockUsePathname.mockReturnValue("/");
+  });
+
+  test("GIVEN no learner profile WHEN rendered THEN no avatar trigger is offered", () => {
+    render(<SiteHeader />);
+
+    expect(screen.queryByRole("button", { name: "learnerMenuLabel" })).not.toBeInTheDocument();
+  });
+
+  test("GIVEN the profile is not known yet WHEN rendered THEN no avatar trigger is offered", () => {
+    mockUseLearnerProfile.mockReturnValue({ status: "unknown", save: vi.fn() });
+
+    render(<SiteHeader />);
+
+    expect(screen.queryByRole("button", { name: "learnerMenuLabel" })).not.toBeInTheDocument();
+  });
+
+  test("GIVEN a learner profile WHEN the avatar is opened THEN it offers My learning and Profile", async () => {
+    const user = userEvent.setup();
+    mockUseLearnerProfile.mockReturnValue({
+      status: "present",
+      profile: LearnerProfile.parse({ name: "Ana García", avatar: { kind: "initials" } }),
+      save: vi.fn(),
+    });
+
+    render(<SiteHeader />);
+    await user.click(screen.getByRole("button", { name: "learnerMenuLabel" }));
+
+    expect(await screen.findByRole("menuitem", { name: "myLearning" })).toHaveAttribute(
+      "href",
+      "/learning",
+    );
+    expect(screen.getByRole("menuitem", { name: "profile" })).toHaveAttribute("href", "/profile");
+  });
+
+  describe("GIVEN a phone-width header with a learner profile", () => {
+    const setTheme = vi.fn();
+
+    beforeEach(() => {
+      setTheme.mockClear();
+      vi.mocked(useTheme).mockReturnValue({ theme: "light", setTheme } as never);
+      mockUseLearnerProfile.mockReturnValue({
+        status: "present",
+        profile: LearnerProfile.parse({ name: "Ana García", avatar: { kind: "initials" } }),
+        save: vi.fn(),
+      });
+    });
+
+    test("WHEN rendered THEN the row's theme toggle is hidden below sm", () => {
+      render(<SiteHeader />);
+
+      expect(screen.getByTestId("header-theme-toggle")).toHaveClass("hidden", "sm:inline-flex");
+    });
+
+    test("WHEN the avatar menu is opened THEN a phone-only theme item toggles the theme", async () => {
+      const user = userEvent.setup();
+      render(<SiteHeader />);
+
+      await user.click(screen.getByRole("button", { name: "learnerMenuLabel" }));
+      const themeItem = await screen.findByRole("menuitem", { name: "label: light" });
+      expect(themeItem).toHaveClass("sm:hidden");
+      await user.click(themeItem);
+
+      await waitFor(() => expect(setTheme).toHaveBeenCalledWith("dark"));
+    });
+
+    test("WHEN the theme item is chosen THEN the menu stays open so the switch's slide is seen", async () => {
+      const user = userEvent.setup();
+      render(<SiteHeader />);
+
+      await user.click(screen.getByRole("button", { name: "learnerMenuLabel" }));
+      await user.click(await screen.findByRole("menuitem", { name: "label: light" }));
+
+      expect(screen.getByRole("menu")).toBeInTheDocument();
+      expect(screen.getByRole("menuitem", { name: "label: dark" })).toBeInTheDocument();
+    });
+
+    test("WHEN the theme item switches THEN both theme names stay laid out so the menu keeps its width", async () => {
+      // jsdom has no layout, so the guard is structural: the item always
+      // renders both names in one cell and only hides the inactive one, which
+      // is what pins its width to the longer name.
+      const user = userEvent.setup();
+      render(<SiteHeader />);
+
+      await user.click(screen.getByRole("button", { name: "learnerMenuLabel" }));
+      const themeItem = await screen.findByRole("menuitem", { name: "label: light" });
+      const nameOf = (theme: string) => within(themeItem).getByText(theme);
+
+      expect(nameOf("light")).not.toHaveClass("invisible");
+      expect(nameOf("dark")).toHaveClass("invisible");
+
+      await user.click(themeItem);
+
+      expect(nameOf("dark")).not.toHaveClass("invisible");
+      expect(nameOf("light")).toHaveClass("invisible");
+    });
+  });
+
+  test("GIVEN no learner profile WHEN rendered THEN the row's theme toggle shows at every width", () => {
+    render(<SiteHeader />);
+
+    expect(screen.getByTestId("header-theme-toggle")).not.toHaveClass("hidden");
   });
 });
 

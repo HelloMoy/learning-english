@@ -7,6 +7,7 @@ import { describe, expect, test } from "vitest";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuItemIndicator,
   DropdownMenuPortal,
   DropdownMenuRadioGroup,
@@ -144,6 +145,36 @@ describe("DropdownMenu", () => {
         "aria-checked",
         "false",
       );
+    });
+  });
+
+  describe("GIVEN a navigation menu of plain items", () => {
+    test("WHEN opened THEN each item is a menuitem that can render as a link", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      render(
+        <DropdownMenu>
+          <DropdownMenuTrigger>Account</DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem asChild>
+              <a href="#learning">My learning</a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a href="#profile">Profile</a>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>,
+      );
+
+      // Act
+      await user.click(screen.getByRole("button", { name: "Account" }));
+
+      // Assert
+      expect(screen.getByRole("menuitem", { name: "My learning" })).toHaveAttribute(
+        "href",
+        "#learning",
+      );
+      expect(screen.getByRole("menuitem", { name: "Profile" })).toHaveAttribute("href", "#profile");
     });
   });
 

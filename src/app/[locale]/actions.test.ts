@@ -86,8 +86,12 @@ describe("findContinueWatchingAction", () => {
 
       // Assert
       expect(result?.data).toEqual({
+        courseSlug: course.slug,
         courseTitle: course.title,
+        moduleId: module_.id,
+        moduleSequence: module_.sequence,
         moduleTitle: module_.title,
+        lessonSequence: videoLesson.sequence,
         lessonTitle: videoLesson.title,
         lessonHref: `/courses/${course.slug}/modules/${module_.slug}/lessons/${videoLesson.id}`,
         durationSeconds: 600,
