@@ -367,9 +367,20 @@
       "moduleNotInCourse": "No encontramos este módulo en el curso.",
       "goHome": "Ir al inicio",
       "backToCourse": "Volver al curso",
-      "moduleLabel": "Lección {number}",
       "videoOrdinal": "Video {number}",
-      "watchVideo": "Ver video"
+      "watchVideo": "Ver video",
+      "moduleEyebrow": "Lección {number} · {courseTitle}",
+      "runtime": "{hours, plural, =0 {{minutes} min} other {# h {minutes} min}}",
+      "stats": "{count, plural, one {# video} other {# videos}} · {runtime}",
+      "youAreHere": "Estás aquí · Video {number}",
+      "continue": "Continuar",
+      "start": "Empezar video",
+      "watchAgain": "Volver a ver",
+      "minutesLeft": "Quedan {minutes} min",
+      "progressHeading": "Tu progreso",
+      "videosFinished": "{finished} de {total} videos",
+      "timeLeft": "Te quedan {runtime}",
+      "moduleCompleted": "Lección completada"
     }
   },
   "PageNotFound": {
