@@ -41,7 +41,7 @@ const ACTION =
 const PRIMARY_ACTION = "bg-primary text-primary-foreground hover:bg-primary/90";
 const QUIET_ACTION = "border border-border bg-foreground/5 text-foreground hover:bg-foreground/10";
 
-/** The panel's own atmosphere, matching `ModuleShowcaseCard`'s glow. */
+/** The panel's own atmosphere: a warm bloom from the upper left into the page background. */
 const IN_PROGRESS_GLOW =
   "radial-gradient(90% 160% at 4% 0%, color-mix(in oklab, var(--glow) 34%, var(--background)), var(--background) 68%)";
 
@@ -60,7 +60,7 @@ const IN_PROGRESS_GLOW =
  * ordinals rendered outside the title survive its truncation
  * (`course-vocabulary` § "Content ordering is stated, not implied").
  *
- * Like `ModuleShowcaseCard`, the card is a plain container with links to the
+ * The card is a plain container with links to the
  * course inside it rather than one wrapping link, so its accessible name stays
  * the course title instead of swallowing the description, the module list and
  * every badge.

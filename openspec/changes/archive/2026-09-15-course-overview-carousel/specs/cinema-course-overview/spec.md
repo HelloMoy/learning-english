@@ -1,9 +1,5 @@
-# Capability: cinema-course-overview
+## ADDED Requirements
 
-## Purpose
-
-Define the Immersion Cinema presentation of the course overview route (`/[locale]/courses/[courseSlug]`). The course is presented as a numbered index of its modules: a course header with gold count pills, then one full-width showcase card per module, each preceded by its ordinal. A card pairs the module's title, an explicit video count and duration, and a call to action with a receding gallery of that module's leading lesson artwork, so a module reads as a container of several videos rather than as one video to play. A primary "Start course" action targets the deterministic first lesson. Neither the earlier interactive practice track nor the poster grid that replaced it remains in this view.
-## Requirements
 ### Requirement: The course overview opens with a compact hero that carries Start course
 
 The course overview (`/[locale]/courses/[courseSlug]`) SHALL open with a hero presenting a
@@ -164,3 +160,16 @@ an Open lesson action, with the ring track unfilled.
 - **WHEN** the locale is `es` or `pt`
 - **THEN** every panel and carousel string renders from the matching message file
 
+## REMOVED Requirements
+
+### Requirement: Course overview renders modules as showcase cards
+**Reason**: Replaced by the poster carousel (J3) and the progress panel (K3) after design review.
+**Migration**: See "Modules are presented as a poster carousel with one selected module" and "A progress panel invites the learner into the selected module".
+
+### Requirement: Showcase cards report how far the learner has got through the module
+**Reason**: The showcase card no longer exists; module progress is shown by the panel's ring for the selected module.
+**Migration**: See "A progress panel invites the learner into the selected module".
+
+### Requirement: A showcase card is clickable across its whole area
+**Reason**: A module is now opened from the selected poster in the carousel, or from the panel's actions.
+**Migration**: See "Modules are presented as a poster carousel with one selected module".

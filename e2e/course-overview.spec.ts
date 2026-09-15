@@ -1,108 +1,188 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
-import { modulesOfCourse } from "./content-seed-fixtures";
+import { lessonsOfModule, modulesOfCourse } from "./content-seed-fixtures";
 
 /**
- * E2E coverage for the course overview's module showcase (capabilities:
- * `cinema-course-overview`, `course-vocabulary`).
+ * E2E coverage for the course overview's hero, poster carousel and progress
+ * panel (capabilities: `cinema-course-overview`, `course-vocabulary`).
  *
- * These assertions are deliberately the ones jsdom cannot make. The
- * component tests already cover structure and accessibility against mocked
- * translations; what only a real browser can confirm is that the deck
- * artwork actually loads — a broken `BlobStore` URL renders an `<img>` that
- * jsdom is perfectly happy with and a learner sees as an empty box.
+ * These are the assertions jsdom cannot make: that poster artwork actually
+ * loads, that navigation lands on real routes, that progress saved in this
+ * browser's storage drives the panel after hydration, and that the layout
+ * neither overlaps the title nor widens the page on a phone.
  */
-const COURSE_SLUG = "advanced-intermediate-course";
+const COURSE_SLUG = "basic-course";
 const MODULES = modulesOfCourse(COURSE_SLUG);
-const MODULE_COUNT = MODULES.length;
-const FIRST_MODULE = MODULES[0]!;
+const COMPLETED_KEY_PREFIX = "learning-english:completed:";
 
-function courseUrl(locale: string): string {
-  return `/${locale}/courses/${COURSE_SLUG}`;
-}
+/** Compiling a route on a cold `pnpm dev` overruns the default 5s timeout. */
+const COLD_ROUTE = { timeout: 60_000 };
 
-test.describe("Course overview module showcase", () => {
-  test("WHEN the course overview is visited THEN one numbered showcase card renders per module", async ({
-    page,
-  }) => {
-    await page.goto(courseUrl("en"));
+const courseUrl = (locale: string) => `/${locale}/courses/${COURSE_SLUG}`;
+const moduleUrl = (moduleSlug: string) => `/en/courses/${COURSE_SLUG}/modules/${moduleSlug}`;
 
-    await expect(page.getByTestId("course-module-list")).toBeVisible();
-    const ordinals = page.getByTestId("module-showcase-ordinal");
-    await expect(ordinals).toHaveCount(MODULE_COUNT);
+const indexOfFirstModuleWith = (predicate: (lessonCount: number) => boolean) =>
+  MODULES.findIndex((module) => predicate(lessonsOfModule(module.id).length));
 
-    // The ordinals must ascend — the page's whole job is to read as an index.
-    const texts = await ordinals.allInnerTexts();
-    const numbers = texts.map((text) => Number(text.replace(/\D+/g, "")));
-    expect(numbers).toEqual(Array.from({ length: MODULE_COUNT }, (_, index) => index + 1));
-  });
+const dot = (page: Page, index: number) => page.getByTestId("carousel-dot").nth(index);
+const selectedPoster = (page: Page) => page.locator('a[data-testid="carousel-poster"]');
 
-  test("WHEN a card's call to action is activated THEN its module overview opens", async ({
-    page,
-  }) => {
-    await page.goto(courseUrl("en"));
+test.describe("Course overview", () => {
+  test.describe("GIVEN a learner with no progress on this device", () => {
+    test("WHEN the page renders THEN the selected poster's artwork loads", async ({ page }) => {
+      // Act
+      await page.goto(courseUrl("en"));
 
-    await page.getByTestId("module-showcase-cta").first().click();
-    // Generous timeout: against `pnpm dev` the first hit of the module route
-    // pays for compiling it, which overruns the default 5s expect timeout on
-    // a cold server even though the navigation itself is immediate.
-    await page.waitForURL(new RegExp(`/en/courses/${COURSE_SLUG}/modules/`), { timeout: 60_000 });
-    await expect(page.getByTestId("module-overview")).toBeVisible({ timeout: 60_000 });
-  });
+      // Assert
+      const image = selectedPoster(page).locator("img").first();
+      await expect
+        .poll(() => image.evaluate((node) => (node as HTMLImageElement).naturalWidth), COLD_ROUTE)
+        .toBeGreaterThan(0);
+    });
 
-  test("WHEN the deck renders THEN its artwork actually loads", async ({ page }) => {
-    await page.goto(courseUrl("en"));
-
-    const firstDeck = page.getByTestId("module-showcase-deck").first();
-    await expect(firstDeck).toBeVisible();
-
-    const images = firstDeck.locator("img");
-    await expect(images.first()).toBeVisible();
-
-    // `naturalWidth` is zero for an image that 404s. jsdom reports zero for
-    // every image, which is why this assertion has to live in a real browser.
-    const widths = await images.evaluateAll((nodes) =>
-      nodes.map((node) => (node as HTMLImageElement).naturalWidth),
-    );
-    expect(widths.length).toBeGreaterThan(0);
-    for (const width of widths) expect(width).toBeGreaterThan(0);
-  });
-
-  test("WHEN a module holds more lessons than the deck shows THEN the remainder is disclosed", async ({
-    page,
-  }) => {
-    await page.goto(courseUrl("en"));
-
-    // Module 7 holds 31 lessons against a deck of 6, so at least one card
-    // must disclose a remainder.
-    await expect(page.getByTestId("module-showcase-remainder").first()).toBeVisible();
-  });
-
-  for (const locale of ["en", "es"]) {
-    test(`WHEN the overview renders in ${locale} THEN no retired season or episode vocabulary appears`, async ({
+    test("WHEN the next arrow is pressed THEN the second module becomes selected", async ({
       page,
     }) => {
-      await page.goto(courseUrl(locale));
-      await expect(page.getByTestId("course-module-list")).toBeVisible();
+      // Arrange
+      await page.goto(courseUrl("en"));
+      await expect(dot(page, 0)).toHaveAttribute("aria-current", "true", COLD_ROUTE);
 
-      const text = (await page.getByTestId("course-overview").innerText()).toLowerCase();
-      for (const retired of ["season", "temporada", "episode", "episodio"]) {
-        expect(text, `"${retired}" should be gone from the ${locale} overview`).not.toContain(
-          retired,
-        );
-      }
+      // Act
+      await page.getByRole("button", { name: "Next lesson" }).click();
+
+      // Assert
+      await expect(dot(page, 1)).toHaveAttribute("aria-current", "true");
+    });
+
+    test("WHEN the selected poster of a module with several videos is clicked THEN its module overview opens", async ({
+      page,
+    }) => {
+      // Arrange
+      const index = indexOfFirstModuleWith((count) => count > 1);
+      await page.goto(courseUrl("en"));
+      await dot(page, index).click(COLD_ROUTE);
+
+      // Act
+      await selectedPoster(page).click();
+
+      // Assert
+      await page.waitForURL(`**${moduleUrl(MODULES[index]!.slug)}`, COLD_ROUTE);
+    });
+
+    test("WHEN the selected poster of a one-video module is clicked THEN that video opens", async ({
+      page,
+    }) => {
+      // Arrange
+      const index = indexOfFirstModuleWith((count) => count === 1);
+      const onlyLesson = lessonsOfModule(MODULES[index]!.id)[0]!;
+      await page.goto(courseUrl("en"));
+      await dot(page, index).click(COLD_ROUTE);
+
+      // Act
+      await selectedPoster(page).click();
+
+      // Assert
+      await page.waitForURL(
+        `**${moduleUrl(MODULES[index]!.slug)}/lessons/${onlyLesson.id}`,
+        COLD_ROUTE,
+      );
+    });
+
+    test("WHEN Start this lesson is activated in the panel THEN the module's first video opens", async ({
+      page,
+    }) => {
+      // Arrange
+      const index = indexOfFirstModuleWith((count) => count > 1);
+      const firstVideo = lessonsOfModule(MODULES[index]!.id)[0]!;
+      await page.goto(courseUrl("en"));
+      await dot(page, index).click(COLD_ROUTE);
+
+      // Act
+      await page
+        .getByTestId("lesson-progress-panel")
+        .getByRole("link", { name: "Start this lesson" })
+        .click();
+
+      // Assert
+      await page.waitForURL(
+        `**${moduleUrl(MODULES[index]!.slug)}/lessons/${firstVideo.id}`,
+        COLD_ROUTE,
+      );
+    });
+
+    for (const locale of ["en", "es"]) {
+      test(`WHEN the page renders in ${locale} THEN no retired season OR episode vocabulary appears`, async ({
+        page,
+      }) => {
+        // Act
+        await page.goto(courseUrl(locale));
+        await expect(page.getByTestId("course-overview")).toBeVisible(COLD_ROUTE);
+
+        // Assert
+        const text = (await page.getByTestId("course-overview").innerText()).toLowerCase();
+        for (const retired of ["season", "temporada", "episode", "episodio"]) {
+          expect(text, `"${retired}" should be gone from the ${locale} overview`).not.toContain(
+            retired,
+          );
+        }
+      });
+    }
+  });
+
+  test.describe("GIVEN a learner part-way through a module", () => {
+    test("WHEN the page hydrates THEN that module is selected AND the panel offers to continue its first unfinished video", async ({
+      page,
+    }) => {
+      // Arrange
+      const index = indexOfFirstModuleWith((count) => count > 4);
+      const lessons = lessonsOfModule(MODULES[index]!.id);
+      const completedKeys = lessons
+        .slice(0, 3)
+        .map((lesson) => `${COMPLETED_KEY_PREFIX}${lesson.id}`);
+      await page.addInitScript((keys) => {
+        for (const key of keys) window.localStorage.setItem(key, "1");
+      }, completedKeys);
+
+      // Act
+      await page.goto(courseUrl("en"));
+
+      // Assert
+      await expect(dot(page, index)).toHaveAttribute("aria-current", "true", COLD_ROUTE);
+      const panel = page.getByTestId("lesson-progress-panel");
+      await expect(panel).toHaveAttribute("data-state", "in-progress");
+      await expect(panel).toContainText(`Pick up ${lessons[3]!.title}`);
+      await expect(panel.getByRole("link", { name: "Continue" })).toHaveAttribute(
+        "href",
+        `${moduleUrl(MODULES[index]!.slug)}/lessons/${lessons[3]!.id}`,
+      );
+    });
+  });
+
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 844 },
+  ]) {
+    test.describe(`GIVEN a ${viewport.width}px-wide viewport`, () => {
+      test.use({ viewport });
+
+      test("WHEN the page renders THEN the meta line sits below the title AND the page does NOT scroll sideways", async ({
+        page,
+      }) => {
+        // Act
+        await page.goto(courseUrl("en"));
+        const title = page.getByRole("heading", { level: 1 });
+        await expect(title).toBeVisible(COLD_ROUTE);
+
+        // Assert
+        const titleBox = (await title.boundingBox())!;
+        const metaBox = (await page.getByTestId("course-hero-meta").boundingBox())!;
+        expect(metaBox.y).toBeGreaterThanOrEqual(titleBox.y + titleBox.height - 1);
+        const overflow = await page.evaluate(() => ({
+          scrollWidth: document.documentElement.scrollWidth,
+          clientWidth: document.documentElement.clientWidth,
+        }));
+        expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.clientWidth);
+      });
     });
   }
-
-  test("WHEN the first module's card renders THEN it names that module and links to it", async ({
-    page,
-  }) => {
-    await page.goto(courseUrl("en"));
-
-    const link = page.getByRole("link", { name: FIRST_MODULE.title }).first();
-    await expect(link).toHaveAttribute(
-      "href",
-      `/en/courses/${COURSE_SLUG}/modules/${FIRST_MODULE.slug}`,
-    );
-  });
 });

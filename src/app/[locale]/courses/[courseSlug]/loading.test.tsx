@@ -18,25 +18,22 @@ const renderShell = () =>
 
 describe("Course overview loading shell", () => {
   describe("GIVEN a navigation to a course whose payload has not arrived", () => {
-    test("WHEN the shell renders THEN it carries the course overview's landmarks", () => {
+    test("WHEN the shell renders THEN it traces the hero, the carousel AND the progress panel", () => {
       // Act
       renderShell();
 
       // Assert
-      expect(document.querySelector('[data-testid="course-shell-header"]')).toBeInTheDocument();
-      expect(document.querySelector('[data-testid="course-shell-modules"]')).toBeInTheDocument();
+      expect(screen.getByTestId("course-shell-hero")).toBeInTheDocument();
+      expect(screen.getByTestId("course-shell-carousel")).toBeInTheDocument();
+      expect(screen.getByTestId("course-shell-panel")).toBeInTheDocument();
     });
 
-    test("WHEN the shell renders THEN it previews more than one module", () => {
+    test("WHEN the shell renders THEN the carousel previews a selected poster between neighbours", () => {
       // Act
       renderShell();
 
       // Assert
-      // A single card would under-fill the page and let the real list push the
-      // fold down as it arrives, which is the shift the shell exists to absorb.
-      expect(
-        document.querySelectorAll('[data-testid="course-shell-module-card"]').length,
-      ).toBeGreaterThan(1);
+      expect(screen.getAllByTestId("course-shell-poster").length).toBeGreaterThanOrEqual(3);
     });
 
     test("WHEN the shell renders THEN it announces once and its shapes stay silent", () => {
@@ -45,10 +42,7 @@ describe("Course overview loading shell", () => {
 
       // Assert
       expect(screen.getAllByRole("status")).toHaveLength(1);
-      expect(document.querySelector('[data-testid="course-shell-shapes"]')).toHaveAttribute(
-        "aria-hidden",
-        "true",
-      );
+      expect(screen.getByTestId("course-shell-shapes")).toHaveAttribute("aria-hidden", "true");
     });
   });
 });

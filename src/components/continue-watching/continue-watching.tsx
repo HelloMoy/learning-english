@@ -19,7 +19,7 @@ import { Play } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
-/** The card's own atmosphere, matching `ModuleShowcaseCard`'s glow. */
+/** The card's own atmosphere: a warm bloom from the upper left into the page background. */
 const PANEL_GLOW =
   "radial-gradient(90% 160% at 4% 0%, color-mix(in oklab, var(--glow) 34%, var(--background)), var(--background) 68%)";
 

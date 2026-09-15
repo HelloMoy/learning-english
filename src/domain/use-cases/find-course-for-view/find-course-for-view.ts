@@ -11,60 +11,40 @@ import { err, ok, Result, ResultAsync } from "@/domain/result/result";
 import type { FindCourseForViewErrors } from "./find-course-for-view.errors";
 
 /**
- * How many of a module's lessons a summary carries in `leadingLessons`.
+ * One lesson as the course overview sees it: its position in the module, its
+ * title, its runtime and its artwork, and nothing more.
  *
- * The cap lives here rather than in the view so a module holding 31 lessons
- * cannot have all of them projected into one card. The course overview shows
- * a bounded preview and discloses the remainder from `lessonCount`.
+ * @remarks
+ * `durationSeconds` is zero for reading lessons, which have no runtime, so
+ * completion can still be derived from a saved playback position measured
+ * against it. `poster` is absent — not `undefined` — for reading lessons,
+ * whose schema has no such field.
  */
-export const LEADING_LESSONS_CAP = 6;
-
-/**
- * The slice of a Lesson a course-overview card needs: its position in the
- * module and its artwork, and nothing more.
- *
- * `poster` is absent — not `undefined` — for reading lessons, whose schema
- * has no such field.
- */
-export type LeadingLesson = {
+export type ModuleLesson = {
   id: LessonId;
   sequence: number;
   title: string;
+  durationSeconds: number;
   poster?: string;
 };
 
 /**
- * One lesson reduced to what progress accounting needs: which lesson it is,
- * and how long it runs.
- *
- * @remarks
- * Distinct from {@link LeadingLesson}, which is bounded by
- * {@link LEADING_LESSONS_CAP} because it feeds a *preview*. A progress meter
- * counts the whole module, so this list is deliberately uncapped — and it
- * carries the runtime because completion is derived from a saved playback
- * position measured against it.
- *
- * A lesson with no runtime — every reading lesson — reports zero, so the
- * entries and the module's `lessonCount` always agree.
+ * What progress accounting needs of a lesson: which lesson it is, and how long
+ * it runs. Any {@link ModuleLesson} satisfies it.
  */
-export type LessonRuntime = {
-  id: LessonId;
-  durationSeconds: number;
-};
+export type LessonRuntime = Pick<ModuleLesson, "id" | "durationSeconds">;
 
 /**
  * What a course overview needs to know about one module without opening it:
- * how many lessons it holds, how long they run in total, enough of the
- * leading ones to show that the module is a container rather than a video,
- * and the id and runtime of every lesson so the card can report how far the
- * learner has got.
+ * how many lessons it holds, how long they run in total, and every lesson in
+ * `sequence` order — enough to preview the module's artwork, count how far the
+ * learner has got across all of it, and name whichever lesson comes next.
  */
 export type ModuleSummary = {
   moduleId: ModuleId;
   lessonCount: number;
   totalDurationSeconds: number;
-  leadingLessons: LeadingLesson[];
-  lessonRuntimes: LessonRuntime[];
+  lessons: ModuleLesson[];
 };
 
 export type CourseForView = {
@@ -86,15 +66,11 @@ const toInternalError = (cause: unknown): FindCourseForViewErrors => ({
 
 const bySequence = <T extends { sequence: number }>(a: T, b: T): number => a.sequence - b.sequence;
 
-const toLessonRuntime = (lesson: Lesson): LessonRuntime => ({
-  id: lesson.id,
-  durationSeconds: lesson.kind === "video" ? lesson.durationSeconds : 0,
-});
-
-const toLeadingLesson = (lesson: Lesson): LeadingLesson => ({
+const toModuleLesson = (lesson: Lesson): ModuleLesson => ({
   id: lesson.id,
   sequence: lesson.sequence,
   title: lesson.title,
+  durationSeconds: lesson.kind === "video" ? lesson.durationSeconds : 0,
   // An absent poster stays absent rather than becoming `poster: undefined`,
   // so the optional field is genuinely optional for consumers. Reading
   // lessons have no such field at all.
@@ -126,8 +102,7 @@ const summarizeModules = (
         (total, lesson) => total + (lesson.kind === "video" ? lesson.durationSeconds : 0),
         0,
       ),
-      leadingLessons: moduleLessons.slice(0, LEADING_LESSONS_CAP).map(toLeadingLesson),
-      lessonRuntimes: moduleLessons.map(toLessonRuntime),
+      lessons: moduleLessons.map(toModuleLesson),
     };
   });
 };

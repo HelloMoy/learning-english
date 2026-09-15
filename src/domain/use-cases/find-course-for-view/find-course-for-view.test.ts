@@ -2,10 +2,7 @@ import { Course } from "@/domain/entities/course/course";
 import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
 import { Slug } from "@/domain/entities/slug/slug";
-import {
-  LEADING_LESSONS_CAP,
-  makeFindCourseForView,
-} from "@/domain/use-cases/find-course-for-view/find-course-for-view";
+import { makeFindCourseForView } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
 import {
   makeStubCourseRepository,
   makeStubLessonRepository,
@@ -55,6 +52,17 @@ const lessonB = Lesson.parse({
   sequence: 2,
   title: "Lesson B",
 });
+
+const readingLesson = (sequence: number) =>
+  Lesson.parse({
+    kind: "reading",
+    id: "77777777-7777-4777-8777-777777777777",
+    courseId: course.id,
+    moduleId: mod1.id,
+    sequence,
+    title: "Reading lesson",
+    body: "Body",
+  });
 
 /** `Lesson.parse` returns the union, so narrow before reading a video field. */
 const durationOf = (lesson: Lesson): number =>
@@ -149,21 +157,12 @@ describe("findCourseForView", () => {
         moduleId: mod2.id,
         lessonCount: 0,
         totalDurationSeconds: 0,
-        leadingLessons: [],
-        lessonRuntimes: [],
+        lessons: [],
       });
     });
 
     it("excludes reading lessons from the duration but not from the count", async () => {
-      const reading = Lesson.parse({
-        kind: "reading",
-        id: "77777777-7777-4777-8777-777777777777",
-        courseId: course.id,
-        moduleId: mod1.id,
-        sequence: 3,
-        title: "Reading lesson",
-        body: "Body",
-      });
+      const reading = readingLesson(3);
       const useCase = makeFindCourseForView({
         courses: makeStubCourseRepository({ bySlugMap: { "course-1": course } }),
         modules: makeStubModuleRepository({ listByCourse: { [course.id]: [mod1] } }),
@@ -177,22 +176,24 @@ describe("findCourseForView", () => {
       const [summary] = result.value.moduleSummaries;
       expect(summary?.lessonCount).toBe(3);
       expect(summary?.totalDurationSeconds).toBe(durationOf(lessonA) + durationOf(lessonB));
-      expect(summary?.leadingLessons[2]).toEqual({
+      expect(summary?.lessons[2]).toEqual({
         id: reading.id,
         sequence: 3,
         title: "Reading lesson",
+        durationSeconds: 0,
       });
-      expect(summary?.leadingLessons[2]).not.toHaveProperty("poster");
+      expect(summary?.lessons[2]).not.toHaveProperty("poster");
     });
 
-    it("caps leading lessons and keeps them in sequence order with their poster", async () => {
-      const many = Array.from({ length: LEADING_LESSONS_CAP + 4 }, (_, index) =>
+    it("lists every lesson in sequence order with its title, runtime and poster, uncapped", async () => {
+      const many = Array.from({ length: 31 }, (_, index) =>
         Lesson.parse({
           ...lessonA,
           id: `88888888-8888-4888-8888-${String(index).padStart(12, "0")}`,
           moduleId: mod1.id,
           sequence: index + 1,
           title: `Lesson ${index + 1}`,
+          durationSeconds: (index + 1) * 10,
           poster: `/local-filesystem-lesson/poster-${index + 1}.jpeg`,
         }),
       );
@@ -205,55 +206,20 @@ describe("findCourseForView", () => {
       expect(result.isOk()).toBe(true);
       if (!result.isOk()) return;
       const [summary] = result.value.moduleSummaries;
-      expect(summary?.lessonCount).toBe(LEADING_LESSONS_CAP + 4);
-      expect(summary?.leadingLessons).toHaveLength(LEADING_LESSONS_CAP);
-      expect(summary?.leadingLessons.map((lesson) => lesson.sequence)).toEqual([1, 2, 3, 4, 5, 6]);
-      expect(summary?.leadingLessons[0]).toEqual({
-        id: many[0]?.id,
-        sequence: 1,
-        title: "Lesson 1",
-        poster: "/local-filesystem-lesson/poster-1.jpeg",
-      });
-    });
-
-    it("reports every lesson's runtime, not only the ones the preview shows", async () => {
-      // The card previews six lessons but its progress meter counts all of
-      // them, so the runtimes must run past the cap the preview obeys.
-      const many = Array.from({ length: LEADING_LESSONS_CAP + 4 }, (_, index) =>
-        Lesson.parse({
-          ...lessonA,
-          id: `99999999-9999-4999-8999-${String(index).padStart(12, "0")}`,
-          moduleId: mod1.id,
+      expect(summary?.lessonCount).toBe(31);
+      expect(summary?.lessons).toEqual(
+        many.map((lesson, index) => ({
+          id: lesson.id,
           sequence: index + 1,
           title: `Lesson ${index + 1}`,
-          durationSeconds: (index + 1) * 10,
-        }),
-      );
-      const useCase = makeFindCourseForView({
-        courses: makeStubCourseRepository({ bySlugMap: { "course-1": course } }),
-        modules: makeStubModuleRepository({ listByCourse: { [course.id]: [mod1] } }),
-        lessons: makeStubLessonRepository({ listByCourse: { [course.id]: [...many].reverse() } }),
-      });
-      const result = await useCase({ courseSlug: Slug.parse("course-1") });
-      expect(result.isOk()).toBe(true);
-      if (!result.isOk()) return;
-      const [summary] = result.value.moduleSummaries;
-      expect(summary?.lessonRuntimes).toHaveLength(LEADING_LESSONS_CAP + 4);
-      expect(summary?.lessonRuntimes).toEqual(
-        many.map((lesson) => ({ id: lesson.id, durationSeconds: durationOf(lesson) })),
+          durationSeconds: durationOf(lesson),
+          poster: `/local-filesystem-lesson/poster-${index + 1}.jpeg`,
+        })),
       );
     });
 
-    it("reports a runtime of zero for a lesson that has none", async () => {
-      const reading = Lesson.parse({
-        kind: "reading",
-        id: "77777777-7777-4777-8777-777777777777",
-        courseId: course.id,
-        moduleId: mod1.id,
-        sequence: 3,
-        title: "Reading lesson",
-        body: "Body",
-      });
+    it("reports a runtime of zero for a lesson that has none, keeping count and list in agreement", async () => {
+      const reading = readingLesson(3);
       const useCase = makeFindCourseForView({
         courses: makeStubCourseRepository({ bySlugMap: { "course-1": course } }),
         modules: makeStubModuleRepository({ listByCourse: { [course.id]: [mod1] } }),
@@ -265,10 +231,8 @@ describe("findCourseForView", () => {
       expect(result.isOk()).toBe(true);
       if (!result.isOk()) return;
       const [summary] = result.value.moduleSummaries;
-      // The count and the runtimes must agree, or the meter's denominator
-      // would disagree with the card's own "N videos" line.
-      expect(summary?.lessonRuntimes).toHaveLength(summary?.lessonCount ?? 0);
-      expect(summary?.lessonRuntimes[2]).toEqual({ id: reading.id, durationSeconds: 0 });
+      expect(summary?.lessons).toHaveLength(summary?.lessonCount ?? 0);
+      expect(summary?.lessons[2]?.durationSeconds).toBe(0);
     });
 
     it("derives every summary from a single lessons fetch", async () => {
