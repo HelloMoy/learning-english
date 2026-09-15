@@ -54,6 +54,7 @@ test.describe("Landing", () => {
   test("WHEN a learner who opened a lesson returns THEN the landing is still the landing", async ({
     page,
   }) => {
+    await withProfile(page);
     await page.goto(FIRST_LESSON_URL);
     await expect(page.getByRole("heading", { name: FIRST_LESSON.title })).toBeVisible(COLD_ROUTE);
 

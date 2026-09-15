@@ -10,6 +10,7 @@ import {
 import type { LearnerProfileRepository } from "@/domain/ports/learner-profile-repository/learner-profile-repository";
 import { useLearnerProfile } from "@/hooks/use-learner-profile/use-learner-profile";
 import { useLearnerRedirect } from "@/hooks/use-learner-redirect/use-learner-redirect";
+import { useOnboardingDestinations } from "@/hooks/use-onboarding-destinations/use-onboarding-destinations";
 import { useRouter } from "@/i18n/navigation";
 
 import { ArrowRight } from "lucide-react";
@@ -26,9 +27,10 @@ const INITIALS: LearnerAvatar = { kind: "initials" };
  * profile, so a learner who leaves before step 2 still has a card — and opens
  * step 2.
  *
- * A device that already holds a profile is forwarded to My learning. Saving
- * creates exactly such a profile, so the forward stands down once the learner
- * has submitted.
+ * A device that already holds a profile is forwarded to where the onboarding
+ * ends: the course route named in `next`, or My learning. Saving creates
+ * exactly such a profile, so the forward stands down once the learner has
+ * submitted. Step 2 opens carrying the same `next`.
  *
  * @param profiles - Overrides the profile storage adapter; tests inject a stub
  * @param level - The level line the card shows
@@ -46,9 +48,13 @@ export function OnboardingNameStep({
   const t = useTranslations("Onboarding");
   const learner = useLearnerProfile(profiles);
   const router = useRouter();
+  const destinations = useOnboardingDestinations();
   const [name, setName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  useLearnerRedirect(isSaving ? "unknown" : learner.status, { when: "present", to: "/learning" });
+  useLearnerRedirect(isSaving ? "unknown" : learner.status, {
+    when: "present",
+    to: destinations.afterOnboarding,
+  });
 
   if (learner.status === "unknown" || (learner.status === "present" && !isSaving)) {
     return <OnboardingShell />;
@@ -61,7 +67,7 @@ export function OnboardingNameStep({
     if (!hasName) return;
     setIsSaving(true);
     const isSaved = await learner.save({ name, avatar: INITIALS });
-    if (isSaved) router.push("/start/avatar");
+    if (isSaved) router.push(destinations.avatarStep);
     else setIsSaving(false);
   };
 

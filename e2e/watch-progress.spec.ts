@@ -2,9 +2,10 @@ import { contentCatalog } from "@/adapters/persistence/content-manifest/content-
 import type { VideoLesson } from "@/domain/entities/lesson/lesson";
 import { finishThresholdSeconds } from "@/lib/watch-progress/watch-progress";
 
-import { expect, test, type BrowserContext, type Page } from "@playwright/test";
+import { type BrowserContext, type Page } from "@playwright/test";
 
 import { modulesOfCourse } from "./content-seed-fixtures";
+import { expect, seedLearnerProfile, test } from "./learner-profile-fixture";
 
 /**
  * E2E tests for the `watch-progress` capability.
@@ -78,6 +79,8 @@ async function seedPositions(context: BrowserContext) {
       ],
     ],
   );
+  // After the clear, so the wipe does not take the learner card with it.
+  await seedLearnerProfile(context);
 }
 
 /** The row for one lesson in the module overview's video list. */
@@ -139,6 +142,7 @@ test.describe("watch progress", () => {
         // ignore
       }
     });
+    await seedLearnerProfile(context);
 
     await page.goto(courseUrl("en"));
     await expect(page.getByTestId("course-overview")).toBeVisible();

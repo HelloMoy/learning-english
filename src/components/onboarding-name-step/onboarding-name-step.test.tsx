@@ -1,15 +1,19 @@
 import { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
 import { useRouter } from "@/i18n/navigation";
-import { renderInLocale } from "@/test-setup/render-in-locale";
+import { renderInLocale, type TestLocale } from "@/test-setup/render-in-locale";
 import { makeStubLearnerProfileRepository } from "@/test-setup/stubs/domain-repos";
 
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { OnboardingNameStep } from "./onboarding-name-step";
 
 const level = { number: 1, courseTitle: "Basic Course" };
+
+const courseReturnPath = "/courses/basics/modules/vowels";
+const nextQuery = `?next=${encodeURIComponent(courseReturnPath)}`;
 
 const router = { replace: vi.fn(), push: vi.fn() };
 
@@ -19,13 +23,23 @@ beforeEach(() => {
   vi.mocked(useRouter).mockReturnValue(router as never);
 });
 
-const renderStep = (profiles = makeStubLearnerProfileRepository(), locale?: "en" | "es" | "pt") =>
+const renderStep = ({
+  profiles = makeStubLearnerProfileRepository(),
+  locale,
+  searchParams = "",
+}: {
+  profiles?: ReturnType<typeof makeStubLearnerProfileRepository>;
+  locale?: TestLocale;
+  searchParams?: string;
+} = {}) =>
   renderInLocale(
-    <OnboardingNameStep
-      profiles={profiles}
-      level={level}
-      videoCount={48}
-    />,
+    <NuqsTestingAdapter searchParams={searchParams}>
+      <OnboardingNameStep
+        profiles={profiles}
+        level={level}
+        videoCount={48}
+      />
+    </NuqsTestingAdapter>,
     locale,
   );
 
@@ -39,9 +53,20 @@ describe("OnboardingNameStep", () => {
   test("WHEN the device already has a profile THEN the learner is sent to My learning", async () => {
     const profile = LearnerProfile.parse({ name: "Ana", avatar: { kind: "initials" } });
 
-    renderStep(makeStubLearnerProfileRepository({ profile }));
+    renderStep({ profiles: makeStubLearnerProfileRepository({ profile }) });
 
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/learning"));
+  });
+
+  test("WHEN the device already has a profile and a course route is waiting THEN the learner is sent to it", async () => {
+    const profile = LearnerProfile.parse({ name: "Ana", avatar: { kind: "initials" } });
+
+    renderStep({
+      profiles: makeStubLearnerProfileRepository({ profile }),
+      searchParams: nextQuery,
+    });
+
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith(courseReturnPath));
   });
 
   describe("GIVEN a device without a profile", () => {
@@ -80,7 +105,7 @@ describe("OnboardingNameStep", () => {
     test("WHEN Continue is pressed THEN the name is saved with initials and step two opens", async () => {
       const user = userEvent.setup();
       const profiles = makeStubLearnerProfileRepository();
-      renderStep(profiles);
+      renderStep({ profiles });
 
       await user.type(await screen.findByRole("textbox", { name: "Your name" }), " Ana García ");
       await user.click(screen.getByRole("button", { name: "Continue" }));
@@ -90,10 +115,20 @@ describe("OnboardingNameStep", () => {
       // Saving creates the profile, which must not trip the "already onboarded" redirect.
       expect(router.replace).not.toHaveBeenCalled();
     });
+
+    test("WHEN Continue is pressed with a course route waiting THEN step two opens carrying it", async () => {
+      const user = userEvent.setup();
+      renderStep({ searchParams: nextQuery });
+
+      await user.type(await screen.findByRole("textbox", { name: "Your name" }), "Ana");
+      await user.click(screen.getByRole("button", { name: "Continue" }));
+
+      await waitFor(() => expect(router.push).toHaveBeenCalledWith(`/start/avatar${nextQuery}`));
+    });
   });
 
   test("WHEN rendered in pt THEN the step copy comes from the Portuguese catalogue", async () => {
-    renderStep(makeStubLearnerProfileRepository(), "pt");
+    renderStep({ locale: "pt" });
 
     expect(
       await screen.findByRole("heading", { level: 1, name: "Vamos criar seu cartão de aluno" }),

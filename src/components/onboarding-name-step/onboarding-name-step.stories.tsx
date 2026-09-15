@@ -1,6 +1,7 @@
 import type { LearnerProfileRepository } from "@/domain/ports/learner-profile-repository/learner-profile-repository";
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { expect, userEvent, within } from "storybook/test";
 
 import { OnboardingNameStep } from "./onboarding-name-step";
@@ -14,6 +15,13 @@ const freshDevice: LearnerProfileRepository = { get: async () => null, set: asyn
 const meta = {
   title: "Components/OnboardingNameStep",
   component: OnboardingNameStep,
+  decorators: [
+    (Story) => (
+      <NuqsTestingAdapter>
+        <Story />
+      </NuqsTestingAdapter>
+    ),
+  ],
   args: {
     profiles: freshDevice,
     level: { number: 1, courseTitle: "Basic Course" },

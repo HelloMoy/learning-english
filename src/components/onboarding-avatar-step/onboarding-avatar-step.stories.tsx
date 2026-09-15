@@ -2,6 +2,7 @@ import { LearnerProfile } from "@/domain/entities/learner-profile/learner-profil
 import type { LearnerProfileRepository } from "@/domain/ports/learner-profile-repository/learner-profile-repository";
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { expect, userEvent, within } from "storybook/test";
 
 import { OnboardingAvatarStep } from "./onboarding-avatar-step";
@@ -15,6 +16,13 @@ const afterStepOne: LearnerProfileRepository = {
 const meta = {
   title: "Components/OnboardingAvatarStep",
   component: OnboardingAvatarStep,
+  decorators: [
+    (Story) => (
+      <NuqsTestingAdapter>
+        <Story />
+      </NuqsTestingAdapter>
+    ),
+  ],
   args: {
     profiles: afterStepOne,
     level: { number: 1, courseTitle: "Basic Course" },

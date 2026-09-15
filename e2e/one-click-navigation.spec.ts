@@ -1,8 +1,9 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
 
 import { lessonsOfModule, modulesOfCourse } from "./content-seed-fixtures";
+import { expect, test } from "./learner-profile-fixture";
 
 /**
  * E2E coverage for the catalog's one-click navigation (capabilities:

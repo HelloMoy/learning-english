@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./learner-profile-fixture";
 
 /**
  * E2E tests for unknown routes.
