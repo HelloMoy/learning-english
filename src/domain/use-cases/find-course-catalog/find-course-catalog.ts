@@ -1,4 +1,5 @@
 import type { Course } from "@/domain/entities/course/course";
+import type { LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
 import type { Module } from "@/domain/entities/module/module";
 import type { CourseRepository } from "@/domain/ports/course-repository/course-repository";
@@ -9,26 +10,32 @@ import { ResultAsync } from "@/domain/result/result";
 import type { FindCourseCatalogErrors } from "./find-course-catalog.errors";
 
 /**
- * How many modules a catalog entry previews.
+ * One lesson reduced to what progress accounting needs: which lesson it is,
+ * the module it belongs to, and how long it runs.
  *
- * Three keeps the home card's preview short: enough to show a course is a
- * container of modules before deferring the rest to a `+N more`.
+ * @remarks
+ * A reading lesson reports a `durationSeconds` of zero — there is nothing to
+ * watch to the end — the same convention `findCourseForView` uses, so every
+ * surface counts completion alike.
  */
-const LEADING_MODULE_PREVIEW_COUNT = 3;
+export type LessonProgressSlice = {
+  id: LessonId;
+  moduleId: ModuleId;
+  durationSeconds: number;
+};
 
 /**
  * One row of the locale-home course catalog. Includes the deterministic
- * entry lesson so the course card can render a CTA and an artwork poster
- * without the page having to read ports directly, and the course's leading
- * modules so the card can show what is inside without a second round trip.
- *
- * `leadingModules` is capped: the remainder is `course.moduleCount` minus
- * its length, which is what the card renders as `+N more`.
+ * entry lesson so the home can link into the course without reading ports,
+ * every module so the home can list a course's progress lesson by lesson,
+ * and each lesson's progress slice so that progress is counted in the browser
+ * without a second round trip.
  */
 export type CourseCatalogEntry = {
   course: Course;
   firstLesson: Lesson | null;
-  leadingModules: Module[];
+  modules: Module[];
+  lessonRuntimes: LessonProgressSlice[];
 };
 
 export type CourseCatalog = {
@@ -44,6 +51,18 @@ const toInternalError = (cause: unknown): FindCourseCatalogErrors => ({
 
 const bySequenceThenTitle = (a: { sequence: number }, b: { sequence: number }): number =>
   a.sequence - b.sequence;
+
+/**
+ * Reduce a lesson to its progress slice.
+ *
+ * @param lesson - A video or reading lesson
+ * @returns Its id, module and runtime; `0` seconds for a reading lesson
+ */
+export const toLessonProgressSlice = (lesson: Lesson): LessonProgressSlice => ({
+  id: lesson.id,
+  moduleId: lesson.moduleId,
+  durationSeconds: lesson.kind === "video" ? lesson.durationSeconds : 0,
+});
 
 const pickFirstLesson = (lessons: ReadonlyArray<Lesson>): Lesson | null => {
   if (lessons.length === 0) return null;
@@ -76,9 +95,8 @@ export const makeFindCourseCatalog = (deps: {
                 return {
                   course,
                   firstLesson: pickFirstLesson(lessonsInFirstModule),
-                  // Derived from the `modules` the first lesson already
-                  // needed, so the preview costs no extra repository call.
-                  leadingModules: modules.slice(0, LEADING_MODULE_PREVIEW_COUNT),
+                  modules,
+                  lessonRuntimes: lessons.map(toLessonProgressSlice),
                 };
               }),
             ),

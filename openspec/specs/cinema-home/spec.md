@@ -6,7 +6,11 @@ Define the Immersion Cinema presentation of the locale layout and home route. Th
 ## Requirements
 ### Requirement: Global header shows brand and section chrome
 
-The locale layout SHALL render an Immersion Cinema header containing the `ENGLISH·COURSE` wordmark, a section eyebrow of the form `IMMERSION CINEMA · <SECTION>` where `<SECTION>` derives from the current route (`HOME`, `COURSE`, `MODULE`, `LESSON`), and the existing locale switcher and theme toggle re-styled as chips. The header SHALL remain a landmark, keep locale switching and theme toggling functional, and be localized.
+The locale layout SHALL render an Immersion Cinema header containing the `ENGLISH·COURSE` wordmark, a section eyebrow of the form `IMMERSION CINEMA · <SECTION>` where `<SECTION>` derives from the current route (`HOME`, `COURSE`, `MODULE`, `LESSON`, `START`, `MY LEARNING`, `PROFILE`), and the existing locale switcher and theme toggle re-styled as chips. The header SHALL remain a landmark, keep locale switching and theme toggling functional, and be localized.
+
+When the device holds a learner profile, the header SHALL additionally render the learner's avatar as a menu trigger whose accessible name includes the learner's name, opening a menu with **My learning** and **Profile** links for the active locale. Without a profile, and before the profile is known, the trigger SHALL NOT render.
+
+On phone-class viewports (below `sm`) with a learner profile, the wordmark, the locale control and three 44px controls cannot share the width, so the theme control SHALL move out of the header row and into the avatar menu as an item that toggles the theme and names the current theme in its accessible name. From `sm` up, and whenever there is no profile, the theme toggle SHALL stay in the header row and the menu SHALL NOT repeat it.
 
 The wordmark SHALL read `ENGLISH·COURSE` in every supported locale. It is a brand mark, not copy: it is not translated, and it names the same product the site publishes to the outside world through its metadata, so a learner reads one name in the header, the browser tab and a shared link preview.
 
@@ -18,18 +22,38 @@ The header SHALL fit within the viewport at every phone-class viewport width in 
 
 The locale control SHALL present the active locale as visible text at every width, so a learner can always see which language they are in without opening anything. Its width SHALL be governed by the label it currently displays rather than by the longest label it could display — a native `<select>`, whose rendered width is set by its widest `<option>`, cannot satisfy this and SHALL NOT be used.
 
-At every width the locale control and the theme toggle SHALL remain fully within the viewport and operable. On touch-sized viewports each SHALL present a hit area of at least 44×44 CSS pixels, which may extend beyond its visible chip.
+At every width the locale control, the theme control (in the header row, or in the avatar menu on a phone with a profile) and the avatar trigger SHALL remain fully within the viewport and operable. On touch-sized viewports each SHALL present a hit area of at least 44×44 CSS pixels, which may extend beyond its visible chip.
 
 #### Scenario: Section label reflects the route
 - **WHEN** the user is on the locale home
-- **THEN** the header eyebrow reads `IMMERSION CINEMA · HOME`; on a lesson route it reads `IMMERSION CINEMA · LESSON`
+- **THEN** the header eyebrow reads `IMMERSION CINEMA · HOME`; on a lesson route it reads `IMMERSION CINEMA · LESSON`; on `/learning` it reads `IMMERSION CINEMA · MY LEARNING`
 
 #### Scenario: Locale and theme controls remain functional
 - **WHEN** the header renders with the chip-styled controls
 - **THEN** changing the locale and toggling the theme behave exactly as before the re-skin
 
+#### Scenario: The avatar menu appears with a profile
+- **WHEN** the header renders on a device with a saved learner profile
+- **THEN** an avatar trigger renders, and opening it offers My learning and Profile links for the active locale
+
+#### Scenario: On a phone with a profile, the theme control lives in the avatar menu
+- **WHEN** the header renders at a 320px viewport width on a device with a learner profile
+- **THEN** the theme toggle is not in the header row, the avatar menu offers a theme item, and the wordmark is not clipped
+
+#### Scenario: Switching the theme from the avatar menu keeps the menu open
+- **WHEN** the learner activates the avatar menu's theme item
+- **THEN** the menu stays open so the switch's slide is visible, and the theme changes once the slide has played
+
+#### Scenario: The avatar menu keeps its size while the theme switches
+- **WHEN** the theme item's label changes from one theme's name to the other's
+- **THEN** the item and the menu keep the width of the longer name, so the menu does not resize
+
+#### Scenario: No profile, no avatar trigger
+- **WHEN** the header renders on a device without a learner profile
+- **THEN** no avatar trigger renders
+
 #### Scenario: The header fits the narrowest phone in every locale
-- **WHEN** the header renders at a 320px viewport width in `en`, `es`, or `pt`
+- **WHEN** the header renders at a 320px viewport width in `en`, `es`, or `pt`, with or without a learner profile
 - **THEN** it fits within the viewport and contributes no horizontal document scroll
 
 #### Scenario: Controls shed visible text but keep their accessible names
@@ -60,113 +84,101 @@ At every width the locale control and the theme toggle SHALL remain fully within
 - **WHEN** the header renders under `en`, `es` or `pt`
 - **THEN** the wordmark reads `ENGLISH·COURSE` in all three, because the brand mark is not translated copy
 
-### Requirement: Home renders the whole catalog as an ordered ladder of levels
+### Requirement: The new-visitor hero leads with one action
 
-The locale home (`/[locale]`) SHALL present a cinema hero over a `CinemaBackground` with an eyebrow, the localized title and subtitle, followed by an explicitly labelled `Available courses` section containing a numbered track and **one card per catalog course**, in `Course.sequence` order. No course SHALL be dropped, and no course SHALL be given a layout slot the others cannot have.
+The locale home SHALL render an editorial hero with a localized eyebrow naming the path from the first sound
+to real English, a display heading promising American English learned one sound at a time, an intro that
+names the progression — vowels and consonants up to contractions, intonation and fast speech — and the notes
+in Spanish and English, and exactly one primary action. On a device without a learner profile the action SHALL be labelled **Start course** and navigate to
+`/[locale]/start`; on a device with a profile it SHALL be labelled **Continue** and navigate to
+`/[locale]/learning`. During server rendering and hydration, before the profile is known, it SHALL read
+**Start course** and link to `/[locale]/start`. The action SHALL be accompanied by a localized note
+naming the first course and its video count.
 
-Each course card SHALL show: the course's localized ordinal (`Level {number}`, derived from `Course.sequence`), its title, its description, its leading modules with their ordinals, a `+N more` indicator when the course has more modules than are listed, the module and lesson counts, and one call to action linking to the course overview for the active locale.
+The home SHALL render this hero regardless of any stored continue-watching location.
 
-The section heading SHALL state that these are the available courses, and SHALL report how many there are.
+The hero SHALL place the vowel-length card (`hear-the-difference` variant) beside the copy on wide viewports
+and below the primary action on phone-class viewports.
 
-All copy SHALL be localized (en/es/pt) and links SHALL be locale-aware.
+#### Scenario: The hero names the path from the first sound
+- **WHEN** the home renders in `es`
+- **THEN** the eyebrow reads `Del primer sonido al inglés real` and the heading reads `Aprende el inglés americano sonido por sonido.`
 
-#### Scenario: Every catalog course gets a card
+#### Scenario: A first-time visitor starts the onboarding
+- **WHEN** the home renders on a device with no learner profile
+- **THEN** the hero's Start course action links to `/[locale]/start`
+
+#### Scenario: A learner with a profile goes to My learning
+- **WHEN** the home renders on a device with a saved learner profile
+- **THEN** after hydration the hero's action reads Continue and links to `/[locale]/learning`
+
+#### Scenario: A returning learner still sees the landing
+- **WHEN** a device with a continue-watching record opens the home
+- **THEN** the editorial hero renders and no returning-learner content appears
+
+#### Scenario: The hero offers one primary action
+- **WHEN** the hero renders
+- **THEN** it contains exactly one primary action, and the vowel-length card's controls are the only other interactive elements in it
+
+#### Scenario: The card stacks under the action on a phone
+- **WHEN** the home renders at a 390px viewport width
+- **THEN** the vowel-length card renders below the primary action and the page does not scroll horizontally
+
+### Requirement: The home answers the questions learners ask first
+
+In the new-visitor state the home SHALL render a localized section of three numbered
+questions with their answers, covering why the course starts with sounds, how it fits into
+a few minutes a day, and whether it works on a phone.
+
+#### Scenario: Three questions render in order
+- **WHEN** the new-visitor home renders
+- **THEN** the questions section shows three numbered questions, each with its answer, in the active locale
+
+### Requirement: The home lists every catalog course as a row of an ordered levels table
+
+The home SHALL render an `Available courses` section whose heading states how many levels
+there are, followed by one row per catalog course in ascending `Course.sequence` order. No
+course SHALL be dropped.
+
+Each row SHALL show the course's localized level ordinal (`Level {number}`), its title, its
+description, its lesson and video counts, and one link to the course overview for the
+active locale.
+
+When the catalog is empty the section SHALL be replaced by a localized empty state.
+
+#### Scenario: Every catalog course gets a row
 - **WHEN** the catalog resolves two courses
-- **THEN** the home renders two course cards, in ascending `Course.sequence` order, each linking to its own course overview
-
-#### Scenario: A card previews what is inside the course
-- **WHEN** a course has ten modules
-- **THEN** its card lists its leading modules with their ordinals and indicates that the remaining ones exist, rather than listing all ten or none
-
-#### Scenario: The courses section announces itself
-- **WHEN** the home renders with a non-empty catalog
-- **THEN** an `Available courses` heading precedes the cards and the number of courses is shown
+- **THEN** the levels table renders two rows in ascending `sequence` order, each linking to its own course overview
 
 #### Scenario: Ordering is data, not arrival order
 - **WHEN** the repository returns courses in an order that does not match their `sequence`
-- **THEN** the home still renders them in ascending `sequence` order
-
-#### Scenario: A single-course catalog still renders the ladder
-- **WHEN** the catalog resolves exactly one course
-- **THEN** the home renders one card under the same heading, with no empty slots and no placeholder for a course that does not exist
+- **THEN** the rows still render in ascending `sequence` order
 
 #### Scenario: Empty catalog degrades gracefully
 - **WHEN** the catalog returns no entries
-- **THEN** the home shows a localized empty state instead of a broken or empty ladder
+- **THEN** the home shows a localized empty state instead of an empty table
 
-#### Scenario: Home copy is localized
+#### Scenario: Levels copy is localized
 - **WHEN** the locale is `es`
-- **THEN** the eyebrow, the section heading, the ordinals, the counts and the calls to action render from `es.json`, not hardcoded English
+- **THEN** the section heading, the ordinals, the counts and the row links render from `es.json`
 
-### Requirement: A course card is clickable across its body
+### Requirement: The new-visitor home closes by repeating its primary action
 
-A course card presents itself as one object — a bordered panel with its own glow and a hover-lit title — so a pointer landing anywhere on its **body** SHALL navigate to the course overview, the destination its title already carries.
+The home SHALL end its content with a band that repeats the hero's primary action to the same
+destination.
 
-The card's body is everything except the actions pinned at its foot. Those actions SHALL keep their own hit areas and their own destinations, unreduced and unshifted: on an in-progress card the primary action still resumes the lesson and the secondary action still opens the course overview, and a pointer landing on either SHALL reach that action's destination rather than the body's.
+On a device without a learner profile — and before the profile is known — the band SHALL restate the
+offer in localized copy sized by the first lesson's runtime.
 
-The body's hit area SHALL be an extension of the title's existing link, not a new control. The card SHALL therefore expose no additional link to assistive technology and add no tab stop, and its title link's accessible name SHALL remain the course title rather than the whole panel's text.
+On a device with a learner profile the offer no longer fits what the action does, so the band SHALL
+instead greet the learner by first name with localized copy inviting them to pick up where they left off,
+show their learner card with its progress through the first course, and offer **Continue**.
 
-#### Scenario: Clicking the card body opens the course overview
-- **WHEN** the user clicks the card's description, its module preview list, its `+N more` line or its count pills
-- **THEN** they navigate to the course overview for the active locale — the same destination as the card's title
+#### Scenario: The band repeats the hero's destination
+- **WHEN** the home renders
+- **THEN** the closing band's action links to the same destination as the hero's action
 
-#### Scenario: The actions keep their own destinations
-- **WHEN** the user clicks the primary or the secondary action on an in-progress card
-- **THEN** they reach that action's destination — the resumed lesson or the course overview — and the body's hit area does not intercept the click
-
-#### Scenario: The body's hit area adds no control
-- **WHEN** a screen reader or keyboard user traverses a course card
-- **THEN** the same links are announced and reachable as before the hit area was extended, and the card itself is not announced as a link
-
-#### Scenario: The title keeps its accessible name
-- **WHEN** assistive technology reports the card's title link
-- **THEN** its name is the course title alone, not the description, the module list, the counts or the actions
-
-### Requirement: The course being continued is marked on its card
-
-When a stored continue-watching location resolves to a lesson belonging to one of the catalog courses, that course's card SHALL be marked as in progress and its call to action SHALL invite the learner to continue rather than to start. Every other card SHALL read as not started.
-
-The in-progress card's primary call to action SHALL navigate to **the resolved lesson itself** — the same destination as the `Continue watching` panel's action — not to the course overview. A card that says `Continue course` and lands two clicks short of the video contradicts the panel offering the real thing directly above it.
-
-Because that primary action gives up the course overview, the in-progress card SHALL additionally render a **secondary action beneath it** that navigates to the course overview, so the whole course remains one click away. The two actions SHALL be visually distinguishable, the resume action reading as the primary one.
-
-A not-started card SHALL keep exactly one call to action, to the course overview, and SHALL NOT render the secondary action.
-
-Whenever there is no stored record, every card SHALL render the not-started state — the honest one — rather than flashing a mark it cannot yet justify. The in-progress state SHALL therefore be asserted only once a lesson href is known, so no card ever offers a resume action with nowhere to resume to.
-
-When a stored record **does** exist and the round-trip that resolves it has not yet answered, the card's progress mark and its call-to-action area SHALL be reserved with a placeholder of their own dimensions instead of asserting the not-started state. The record's existence is known synchronously, before the round-trip; the course it belongs to is not. Reserving says "one of these cards is in progress and we are finding out which", which is true, and it stops the primary action's wording from changing under the learner's thumb. Every card SHALL reserve alike during that window, because guessing which one to reserve is the assertion being avoided.
-
-When the round-trip answers, the resolved card SHALL take the in-progress state and every other card SHALL take the not-started state. When it answers that the record no longer resolves, every card SHALL take the not-started state.
-
-#### Scenario: The in-progress course is marked
-- **WHEN** the stored location points at a lesson of the first course
-- **THEN** that course's card shows an in-progress mark and a `Continue course` action, and the other cards show a not-started mark and a `Start course` action
-
-#### Scenario: Continuing goes to the lesson, not the course overview
-- **WHEN** the stored location resolves to a lesson of a catalog course
-- **THEN** that card's `Continue course` action links to that lesson's locale-aware path — the same href the `Continue watching` panel uses — and not to the course overview
-
-#### Scenario: The in-progress card still reaches the course overview
-- **WHEN** a card renders in the in-progress state
-- **THEN** a second, secondary action renders beneath the primary one and links to the course overview for the active locale
-
-#### Scenario: A not-started card offers one way in
-- **WHEN** a card renders in the not-started state
-- **THEN** it renders a single `Start course` action to the course overview and no secondary action
-
-#### Scenario: An unresolvable record leaves every card unmarked
-- **WHEN** a location is stored but no longer resolves to a live lesson
-- **THEN** every card renders the not-started state, and no card offers a resume action
-
-#### Scenario: No record leaves every card unmarked
-- **WHEN** no location is stored
-- **THEN** every card shows the not-started state
-
-#### Scenario: A pending record reserves every card's mark and action
-- **WHEN** the client has read a stored location and the round-trip that resolves it has not answered
-- **THEN** every card shows a placeholder in place of its progress mark and its call-to-action area, and no card asserts either state
-
-#### Scenario: The server-rendered card asserts nothing it cannot know
-- **WHEN** the home is server-rendered, before `localStorage` can be read
-- **THEN** every card renders the not-started state, as it does today
+#### Scenario: An onboarded learner sees their card in the closing band
+- **WHEN** the home renders on a device with a learner profile named `Ana García`
+- **THEN** after hydration the band reads `Pick up where you left off, Ana.`, shows the learner card, offers Continue, and no longer states the first lesson's runtime
 

@@ -1,6 +1,6 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 import { lessonsOfModule, modulesOfCourse } from "./content-seed-fixtures";
 
@@ -44,22 +44,34 @@ const lessonUrl = (courseSlug: string, moduleSlug: string, lessonId: string) =>
 /** Compiling a route on a cold `pnpm dev` overruns the default 5s timeout. */
 const COLD_ROUTE = { timeout: 60_000 };
 
-test.describe("Course card — one click to the course, one to the lesson", () => {
-  test("WHEN the card's body is clicked THEN the course overview opens", async ({ page }) => {
+/** My learning belongs to a learner, so the device needs a card before it opens. */
+const withLearnerCard = (page: Page) =>
+  page.addInitScript(() =>
+    window.localStorage.setItem(
+      "learning-english:learner-profile",
+      JSON.stringify({ name: "Ana García", avatar: { kind: "initials" } }),
+    ),
+  );
+
+test.describe("Home and My learning — one click to the course, one to the lesson", () => {
+  test("WHEN a level row's link is pressed THEN the course overview opens", async ({ page }) => {
     await page.goto("/en");
 
-    // The card's top-left padding: no child renders there and both foot
-    // actions are the far end of the card, so a navigation from this point
-    // can only have come from the body's own hit area.
-    await page.getByTestId("course-level-card").first().click({ position: IN_THE_PADDING });
+    await page
+      .getByRole("list", { name: "Available courses, in order" })
+      .getByRole("listitem")
+      .first()
+      .getByRole("link")
+      .click(COLD_ROUTE);
 
     await page.waitForURL(`**/en/courses/${FIRST_COURSE.slug}`, COLD_ROUTE);
     await expect(page.getByTestId("course-overview")).toBeVisible(COLD_ROUTE);
   });
 
-  test("WHEN a lesson has been opened THEN that card's primary action resumes it", async ({
+  test("WHEN a lesson has been opened THEN My learning's Resume returns to it", async ({
     page,
   }) => {
+    await withLearnerCard(page);
     const lessonPath = lessonUrl(
       SECOND_COURSE.slug,
       SECOND_COURSE_START.module.slug,
@@ -72,18 +84,17 @@ test.describe("Course card — one click to the course, one to the lesson", () =
       COLD_ROUTE,
     );
 
-    await page.goto("/en");
+    await page.goto("/en/learning");
 
-    const card = page.getByTestId("course-level-card").nth(1);
-    await expect(card).toHaveAttribute("data-state", "in-progress");
-    await card.getByTestId("course-level-cta").click();
+    await page.getByRole("link", { name: "Resume" }).first().click(COLD_ROUTE);
 
     await page.waitForURL(new RegExp(`${SECOND_COURSE_START.lesson.id}$`), COLD_ROUTE);
   });
 
-  test("WHEN a lesson has been opened THEN that card's second action still opens the course", async ({
+  test("WHEN a lesson has been opened THEN My learning's quieter link still opens the course", async ({
     page,
   }) => {
+    await withLearnerCard(page);
     await page.goto(
       lessonUrl(SECOND_COURSE.slug, SECOND_COURSE_START.module.slug, SECOND_COURSE_START.lesson.id),
     );
@@ -91,10 +102,9 @@ test.describe("Course card — one click to the course, one to the lesson", () =
       COLD_ROUTE,
     );
 
-    await page.goto("/en");
+    await page.goto("/en/learning");
 
-    const card = page.getByTestId("course-level-card").nth(1);
-    await card.getByTestId("course-level-secondary-cta").click();
+    await page.getByRole("link", { name: "View course content" }).first().click(COLD_ROUTE);
 
     await page.waitForURL(`**/en/courses/${SECOND_COURSE.slug}`, COLD_ROUTE);
     await expect(page.getByTestId("course-overview")).toBeVisible(COLD_ROUTE);

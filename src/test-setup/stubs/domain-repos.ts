@@ -1,10 +1,12 @@
 import type { Course } from "@/domain/entities/course/course";
 import type { CourseId, LessonId, ModuleId, ResourceId } from "@/domain/entities/ids/ids";
+import type { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
 import type { Module } from "@/domain/entities/module/module";
 import type { Resource } from "@/domain/entities/resource/resource";
 import type { Slug } from "@/domain/entities/slug/slug";
 import type { CourseRepository } from "@/domain/ports/course-repository/course-repository";
+import type { LearnerProfileRepository } from "@/domain/ports/learner-profile-repository/learner-profile-repository";
 import type { LessonRepository } from "@/domain/ports/lesson-repository/lesson-repository";
 import type { ModuleRepository } from "@/domain/ports/module-repository/module-repository";
 import type { PlaybackPositionRepository } from "@/domain/ports/playback-position-repository/playback-position-repository";
@@ -133,6 +135,28 @@ export function makeStubProgressTracker(): ProgressTracker {
       completed.delete(lessonId);
     },
     isComplete: async (lessonId: LessonId) => completed.has(lessonId),
+  };
+}
+
+/**
+ * Test double: a single-slot `LearnerProfileRepository`. Used only in unit
+ * tests; the browser adapter is `BrowserLocalStorageLearnerProfileRepository`.
+ */
+export function makeStubLearnerProfileRepository(seed?: {
+  profile?: LearnerProfile;
+  getRejects?: boolean;
+  setRejects?: boolean;
+}): LearnerProfileRepository {
+  let stored = seed?.profile ?? null;
+  return {
+    get: async () => {
+      if (seed?.getRejects) throw new Error("simulated learner-profile-repo failure");
+      return stored;
+    },
+    set: async (profile: LearnerProfile) => {
+      if (seed?.setRejects) throw new Error("simulated learner-profile-repo failure");
+      stored = profile;
+    },
   };
 }
 

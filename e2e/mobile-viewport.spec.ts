@@ -169,18 +169,25 @@ test.describe("Mobile viewport fit — header controls at 320px", () => {
   /** Worst case for label length: Spanish "Idioma"/"Oscuro" run longer than English. */
   const HOME = "/es";
 
+  /**
+   * The header's locale and theme controls. The theme control is a disabled
+   * placeholder button until hydration and a switch afterwards; `gotoRendered`
+   * does not wait for hydration, so either may be on screen. Both keep the same
+   * box, so the measurement holds for whichever one is found.
+   */
+  const headerControls = (page: Page) => [
+    page.getByRole("button", { name: /idioma/i }),
+    page.getByRole("switch", { name: /tema/i }).or(page.getByRole("button", { name: /tema/i })),
+  ];
+
   test("WHEN the header renders THEN both controls are fully within the viewport", async ({
     page,
   }) => {
     await gotoRendered(page, HOME);
 
     const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
-    const controls = [
-      page.getByRole("button", { name: /idioma/i }),
-      page.getByRole("button", { name: /tema/i }),
-    ];
 
-    for (const control of controls) {
+    for (const control of headerControls(page)) {
       const box = (await control.boundingBox())!;
       expect(box.x).toBeGreaterThanOrEqual(0);
       expect(box.x + box.width).toBeLessThanOrEqual(clientWidth);
@@ -190,10 +197,7 @@ test.describe("Mobile viewport fit — header controls at 320px", () => {
   test("WHEN the header renders THEN both controls offer a 44x44 hit area", async ({ page }) => {
     await gotoRendered(page, HOME);
 
-    const controls = [
-      page.getByRole("button", { name: /idioma/i }),
-      page.getByRole("button", { name: /tema/i }),
-    ];
+    const controls = headerControls(page);
 
     for (const control of controls) {
       const box = (await control.boundingBox())!;
@@ -233,6 +237,47 @@ test.describe("Mobile viewport fit — header controls at 320px", () => {
     const { scrollWidth, clientWidth } = await documentOverflow(page);
     expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
   });
+});
+
+test.describe("Mobile viewport fit — header with a learner card at 320px", () => {
+  test.use({ viewport: { width: 320, height: 720 } });
+
+  const LEARNER_NAME = "Ana García";
+
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript((name) => {
+      window.localStorage.setItem(
+        "learning-english:learner-profile",
+        JSON.stringify({ name, avatar: { kind: "initials" } }),
+      );
+    }, LEARNER_NAME);
+  });
+
+  for (const locale of LOCALES) {
+    test(`WHEN the header renders in '${locale}' with a learner card THEN the avatar fits, the theme moves into its menu and the wordmark is not clipped`, async ({
+      page,
+    }) => {
+      await gotoRendered(page, `/${locale}`);
+      const banner = page.getByRole("banner");
+      const avatar = banner.getByRole("button", { name: new RegExp(LEARNER_NAME) });
+      await expect(avatar).toBeVisible();
+
+      const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
+      const avatarBox = (await avatar.boundingBox())!;
+      expect(avatarBox.x + avatarBox.width).toBeLessThanOrEqual(clientWidth);
+      await expect(page.getByTestId("header-theme-toggle")).toBeHidden();
+
+      const wordmark = banner.getByRole("link").first();
+      await expect(wordmark).toContainText("ENGLISH");
+      const wordmarkFits = await wordmark.evaluate(
+        (element) => element.scrollWidth <= element.clientWidth,
+      );
+      expect(wordmarkFits, "the wordmark is clipped").toBe(true);
+
+      const { scrollWidth } = await documentOverflow(page);
+      expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+    });
+  }
 });
 
 test.describe("Mobile viewport fit — module list titles at 320px", () => {

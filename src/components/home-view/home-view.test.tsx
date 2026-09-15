@@ -1,132 +1,233 @@
-import type { CourseLevel } from "@/components/course-ladder/course-ladder";
 import { Course } from "@/domain/entities/course/course";
+import { LessonId, ModuleId } from "@/domain/entities/ids/ids";
+import { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
 import { Module } from "@/domain/entities/module/module";
+import { renderInLocale } from "@/test-setup/render-in-locale";
+import { makeStubLearnerProfileRepository } from "@/test-setup/stubs/domain-repos";
 
-import { render, screen } from "@testing-library/react";
-import { useTranslations } from "next-intl";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { faker } from "@faker-js/faker";
+import { screen, waitFor, within } from "@testing-library/react";
+import { beforeEach, describe, expect, test } from "vitest";
 
-import { HomeView } from "./home-view";
+import { HomeView, type HomeLevel } from "./home-view";
 
-vi.mock("next-intl", () => ({ useTranslations: vi.fn() }));
-// The panel has its own tests; here it must only be present and correctly
-// placed. Rendering the real one would reach for `localStorage` and a Server
-// Action, neither of which says anything about the home's composition.
-vi.mock("@/components/continue-watching/continue-watching", () => ({
-  ContinueWatching: () => <div data-testid="continue-watching-slot" />,
-}));
-
-const mockUseTranslations = vi.mocked(useTranslations);
-
-const msg = (namespace: string, key: string, values?: Record<string, unknown>) =>
-  values ? `${namespace}.${key}:${JSON.stringify(values)}` : `${namespace}.${key}`;
-
-const home = (key: string, values?: Record<string, unknown>) => msg("HomePage", key, values);
-
-const buildCourse = (sequence: number, slug: string, title: string) =>
+const buildCourse = (overrides: {
+  slug: string;
+  title: string;
+  sequence: number;
+  lessonCount: number;
+  moduleCount: number;
+}) =>
   Course.parse({
-    id: `11111111-1111-4111-8111-${String(sequence).padStart(12, "0")}`,
-    slug,
-    title,
-    description: `${title} description`,
+    id: faker.string.uuid(),
+    description: faker.lorem.sentence(),
     language: "en",
-    lessonCount: 3,
-    moduleCount: 2,
+    ...overrides,
+  });
+
+const basic = buildCourse({
+  slug: "basic-course",
+  title: "Basic Course",
+  sequence: 1,
+  lessonCount: 3,
+  moduleCount: 2,
+});
+const advanced = buildCourse({
+  slug: "advanced-intermediate-course",
+  title: "Advanced Intermediate Course",
+  sequence: 2,
+  lessonCount: 0,
+  moduleCount: 0,
+});
+
+const buildModule = (sequence: number, title: string) =>
+  Module.parse({
+    id: ModuleId.parse(faker.string.uuid()),
+    courseId: basic.id,
+    slug: `module-${sequence}`,
+    title,
     sequence,
   });
 
-const basic = buildCourse(1, "english-a1-pronunciation", "Basic — Foundational Pronunciation");
-const advanced = buildCourse(2, "advanced-intermediate-course", "Advanced Intermediate Course");
+const introduction = buildModule(1, "Introduction");
+const vowels = buildModule(2, "Vowels");
 
-const levelFor = (course: Course): CourseLevel => ({
-  course,
-  leadingModules: [
-    Module.parse({
-      id: `22222222-2222-4222-8222-${String(course.sequence).padStart(12, "0")}`,
-      courseId: course.id,
-      slug: "module-1",
-      title: "Module 1",
-      sequence: 1,
-    }),
-  ],
+const slice = (moduleId: ModuleId) => ({
+  id: LessonId.parse(faker.string.uuid()),
+  moduleId,
+  durationSeconds: 480,
+});
+
+const introductionLesson = slice(introduction.id);
+
+const levels: HomeLevel[] = [
+  {
+    course: basic,
+    modules: [introduction, vowels],
+    lessonRuntimes: [introductionLesson, slice(vowels.id), slice(vowels.id)],
+  },
+  { course: advanced, modules: [], lessonRuntimes: [] },
+];
+
+const firstLesson = {
+  href: `/courses/basic-course/modules/module-1/lessons/${introductionLesson.id}`,
+  minutes: 8,
+  courseTitle: "Basic Course",
+};
+
+const profile = LearnerProfile.parse({ name: "Ana García", avatar: { kind: "initials" } });
+
+beforeEach(() => {
+  window.localStorage.clear();
 });
 
 describe("HomeView", () => {
-  beforeEach(() => {
-    mockUseTranslations.mockImplementation(
-      ((namespace: string) => (key: string, values?: Record<string, unknown>) =>
-        msg(namespace, key, values)) as never,
-    );
+  describe("GIVEN a device without a learner profile", () => {
+    test("WHEN rendered THEN the landing leads, answers questions, lists levels and closes with the offer", () => {
+      renderInLocale(
+        <HomeView
+          levels={levels}
+          firstLesson={firstLesson}
+          profiles={makeStubLearnerProfileRepository()}
+        />,
+      );
+
+      expect(
+        screen.getByRole("heading", {
+          level: 1,
+          name: "Learn American English one sound at a time.",
+        }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Three questions learners ask first" }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "2 levels, in order" })).toBeInTheDocument();
+      expect(
+        within(screen.getByRole("list", { name: "Available courses, in order" })).getAllByRole(
+          "listitem",
+        ),
+      ).toHaveLength(2);
+      expect(
+        screen.getByRole("heading", {
+          name: "8 minutes to find out what your ear has been missing.",
+        }),
+      ).toBeInTheDocument();
+    });
+
+    test("WHEN rendered THEN the hero and the closing band both start the course through the onboarding", async () => {
+      renderInLocale(
+        <HomeView
+          levels={levels}
+          firstLesson={firstLesson}
+          profiles={makeStubLearnerProfileRepository()}
+        />,
+      );
+
+      const starts = screen.getAllByRole("link", { name: "Start course" });
+      expect(starts).toHaveLength(2);
+      await waitFor(() => {
+        for (const start of starts) expect(start).toHaveAttribute("href", "/start");
+      });
+    });
+
+    test("WHEN rendered THEN the hero's note names the first course and its video count", () => {
+      renderInLocale(
+        <HomeView
+          levels={levels}
+          firstLesson={firstLesson}
+          profiles={makeStubLearnerProfileRepository()}
+        />,
+      );
+
+      expect(screen.getByText("3 videos · Basic Course")).toBeInTheDocument();
+    });
   });
 
-  describe("GIVEN a catalog with two courses", () => {
-    const twoLevels = [levelFor(basic), levelFor(advanced)];
+  describe("GIVEN a device with a learner profile", () => {
+    test("WHEN rendered THEN both actions read Continue and open My learning", async () => {
+      renderInLocale(
+        <HomeView
+          levels={levels}
+          firstLesson={firstLesson}
+          profiles={makeStubLearnerProfileRepository({ profile })}
+        />,
+      );
 
-    test("WHEN rendered THEN both courses get a card", () => {
-      render(<HomeView levels={twoLevels} />);
-      const cards = screen.getAllByTestId("course-level-card");
-      expect(cards).toHaveLength(2);
-      expect(cards[0]).toHaveTextContent(basic.title);
-      expect(cards[1]).toHaveTextContent(advanced.title);
-    });
-
-    test("WHEN rendered THEN the courses section announces itself and its size", () => {
-      render(<HomeView levels={twoLevels} />);
-      expect(screen.getByText(home("coursesEyebrow"))).toBeInTheDocument();
-      expect(
-        screen.getByRole("heading", { name: home("coursesHeading", { count: 2 }) }),
-      ).toBeInTheDocument();
-      expect(screen.getByText(home("coursesCount", { count: 2 }))).toBeInTheDocument();
-    });
-
-    test("WHEN rendered THEN the hero states the platform, not one course", () => {
-      render(<HomeView levels={twoLevels} />);
-      expect(screen.getByRole("heading", { level: 1, name: home("heading") })).toBeInTheDocument();
-      expect(screen.getByText(home("intro"))).toBeInTheDocument();
-      expect(screen.getByText(home("eyebrow"))).toBeInTheDocument();
-    });
-
-    test("WHEN rendered THEN the hero carries no call to action of its own", () => {
-      // The page's one primary action is `Resume`; each card carries its own.
-      // A third button competing from the hero leaves no obvious next step.
-      render(<HomeView levels={twoLevels} />);
-      const hero = screen.getByRole("heading", { level: 1 }).closest("section");
-      expect(hero?.querySelectorAll("a, button")).toHaveLength(0);
-    });
-
-    test("WHEN rendered THEN the continue-watching section precedes the ladder", () => {
-      render(<HomeView levels={twoLevels} />);
-      const panel = screen.getByTestId("continue-watching-slot");
-      const ladder = screen.getByTestId("course-ladder");
-      expect(panel.compareDocumentPosition(ladder) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    });
-
-    test("WHEN rendered THEN no featured rail survives", () => {
-      render(<HomeView levels={twoLevels} />);
-      expect(screen.queryByTestId("featured-course")).toBeNull();
+      await waitFor(() => {
+        const continues = screen.getAllByRole("link", { name: "Continue" });
+        expect(continues).toHaveLength(2);
+        for (const action of continues) {
+          expect(action).toHaveAttribute("href", "/learning");
+        }
+      });
     });
   });
 
-  describe("GIVEN a catalog with one course", () => {
-    test("WHEN rendered THEN it renders one card under the same heading", () => {
-      render(<HomeView levels={[levelFor(basic)]} />);
-      expect(screen.getAllByTestId("course-level-card")).toHaveLength(1);
+  describe("GIVEN a device with a learner profile, at the closing band", () => {
+    test("WHEN rendered THEN the band greets the learner with their card instead of restating the offer", async () => {
+      renderInLocale(
+        <HomeView
+          levels={levels}
+          firstLesson={firstLesson}
+          profiles={makeStubLearnerProfileRepository({ profile })}
+        />,
+      );
+
       expect(
-        screen.getByRole("heading", { name: home("coursesHeading", { count: 1 }) }),
+        await screen.findByRole("heading", { level: 2, name: "Pick up where you left off, Ana." }),
       ).toBeInTheDocument();
+      expect(screen.getByText("0 of 3 videos")).toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", {
+          name: "8 minutes to find out what your ear has been missing.",
+        }),
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN a device holding a continue-watching record", () => {
+    test("WHEN rendered THEN the landing stays and no returning-learner content appears", async () => {
+      window.localStorage.setItem(
+        "learning-english:continue-watching",
+        JSON.stringify({
+          courseSlug: basic.slug,
+          moduleSlug: vowels.slug,
+          lessonId: faker.string.uuid(),
+        }),
+      );
+
+      renderInLocale(
+        <HomeView
+          levels={levels}
+          firstLesson={firstLesson}
+          profiles={makeStubLearnerProfileRepository({ profile })}
+        />,
+      );
+
+      await waitFor(() =>
+        expect(screen.getAllByRole("link", { name: "Continue" })[0]).toHaveAttribute(
+          "href",
+          "/learning",
+        ),
+      );
+      expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
+      expect(screen.queryByText("Welcome back")).not.toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: "Resume" })).not.toBeInTheDocument();
     });
   });
 
   describe("GIVEN an empty catalog", () => {
-    test("WHEN rendered THEN it shows the localized empty state and no ladder", () => {
-      render(<HomeView levels={[]} />);
-      expect(screen.getByRole("status")).toHaveTextContent(home("catalogEmpty"));
-      expect(screen.queryByTestId("course-ladder")).toBeNull();
-    });
+    test("WHEN rendered THEN a localized empty state replaces the home", () => {
+      renderInLocale(
+        <HomeView
+          levels={[]}
+          firstLesson={null}
+          profiles={makeStubLearnerProfileRepository()}
+        />,
+      );
 
-    test("WHEN rendered THEN the hero still stands", () => {
-      render(<HomeView levels={[]} />);
-      expect(screen.getByRole("heading", { level: 1, name: home("heading") })).toBeInTheDocument();
+      expect(screen.getByRole("status")).toHaveTextContent("No courses are available right now.");
+      expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
     });
   });
 });

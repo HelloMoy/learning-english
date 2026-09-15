@@ -4,6 +4,7 @@ import type { Course } from "@/domain/entities/course/course";
 import type { LessonId } from "@/domain/entities/ids/ids";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
 import type { Module } from "@/domain/entities/module/module";
+import { toLessonProgressSlice } from "@/domain/use-cases/find-course-catalog/find-course-catalog";
 import { useCourseWatchProgress } from "@/hooks/use-course-watch-progress/use-course-watch-progress";
 import { useIsHydrated } from "@/hooks/use-is-hydrated/use-is-hydrated";
 import { useScrollCurrentIntoView } from "@/hooks/use-scroll-current-into-view/use-scroll-current-into-view";
@@ -135,7 +136,7 @@ function MobileOutlineDrawer({
   const [isOpen, setIsOpen] = useState(false);
   const outlineRef = useScrollCurrentIntoView<HTMLDivElement>(isOpen);
 
-  const courseLessons = [...lessonsByModuleId.values()].flat();
+  const courseLessons = [...lessonsByModuleId.values()].flat().map(toLessonProgressSlice);
   const { completedCount, completedFraction } = useCourseWatchProgress(courseLessons);
   const headline = outlineHeadlineFor({ modules, lessonsByModuleId, currentLessonId });
 

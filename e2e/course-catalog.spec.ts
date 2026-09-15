@@ -46,17 +46,17 @@ function lessonUrl(
 }
 
 test.describe("Course catalog navigation", () => {
-  test("WHEN the home is visited THEN the course ladder links to the course overview", async ({
+  test("WHEN the home is visited THEN the levels table links to the course overview", async ({
     page,
   }) => {
     await page.goto(homeUrl("en"));
 
-    await expect(page.getByTestId("course-ladder")).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Advanced Intermediate Course" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Advanced Intermediate Course" })).toHaveAttribute(
-      "href",
-      courseUrl("en"),
-    );
+    const row = page
+      .getByRole("list", { name: "Available courses, in order" })
+      .getByRole("listitem")
+      .filter({ hasText: "Advanced Intermediate Course" });
+    await expect(row.getByRole("heading", { name: "Advanced Intermediate Course" })).toBeVisible();
+    await expect(row.getByRole("link")).toHaveAttribute("href", courseUrl("en"));
   });
 
   test("WHEN the course card is activated THEN the course overview renders the module list and start course CTA", async ({
@@ -130,12 +130,15 @@ test.describe("Course catalog navigation", () => {
 
 test.describe("Course catalog — locale awareness", () => {
   for (const locale of ["es", "pt"] as const) {
-    test(`WHEN the home is visited in /${locale} THEN the card preserves the locale prefix`, async ({
+    test(`WHEN the home is visited in /${locale} THEN the level row preserves the locale prefix`, async ({
       page,
     }) => {
       await page.goto(homeUrl(locale));
       await expect(
-        page.getByRole("link", { name: "Advanced Intermediate Course" }),
+        page
+          .getByRole("listitem")
+          .filter({ hasText: "Advanced Intermediate Course" })
+          .getByRole("link"),
       ).toHaveAttribute("href", courseUrl(locale));
     });
   }

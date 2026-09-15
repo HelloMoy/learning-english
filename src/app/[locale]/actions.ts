@@ -17,8 +17,12 @@ import { actionClient } from "@/lib/safe-action/safe-action";
  * signal to omit the progress indicator rather than draw it at zero.
  */
 export type ContinueWatchingPanel = {
+  courseSlug: string;
   courseTitle: string;
+  moduleId: string;
+  moduleSequence: number;
   moduleTitle: string;
+  lessonSequence: number;
   lessonTitle: string;
   lessonHref: string;
   durationSeconds: number | null;
@@ -52,8 +56,12 @@ export const findContinueWatchingAction = actionClient
 
     const { course, module, lesson } = result.value;
     return {
+      courseSlug: course.slug,
       courseTitle: course.title,
+      moduleId: module.id,
+      moduleSequence: module.sequence,
       moduleTitle: module.title,
+      lessonSequence: lesson.sequence,
       lessonTitle: lesson.title,
       lessonHref: lessonPath(course, module, lesson),
       durationSeconds: lesson.kind === "video" ? lesson.durationSeconds : null,

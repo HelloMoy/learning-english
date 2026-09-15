@@ -20,7 +20,8 @@ import * as React from "react";
  * focus restored to the trigger on close.
  *
  * This primitive is deliberately scoped to **single-choice menus** — the shape
- * {@link "@/components/locale-switcher/locale-switcher"} needs. Sub-menus,
+ * {@link "@/components/locale-switcher/locale-switcher"} needs — and plain
+ * navigation items for the header's learner menu. Sub-menus,
  * checkbox items, group labels, separators, and shortcut slots are not ported;
  * shipping the full shadcn registry surface for one consumer would be
  * speculative generality. Add a part when a caller actually needs it.
@@ -116,6 +117,30 @@ function DropdownMenuContent({
 }
 
 /**
+ * A plain action or navigation entry, exposed as `menuitem`.
+ *
+ * @remarks
+ * Pass `asChild` to render a locale-aware `Link` as the item, so the menu keeps
+ * Radix's roving focus and type-ahead while the entry stays a real anchor that
+ * can be opened in a new tab.
+ */
+function DropdownMenuItem({
+  className,
+  ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Item>) {
+  return (
+    <DropdownMenuPrimitive.Item
+      data-slot="dropdown-menu-item"
+      className={cn(
+        "relative flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground outline-none select-none focus:bg-foreground/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+/**
  * Groups {@link DropdownMenuRadioItem}s into one single-choice set. Exactly one
  * item is checked at a time, reflecting `value`.
  */
@@ -179,6 +204,7 @@ function DropdownMenuItemIndicator({
 export {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuItemIndicator,
   DropdownMenuPortal,
   DropdownMenuRadioGroup,

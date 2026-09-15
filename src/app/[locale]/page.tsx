@@ -1,22 +1,17 @@
-import { getCoursePlatformDeps } from "@/adapters/persistence/in-memory/use-case-dependencies/use-case-dependencies";
-import type { CourseLevel } from "@/components/course-ladder/course-ladder";
 import { HomeView } from "@/components/home-view/home-view";
 import { requireSupportedLocale } from "@/i18n/require-supported-locale/require-supported-locale";
 import { shareMetadata } from "@/lib/share-metadata/share-metadata";
 
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { cache, use } from "react";
+import { use } from "react";
+
+import { catalogLevels, loadCatalogEntries } from "./catalog-levels";
+import { homeFirstLesson } from "./home-first-lesson";
 
 type Props = {
   params: Promise<{ locale: string }>;
 };
-
-const loadCatalog = cache(async () => {
-  const deps = getCoursePlatformDeps();
-  const result = await deps.useCases.findCourseCatalog();
-  return result.isOk() ? result.value.entries : [];
-});
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -35,29 +30,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 /**
  * The locale home route. A thin shell: it resolves the catalog through the
- * use case and hands the levels to `HomeView`, mirroring how the course and
- * module routes delegate to `CourseOverview` and `ModuleOverview`.
+ * use case and hands `HomeView` every course with its modules and lesson
+ * progress slices, and the first lesson the closing band's offer is sized by —
+ * mirroring how the course and module routes delegate to `CourseOverview` and
+ * `ModuleOverview`.
  *
- * Only the fields the ladder renders cross into the view — the catalog's
- * `firstLesson` stays here, unread, rather than being serialized into the
- * client payload for a card that never shows it.
+ * Lesson bodies stay on the server: only the progress slices and the first
+ * lesson's href, runtime and course title cross into the client payload.
  */
 export default function Home({ params }: Props) {
   const { locale } = use(params);
   setRequestLocale(locale);
 
-  const entries = use(loadCatalog());
-  const levels: CourseLevel[] = entries.map((entry) => ({
-    course: entry.course,
-    leadingModules: entry.leadingModules,
-  }));
+  const entries = use(loadCatalogEntries());
+  const levels = catalogLevels(entries);
 
   return (
     <main
       id="main"
-      className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-14 px-4 py-12 sm:px-11 sm:py-20"
+      className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-20 px-4 py-12 sm:gap-28 sm:px-11 sm:py-20"
     >
-      <HomeView levels={levels} />
+      <HomeView
+        levels={levels}
+        firstLesson={homeFirstLesson(entries)}
+      />
     </main>
   );
 }

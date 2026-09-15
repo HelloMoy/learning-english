@@ -10,56 +10,74 @@ import { Skeleton } from "@/components/ui/skeleton/skeleton";
  * phone — and they read that stale page as the one they asked for. This gives
  * Next something to swap in on the first frame instead.
  *
- * The shapes trace the real home: the hero's eyebrow, headline and standfirst,
- * the section heading row, and the course ladder in the grid `CourseLadder`
- * derives from the catalog size. The classes are the page's own, so the arriving
- * content fills positions that are already correct.
+ * The shapes trace the new-visitor home, which is what the server renders: the
+ * editorial hero on its twelve-column grid with the vowel-length card beside
+ * it, the numbered questions, and the levels table. The classes are the page's
+ * own, so the arriving content fills positions that are already correct.
  *
- * Three cards, because the catalog holds two courses today and a third column
- * only opens above `xl` — a shell that guessed higher would leave a hole the
- * real ladder never has.
+ * Two level rows, because the catalog ships two courses today; a shell that
+ * guessed more would promise rows the table never draws.
  */
 export default function Loading() {
   return (
     <main
       id="main"
-      className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-14 px-4 py-12 sm:px-11 sm:py-20"
+      className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-20 px-4 py-12 sm:gap-28 sm:px-11 sm:py-20"
     >
       <LoadingStatus />
 
       <div
         data-testid="home-shell-shapes"
         aria-hidden="true"
-        className="flex flex-col gap-14"
+        className="flex flex-col gap-20 sm:gap-28"
       >
         <section
           data-testid="home-shell-hero"
-          className="flex max-w-3xl flex-col gap-5"
+          className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-12"
         >
-          <Skeleton className="h-3 w-56" />
-          <Skeleton className="h-16 w-full sm:h-20" />
-          <Skeleton className="h-16 w-4/5 sm:h-20" />
-          <Skeleton className="h-6 w-full max-w-xl" />
+          <div className="flex flex-col gap-6 lg:col-span-7">
+            <Skeleton className="h-3 w-64" />
+            <Skeleton className="h-12 w-full sm:h-16" />
+            <Skeleton className="h-12 w-5/6 sm:h-16" />
+            <Skeleton className="h-12 w-2/3 sm:h-16" />
+            <Skeleton className="h-5 w-full max-w-xl" />
+            <Skeleton className="h-12 w-60 rounded-lg" />
+          </div>
+          <CardShape />
         </section>
 
-        <section
-          data-testid="home-shell-section"
-          className="flex flex-col gap-8"
-        >
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div className="flex flex-col gap-3">
-              <Skeleton className="h-3 w-40" />
-              <Skeleton className="h-9 w-64" />
-            </div>
-            <Skeleton className="h-7 w-28 rounded-full" />
+        <section className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-12">
+          <div className="flex flex-col gap-3 lg:col-span-4">
+            <Skeleton className="h-3 w-36" />
+            <Skeleton className="h-9 w-full max-w-72" />
           </div>
+          <div className="flex flex-col lg:col-span-8">
+            {[0, 1, 2].map((question) => (
+              <div
+                key={question}
+                className="flex gap-6 border-t border-border py-7"
+              >
+                <Skeleton className="h-8 w-10 shrink-0" />
+                <div className="flex w-full flex-col gap-3">
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
+        <section className="flex flex-col gap-7">
+          <div className="flex flex-col gap-3">
+            <Skeleton className="h-3 w-40" />
+            <Skeleton className="h-9 w-64" />
+          </div>
           <div
-            data-testid="home-shell-ladder"
-            className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
+            data-testid="home-shell-levels"
+            className="flex flex-col border-t-2 border-border"
           >
-            {[0, 1, 2].map((card) => (
-              <CourseCardShape key={card} />
+            {[0, 1].map((row) => (
+              <LevelRowShape key={row} />
             ))}
           </div>
         </section>
@@ -68,34 +86,43 @@ export default function Loading() {
   );
 }
 
-/**
- * One rung of the ladder: the ordinal and state chips, the course title, its
- * description, the module rows it previews, and the call to action.
- */
-function CourseCardShape() {
+/** The vowel-length card: eyebrow row, the two word rows, and the anchor note. */
+function CardShape() {
   return (
-    <div className="flex h-full flex-col gap-5 rounded-2xl border border-border p-7">
+    <div
+      data-testid="home-shell-card"
+      className="flex flex-col gap-5 rounded-2xl border border-border p-5 sm:p-7 lg:col-span-5"
+    >
       <div className="flex items-center justify-between gap-3">
-        <Skeleton className="h-3 w-20" />
-        <Skeleton className="h-6 w-24 rounded-full" />
+        <Skeleton className="h-3 w-40" />
+        <Skeleton className="h-4 w-20" />
       </div>
-      <Skeleton className="h-7 w-3/4" />
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-5/6" />
-      </div>
-      <div className="flex flex-col">
-        {[0, 1, 2].map((row) => (
-          <div
-            key={row}
-            className="flex items-center gap-3 border-t border-border py-2.5"
-          >
-            <Skeleton className="h-3 w-16 shrink-0" />
-            <Skeleton className="h-4 min-w-0 flex-1" />
+      {[0, 1].map((row) => (
+        <div
+          key={row}
+          className="flex items-center gap-4 border-t border-border py-3.5"
+        >
+          <Skeleton className="size-12 shrink-0 rounded-full" />
+          <div className="flex w-full flex-col gap-2.5">
+            <Skeleton className="h-10 w-32" />
+            <Skeleton className="h-2 w-full rounded-full" />
           </div>
-        ))}
-      </div>
-      <Skeleton className="h-11 w-36 rounded-lg" />
+        </div>
+      ))}
+      <Skeleton className="h-20 w-full rounded-xl" />
+    </div>
+  );
+}
+
+/** One row of the levels table: ordinal, title, description, counts and link. */
+function LevelRowShape() {
+  return (
+    <div className="grid grid-cols-1 gap-3 border-b border-border py-6 lg:grid-cols-[7.5rem_minmax(0,1.2fr)_minmax(0,1.4fr)_12.5rem_11.25rem] lg:items-center lg:gap-6 lg:py-8">
+      <Skeleton className="h-3 w-16" />
+      <Skeleton className="h-7 w-3/4" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-28" />
+      <Skeleton className="h-11 w-full rounded-lg" />
     </div>
   );
 }

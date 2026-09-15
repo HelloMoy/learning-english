@@ -24,21 +24,30 @@ describe("Home loading shell", () => {
 
       // Assert
       expect(document.querySelector('[data-testid="home-shell-hero"]')).toBeInTheDocument();
-      expect(document.querySelector('[data-testid="home-shell-section"]')).toBeInTheDocument();
-      expect(document.querySelector('[data-testid="home-shell-ladder"]')).toBeInTheDocument();
+      expect(document.querySelector('[data-testid="home-shell-card"]')).toBeInTheDocument();
+      expect(document.querySelector('[data-testid="home-shell-levels"]')).toBeInTheDocument();
     });
 
-    test("WHEN the shell renders THEN the ladder follows the real grid at every breakpoint", () => {
+    test("WHEN the shell renders THEN the hero follows the editorial two-column grid", () => {
       // Act
       renderShell();
 
       // Assert
-      // The real ladder is `grid-cols-1 md:grid-cols-2 xl:grid-cols-3`; a shell
-      // that stacks where the page does not re-lays the page out on arrival.
-      const ladder = document.querySelector('[data-testid="home-shell-ladder"]');
-      expect(ladder).toHaveClass("grid-cols-1");
-      expect(ladder).toHaveClass("md:grid-cols-2");
-      expect(ladder).toHaveClass("xl:grid-cols-3");
+      // The real hero is one column that opens to twelve at `lg`, with the copy
+      // on seven and the card on five; a shell that disagreed would re-lay the
+      // page out on arrival.
+      const hero = document.querySelector('[data-testid="home-shell-hero"]');
+      expect(hero).toHaveClass("grid-cols-1");
+      expect(hero).toHaveClass("lg:grid-cols-12");
+    });
+
+    test("WHEN the shell renders THEN it traces one levels row per course the catalog ships", () => {
+      // Act
+      renderShell();
+
+      // Assert
+      const rows = document.querySelectorAll('[data-testid="home-shell-levels"] > *');
+      expect(rows).toHaveLength(2);
     });
 
     test("WHEN the shell renders THEN it announces once and its shapes stay silent", () => {
