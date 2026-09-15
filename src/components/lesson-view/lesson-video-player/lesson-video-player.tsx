@@ -77,6 +77,12 @@ import { buildVideoPlayerTranslations } from "./video-player-translations";
  * band shorter than `width × 9/16` — which is what a landscape viewport would
  * give — crops the video top and bottom.
  *
+ * The browser's own fullscreen has the same trap and gets the same answer one
+ * level down. There the browser makes the player the screen, so on a screen
+ * wider than 16:9 — an Android phone in landscape — the stylesheet bounds the
+ * provider instead: the video is the largest 16:9 band, centred, while the
+ * controls and gestures keep the whole screen.
+ *
  * On an iPhone the viewport itself is the ceiling: Safari's toolbar takes 110
  * of the 402 landscape points and hides only for a real swipe on the document,
  * which is why the mode never locks the page's scroll — the swipe has to travel
