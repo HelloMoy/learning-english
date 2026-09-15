@@ -1,9 +1,5 @@
-# Capability: cinema-course-overview
+## ADDED Requirements
 
-## Purpose
-
-Define the Immersion Cinema presentation of the course overview route (`/[locale]/courses/[courseSlug]`). The course is presented as a numbered index of its modules: a course header with gold count pills, then one full-width showcase card per module, each preceded by its ordinal. A card pairs the module's title, an explicit video count and duration, and a call to action with a receding gallery of that module's leading lesson artwork, so a module reads as a container of several videos rather than as one video to play. A primary "Start course" action targets the deterministic first lesson. Neither the earlier interactive practice track nor the poster grid that replaced it remains in this view.
-## Requirements
 ### Requirement: The course overview opens with a continue tile and the course's progress
 
 The course overview (`/[locale]/courses/[courseSlug]`) SHALL open with two tiles, side by side
@@ -129,3 +125,16 @@ title.
 - **WHEN** the course overview renders at 390px wide
 - **THEN** each lesson tile is a full-width row and the document does not scroll horizontally
 
+## REMOVED Requirements
+
+### Requirement: The course overview opens with a compact hero that carries Start course
+**Reason**: Replaced by the continue tile and course progress tile, whose action adapts to the learner's progress.
+**Migration**: See "The course overview opens with a continue tile and the course's progress". The `start-course` test id is replaced by the continue tile's action.
+
+### Requirement: Modules are presented as a poster carousel with one selected module
+**Reason**: The carousel forced learners to page through lessons one at a time; every lesson is now visible at once.
+**Migration**: See "Every lesson is a progress-ring tile that opens its lesson". Clicking a tile replaces clicking the selected poster; selection, arrows, dots and swipe are gone.
+
+### Requirement: A progress panel invites the learner into the selected module
+**Reason**: Its progress moves into each lesson tile and the course tile; its per-video "Up next" list belongs to the module overview.
+**Migration**: Per-lesson progress is on the lesson tiles; the continue action is on the continue tile; video lists stay on the module overview.

@@ -1,24 +1,4 @@
-# my-learning Specification
-
-## Purpose
-TBD - created by archiving change learner-onboarding. Update Purpose after archive.
-## Requirements
-### Requirement: My learning is the learner's own page
-
-The route `/[locale]/learning` SHALL render the learner's page. After hydration it SHALL replace
-itself with `/[locale]/start` when no profile exists. Until storage has been read it SHALL render a
-placeholder of the page's shape.
-
-The page SHALL greet the learner with their avatar and a localized welcome that uses the first word of
-their name.
-
-#### Scenario: The greeting uses the learner's name
-- **WHEN** a learner named `Ana García` opens My learning
-- **THEN** the page shows their avatar and `Welcome back, Ana.`
-
-#### Scenario: No profile sends the learner to onboarding
-- **WHEN** a device without a profile opens `/en/learning`
-- **THEN** it lands on `/en/start`
+## MODIFIED Requirements
 
 ### Requirement: My learning resumes the last lesson or starts the first
 
@@ -87,23 +67,3 @@ offer Continue.
 #### Scenario: A card's ring fills to the module's share
 - **WHEN** one of a module's three videos is complete
 - **THEN** its card's ring fill covers a third of the circle and its label reads 33%
-
-### Requirement: My learning lists every course with the continued one marked
-
-My learning SHALL render the courses table in `sequence` order. The row for the continued course SHALL
-show an in-progress badge, its completed and total video counts and a `Continue course` link; every other
-row SHALL show its lesson and video counts and a `View course` link.
-
-#### Scenario: Only the continued course is marked
-- **WHEN** the continued lesson belongs to the first course
-- **THEN** the first row shows In progress and Continue course, and the second shows View course
-
-### Requirement: My learning copy is localized
-
-Every string on My learning SHALL come from the active locale's messages in `en`, `es` and `pt`, with ICU
-plurals for counts, and every link SHALL be locale-aware.
-
-#### Scenario: My learning in Spanish
-- **WHEN** `/es/learning` renders for a learner
-- **THEN** the greeting, panel actions, row labels and table copy render from `es.json`
-

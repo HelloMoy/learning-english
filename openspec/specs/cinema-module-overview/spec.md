@@ -143,24 +143,14 @@ The row SHALL show a pointer-driven hover treatment, so the area that responds t
 
 ### Requirement: The current lesson is featured on the route
 
-The **current** lesson SHALL follow where the learner was last, so a learner who skips
-ahead is not sent back to the start, and a learner who then returns to the start
-continues there. It is found from an **anchor** lesson:
+The **current** lesson SHALL be the module's **continue target**, as defined once by the
+`continue-target` capability: the rule applied to the module's lessons in `sequence` order, with the
+lesson recorded by the `continue-watching` capability as the last opened lesson when it belongs to this
+module. The module overview SHALL NOT restate or reimplement that rule; its route SHALL obtain the
+current step from `findContinueTarget`.
 
-- The anchor SHALL be the **last opened** lesson — the lesson recorded by the
-  `continue-watching` capability — when that record points to a lesson of this module.
-- Otherwise — no record, or a record pointing outside this module — the anchor SHALL be
-  the **furthest** lesson: the one with the highest `sequence` that has any progress
-  (finished, or a watched fraction above 0).
-
-From the anchor:
-
-- When the anchor is not finished, it SHALL be the current lesson.
-- When it is finished, the current lesson SHALL be the first unfinished lesson after it
-  in `sequence` order.
-- When no unfinished lesson follows it, the current lesson SHALL be the first unfinished
-  lesson in the module.
-- When there is no anchor, the current lesson SHALL be the first lesson.
+A target of kind `start` or `continue` SHALL be the current step. A target of kind `rewatch` — every
+lesson finished — SHALL make no step current.
 
 Because the record holds the lesson opened last, opening an earlier lesson to review it
 moves the current lesson to that point; the record cannot tell a review from a return to
@@ -224,6 +214,10 @@ action — with the poster excluded from the accessibility tree and the tab orde
 #### Scenario: A finished module features nothing
 - **WHEN** every lesson in the module is finished
 - **THEN** no step is expanded and every step shows the finished marker
+
+#### Scenario: The module and the course pick the same video
+- **WHEN** the current step of a module is video 4 and that module holds the course's continue target
+- **THEN** the course overview's continue tile offers the same video 4
 
 ### Requirement: The module states its progress in a panel
 
