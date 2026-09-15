@@ -44,8 +44,9 @@ panel area SHALL show a placeholder naming no lesson.
 My learning SHALL list, for the continued course — or the first catalog course when nothing is
 continued — the course title, its completed and total video counts, and one card per module. Each card
 SHALL show the module's ordinal, title, a progress ring labelled with the module's completed share as a
-whole, locale-formatted percentage, and its completed-of-total video count. Counts SHALL use the same
-completion rule as the course overview, and before hydration every ring SHALL read 0%.
+whole, locale-formatted percentage, and its completed-of-total video count. The ring SHALL be the same
+progress ring the course overview draws. Counts SHALL use the same completion rule as the course
+overview, and before hydration every ring SHALL read 0%.
 
 Every card SHALL open its module's overview (`/[locale]/courses/<course>/modules/<module>`).
 
@@ -69,6 +70,10 @@ nothing is continued, every card SHALL render in `sequence` order and none SHALL
 #### Scenario: A finished module reads as complete
 - **WHEN** every video of a module is complete
 - **THEN** its ring reads 100%
+
+#### Scenario: A card's ring fills to the module's share
+- **WHEN** one of a module's three videos is complete
+- **THEN** its card's ring fill covers a third of the circle and its label reads 33%
 
 ### Requirement: My learning lists every course with the continued one marked
 

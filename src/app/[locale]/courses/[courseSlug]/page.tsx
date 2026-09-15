@@ -65,7 +65,7 @@ export default async function CourseOverviewPage({ params }: Props) {
   return (
     <main
       id="main"
-      className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-11 sm:py-16"
+      className="w-full"
     >
       <StructuredData data={courseSchema({ course, siteUrl: origin, locale })} />
       <StructuredData data={breadcrumbSchema([{ name: course.title, url: courseUrl }])} />

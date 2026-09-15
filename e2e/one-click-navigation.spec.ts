@@ -65,7 +65,7 @@ test.describe("Home and My learning — one click to the course, one to the less
       .click(COLD_ROUTE);
 
     await page.waitForURL(`**/en/courses/${FIRST_COURSE.slug}`, COLD_ROUTE);
-    await expect(page.getByTestId("course-module-list")).toBeVisible(COLD_ROUTE);
+    await expect(page.getByTestId("course-overview")).toBeVisible(COLD_ROUTE);
   });
 
   test("WHEN a lesson has been opened THEN My learning's Resume returns to it", async ({
@@ -107,22 +107,27 @@ test.describe("Home and My learning — one click to the course, one to the less
     await page.getByRole("link", { name: "View course content" }).first().click(COLD_ROUTE);
 
     await page.waitForURL(`**/en/courses/${SECOND_COURSE.slug}`, COLD_ROUTE);
-    await expect(page.getByTestId("course-module-list")).toBeVisible(COLD_ROUTE);
+    await expect(page.getByTestId("course-overview")).toBeVisible(COLD_ROUTE);
   });
 });
 
-test.describe("Showcase card — one click anywhere to the module", () => {
-  test("WHEN the card's body is clicked THEN its module overview opens", async ({ page }) => {
+test.describe("Course carousel — one click from the selected poster to the module", () => {
+  test("WHEN the selected poster on the course overview is clicked THEN its module overview opens", async ({
+    page,
+  }) => {
     const modules = modulesOfCourse(FIRST_COURSE.slug);
+    // A one-video module's poster opens its video instead, so aim at the first
+    // module that actually has an overview worth opening.
+    const moduleIndex = modules.findIndex((module) => lessonsOfModule(module.id).length > 1);
     await page.goto(`/en/courses/${FIRST_COURSE.slug}`);
 
-    // The panel's top-left padding, the far side of it from the call to
-    // action — so this click can only be the overlay's.
-    await page.getByTestId("module-showcase-panel").first().click({ position: IN_THE_PADDING });
+    await page.getByTestId("carousel-dot").nth(moduleIndex).click(COLD_ROUTE);
+    await page.locator('a[data-testid="carousel-poster"]').click();
 
-    await page.waitForURL(`**/en/courses/${FIRST_COURSE.slug}/modules/${modules[0]!.slug}`, {
-      ...COLD_ROUTE,
-    });
+    await page.waitForURL(
+      `**/en/courses/${FIRST_COURSE.slug}/modules/${modules[moduleIndex]!.slug}`,
+      COLD_ROUTE,
+    );
     await expect(page.getByTestId("module-overview")).toBeVisible(COLD_ROUTE);
   });
 });

@@ -137,6 +137,19 @@ describe("CourseProgressList", () => {
     expect(third).toHaveTextContent("0%");
   });
 
+  test("WHEN one of a module's three videos is complete THEN its card's ring fill covers a third of the circle", () => {
+    markComplete(vowelLessons[0]!.id);
+    announceStorageChange();
+
+    renderList(null);
+
+    const fill = within(cards()[1]!).getByTestId("progress-ring-fill");
+    const circumference = 2 * Math.PI * Number(fill.getAttribute("r"));
+    const [drawn] = fill.getAttribute("stroke-dasharray")!.split(" ").map(Number);
+    expect(drawn).toBeCloseTo(circumference / 3, 1);
+    expect(cards()[1]).toHaveTextContent("33%");
+  });
+
   test("WHEN a module is fully watched THEN its card is marked complete", () => {
     markComplete(introductionLessons[0]!.id);
     announceStorageChange();

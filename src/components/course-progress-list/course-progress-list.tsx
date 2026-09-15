@@ -175,7 +175,7 @@ function LeadLessonCard({
     >
       <ModuleRing
         tally={tally}
-        className="size-[4.5rem]"
+        size={72}
         labelClassName="text-sm text-foreground"
       />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -231,7 +231,8 @@ function LessonCard({
         <ModuleOrdinal number={module.sequence} />
         <ModuleRing
           tally={tally}
-          labelClassName="text-foreground"
+          size={44}
+          labelClassName="text-[11px] text-foreground"
         />
       </div>
       <CardTitleLink
@@ -294,13 +295,14 @@ function ModuleCount({ tally }: { tally: WatchTally }) {
   );
 }
 
+/** The module's completed share on the shared ring, its percentage centred as real text. */
 function ModuleRing({
   tally,
-  className,
+  size,
   labelClassName,
 }: {
   tally: WatchTally;
-  className?: string;
+  size: number;
   labelClassName: string;
 }) {
   const t = useTranslations("Components.CourseProgressList");
@@ -308,11 +310,13 @@ function ModuleRing({
 
   return (
     <ProgressRing
-      share={share}
-      label={t("progressPercent", { percent: share })}
-      className={className}
-      labelClassName={labelClassName}
-    />
+      size={size}
+      fraction={share}
+    >
+      <span className={cn("font-extrabold whitespace-nowrap tabular-nums", labelClassName)}>
+        {t("progressPercent", { percent: share })}
+      </span>
+    </ProgressRing>
   );
 }
 

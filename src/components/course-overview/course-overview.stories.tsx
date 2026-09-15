@@ -24,8 +24,8 @@ const course = Course.parse({
  * The real course's shape, module by module: title, lesson count and total
  * duration in minutes. The distribution is deliberately uneven — 1 lesson in
  * module 4, 31 in module 7, ten and a half hours in module 10 — because a
- * story built on ten identical six-lesson modules would hide every layout
- * case that actually matters.
+ * story built on ten identical modules would hide every layout case that
+ * actually matters.
  */
 const REAL_MODULES: ReadonlyArray<[string, number, number]> = [
   ["Advanced Pronunciation Course", 4, 28],
@@ -40,7 +40,7 @@ const REAL_MODULES: ReadonlyArray<[string, number, number]> = [
   ["The Practice Zone Sharpen Your Skills", 16, 635],
 ];
 
-/** A real seed poster, so the mosaic resolves instead of showing empty tiles. */
+/** A real seed poster, so every collage resolves instead of showing empty frames. */
 const POSTER =
   "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/1-intro/04ecdb-ec4d-8fea-d3f-dc020da6ec80-snapshot-554507553.jpeg";
 
@@ -60,15 +60,12 @@ const moduleSummaries: ModuleSummary[] = modules.map((module, index) => {
     moduleId: module.id,
     lessonCount,
     totalDurationSeconds: minutes * 60,
-    leadingLessons: Array.from({ length: Math.min(lessonCount, 6) }, (_, tile) => ({
+    lessons: Array.from({ length: lessonCount }, (_, lessonIndex) => ({
       id: LessonId.parse(faker.string.uuid()),
-      sequence: tile + 1,
-      title: `Lesson ${tile + 1}`,
-      poster: POSTER,
-    })),
-    lessonRuntimes: Array.from({ length: lessonCount }, () => ({
-      id: LessonId.parse(faker.string.uuid()),
+      sequence: lessonIndex + 1,
+      title: `Lesson ${lessonIndex + 1}`,
       durationSeconds: Math.round((minutes * 60) / lessonCount),
+      poster: POSTER,
     })),
   };
 });
@@ -83,11 +80,13 @@ const firstLesson = Lesson.parse({
   description: "Welcome to the course.",
   source: "/local-filesystem-lesson/advanced-intermediate-course/1-module/welcome.mp4",
   durationSeconds: 195,
+  poster: POSTER,
 });
 
 const meta: Meta<typeof CourseOverview> = {
   title: "Components/CourseOverview",
   component: CourseOverview,
+  parameters: { layout: "fullscreen" },
   args: {
     course,
     modules,
@@ -101,12 +100,13 @@ export default meta;
 type Story = StoryObj<typeof CourseOverview>;
 
 /**
- * All ten modules at their real sizes. Scan the ordinals down the left edge:
- * the page should read as a numbered index, and no card should read as a
- * single video.
+ * All ten modules at their real sizes: the compact hero, the poster carousel
+ * and the progress panel for the selected module. Narrow the viewport to see
+ * the neighbours peek in from the screen edges.
  */
 export const Default: Story = {};
 
+/** A course with no lessons yet: the hero renders without Start course. */
 export const NoFirstLesson: Story = {
   args: {
     modules: modules.slice(0, 3),

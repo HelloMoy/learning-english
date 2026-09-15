@@ -113,10 +113,13 @@ export function LearnerCard({
         <span>{t("subject")}</span>
         <ProgressTooltip label={t("progress", progress)}>
           <ProgressRing
-            share={share}
-            label={t("progressPercent", { percent: share })}
-            labelClassName="text-popover-foreground"
-          />
+            size={44}
+            fraction={share}
+          >
+            <span className="text-[11px] font-extrabold whitespace-nowrap text-popover-foreground tabular-nums">
+              {t("progressPercent", { percent: share })}
+            </span>
+          </ProgressRing>
           <span className="flex flex-col gap-0.5 text-left">
             <span className="text-[13px] font-bold">{t("progress", progress)}</span>
             <span className="text-xs font-normal text-muted-foreground">

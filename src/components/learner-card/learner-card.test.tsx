@@ -44,6 +44,11 @@ describe("LearnerCard", () => {
     expect(tooltip).toHaveTextContent("8%");
     expect(tooltip).toHaveTextContent("4 of 48 videos");
     expect(tooltip).toHaveTextContent("44 to go in Basic Course");
+    // Radix renders a visually hidden copy for assistive technology; the ring is drawn once.
+    const [fill] = screen.getAllByTestId("progress-ring-fill");
+    const circumference = 2 * Math.PI * Number(fill!.getAttribute("r"));
+    const [drawn] = fill!.getAttribute("stroke-dasharray")!.split(" ").map(Number);
+    expect(drawn).toBeCloseTo((circumference * 4) / 48, 1);
   });
 
   test("WHEN the progress label is focused in es THEN the tooltip copy and percentage are Spanish", async () => {

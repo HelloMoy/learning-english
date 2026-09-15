@@ -5,26 +5,34 @@ import { ProgressRing } from "./progress-ring";
 const meta = {
   title: "Components/ProgressRing",
   component: ProgressRing,
-  args: { share: 0.24, label: "24%" },
+  args: { size: 220, fraction: 0.12 },
 } satisfies Meta<typeof ProgressRing>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** A quarter of the way through. */
-export const Partial: Story = {};
-
-/** Nothing done: the track alone, with no dot where the arc would start. */
-export const Empty: Story = {
-  args: { share: 0, label: "0%" },
+/** A module three videos into twenty-five. */
+export const Fraction: Story = {
+  args: {
+    children: <span className="text-5xl font-black">12%</span>,
+  },
 };
 
-/** Everything done: a closed gold ring. */
+/** A finished module: the fill closes the circle. */
 export const Complete: Story = {
-  args: { share: 1, label: "100%" },
+  args: { fraction: 1, children: <span className="text-5xl font-black">100%</span> },
 };
 
-/** Sized up, as the lead lesson card on My learning draws it. */
-export const Large: Story = {
-  args: { className: "size-[4.5rem]", labelClassName: "text-sm" },
+/** A module not yet started: one dash per video, the first one lit. */
+export const Segments: Story = {
+  args: {
+    fraction: undefined,
+    segments: 25,
+    children: <span className="text-5xl font-black">25</span>,
+  } as never,
+};
+
+/** The phone size used under the carousel. */
+export const Small: Story = {
+  args: { size: 170, children: <span className="text-4xl font-black">12%</span> },
 };

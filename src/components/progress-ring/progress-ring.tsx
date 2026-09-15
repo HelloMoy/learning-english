@@ -1,78 +1,88 @@
-import { cn } from "@/lib/utils/utils";
+import type { ReactNode } from "react";
 
-const RING_RADIUS = 18;
-const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+/** The gap, in pixels along the circle, between two segments of a segmented ring. */
+const SEGMENT_GAP_PX = 4;
+
+type ProgressRingProps = {
+  /** Outer width and height of the ring, in pixels. */
+  size: number;
+  /** Content centred inside the ring — typically a number and a caption. */
+  children?: ReactNode;
+} & ({ fraction: number; segments?: never } | { segments: number; fraction?: never });
 
 /**
- * A progress ring: a track with a gold arc for the completed share, and a
- * label — usually the percentage — as real text in its middle.
+ * A circular progress indicator in the Immersion Cinema gold.
  *
  * @remarks
- * The drawing is decorative; the label carries the meaning, so it is read out
- * with whatever surrounds the ring. An empty share draws no arc rather than the
- * dot a zero-length round-capped stroke would leave.
+ * Two modes:
  *
- * The ring is 44px by default; size it with `className` (it scales with the
- * box) and set the label's size and colour with `labelClassName`.
+ * - `fraction` fills the ring clockwise from the top to that share, clamped to
+ *   the unit range — the "how far through this lesson" reading.
+ * - `segments` splits the track into one dash per item and lights only the
+ *   first — the "N videos, starting here" reading for something not begun.
+ *
+ * The drawing is decorative: whatever it means must be said by `children` or by
+ * nearby text, so the SVG is hidden from assistive technology.
  *
  * @example
  * ```tsx
- * <ProgressRing share={0.24} label="24%" className="size-[4.5rem]" labelClassName="text-sm" />
+ * <ProgressRing size={220} fraction={0.12}>
+ *   <span>12%</span>
+ * </ProgressRing>
  * ```
- *
- * @param share - The completed share, in `[0, 1]`
- * @param label - The text in the middle of the ring
- * @param className - Classes for the ring's box, such as its size
- * @param labelClassName - Classes for the label, such as its size and colour
  */
-export function ProgressRing({
-  share,
-  label,
-  className,
-  labelClassName,
-}: {
-  share: number;
-  label: string;
-  className?: string;
-  labelClassName?: string;
-}) {
+export function ProgressRing({ size, fraction, segments, children }: ProgressRingProps) {
+  const strokeWidth = Math.round(size * 0.064);
+  const radius = size / 2 - strokeWidth - 2;
+  const circumference = 2 * Math.PI * radius;
+  const centre = size / 2;
+  const segmentDash = segments ? circumference / segments - SEGMENT_GAP_PX : 0;
+
   return (
-    <span className={cn("relative flex size-11 shrink-0 items-center justify-center", className)}>
+    <div
+      className="relative shrink-0"
+      style={{ width: size, height: size }}
+    >
       <svg
-        viewBox="0 0 44 44"
         aria-hidden="true"
-        className="absolute inset-0 size-full -rotate-90"
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        className="-rotate-90"
       >
         <circle
-          cx="22"
-          cy="22"
-          r={RING_RADIUS}
+          data-testid="progress-ring-track"
+          cx={centre}
+          cy={centre}
+          r={radius}
           fill="none"
-          strokeWidth="5"
-          className="stroke-secondary"
+          strokeWidth={strokeWidth}
+          className={segments ? "stroke-gold/40" : "stroke-border"}
+          strokeDasharray={segments ? `${segmentDash} ${SEGMENT_GAP_PX}` : undefined}
         />
-        {share > 0 ? (
-          <circle
-            data-slot="progress-ring-arc"
-            cx="22"
-            cy="22"
-            r={RING_RADIUS}
-            fill="none"
-            strokeWidth="5"
-            strokeLinecap="round"
-            strokeDasharray={`${share * RING_CIRCUMFERENCE} ${RING_CIRCUMFERENCE}`}
-            className="stroke-primary"
-          />
-        ) : null}
+        <circle
+          data-testid="progress-ring-fill"
+          cx={centre}
+          cy={centre}
+          r={radius}
+          fill="none"
+          strokeWidth={strokeWidth}
+          strokeLinecap={segments ? "butt" : "round"}
+          className="stroke-gold drop-shadow-[0_0_10px_color-mix(in_oklab,var(--glow)_60%,transparent)]"
+          strokeDasharray={
+            segments
+              ? `${segmentDash} ${circumference}`
+              : `${circumference * clampToUnit(fraction ?? 0)} ${circumference}`
+          }
+        />
       </svg>
-      <span
-        className={cn(
-          "relative text-[11px] font-extrabold whitespace-nowrap tabular-nums",
-          labelClassName,
-        )}
-      >
-        {label}
-      </span>
-    </span>
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+        {children}
+      </div>
+    </div>
   );
+}
+
+function clampToUnit(value: number): number {
+  return Math.min(1, Math.max(0, value));
 }

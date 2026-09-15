@@ -3,7 +3,9 @@ import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
 import type { ModuleSummary } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
+import { useIsHydrated } from "@/hooks/use-is-hydrated/use-is-hydrated";
 
+import { faker } from "@faker-js/faker";
 import { render, screen } from "@testing-library/react";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -14,13 +16,22 @@ vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
 }));
 
-const mockUseTranslations = vi.mocked(useTranslations);
+vi.mock("@/hooks/use-is-hydrated/use-is-hydrated", () => ({
+  useIsHydrated: vi.fn(),
+}));
+
+/**
+ * The string the key-echoing `useTranslations` mock produces for a message,
+ * so expectations for nested messages need no hand-escaped JSON.
+ */
+const msg = (key: string, values?: Record<string, unknown>) =>
+  values ? `${key}:${JSON.stringify(values)}` : key;
 
 const course = Course.parse({
-  id: CourseId.parse("11111111-1111-4111-8111-111111111111"),
+  id: CourseId.parse(faker.string.uuid()),
   slug: "course-1",
-  title: "Course 1",
-  description: "Course description",
+  title: faker.lorem.words(2),
+  description: faker.lorem.sentence(),
   language: "en",
   lessonCount: 3,
   moduleCount: 2,
@@ -28,28 +39,28 @@ const course = Course.parse({
 });
 
 const mod1 = Module.parse({
-  id: ModuleId.parse("22222222-2222-4222-8222-222222222222"),
+  id: ModuleId.parse(faker.string.uuid()),
   courseId: course.id,
   slug: "mod-1",
-  title: "Module 1",
+  title: faker.lorem.words(2),
   sequence: 1,
 });
 const mod2 = Module.parse({
   ...mod1,
-  id: ModuleId.parse("33333333-3333-4333-8333-333333333333"),
+  id: ModuleId.parse(faker.string.uuid()),
   slug: "mod-2",
-  title: "Module 2",
+  title: faker.lorem.words(2),
   sequence: 2,
 });
 
 const firstLesson = Lesson.parse({
   kind: "video",
-  id: LessonId.parse("44444444-4444-4444-8444-444444444444"),
+  id: LessonId.parse(faker.string.uuid()),
   courseId: course.id,
   moduleId: mod1.id,
   sequence: 1,
-  title: "First lesson",
-  description: "First lesson",
+  title: faker.lorem.words(2),
+  description: faker.lorem.sentence(),
   source: "/local-filesystem-lesson/lesson.mp4",
   durationSeconds: 240,
 });
@@ -58,94 +69,88 @@ const summaryFor = (module: Module): ModuleSummary => ({
   moduleId: module.id,
   lessonCount: 2,
   totalDurationSeconds: 600,
-  leadingLessons: [
-    {
-      id: LessonId.parse("55555555-5555-4555-8555-555555555555"),
-      sequence: 1,
-      title: `${module.title} lesson one`,
-      poster: "/local-filesystem-lesson/poster.jpeg",
-    },
-  ],
-  lessonRuntimes: [
-    { id: LessonId.parse("55555555-5555-4555-8555-555555555555"), durationSeconds: 300 },
-    { id: LessonId.parse("66666666-6666-4666-8666-666666666666"), durationSeconds: 300 },
-  ],
+  lessons: [1, 2].map((sequence) => ({
+    id: LessonId.parse(faker.string.uuid()),
+    sequence,
+    title: faker.lorem.words(3),
+    durationSeconds: 300,
+  })),
 });
 
-const renderOverview = (overrides?: {
-  modules?: Module[];
-  moduleSummaries?: ModuleSummary[];
-  firstLesson?: Lesson | null;
-}) => {
-  const modules = overrides?.modules ?? [mod1, mod2];
-  return render(
+const renderOverview = (overrides?: { firstLesson?: Lesson | null }) =>
+  render(
     <CourseOverview
       course={course}
-      modules={modules}
-      moduleSummaries={overrides?.moduleSummaries ?? modules.map(summaryFor)}
+      modules={[mod1, mod2]}
+      moduleSummaries={[mod1, mod2].map(summaryFor)}
       firstLesson={overrides?.firstLesson === undefined ? firstLesson : overrides.firstLesson}
     />,
   );
-};
 
 describe("CourseOverview", () => {
   beforeEach(() => {
-    mockUseTranslations.mockImplementation(
-      () =>
-        ((key: string, values?: Record<string, unknown>) =>
-          values
-            ? `CourseCatalog.courseOverview.${key}:${JSON.stringify(values)}`
-            : `CourseCatalog.courseOverview.${key}`) as never,
-    );
+    vi.mocked(useTranslations).mockImplementation(() => msg as never);
+    vi.mocked(useIsHydrated).mockReturnValue(true);
   });
 
-  test("renders the course title and a Start course CTA when a first lesson exists", () => {
-    renderOverview();
-    expect(screen.getByRole("heading", { level: 1, name: "Course 1" })).toBeInTheDocument();
-    expect(screen.getByTestId("start-course")).toHaveAttribute(
-      "href",
-      "/courses/course-1/modules/mod-1/lessons/44444444-4444-4444-8444-444444444444",
-    );
+  describe("GIVEN a course with a first lesson", () => {
+    test("WHEN the overview renders THEN the hero shows the now-showing eyebrow AND the course title", () => {
+      // Act
+      renderOverview();
+
+      // Assert
+      expect(screen.getByText(msg("nowShowing", { count: 2 }))).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1, name: course.title })).toBeInTheDocument();
+    });
+
+    test("WHEN the overview renders THEN the meta line states the videos AND runtime below the title", () => {
+      // Act
+      renderOverview();
+
+      // Assert
+      const meta = screen.getByTestId("course-hero-meta");
+      expect(meta).toHaveTextContent(
+        msg("courseMetaShort", {
+          videos: msg("lessonCount", { count: 3 }),
+          duration: msg("durationMinutes", { minutes: 20 }),
+        }),
+      );
+      const title = screen.getByRole("heading", { level: 1 });
+      expect(title.contains(meta)).toBe(false);
+      expect(title.compareDocumentPosition(meta) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    test("WHEN the overview renders THEN a single Start course action opens the first lesson", () => {
+      // Act
+      renderOverview();
+
+      // Assert
+      const startCourse = screen.getAllByTestId("start-course");
+      expect(startCourse).toHaveLength(1);
+      expect(startCourse[0]).toHaveAttribute(
+        "href",
+        `/courses/course-1/modules/mod-1/lessons/${firstLesson.id}`,
+      );
+    });
+
+    test("WHEN the overview renders THEN it presents the modules as a carousel AND no shelves", () => {
+      // Act
+      renderOverview();
+
+      // Assert
+      expect(screen.getByRole("region", { name: "carouselLabel" })).toBeInTheDocument();
+      expect(screen.getAllByTestId("module-poster")).toHaveLength(2);
+      expect(screen.queryByTestId("module-shelf")).toBeNull();
+    });
   });
 
-  test("renders one showcase card per module, numbered in sequence", () => {
-    renderOverview();
-    const ordinals = screen.getAllByTestId("module-showcase-ordinal");
-    expect(ordinals).toHaveLength(2);
-    expect(ordinals[0]).toHaveTextContent('moduleOrdinal:{"number":1}');
-    expect(ordinals[1]).toHaveTextContent('moduleOrdinal:{"number":2}');
-    const cards = [...screen.getByTestId("course-module-list").children];
-    expect(cards).toHaveLength(2);
-    for (const card of cards) expect(card.tagName).toBe("LI");
-  });
+  describe("GIVEN a course with no first lesson", () => {
+    test("WHEN the overview renders THEN no Start course action renders", () => {
+      // Act
+      renderOverview({ firstLesson: null });
 
-  test("each card links to its module overview", () => {
-    renderOverview();
-    const ctas = screen.getAllByTestId("module-showcase-cta");
-    expect(ctas).toHaveLength(2);
-    expect(ctas[0]).toHaveAttribute("href", "/courses/course-1/modules/mod-1");
-    expect(ctas[1]).toHaveAttribute("href", "/courses/course-1/modules/mod-2");
-  });
-
-  test("drops the retired season heading, poster grid and Module badge", () => {
-    renderOverview();
-    // The grid and the practice track that preceded it are both gone.
-    expect(screen.queryByTestId("course-episode-grid")).toBeNull();
-    expect(screen.queryByTestId("course-track")).toBeNull();
-    expect(screen.queryByTestId("poster-card")).toBeNull();
-    const overview = screen.getByTestId("course-overview");
-    expect(overview.textContent).not.toContain("season");
-    expect(overview.textContent).not.toContain("limitedSeries");
-    expect(overview.textContent).not.toContain("moduleLabel");
-  });
-
-  test("skips a module that has no summary rather than crashing", () => {
-    renderOverview({ moduleSummaries: [summaryFor(mod1)] });
-    expect(screen.getAllByTestId("module-showcase-ordinal")).toHaveLength(1);
-  });
-
-  test("omits the Start course CTA when the course has no first lesson", () => {
-    renderOverview({ firstLesson: null });
-    expect(screen.queryByTestId("start-course")).toBeNull();
+      // Assert
+      expect(screen.queryByTestId("start-course")).toBeNull();
+    });
   });
 });
