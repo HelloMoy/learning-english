@@ -1,8 +1,51 @@
-# learner-onboarding Specification
+## ADDED Requirements
 
-## Purpose
-TBD - created by archiving change learner-onboarding. Update Purpose after archive.
-## Requirements
+### Requirement: Course routes require a learner profile
+
+Every course route SHALL, after hydration, replace itself with `/[locale]/start?next=<path>` when
+the device holds no learner profile. Course routes are `/[locale]/courses/[courseSlug]`,
+`/[locale]/courses/[courseSlug]/modules/[moduleSlug]` and
+`/[locale]/courses/[courseSlug]/modules/[moduleSlug]/lessons/[lessonId]`; `<path>` is the
+requested route's path without the locale prefix. The redirect SHALL apply however the route was
+reached (landing link, shared link, typed URL). Nothing SHALL be decided while the profile is
+unknown, and the server SHALL keep rendering the route's full content.
+
+#### Scenario: A lesson link on a device without a profile opens the onboarding
+- **WHEN** a device without a profile opens `/en/courses/c/modules/m/lessons/l`
+- **THEN** it lands on `/en/start?next=%2Fcourses%2Fc%2Fmodules%2Fm%2Flessons%2Fl`
+
+#### Scenario: A landing catalog card on a device without a profile opens the onboarding
+- **WHEN** a device without a profile follows a course card from `/en`
+- **THEN** it lands on `/en/start` carrying that course path as `next`
+
+#### Scenario: A learner with a profile stays on the course route
+- **WHEN** a device with a saved profile opens `/en/courses/c`
+- **THEN** the course overview stays open
+
+#### Scenario: The server still renders course content
+- **WHEN** `/en/courses/c` is requested without JavaScript
+- **THEN** the response contains the course overview and its structured data
+
+### Requirement: Only internal course paths are accepted as the onboarding return
+
+The onboarding SHALL treat `next` as valid only when it is a path that starts with `/courses/`, has
+no scheme, no host, no `//` sequence, no backslash and no `..` segment. An invalid or missing `next`
+SHALL be ignored, and the onboarding SHALL behave as though none was given.
+
+#### Scenario: An external URL is ignored
+- **WHEN** `/en/start?next=https%3A%2F%2Fevil.example` is completed
+- **THEN** finishing step 2 opens `/en/learning`
+
+#### Scenario: A protocol-relative path is ignored
+- **WHEN** `next` is `//evil.example/courses/c`
+- **THEN** it is ignored
+
+#### Scenario: A non-course internal path is ignored
+- **WHEN** `next` is `/profile`
+- **THEN** it is ignored
+
+## MODIFIED Requirements
+
 ### Requirement: Step one asks for the learner's name on a live card
 
 The route `/[locale]/start` SHALL render step 1 of 2 of the onboarding: a heading inviting the learner
@@ -62,57 +105,3 @@ Until storage has been read each step SHALL render a placeholder of its own shap
 #### Scenario: Step two needs step one
 - **WHEN** a device without a profile opens `/en/start/avatar`
 - **THEN** it lands on `/en/start`
-
-### Requirement: Onboarding copy is localized and marks its progress
-
-Every onboarding string SHALL come from the active locale's messages in `en`, `es` and `pt`, and each
-step SHALL state its position (`Step 1 of 2`, `Step 2 of 2`) in text and as a two-segment indicator.
-
-#### Scenario: Step one in Portuguese
-- **WHEN** `/pt/start` renders
-- **THEN** the heading, field label, placeholder, Continue and step label render from `pt.json`
-
-### Requirement: Course routes require a learner profile
-
-Every course route SHALL, after hydration, replace itself with `/[locale]/start?next=<path>` when
-the device holds no learner profile. Course routes are `/[locale]/courses/[courseSlug]`,
-`/[locale]/courses/[courseSlug]/modules/[moduleSlug]` and
-`/[locale]/courses/[courseSlug]/modules/[moduleSlug]/lessons/[lessonId]`; `<path>` is the
-requested route's path without the locale prefix. The redirect SHALL apply however the route was
-reached (landing link, shared link, typed URL). Nothing SHALL be decided while the profile is
-unknown, and the server SHALL keep rendering the route's full content.
-
-#### Scenario: A lesson link on a device without a profile opens the onboarding
-- **WHEN** a device without a profile opens `/en/courses/c/modules/m/lessons/l`
-- **THEN** it lands on `/en/start?next=%2Fcourses%2Fc%2Fmodules%2Fm%2Flessons%2Fl`
-
-#### Scenario: A landing catalog card on a device without a profile opens the onboarding
-- **WHEN** a device without a profile follows a course card from `/en`
-- **THEN** it lands on `/en/start` carrying that course path as `next`
-
-#### Scenario: A learner with a profile stays on the course route
-- **WHEN** a device with a saved profile opens `/en/courses/c`
-- **THEN** the course overview stays open
-
-#### Scenario: The server still renders course content
-- **WHEN** `/en/courses/c` is requested without JavaScript
-- **THEN** the response contains the course overview and its structured data
-
-### Requirement: Only internal course paths are accepted as the onboarding return
-
-The onboarding SHALL treat `next` as valid only when it is a path that starts with `/courses/`, has
-no scheme, no host, no `//` sequence, no backslash and no `..` segment. An invalid or missing `next`
-SHALL be ignored, and the onboarding SHALL behave as though none was given.
-
-#### Scenario: An external URL is ignored
-- **WHEN** `/en/start?next=https%3A%2F%2Fevil.example` is completed
-- **THEN** finishing step 2 opens `/en/learning`
-
-#### Scenario: A protocol-relative path is ignored
-- **WHEN** `next` is `//evil.example/courses/c`
-- **THEN** it is ignored
-
-#### Scenario: A non-course internal path is ignored
-- **WHEN** `next` is `/profile`
-- **THEN** it is ignored
-
