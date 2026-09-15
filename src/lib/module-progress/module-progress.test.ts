@@ -4,7 +4,7 @@ import type { ModuleLesson } from "@/domain/use-cases/find-course-for-view/find-
 import { faker } from "@faker-js/faker";
 import { describe, expect, test } from "vitest";
 
-import { moduleProgress, selectInitialModuleIndex, type ModuleProgress } from "./module-progress";
+import { moduleProgress } from "./module-progress";
 
 const MINUTE = 60;
 
@@ -154,43 +154,6 @@ describe("moduleProgress", () => {
 
       // Assert
       expect(progress).toEqual({ kind: "completed", first: lessons[0], lessonCount: 5 });
-    });
-  });
-});
-
-describe("selectInitialModuleIndex", () => {
-  const notStarted = { kind: "not-started" } as ModuleProgress;
-  const inProgress = { kind: "in-progress" } as ModuleProgress;
-  const completed = { kind: "completed" } as ModuleProgress;
-  const empty = { kind: "empty" } as ModuleProgress;
-
-  describe("GIVEN a module in progress after finished and untouched ones", () => {
-    test("WHEN the initial selection is chosen THEN the module in progress is selected", () => {
-      // Arrange + Act
-      const index = selectInitialModuleIndex([completed, notStarted, inProgress, notStarted]);
-
-      // Assert
-      expect(index).toBe(2);
-    });
-  });
-
-  describe("GIVEN no module in progress", () => {
-    test("WHEN the initial selection is chosen THEN the first unfinished module is selected", () => {
-      // Arrange + Act
-      const index = selectInitialModuleIndex([completed, empty, notStarted, notStarted]);
-
-      // Assert
-      expect(index).toBe(2);
-    });
-  });
-
-  describe("GIVEN every module finished", () => {
-    test("WHEN the initial selection is chosen THEN the first module is selected", () => {
-      // Arrange + Act
-      const index = selectInitialModuleIndex([completed, completed]);
-
-      // Assert
-      expect(index).toBe(0);
     });
   });
 });

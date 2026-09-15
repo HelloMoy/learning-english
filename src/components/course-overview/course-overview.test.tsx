@@ -1,6 +1,5 @@
 import { Course } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
-import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
 import type { ModuleSummary } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
 import { useIsHydrated } from "@/hooks/use-is-hydrated/use-is-hydrated";
@@ -33,7 +32,7 @@ const course = Course.parse({
   title: faker.lorem.words(2),
   description: faker.lorem.sentence(),
   language: "en",
-  lessonCount: 3,
+  lessonCount: 4,
   moduleCount: 2,
   sequence: 1,
 });
@@ -53,37 +52,26 @@ const mod2 = Module.parse({
   sequence: 2,
 });
 
-const firstLesson = Lesson.parse({
-  kind: "video",
-  id: LessonId.parse(faker.string.uuid()),
-  courseId: course.id,
-  moduleId: mod1.id,
-  sequence: 1,
-  title: faker.lorem.words(2),
-  description: faker.lorem.sentence(),
-  source: "/local-filesystem-lesson/lesson.mp4",
-  durationSeconds: 240,
-});
-
-const summaryFor = (module: Module): ModuleSummary => ({
+const summaryFor = (module: Module, lessonCount = 2): ModuleSummary => ({
   moduleId: module.id,
-  lessonCount: 2,
-  totalDurationSeconds: 600,
-  lessons: [1, 2].map((sequence) => ({
+  lessonCount,
+  totalDurationSeconds: lessonCount * 300,
+  lessons: Array.from({ length: lessonCount }, (_, index) => ({
     id: LessonId.parse(faker.string.uuid()),
-    sequence,
+    sequence: index + 1,
     title: faker.lorem.words(3),
     durationSeconds: 300,
   })),
 });
 
-const renderOverview = (overrides?: { firstLesson?: Lesson | null }) =>
+const summaries = [summaryFor(mod1), summaryFor(mod2)];
+
+const renderOverview = (moduleSummaries = summaries) =>
   render(
     <CourseOverview
       course={course}
       modules={[mod1, mod2]}
-      moduleSummaries={[mod1, mod2].map(summaryFor)}
-      firstLesson={overrides?.firstLesson === undefined ? firstLesson : overrides.firstLesson}
+      moduleSummaries={moduleSummaries}
     />,
   );
 
@@ -91,66 +79,55 @@ describe("CourseOverview", () => {
   beforeEach(() => {
     vi.mocked(useTranslations).mockImplementation(() => msg as never);
     vi.mocked(useIsHydrated).mockReturnValue(true);
+    window.localStorage.clear();
   });
 
-  describe("GIVEN a course with a first lesson", () => {
-    test("WHEN the overview renders THEN the hero shows the now-showing eyebrow AND the course title", () => {
+  describe("GIVEN a course with videos", () => {
+    test("WHEN the overview renders THEN the course title is the page heading", () => {
       // Act
       renderOverview();
 
       // Assert
-      expect(screen.getByText(msg("nowShowing", { count: 2 }))).toBeInTheDocument();
       expect(screen.getByRole("heading", { level: 1, name: course.title })).toBeInTheDocument();
     });
 
-    test("WHEN the overview renders THEN the meta line states the videos AND runtime below the title", () => {
+    test("WHEN the overview renders THEN every lesson is a ring tile in order AND there is no carousel", () => {
       // Act
       renderOverview();
 
       // Assert
-      const meta = screen.getByTestId("course-hero-meta");
-      expect(meta).toHaveTextContent(
-        msg("courseMetaShort", {
-          videos: msg("lessonCount", { count: 3 }),
-          duration: msg("durationMinutes", { minutes: 20 }),
-        }),
-      );
-      const title = screen.getByRole("heading", { level: 1 });
-      expect(title.contains(meta)).toBe(false);
-      expect(title.compareDocumentPosition(meta) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(
+        screen.getAllByTestId("lesson-ring-tile").map((tile) => tile.getAttribute("aria-label")),
+      ).toEqual([
+        msg("openLessonTile", { number: 1, title: mod1.title }),
+        msg("openLessonTile", { number: 2, title: mod2.title }),
+      ]);
+      expect(screen.queryByRole("region", { name: "carouselLabel" })).toBeNull();
+      expect(screen.queryByTestId("module-poster")).toBeNull();
+      expect(screen.queryByTestId("lesson-progress-panel")).toBeNull();
     });
 
-    test("WHEN the overview renders THEN a single Start course action opens the first lesson", () => {
+    test("WHEN a new learner's progress settles THEN a single Start course action opens the first video", async () => {
       // Act
       renderOverview();
 
       // Assert
-      const startCourse = screen.getAllByTestId("start-course");
-      expect(startCourse).toHaveLength(1);
-      expect(startCourse[0]).toHaveAttribute(
+      const start = await screen.findByRole("link", { name: /startCourse/ });
+      expect(start).toHaveAttribute(
         "href",
-        `/courses/course-1/modules/mod-1/lessons/${firstLesson.id}`,
+        `/courses/course-1/modules/mod-1/lessons/${summaries[0]!.lessons[0]!.id}`,
       );
-    });
-
-    test("WHEN the overview renders THEN it presents the modules as a carousel AND no shelves", () => {
-      // Act
-      renderOverview();
-
-      // Assert
-      expect(screen.getByRole("region", { name: "carouselLabel" })).toBeInTheDocument();
-      expect(screen.getAllByTestId("module-poster")).toHaveLength(2);
-      expect(screen.queryByTestId("module-shelf")).toBeNull();
+      expect(screen.getAllByTestId("continue-tile")).toHaveLength(1);
     });
   });
 
-  describe("GIVEN a course with no first lesson", () => {
-    test("WHEN the overview renders THEN no Start course action renders", () => {
+  describe("GIVEN a course with no videos", () => {
+    test("WHEN the overview renders THEN no continue tile renders", () => {
       // Act
-      renderOverview({ firstLesson: null });
+      renderOverview([summaryFor(mod1, 0), summaryFor(mod2, 0)]);
 
       // Assert
-      expect(screen.queryByTestId("start-course")).toBeNull();
+      expect(screen.queryByTestId("continue-tile")).toBeNull();
     });
   });
 });

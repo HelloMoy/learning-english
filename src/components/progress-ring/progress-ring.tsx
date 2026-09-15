@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils/utils";
+
 import type { ReactNode } from "react";
 
 /** The gap, in pixels along the circle, between two segments of a segmented ring. */
@@ -8,6 +10,12 @@ type ProgressRingProps = {
   size: number;
   /** Content centred inside the ring — typically a number and a caption. */
   children?: ReactNode;
+  /**
+   * Whether the fill casts its gold glow. Defaults to `true`. Turn it off when the
+   * ring sits over artwork: the glow's filter paints over whatever lies behind the
+   * ring's square box, which shows as a dark square on an image.
+   */
+  glow?: boolean;
 } & ({ fraction: number; segments?: never } | { segments: number; fraction?: never });
 
 /**
@@ -31,7 +39,13 @@ type ProgressRingProps = {
  * </ProgressRing>
  * ```
  */
-export function ProgressRing({ size, fraction, segments, children }: ProgressRingProps) {
+export function ProgressRing({
+  size,
+  fraction,
+  segments,
+  children,
+  glow = true,
+}: ProgressRingProps) {
   const strokeWidth = Math.round(size * 0.064);
   const radius = size / 2 - strokeWidth - 2;
   const circumference = 2 * Math.PI * radius;
@@ -68,7 +82,10 @@ export function ProgressRing({ size, fraction, segments, children }: ProgressRin
           fill="none"
           strokeWidth={strokeWidth}
           strokeLinecap={segments ? "butt" : "round"}
-          className="stroke-gold drop-shadow-[0_0_10px_color-mix(in_oklab,var(--glow)_60%,transparent)]"
+          className={cn(
+            "stroke-gold",
+            glow && "drop-shadow-[0_0_10px_color-mix(in_oklab,var(--glow)_60%,transparent)]",
+          )}
           strokeDasharray={
             segments
               ? `${segmentDash} ${circumference}`

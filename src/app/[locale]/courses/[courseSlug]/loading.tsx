@@ -1,14 +1,17 @@
 import { LoadingStatus } from "@/components/loading-status/loading-status";
 import { Skeleton } from "@/components/ui/skeleton/skeleton";
 
+/** How many lesson tiles the shell previews: one row at `lg`. */
+const LESSON_SHAPES = 5;
+
 /**
  * The course overview's loading shell.
  *
  * @remarks
- * The shapes trace `CourseOverview`: the compact hero (eyebrow, title, meta line
- * and Start course), the poster carousel with its selected poster between
- * shrinking neighbours and its dots, and the progress panel beneath. Sizes match
- * the real carousel at both breakpoints so nothing reflows when it arrives.
+ * The shapes trace `CourseProgressBoard`: the continue tile beside the course
+ * progress tile (the course tile first on a phone), then a row of lesson ring
+ * tiles. Sizes match the real tiles at both breakpoints so nothing reflows when
+ * the page arrives.
  */
 export default function Loading() {
   return (
@@ -21,73 +24,28 @@ export default function Loading() {
       <div
         data-testid="course-shell-shapes"
         aria-hidden="true"
-        className="flex flex-col gap-4 pb-16 sm:gap-6 sm:pb-24"
+        className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 pt-4 pb-16 sm:px-11 sm:pb-24 lg:gap-4 lg:pt-5"
       >
-        <HeroShape />
-        <CarouselShape />
-        <div className="mx-auto w-full max-w-7xl px-4 sm:px-11">
+        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-12 lg:gap-4">
           <Skeleton
-            data-testid="course-shell-panel"
-            className="h-[520px] w-full rounded-[22px] lg:h-[300px]"
+            data-testid="course-shell-continue"
+            className="h-80 rounded-[22px] lg:col-span-8 lg:h-[380px] lg:rounded-[26px]"
           />
+          <Skeleton
+            data-testid="course-shell-course"
+            className="-order-1 h-32 rounded-[22px] lg:order-none lg:col-span-4 lg:h-[380px] lg:rounded-[26px]"
+          />
+        </div>
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-5 lg:gap-4">
+          {Array.from({ length: LESSON_SHAPES }, (_, index) => (
+            <Skeleton
+              key={index}
+              data-testid="course-shell-lesson"
+              className="h-[108px] rounded-[20px] lg:h-[350px] lg:rounded-3xl"
+            />
+          ))}
         </div>
       </div>
     </main>
-  );
-}
-
-function HeroShape() {
-  return (
-    <div
-      data-testid="course-shell-hero"
-      className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pt-8 sm:px-11 sm:pt-12 lg:flex-row lg:items-end lg:justify-between"
-    >
-      <div className="flex flex-col gap-3">
-        <Skeleton className="h-3 w-48" />
-        <Skeleton className="h-11 w-64 sm:h-14 sm:w-96" />
-        <Skeleton className="h-4 w-40" />
-      </div>
-      <Skeleton className="h-12 w-full rounded-lg lg:w-44" />
-    </div>
-  );
-}
-
-function CarouselShape() {
-  return (
-    <div className="flex flex-col gap-6">
-      <div
-        data-testid="course-shell-carousel"
-        className="flex h-[400px] items-center justify-center gap-5 overflow-x-clip lg:h-[500px]"
-      >
-        <Skeleton
-          data-testid="course-shell-poster"
-          className="hidden h-[270px] w-[180px] shrink-0 rounded-2xl lg:block"
-        />
-        <Skeleton
-          data-testid="course-shell-poster"
-          className="h-[300px] w-[200px] shrink-0 rounded-2xl lg:h-[345px] lg:w-[230px]"
-        />
-        <Skeleton
-          data-testid="course-shell-poster"
-          className="h-[360px] w-[240px] shrink-0 rounded-[18px] lg:h-[450px] lg:w-[300px]"
-        />
-        <Skeleton
-          data-testid="course-shell-poster"
-          className="h-[300px] w-[200px] shrink-0 rounded-2xl lg:h-[345px] lg:w-[230px]"
-        />
-        <Skeleton
-          data-testid="course-shell-poster"
-          className="hidden h-[270px] w-[180px] shrink-0 rounded-2xl lg:block"
-        />
-      </div>
-      <div className="flex h-11 items-center justify-center gap-2">
-        {[0, 1, 2, 3, 4].map((dot) => (
-          <Skeleton
-            key={dot}
-            className="size-2 rounded-full"
-          />
-        ))}
-      </div>
-    </div>
   );
 }

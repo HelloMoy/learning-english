@@ -112,18 +112,17 @@ test.describe("Home and My learning — one click to the course, one to the less
   });
 });
 
-test.describe("Course carousel — one click from the selected poster to the module", () => {
-  test("WHEN the selected poster on the course overview is clicked THEN its module overview opens", async ({
-    page,
-  }) => {
+test.describe("Lesson tile — one click from the course overview to the module", () => {
+  test("WHEN a lesson tile's body is clicked THEN its module overview opens", async ({ page }) => {
     const modules = modulesOfCourse(FIRST_COURSE.slug);
-    // A one-video module's poster opens its video instead, so aim at the first
+    // A one-video lesson's tile opens its video instead, so aim at the first
     // module that actually has an overview worth opening.
     const moduleIndex = modules.findIndex((module) => lessonsOfModule(module.id).length > 1);
     await page.goto(`/en/courses/${FIRST_COURSE.slug}`);
 
-    await page.getByTestId("carousel-dot").nth(moduleIndex).click(COLD_ROUTE);
-    await page.locator('a[data-testid="carousel-poster"]').click();
+    await page
+      .getByRole("link", { name: `Open lesson ${moduleIndex + 1}: ${modules[moduleIndex]!.title}` })
+      .click({ position: IN_THE_PADDING, ...COLD_ROUTE });
 
     await page.waitForURL(
       `**/en/courses/${FIRST_COURSE.slug}/modules/${modules[moduleIndex]!.slug}`,

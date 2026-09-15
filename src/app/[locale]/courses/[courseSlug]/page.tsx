@@ -73,7 +73,6 @@ export default async function CourseOverviewPage({ params }: Props) {
         course={result.value.course}
         modules={result.value.modules}
         moduleSummaries={result.value.moduleSummaries}
-        firstLesson={result.value.firstLesson}
       />
     </main>
   );

@@ -185,6 +185,43 @@ describe("findCourseCatalog", () => {
     }
   });
 
+  it("lists each course's lesson progress in learning order, whatever order the repository returns", async () => {
+    const secondModule = Module.parse({
+      id: ModuleId.parse("66666666-6666-4666-8666-666666666666"),
+      courseId: course.id,
+      slug: "mod-2",
+      title: "Module 2",
+      sequence: 2,
+    });
+    const secondModuleLesson = (sequence: number, id: string) =>
+      Lesson.parse({ ...lesson1, id: LessonId.parse(id), moduleId: secondModule.id, sequence });
+    const secondModuleFirst = secondModuleLesson(1, "77777777-7777-4777-8777-777777777777");
+    const secondModuleSecond = secondModuleLesson(2, "88888888-8888-4888-8888-888888888888");
+    const shuffled = [secondModuleSecond, lesson2, secondModuleFirst, lesson1];
+    const useCase = makeFindCourseCatalog({
+      courses: makeStubCourseRepository({ available: [course] }),
+      modules: makeStubModuleRepository({
+        listByCourse: { [course.id]: [secondModule, module_] },
+      }),
+      lessons: makeStubLessonRepository({
+        lessons: shuffled,
+        listByCourse: { [course.id]: shuffled },
+      }),
+    });
+
+    const result = await useCase();
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.entries[0]?.lessonRuntimes.map((slice) => slice.id)).toEqual([
+        lesson1.id,
+        lesson2.id,
+        secondModuleFirst.id,
+        secondModuleSecond.id,
+      ]);
+    }
+  });
+
   it("returns no modules and no runtimes when the course has none", async () => {
     const useCase = makeFindCourseCatalog({
       courses: makeStubCourseRepository({ available: [course] }),
