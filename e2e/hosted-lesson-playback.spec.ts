@@ -1,8 +1,7 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
-import { expect, test } from "@playwright/test";
-
 import { courseBySlug, modulesOfCourse } from "./content-seed-fixtures";
+import { expect, test } from "./learner-profile-fixture";
 
 /**
  * E2E coverage for a course whose lectures are hosted elsewhere and whose local

@@ -1,6 +1,7 @@
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
 
 import { lessonsOfModule, moduleOfCourse } from "./content-seed-fixtures";
+import { expect, test } from "./learner-profile-fixture";
 
 /**
  * E2E coverage for the module overview's route (capability:

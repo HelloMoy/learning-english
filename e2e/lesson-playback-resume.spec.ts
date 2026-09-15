@@ -11,6 +11,7 @@ import {
 } from "@playwright/test";
 
 import { modulesOfCourse } from "./content-seed-fixtures";
+import { seedLearnerProfile } from "./learner-profile-fixture";
 
 /**
  * Device emulation minus `defaultBrowserType`, which Playwright refuses inside
@@ -93,6 +94,8 @@ async function clearStorageFor(context: BrowserContext) {
       // localStorage might not be available; ignore.
     }
   });
+  // After the clear, so the wipe does not take the learner card with it.
+  await seedLearnerProfile(context);
 }
 
 async function seedSavedPosition(context: BrowserContext, seconds: number) {

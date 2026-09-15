@@ -11,6 +11,7 @@ import {
   type LearnerProfileHandle,
 } from "@/hooks/use-learner-profile/use-learner-profile";
 import { useLearnerRedirect } from "@/hooks/use-learner-redirect/use-learner-redirect";
+import { useOnboardingDestinations } from "@/hooks/use-onboarding-destinations/use-onboarding-destinations";
 import { useRouter } from "@/i18n/navigation";
 
 import { ArrowRight } from "lucide-react";
@@ -22,8 +23,9 @@ import { useState } from "react";
  *
  * @remarks
  * Choosing updates the card at once and saves nothing; Continue saves the
- * choice and opens My learning. The step needs the name from step 1, so a
- * device without a profile is sent back there.
+ * choice and opens where the onboarding ends: the course route named in
+ * `next`, or My learning. The step needs the name from step 1, so a device
+ * without a profile is sent back there, keeping the same `next`.
  *
  * @param profiles - Overrides the profile storage adapter; tests inject a stub
  * @param level - The level line the card shows
@@ -39,7 +41,8 @@ export function OnboardingAvatarStep({
   videoCount: number;
 }) {
   const learner = useLearnerProfile(profiles);
-  useLearnerRedirect(learner.status, { when: "absent", to: "/start" });
+  const { nameStep } = useOnboardingDestinations();
+  useLearnerRedirect(learner.status, { when: "absent", to: nameStep });
 
   if (learner.status !== "present") {
     return <OnboardingShell />;
@@ -67,13 +70,14 @@ function AvatarChoice({
 }) {
   const t = useTranslations("Onboarding");
   const router = useRouter();
+  const { afterOnboarding } = useOnboardingDestinations();
   const [avatar, setAvatar] = useState(profile.avatar);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleContinue = async () => {
     setIsSaving(true);
     const isSaved = await save({ ...profile, avatar });
-    if (isSaved) router.push("/learning");
+    if (isSaved) router.push(afterOnboarding);
     else setIsSaving(false);
   };
 

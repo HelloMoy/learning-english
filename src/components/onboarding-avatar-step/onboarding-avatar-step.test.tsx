@@ -5,6 +5,7 @@ import { makeStubLearnerProfileRepository } from "@/test-setup/stubs/domain-repo
 
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { OnboardingAvatarStep } from "./onboarding-avatar-step";
@@ -12,6 +13,9 @@ import { OnboardingAvatarStep } from "./onboarding-avatar-step";
 const level = { number: 1, courseTitle: "Basic Course" };
 
 const profile = LearnerProfile.parse({ name: "Ana García", avatar: { kind: "initials" } });
+
+const courseReturnPath = "/courses/basics/modules/vowels";
+const nextQuery = `?next=${encodeURIComponent(courseReturnPath)}`;
 
 const router = { replace: vi.fn(), push: vi.fn() };
 
@@ -21,13 +25,21 @@ beforeEach(() => {
   vi.mocked(useRouter).mockReturnValue(router as never);
 });
 
-const renderStep = (profiles = makeStubLearnerProfileRepository({ profile })) =>
+const renderStep = ({
+  profiles = makeStubLearnerProfileRepository({ profile }),
+  searchParams = "",
+}: {
+  profiles?: ReturnType<typeof makeStubLearnerProfileRepository>;
+  searchParams?: string;
+} = {}) =>
   renderInLocale(
-    <OnboardingAvatarStep
-      profiles={profiles}
-      level={level}
-      videoCount={48}
-    />,
+    <NuqsTestingAdapter searchParams={searchParams}>
+      <OnboardingAvatarStep
+        profiles={profiles}
+        level={level}
+        videoCount={48}
+      />
+    </NuqsTestingAdapter>,
   );
 
 describe("OnboardingAvatarStep", () => {
@@ -38,9 +50,15 @@ describe("OnboardingAvatarStep", () => {
   });
 
   test("WHEN the device has no profile THEN the learner is sent back to step one", async () => {
-    renderStep(makeStubLearnerProfileRepository());
+    renderStep({ profiles: makeStubLearnerProfileRepository() });
 
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/start"));
+  });
+
+  test("WHEN the device has no profile and a course route is waiting THEN step one keeps it", async () => {
+    renderStep({ profiles: makeStubLearnerProfileRepository(), searchParams: nextQuery });
+
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith(`/start${nextQuery}`));
   });
 
   describe("GIVEN the name from step one", () => {
@@ -61,7 +79,7 @@ describe("OnboardingAvatarStep", () => {
     test("WHEN an illustration is picked THEN the card shows it before anything is saved", async () => {
       const user = userEvent.setup();
       const profiles = makeStubLearnerProfileRepository({ profile });
-      renderStep(profiles);
+      renderStep({ profiles });
 
       await user.click(await screen.findByRole("radio", { name: "Echo" }));
 
@@ -73,7 +91,7 @@ describe("OnboardingAvatarStep", () => {
     test("WHEN Continue is pressed THEN the chosen avatar is saved and My learning opens", async () => {
       const user = userEvent.setup();
       const profiles = makeStubLearnerProfileRepository({ profile });
-      renderStep(profiles);
+      renderStep({ profiles });
 
       await user.click(await screen.findByRole("radio", { name: "Echo" }));
       await user.click(screen.getByRole("button", { name: "Continue" }));
@@ -83,6 +101,15 @@ describe("OnboardingAvatarStep", () => {
         name: "Ana García",
         avatar: { kind: "illustration", id: "echo" },
       });
+    });
+
+    test("WHEN Continue is pressed with a course route waiting THEN that route opens", async () => {
+      const user = userEvent.setup();
+      renderStep({ searchParams: nextQuery });
+
+      await user.click(await screen.findByRole("button", { name: "Continue" }));
+
+      await waitFor(() => expect(router.push).toHaveBeenCalledWith(courseReturnPath));
     });
   });
 });

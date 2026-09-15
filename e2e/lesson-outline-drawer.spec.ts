@@ -1,8 +1,9 @@
 import messages from "@/messages/en.json";
 
-import { devices, expect, test, type Page } from "@playwright/test";
+import { devices, type Page } from "@playwright/test";
 
 import { lessonsOfModule, modulesOfCourse } from "./content-seed-fixtures";
+import { expect, test } from "./learner-profile-fixture";
 
 /**
  * iPhone emulation minus `defaultBrowserType`, which Playwright refuses inside

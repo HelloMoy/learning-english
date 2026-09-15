@@ -5,9 +5,10 @@ import { HOLD_ARM_DELAY_MS, HOLD_PLAYBACK_RATE } from "@/hooks/use-speed-hold/us
 import { DEFAULT_SEEK_STEP_SECONDS } from "@/lib/seek-run/seek-run";
 import messages from "@/messages/en.json";
 
-import { devices, expect, test, type Locator, type Page } from "@playwright/test";
+import { devices, type Locator, type Page } from "@playwright/test";
 
 import { modulesOfCourse } from "./content-seed-fixtures";
+import { expect, test } from "./learner-profile-fixture";
 
 /**
  * iPhone emulation minus `defaultBrowserType`, which Playwright refuses inside

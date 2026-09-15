@@ -1,8 +1,7 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
-import { expect, test } from "@playwright/test";
-
 import { moduleOfCourse, modulesOfCourse } from "./content-seed-fixtures";
+import { expect, test } from "./learner-profile-fixture";
 
 /**
  * E2E coverage for the `site-metadata` capability.
