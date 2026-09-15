@@ -4,158 +4,163 @@
 
 Define the Immersion Cinema presentation of the course overview route (`/[locale]/courses/[courseSlug]`). The course is presented as a numbered index of its modules: a course header with gold count pills, then one full-width showcase card per module, each preceded by its ordinal. A card pairs the module's title, an explicit video count and duration, and a call to action with a receding gallery of that module's leading lesson artwork, so a module reads as a container of several videos rather than as one video to play. A primary "Start course" action targets the deterministic first lesson. Neither the earlier interactive practice track nor the poster grid that replaced it remains in this view.
 ## Requirements
+### Requirement: The course overview opens with a compact hero that carries Start course
 
-### Requirement: Course overview renders modules as showcase cards
+The course overview (`/[locale]/courses/[courseSlug]`) SHALL open with a hero presenting a
+"Now showing" eyebrow stating the number of lessons (modules), the course title, one meta
+line stating the number of videos and the combined runtime (with an hours component above
+60 minutes), and the primary **Start course** action linking to the deterministic first
+lesson through the locale-aware lesson path.
 
-The course overview (`/[locale]/courses/[courseSlug]`) SHALL present the course header — title, description, and count pills for its modules and videos — followed by one full-width showcase card per module, listed in `sequence` order, one per row.
+The meta line SHALL sit below the title and SHALL NOT overlap it at any viewport width. The
+page SHALL render exactly one Start course action, and none when the course has no lessons.
 
-Each showcase card SHALL be preceded by its module ordinal (`Lesson N`) rendered **outside and above** the card, so the page reads as a numbered index whose ordering is legible independently of the card's contents.
+#### Scenario: The hero states what the course holds
+- **WHEN** a course resolves with 5 modules holding 48 videos totalling 629 minutes
+- **THEN** the hero shows an eyebrow naming 5 lessons, the course title, and a meta line stating 48 videos and 10 h 29 min
 
-Each card SHALL carry two panels:
-
-- A **left panel** with the module title, a count line stating how many videos the module holds and their combined duration, and a call to action linking to that module's overview. The call to action SHALL be the panel's only playback-adjacent affordance: the panel SHALL NOT render a decorative play control beside it. An inert play circle competes with the real action for the same click and reads as the primary way to start watching, which it is not.
-- A **right panel** with the module's leading lessons laid out as a **receding gallery**: landscape cards in `sequence` order, each narrower and darker than the one in front, sharing a single perspective rotation, overlapping slightly and each edged so one card is visibly distinct from the next. The gallery SHALL fill the width the panel affords it.
-
-Gallery cards SHALL carry artwork only — no ordinal, no title, no runtime, no caption.
-
-Because the gallery carries no text and names nothing, it is decorative: what it communicates — that the module holds several videos — the count line states outright, and every lesson it previews is named on the module overview one click away. It SHALL therefore be hidden from assistive technology, consistent with how the module overview treats its row thumbnails. Any disclosure of lessons beyond those shown SHALL remain outside the hidden region so it is still announced.
-
-Cards SHALL be landscape and take their height from their width, so the artwork is never cropped to a portrait frame. A single card SHALL be bounded so that a one-lesson module does not stretch one image across the whole panel.
-
-The `Season 1 · N episodes` heading and the per-module `Module` badge SHALL NOT be rendered.
-
-#### Scenario: One showcase card per module in sequence
-- **WHEN** the course resolves 10 modules
-- **THEN** 10 showcase cards render in `sequence` order, each preceded by its ordinal `Lesson 1` through `Lesson 10`, and each card's call to action links to that module's overview for the active locale
-
-#### Scenario: The left panel offers one action and no decorative play control
-- **WHEN** a showcase card renders
-- **THEN** its left panel shows the title, the count line and the call to action, and renders no play affordance beside that action
-
-#### Scenario: The gallery shows real lesson artwork
-- **WHEN** a module's leading lessons carry `poster` artwork
-- **THEN** each card in the gallery displays that lesson's poster, so the gallery is visually distinct card to card rather than repeating one placeholder
-
-#### Scenario: A lesson without artwork keeps the placeholder card
-- **WHEN** a card renders for a lesson that has no `poster` — including any reading lesson, whose schema has no such field
-- **THEN** the card shows the decorative gradient, and no broken or empty image is rendered
-
-#### Scenario: The gallery reads in order
-- **WHEN** a module's gallery renders
-- **THEN** its cards follow `sequence` order, each is narrower and darker than the one in front of it, and the earliest lesson is the card nearest the viewer
-
-#### Scenario: The gallery carries no text
-- **WHEN** a module's gallery renders
-- **THEN** no card shows a title, a runtime or an ordinal — the cards are artwork, and the module's own ordinal and counts live outside the gallery
-
-#### Scenario: Plurality is stated as well as shown
-- **WHEN** a card renders for a module holding 6 video lessons totalling 60 minutes
-- **THEN** its count line states both the number of videos and the combined duration, so the card's meaning does not depend on the learner interpreting the gallery
-
-#### Scenario: Long durations are expressed in hours
-- **WHEN** a module's combined duration exceeds 60 minutes
-- **THEN** the count line expresses it with an hours component rather than as a minute count alone
-
-#### Scenario: The gallery is bounded and its remainder is disclosed
-- **WHEN** a module holds more lessons than the gallery displays
-- **THEN** the gallery shows the leading lessons in `sequence` order and the card discloses that further lessons exist, rather than silently implying the module holds only what is shown
-
-#### Scenario: A single-lesson module renders without special casing
-- **WHEN** a module holds exactly one lesson
-- **THEN** its card renders with a one-card gallery and a count line stating one video, using the same layout as every other card
-
-#### Scenario: The gallery is not announced
-- **WHEN** a screen reader traverses a showcase card
-- **THEN** the gallery is skipped entirely, and the module is announced through its heading, its count line and its call to action rather than through a run of unlabelled images
-
-#### Scenario: The remainder stays announced even though the artwork does not
-- **WHEN** a module holds more lessons than the gallery shows
-- **THEN** the disclosure of the remainder is reachable by assistive technology, because it sits outside the hidden gallery
-
-#### Scenario: The gallery fills its panel without spilling
-- **WHEN** a module contributes anywhere from one to a full complement of cards
-- **THEN** the gallery spans the width the panel affords it and never overlaps the copy beside it, and a lone card is bounded rather than stretched across the whole panel
-
-#### Scenario: Artwork is never cropped to portrait
-- **WHEN** any gallery card renders
-- **THEN** it is landscape and takes its height from its width, so a text-bearing poster is not sliced by a portrait frame
-
-#### Scenario: Start course targets the first lesson
+#### Scenario: Start course opens the first lesson
 - **WHEN** a first lesson exists
-- **THEN** a "Start course" action links to that lesson via the locale-aware lesson path
+- **THEN** a single Start course action links to that lesson for the active locale
 
-#### Scenario: Retired vocabulary is absent
-- **WHEN** the course overview renders in any supported locale
-- **THEN** no season heading, no episode label and no `Module` badge appears
+#### Scenario: A course with no lessons has no action
+- **WHEN** the course has no lessons
+- **THEN** the hero renders no Start course action
 
-#### Scenario: Course copy is localized
+#### Scenario: The meta line never overlaps the title
+- **WHEN** the hero renders at 1440px and at 390px wide
+- **THEN** the meta line's box starts below the title's box
+
+### Requirement: Modules are presented as a poster carousel with one selected module
+
+After the hero the course overview SHALL present one **poster** per module in `sequence`
+order inside a carousel. Exactly one module SHALL be selected at a time.
+
+A poster SHALL show a portrait collage of up to three of the module's first lessons'
+posters (one image when the module holds one lesson; a decorative placeholder when none has
+artwork), the module ordinal as an outlined numeral, the module title, and a line stating the
+module's video count and combined runtime.
+
+The selected poster SHALL be centred, larger than the others and edged in gold. Posters
+nearer the selection SHALL be larger and more opaque than posters further from it. On wide
+viewports up to two posters SHALL be visible on each side of the selection; on narrow
+viewports the neighbours SHALL peek in from the screen edges. The carousel SHALL NOT make the
+page scroll horizontally.
+
+The selection SHALL move by: previous/next arrow buttons (each disabled at its end), one dot
+per module, the Left/Right arrow keys while focus is within the carousel, a horizontal swipe
+on touch screens, and a click on a non-selected poster. Clicking the selected poster SHALL
+open its module overview — or, when the module holds exactly one lesson, that lesson.
+
+The carousel SHALL be announced as a carousel region; every control SHALL carry a localized
+accessible name; the dot for the selected module SHALL be marked current; a selection change
+SHALL be announced politely as "Lesson N of M: <title>".
+
+On first render the first module SHALL be selected. After hydration the carousel SHALL select
+the first module, in `sequence` order, that the learner has started but not finished; when
+there is none, the first module they have not finished; otherwise the first module.
+
+#### Scenario: One poster per module, in order
+- **WHEN** the course resolves 10 modules
+- **THEN** the carousel holds 10 posters in `sequence` order and 10 dots
+
+#### Scenario: A poster shows real artwork and its counts
+- **WHEN** a module holding 25 videos totalling 325 minutes is rendered
+- **THEN** its poster shows up to three of its lessons' posters, its ordinal, its title and "25 videos · 5 h 25 min"
+
+#### Scenario: Arrows move the selection and stop at the ends
+- **WHEN** the first module is selected
+- **THEN** the previous arrow is disabled, and activating the next arrow selects the second module
+
+#### Scenario: A dot selects its module
+- **WHEN** the learner activates the fourth dot
+- **THEN** the fourth module becomes selected and its dot is marked current
+
+#### Scenario: Keyboard arrows move the selection
+- **WHEN** focus is inside the carousel and the learner presses the Right arrow key
+- **THEN** the next module becomes selected
+
+#### Scenario: Clicking a neighbour selects it
+- **WHEN** the learner clicks a poster that is not selected
+- **THEN** that module becomes selected and no navigation happens
+
+#### Scenario: Clicking the selected poster opens the module
+- **WHEN** the learner clicks the selected poster of a module holding several lessons
+- **THEN** they navigate to that module's overview for the active locale
+
+#### Scenario: Clicking the selected poster of a one-video module opens that video
+- **WHEN** the learner clicks the selected poster of a module holding exactly one lesson
+- **THEN** they navigate straight to that lesson's page
+
+#### Scenario: The carousel opens on the module in progress
+- **WHEN** the learner has completed some but not all videos of the third module and none of the others
+- **THEN** after hydration the third module is selected
+
+#### Scenario: The carousel does not widen the page on a phone
+- **WHEN** the course overview renders at 390px wide
+- **THEN** the document does not scroll horizontally
+
+### Requirement: A progress panel invites the learner into the selected module
+
+Below the carousel the course overview SHALL render a progress panel for the selected module,
+updating whenever the selection changes. The panel SHALL be in exactly one state, decided with
+the same completion rule as every other progress indicator (`countsAsComplete`):
+
+- **Not started** — no video of the module is complete and none has a saved playback
+  position. The panel SHALL show a ring divided into one segment per video with the first
+  segment lit and "N videos ready", a **Start this lesson** action opening the module's first
+  video, the module's runtime and the first video's title.
+- **In progress** — at least one video is complete or has a saved position, and not all are
+  complete. The panel SHALL show a ring filled to the share of completed videos with its
+  percentage and "C of N videos", "Pick up <title>" naming the first video in `sequence`
+  that is not complete, that video's position ("Video K of N"), the time left in it (its
+  runtime minus its saved position) and the time left in the module (the remaining time of
+  every incomplete video), a **Continue** action opening that video, and an **Open lesson**
+  action opening the module overview.
+- **Completed** — every video is complete. The panel SHALL show a full ring, "All N videos
+  watched", a **Watch again** action opening the first video, and an **Open lesson** action.
+
+In the not-started and in-progress states the panel SHALL list, as "Up next", up to three
+videos that follow the video its primary action opens, each with its position, title and
+runtime.
+
+Because progress is read from this device after hydration, the panel SHALL render on the
+server and before hydration without asserting any state: the module title, its meta line and
+an Open lesson action, with the ring track unfilled.
+
+#### Scenario: An untouched module invites the learner to start
+- **WHEN** the selected module holds 25 videos and none is complete or has a saved position
+- **THEN** the panel shows 25 ring segments with the first lit, "25 videos ready", and Start this lesson linking to the module's first video
+
+#### Scenario: A module in progress offers to continue
+- **WHEN** the first three of 25 videos are complete and the fourth, "/Flap/", running 13 minutes, has a saved position of 6 minutes
+- **THEN** the panel shows 12%, "3 of 25 videos", "Pick up /Flap/", "Video 4 of 25", 7 min left in the video, and Continue linking to "/Flap/"
+
+#### Scenario: Time left in the module counts only unfinished videos
+- **WHEN** a module is in progress
+- **THEN** the time left in the module is the sum, over incomplete videos, of each runtime minus its saved position
+
+#### Scenario: A finished module offers to watch again
+- **WHEN** every video of the selected module is complete
+- **THEN** the panel shows a full ring, "All N videos watched", Watch again linking to the first video, and Open lesson
+
+#### Scenario: Up next follows the primary action
+- **WHEN** the panel's primary action opens the fourth video of 25
+- **THEN** Up next lists the fifth, sixth and seventh videos with their titles and runtimes
+
+#### Scenario: Up next stops at the end of the module
+- **WHEN** the primary action opens the last video of the module
+- **THEN** no Up next list is rendered
+
+#### Scenario: The panel follows the selection
+- **WHEN** the learner selects a different module in the carousel
+- **THEN** the panel re-renders for that module
+
+#### Scenario: The server render asserts no progress
+- **WHEN** the course overview is rendered on the server
+- **THEN** the panel shows the selected module's title, meta line and Open lesson, and no state-specific copy or filled ring
+
+#### Scenario: Panel copy is localized
 - **WHEN** the locale is `es` or `pt`
-- **THEN** the module ordinals, count lines, call to action and "Start course" render from the matching message file
+- **THEN** every panel and carousel string renders from the matching message file
 
-### Requirement: Showcase cards report how far the learner has got through the module
-
-Each module showcase card's left panel SHALL carry the module progress meter specified
-by the `watch-progress` capability — a bar and a localized "N / M videos" label —
-placed between the count line and the call to action, so the learner reads what the
-module holds, then how much of it is behind them, then the way in.
-
-The meter SHALL NOT replace or displace any existing part of the card: the ordinal
-outside the panel, the title, the count line, the call to action and the receding
-gallery all remain, and the call to action remains the panel's only control. The meter
-is not interactive and is not a second way into the module.
-
-Because progress is read in the browser after hydration, the meter SHALL be the only
-client-rendered part of the card; the rest of the course overview SHALL continue to
-render on the server. A module with no complete lesson SHALL render no meter, so the
-pre-hydration frame asserts nothing about the learner's progress.
-
-The meter SHALL count every lesson the module holds, not only the leading lessons the
-gallery previews.
-
-#### Scenario: A partly completed module shows its count
-- **WHEN** a card renders for a module holding 17 lessons of which 7 are complete
-- **THEN** its left panel shows a bar filled to 7/17 and a localized "7 / 17 videos" label, between the count line and the call to action
-
-#### Scenario: The meter counts past the gallery's preview
-- **WHEN** a module holds 17 lessons, the gallery previews 6 of them, and a lesson outside that preview is complete
-- **THEN** the meter counts it, reporting a denominator of 17
-
-#### Scenario: An untouched module shows no meter
-- **WHEN** no lesson in a module is complete
-- **THEN** the card renders no meter and the panel reads exactly as it does today
-
-#### Scenario: A finished module says so
-- **WHEN** every lesson in a module is complete
-- **THEN** the card shows a full bar and a localized completed state
-
-#### Scenario: The card keeps one control
-- **WHEN** a card carrying a meter is reached by keyboard
-- **THEN** the heading link and the call to action remain its only tab stops; the meter is not focusable
-
-#### Scenario: The course overview stays server-rendered
-- **WHEN** the course overview is rendered
-- **THEN** only the meter is client-rendered; the header, cards, count lines and galleries are produced on the server as before
-
-### Requirement: A showcase card is clickable across its whole area
-
-A module showcase card presents itself as one object — a bordered panel with its own glow, a hover-lit title and a receding gallery — so a pointer landing anywhere inside it SHALL navigate to that module's overview, not only a pointer landing on the `View videos` button.
-
-The extended hit area SHALL be an extension of the existing call to action, not a new control. The card SHALL therefore expose no additional link to assistive technology and add no tab stop: the number of announced and tabbable links per card SHALL be unchanged, and the card's accessible name SHALL remain the module title rather than the whole panel's text.
-
-Text inside the card SHALL remain selectable-looking and readable; the extended hit area SHALL sit above the decorative gallery so that a click on the artwork navigates like any other part of the card.
-
-#### Scenario: Clicking the card body opens the module
-- **WHEN** the user clicks the card's count line, its progress meter's surrounding space, or the gallery artwork
-- **THEN** they navigate to that module's overview for the active locale — the same destination as the `View videos` action
-
-#### Scenario: The hit area adds no control
-- **WHEN** a screen reader or keyboard user traverses a showcase card
-- **THEN** the same links are announced and reachable as before the hit area was extended — the module heading and its call to action — and the card itself is not announced as a link
-
-#### Scenario: The card's accessible name stays the module title
-- **WHEN** assistive technology reports the card's call to action
-- **THEN** its name is the action's own label and the heading's name is the module title, neither swallowing the count line, the meter or the gallery
-
-#### Scenario: The gallery stays non-interactive
-- **WHEN** the hit area is extended over the receding gallery
-- **THEN** the gallery's cards remain hidden from assistive technology and contribute no links of their own
