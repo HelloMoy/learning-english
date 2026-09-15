@@ -92,23 +92,6 @@ export function moduleProgress(input: ModuleProgressInput): ModuleProgress {
   };
 }
 
-/**
- * Picks the module a course carousel should open on.
- *
- * @remarks
- * The first module the learner is in the middle of; failing that, the first
- * one they have not started; failing that, the first module.
- *
- * @param progresses - Each module's progress, in sequence order
- * @returns The index of the module to select
- */
-export function selectInitialModuleIndex(progresses: ReadonlyArray<ModuleProgress>): number {
-  const inProgress = progresses.findIndex((progress) => progress.kind === "in-progress");
-  if (inProgress !== -1) return inProgress;
-  const notStarted = progresses.findIndex((progress) => progress.kind === "not-started");
-  return notStarted === -1 ? 0 : notStarted;
-}
-
 function isLessonComplete(lesson: ModuleLesson, input: ModuleProgressInput): boolean {
   return countsAsComplete({
     isMarkedComplete: input.completedIds.has(lesson.id),

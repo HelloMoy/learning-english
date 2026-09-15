@@ -4,163 +4,128 @@
 
 Define the Immersion Cinema presentation of the course overview route (`/[locale]/courses/[courseSlug]`). The course is presented as a numbered index of its modules: a course header with gold count pills, then one full-width showcase card per module, each preceded by its ordinal. A card pairs the module's title, an explicit video count and duration, and a call to action with a receding gallery of that module's leading lesson artwork, so a module reads as a container of several videos rather than as one video to play. A primary "Start course" action targets the deterministic first lesson. Neither the earlier interactive practice track nor the poster grid that replaced it remains in this view.
 ## Requirements
-### Requirement: The course overview opens with a compact hero that carries Start course
+### Requirement: The course overview opens with a continue tile and the course's progress
 
-The course overview (`/[locale]/courses/[courseSlug]`) SHALL open with a hero presenting a
-"Now showing" eyebrow stating the number of lessons (modules), the course title, one meta
-line stating the number of videos and the combined runtime (with an hours component above
-60 minutes), and the primary **Start course** action linking to the deterministic first
-lesson through the locale-aware lesson path.
+The course overview (`/[locale]/courses/[courseSlug]`) SHALL open with two tiles, side by side
+on wide viewports and stacked on narrow ones:
 
-The meta line SHALL sit below the title and SHALL NOT overlap it at any viewport width. The
-page SHALL render exactly one Start course action, and none when the course has no lessons.
+- a **continue tile** presenting the video the learner continues with — its artwork (or a
+  decorative placeholder when it has none), the lesson ordinal and the video's position in its
+  lesson, the video's title — and exactly one primary action linking to that video through the
+  locale-aware lesson path;
+- a **course progress tile** presenting the course title as the page's level-one heading, a
+  ring filled to the share of the course's videos that count as complete, that share as a
+  percentage, the watched count out of the total, and the time left.
 
-#### Scenario: The hero states what the course holds
-- **WHEN** a course resolves with 5 modules holding 48 videos totalling 629 minutes
-- **THEN** the hero shows an eyebrow naming 5 lessons, the course title, and a meta line stating 48 videos and 10 h 29 min
+The video and the action's label SHALL be decided from this device's progress with
+`countsAsComplete`:
 
-#### Scenario: Start course opens the first lesson
-- **WHEN** a first lesson exists
-- **THEN** a single Start course action links to that lesson for the active locale
+- **Nothing watched** — the course's first video, labelled **Start course**.
+- **Partly watched** — the video the module overview's route would mark as current, applied to
+  the whole course in `sequence` order (lessons in order, videos in order within each): the
+  anchor is the video named by the continue-watching record when it names a video of this course
+  that still exists, otherwise the furthest video with any progress; the target is the anchor
+  itself when it is not complete, otherwise the first incomplete video after it, otherwise the
+  first incomplete video of the course. Labelled **Continue where you left off**.
+- **Everything watched** — the course's first video, labelled **Watch again**.
 
-#### Scenario: A course with no lessons has no action
-- **WHEN** the course has no lessons
-- **THEN** the hero renders no Start course action
+Time left SHALL be the sum, over incomplete videos, of each runtime minus its saved position.
 
-#### Scenario: The meta line never overlaps the title
-- **WHEN** the hero renders at 1440px and at 390px wide
-- **THEN** the meta line's box starts below the title's box
+Because progress is read from this device after hydration, the tiles SHALL render on the
+server and before progress is known without asserting any state: the course title, an
+unfilled ring with no percentage, and placeholders of the continue tile's text and action.
+When the course has no lessons, the page SHALL render no continue tile.
 
-### Requirement: Modules are presented as a poster carousel with one selected module
+#### Scenario: A new learner is invited to start
+- **WHEN** no video of the course counts as complete, none has a saved position and no record names this course
+- **THEN** the continue tile shows the first video and a single Start course action linking to it, and the course tile shows 0 %
 
-After the hero the course overview SHALL present one **poster** per module in `sequence`
-order inside a carousel. Exactly one module SHALL be selected at a time.
+#### Scenario: A returning learner continues the recorded video
+- **WHEN** the continue-watching record names the second video of the second lesson of this course and that video is not complete
+- **THEN** the continue tile shows that video, "Lesson 02 · Video 2 of 17", and Continue where you left off linking to it
 
-A poster SHALL show a portrait collage of up to three of the module's first lessons'
-posters (one image when the module holds one lesson; a decorative placeholder when none has
-artwork), the module ordinal as an outlined numeral, the module title, and a line stating the
-module's video count and combined runtime.
+#### Scenario: A finished recorded video continues with the next one
+- **WHEN** the continue-watching record names the first video of the fifth lesson and that video is complete
+- **THEN** Continue where you left off links to the second video of the fifth lesson, not to the finished one
 
-The selected poster SHALL be centred, larger than the others and edged in gold. Posters
-nearer the selection SHALL be larger and more opaque than posters further from it. On wide
-viewports up to two posters SHALL be visible on each side of the selection; on narrow
-viewports the neighbours SHALL peek in from the screen edges. The carousel SHALL NOT make the
-page scroll horizontally.
+#### Scenario: The last video of a lesson hands over to the next lesson
+- **WHEN** the record names the last video of the second lesson and that video is complete
+- **THEN** Continue where you left off links to the first incomplete video of the third lesson
 
-The selection SHALL move by: previous/next arrow buttons (each disabled at its end), one dot
-per module, the Left/Right arrow keys while focus is within the carousel, a horizontal swipe
-on touch screens, and a click on a non-selected poster. Clicking the selected poster SHALL
-open its module overview — or, when the module holds exactly one lesson, that lesson.
+#### Scenario: Without a record the furthest progress anchors the target
+- **WHEN** no record names this course, the first video of the first lesson is part-watched and the first two videos of the third lesson are complete
+- **THEN** Continue where you left off links to the third video of the third lesson
 
-The carousel SHALL be announced as a carousel region; every control SHALL carry a localized
-accessible name; the dot for the selected module SHALL be marked current; a selection change
-SHALL be announced politely as "Lesson N of M: <title>".
+#### Scenario: A record for another course falls back to this course's progress
+- **WHEN** the record names another course and the first three videos of this course's second lesson are complete
+- **THEN** Continue where you left off links to the fourth video of the second lesson
 
-On first render the first module SHALL be selected. After hydration the carousel SHALL select
-the first module, in `sequence` order, that the learner has started but not finished; when
-there is none, the first module they have not finished; otherwise the first module.
+#### Scenario: A finished course offers to watch again
+- **WHEN** every video of the course counts as complete
+- **THEN** the course tile shows 100 % and the continue tile's action reads Watch again and links to the first video
 
-#### Scenario: One poster per module, in order
-- **WHEN** the course resolves 10 modules
-- **THEN** the carousel holds 10 posters in `sequence` order and 10 dots
-
-#### Scenario: A poster shows real artwork and its counts
-- **WHEN** a module holding 25 videos totalling 325 minutes is rendered
-- **THEN** its poster shows up to three of its lessons' posters, its ordinal, its title and "25 videos · 5 h 25 min"
-
-#### Scenario: Arrows move the selection and stop at the ends
-- **WHEN** the first module is selected
-- **THEN** the previous arrow is disabled, and activating the next arrow selects the second module
-
-#### Scenario: A dot selects its module
-- **WHEN** the learner activates the fourth dot
-- **THEN** the fourth module becomes selected and its dot is marked current
-
-#### Scenario: Keyboard arrows move the selection
-- **WHEN** focus is inside the carousel and the learner presses the Right arrow key
-- **THEN** the next module becomes selected
-
-#### Scenario: Clicking a neighbour selects it
-- **WHEN** the learner clicks a poster that is not selected
-- **THEN** that module becomes selected and no navigation happens
-
-#### Scenario: Clicking the selected poster opens the module
-- **WHEN** the learner clicks the selected poster of a module holding several lessons
-- **THEN** they navigate to that module's overview for the active locale
-
-#### Scenario: Clicking the selected poster of a one-video module opens that video
-- **WHEN** the learner clicks the selected poster of a module holding exactly one lesson
-- **THEN** they navigate straight to that lesson's page
-
-#### Scenario: The carousel opens on the module in progress
-- **WHEN** the learner has completed some but not all videos of the third module and none of the others
-- **THEN** after hydration the third module is selected
-
-#### Scenario: The carousel does not widen the page on a phone
-- **WHEN** the course overview renders at 390px wide
-- **THEN** the document does not scroll horizontally
-
-### Requirement: A progress panel invites the learner into the selected module
-
-Below the carousel the course overview SHALL render a progress panel for the selected module,
-updating whenever the selection changes. The panel SHALL be in exactly one state, decided with
-the same completion rule as every other progress indicator (`countsAsComplete`):
-
-- **Not started** — no video of the module is complete and none has a saved playback
-  position. The panel SHALL show a ring divided into one segment per video with the first
-  segment lit and "N videos ready", a **Start this lesson** action opening the module's first
-  video, the module's runtime and the first video's title.
-- **In progress** — at least one video is complete or has a saved position, and not all are
-  complete. The panel SHALL show a ring filled to the share of completed videos with its
-  percentage and "C of N videos", "Pick up <title>" naming the first video in `sequence`
-  that is not complete, that video's position ("Video K of N"), the time left in it (its
-  runtime minus its saved position) and the time left in the module (the remaining time of
-  every incomplete video), a **Continue** action opening that video, and an **Open lesson**
-  action opening the module overview.
-- **Completed** — every video is complete. The panel SHALL show a full ring, "All N videos
-  watched", a **Watch again** action opening the first video, and an **Open lesson** action.
-
-In the not-started and in-progress states the panel SHALL list, as "Up next", up to three
-videos that follow the video its primary action opens, each with its position, title and
-runtime.
-
-Because progress is read from this device after hydration, the panel SHALL render on the
-server and before hydration without asserting any state: the module title, its meta line and
-an Open lesson action, with the ring track unfilled.
-
-#### Scenario: An untouched module invites the learner to start
-- **WHEN** the selected module holds 25 videos and none is complete or has a saved position
-- **THEN** the panel shows 25 ring segments with the first lit, "25 videos ready", and Start this lesson linking to the module's first video
-
-#### Scenario: A module in progress offers to continue
-- **WHEN** the first three of 25 videos are complete and the fourth, "/Flap/", running 13 minutes, has a saved position of 6 minutes
-- **THEN** the panel shows 12%, "3 of 25 videos", "Pick up /Flap/", "Video 4 of 25", 7 min left in the video, and Continue linking to "/Flap/"
-
-#### Scenario: Time left in the module counts only unfinished videos
-- **WHEN** a module is in progress
-- **THEN** the time left in the module is the sum, over incomplete videos, of each runtime minus its saved position
-
-#### Scenario: A finished module offers to watch again
-- **WHEN** every video of the selected module is complete
-- **THEN** the panel shows a full ring, "All N videos watched", Watch again linking to the first video, and Open lesson
-
-#### Scenario: Up next follows the primary action
-- **WHEN** the panel's primary action opens the fourth video of 25
-- **THEN** Up next lists the fifth, sixth and seventh videos with their titles and runtimes
-
-#### Scenario: Up next stops at the end of the module
-- **WHEN** the primary action opens the last video of the module
-- **THEN** no Up next list is rendered
-
-#### Scenario: The panel follows the selection
-- **WHEN** the learner selects a different module in the carousel
-- **THEN** the panel re-renders for that module
+#### Scenario: The course tile states progress in videos and time
+- **WHEN** 2 of 48 videos are complete and the remaining runtime minus saved positions is 10 h 7 min
+- **THEN** the course tile shows 4 %, "2 of 48 videos" and "10 h 7 min left"
 
 #### Scenario: The server render asserts no progress
 - **WHEN** the course overview is rendered on the server
-- **THEN** the panel shows the selected module's title, meta line and Open lesson, and no state-specific copy or filled ring
+- **THEN** the course title is present, the ring is unfilled with no percentage, and the continue tile shows placeholders instead of a label
 
-#### Scenario: Panel copy is localized
-- **WHEN** the locale is `es` or `pt`
-- **THEN** every panel and carousel string renders from the matching message file
+#### Scenario: A course with no lessons has no continue tile
+- **WHEN** the course has no lessons
+- **THEN** no continue tile and no continue action render
+
+### Requirement: Every lesson is a progress-ring tile that opens its lesson
+
+Below the opening tiles the course overview SHALL render one tile per lesson (module) in
+`sequence` order, all visible without paging. A tile SHALL show the lesson's artwork (the first
+video's poster, or a decorative placeholder), the lesson ordinal as an outlined numeral, a ring
+filled to the share of the lesson's videos that count as complete with that share as a
+percentage, the lesson title, and the watched count out of the lesson's videos with the time
+left in the lesson (**All watched** when completed). On wide viewports the tile SHALL also show a
+status chip — **Completed**, **In progress** or **Not started**; on narrow viewports the row's
+leading ring and meta line carry that state and no chip renders.
+
+A tile SHALL NOT list the lesson's videos. Activating a tile SHALL open the lesson's module
+overview for the active locale — or, when the lesson holds exactly one video, that video's
+page. When the learner has progress to continue (a continue tile labelled Continue where you
+left off), the lesson holding the continue tile's video SHALL be visually emphasized; a course
+not started or fully watched emphasizes no lesson.
+
+On wide viewports the tiles SHALL sit in a grid of up to five per row; on narrow viewports each
+tile SHALL be a full-width row led by its ring. The page SHALL NOT scroll horizontally.
+
+Before progress is known, tiles SHALL render with unfilled rings, no percentage and no status,
+and their meta line SHALL state the lesson's video count and runtime. All tile copy SHALL be
+localized (en/es/pt) and every tile SHALL carry an accessible name that includes the lesson
+title.
+
+#### Scenario: One tile per lesson, in order
+- **WHEN** the course resolves 5 lessons
+- **THEN** 5 lesson tiles render in `sequence` order, each with its ordinal and title
+
+#### Scenario: A tile states the lesson's progress
+- **WHEN** 1 of the 17 videos of Vowels is complete and 2 h 24 min remain in it
+- **THEN** its tile shows 6 %, In progress, "1/17" and "2 h 24 min left", and it is emphasized
+
+#### Scenario: A completed lesson reads as completed
+- **WHEN** every video of Introduction is complete
+- **THEN** its tile shows 100 %, Completed and All watched
+
+#### Scenario: A tile opens the module overview
+- **WHEN** the learner activates the tile of a lesson holding several videos
+- **THEN** they navigate to that lesson's module overview for the active locale
+
+#### Scenario: A one-video lesson opens its video
+- **WHEN** the learner activates the tile of a lesson holding exactly one video
+- **THEN** they navigate to that video's page
+
+#### Scenario: Tiles never list videos
+- **WHEN** the course overview renders in any progress state
+- **THEN** no tile renders the titles of the lesson's videos
+
+#### Scenario: The page does not scroll sideways on a phone
+- **WHEN** the course overview renders at 390px wide
+- **THEN** each lesson tile is a full-width row and the document does not scroll horizontally
 

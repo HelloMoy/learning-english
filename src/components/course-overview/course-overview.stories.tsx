@@ -1,6 +1,5 @@
 import { Course } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
-import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
 import type { ModuleSummary } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
 
@@ -40,7 +39,7 @@ const REAL_MODULES: ReadonlyArray<[string, number, number]> = [
   ["The Practice Zone Sharpen Your Skills", 16, 635],
 ];
 
-/** A real seed poster, so every collage resolves instead of showing empty frames. */
+/** A real seed poster, so every tile shows artwork instead of an empty band. */
 const POSTER =
   "/local-filesystem-lesson/advanced-intermediate-course/3-contractions-reductions/1-intro/04ecdb-ec4d-8fea-d3f-dc020da6ec80-snapshot-554507553.jpeg";
 
@@ -70,19 +69,6 @@ const moduleSummaries: ModuleSummary[] = modules.map((module, index) => {
   };
 });
 
-const firstLesson = Lesson.parse({
-  kind: "video",
-  id: "9e9d39a2-d2bb-57bb-9a5e-37de8c3e2a1c",
-  courseId: course.id,
-  moduleId: modules[0]!.id,
-  sequence: 1,
-  title: "Welcome",
-  description: "Welcome to the course.",
-  source: "/local-filesystem-lesson/advanced-intermediate-course/1-module/welcome.mp4",
-  durationSeconds: 195,
-  poster: POSTER,
-});
-
 const meta: Meta<typeof CourseOverview> = {
   title: "Components/CourseOverview",
   component: CourseOverview,
@@ -91,7 +77,6 @@ const meta: Meta<typeof CourseOverview> = {
     course,
     modules,
     moduleSummaries,
-    firstLesson,
   },
 };
 
@@ -100,17 +85,18 @@ export default meta;
 type Story = StoryObj<typeof CourseOverview>;
 
 /**
- * All ten modules at their real sizes: the compact hero, the poster carousel
- * and the progress panel for the selected module. Narrow the viewport to see
- * the neighbours peek in from the screen edges.
+ * All ten modules at their real sizes: the continue tile and the course's
+ * progress, then ten lesson ring tiles in two rows of five. Narrow the viewport
+ * to see each lesson become a row led by its ring.
  */
 export const Default: Story = {};
 
-/** A course with no lessons yet: the hero renders without Start course. */
-export const NoFirstLesson: Story = {
+/** A course whose modules hold no videos yet: no continue tile, empty rings. */
+export const NoVideos: Story = {
   args: {
     modules: modules.slice(0, 3),
-    moduleSummaries: moduleSummaries.slice(0, 3),
-    firstLesson: null,
+    moduleSummaries: moduleSummaries
+      .slice(0, 3)
+      .map((summary) => ({ ...summary, lessonCount: 0, totalDurationSeconds: 0, lessons: [] })),
   },
 };

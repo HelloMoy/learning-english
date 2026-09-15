@@ -66,6 +66,39 @@ describe("ProgressRing", () => {
     });
   });
 
+  describe("GIVEN the glow setting", () => {
+    test("WHEN no setting is passed THEN the fill glows", () => {
+      // Act
+      render(
+        <ProgressRing
+          size={120}
+          fraction={0.5}
+        />,
+      );
+
+      // Assert
+      expect(screen.getByTestId("progress-ring-fill").getAttribute("class")).toContain(
+        "drop-shadow",
+      );
+    });
+
+    test("WHEN the glow is turned off THEN the fill carries no drop-shadow filter", () => {
+      // Act
+      render(
+        <ProgressRing
+          size={120}
+          fraction={0.5}
+          glow={false}
+        />,
+      );
+
+      // Assert
+      expect(screen.getByTestId("progress-ring-fill").getAttribute("class")).not.toContain(
+        "drop-shadow",
+      );
+    });
+  });
+
   describe("GIVEN a label inside the ring", () => {
     test("WHEN the ring renders THEN the label is shown AND the drawing is hidden from assistive technology", () => {
       // Arrange
