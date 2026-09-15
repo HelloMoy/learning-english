@@ -49,6 +49,9 @@ const IPHONE = deviceWithoutEngine(devices["iPhone 13"]);
  *   - "The enlarge control is present on iPhone Safari" (its engine-independent
  *     half — the control exists and is operable)
  *   - "Enlarging pins the player to the viewport"
+ *   - "A wide landscape screen does not crop the video" / "The embed stays
+ *     centred on the fitted video area" / "The controls still span the screen"
+ *     (the browser's own fullscreen)
  *   - "Enlarging does not interrupt playback" (the element is never replaced)
  *   - "Escape leaves the mode"
  *   - "A tap reveals the controls on a phone" / "A second tap hides them again" /
@@ -629,6 +632,66 @@ test.describe("GIVEN a browser that can take the player fullscreen", () => {
     await expect(page.locator("[data-media-player]")).toBeVisible();
 
     await expect(await stepShownAsChosen(page, CHOSEN)).toHaveAttribute("aria-checked", "true");
+  });
+});
+
+/** A 20:9 phone held in landscape — wider than the 16:9 the embed lays its video out for. */
+const WIDE_LANDSCAPE_SCREEN = { width: 915, height: 412 };
+
+/** Enters the browser's own fullscreen through the library's button, the learner's way. */
+async function enterBrowserFullscreen(page: Page, player: Locator) {
+  await page.locator(".vds-fullscreen-button").click();
+  await expect(player).toHaveAttribute("data-fullscreen", "");
+}
+
+/** The size of the screen the fullscreen player is laid out against. */
+async function screenSizeOf(page: Page) {
+  return page.evaluate(() => ({ width: window.innerWidth, height: window.innerHeight }));
+}
+
+test.describe("GIVEN a screen wider than 16:9 in the browser's own fullscreen", () => {
+  test.use({ viewport: WIDE_LANDSCAPE_SCREEN });
+
+  test("WHEN fullscreen is entered THEN the video area is the largest 16:9 box, centred", async ({
+    page,
+  }) => {
+    // The embed lays its video out against the frame's width and only the
+    // provider's band is on screen, so a band shorter than `width × 9/16` is
+    // what cropped the video top and bottom on Android phones.
+    const { player } = await openLesson(page);
+    await enterBrowserFullscreen(page, player);
+    const screen = await screenSizeOf(page);
+
+    const band = (await page.locator("[data-media-provider]").boundingBox())!;
+
+    expect(Math.abs(band.height - screen.height)).toBeLessThanOrEqual(1);
+    expect(Math.abs(band.width - (band.height * 16) / 9)).toBeLessThanOrEqual(1);
+    expect(Math.abs(band.x + band.width / 2 - screen.width / 2)).toBeLessThanOrEqual(1);
+  });
+
+  test("WHEN fullscreen is entered THEN the embed frame stays centred on the video area", async ({
+    page,
+  }) => {
+    const { player, embedFrame } = await openLesson(page);
+    await enterBrowserFullscreen(page, player);
+
+    const frame = (await embedFrame.boundingBox())!;
+    const band = (await page.locator("[data-media-provider]").boundingBox())!;
+
+    expect(Math.abs(frame.x + frame.width / 2 - (band.x + band.width / 2))).toBeLessThanOrEqual(1);
+    expect(Math.abs(frame.y + frame.height / 2 - (band.y + band.height / 2))).toBeLessThanOrEqual(
+      1,
+    );
+  });
+
+  test("WHEN fullscreen is entered THEN the controls still span the screen", async ({ page }) => {
+    const { player } = await openLesson(page);
+    await enterBrowserFullscreen(page, player);
+    const screen = await screenSizeOf(page);
+
+    const controls = (await controlBarOf(page).boundingBox())!;
+
+    expect(Math.abs(controls.width - screen.width)).toBeLessThanOrEqual(1);
   });
 });
 
