@@ -132,6 +132,80 @@ describe("ModuleRoute", () => {
     });
   });
 
+  describe("GIVEN the module's prize", () => {
+    const claimInStorage = (): void => {
+      window.localStorage.setItem(`learning-english:prize-claimed:${courseModule.slug}`, "1");
+    };
+    const ticketTag = (earned: number) => key("tag", { earned, count: lessons.length });
+    const claimLinks = () =>
+      screen.queryAllByRole("link", { name: key("claimLabel", { module: "Vowels" }) });
+
+    test("WHEN the first frame is produced on the server THEN no prize state, tag or claim link is asserted", () => {
+      lessons.forEach((lesson) => markCompleteInStorage(lesson.id));
+
+      const html = renderToString(
+        <ModuleRoute
+          course={course}
+          module={courseModule}
+          lessons={lessons}
+        />,
+      );
+
+      expect(html).toContain("hiddenName");
+      expect(html).not.toContain("tag:");
+      expect(html).not.toContain("claimLabel");
+      expect(html).not.toContain('data-testid="module-prize-finale"');
+    });
+
+    test("WHEN one ticket is earned THEN the panel and the route's finale both show the hidden prize with one of three tickets", async () => {
+      markCompleteInStorage(lessons[0]!.id);
+      announceStorageChange();
+
+      renderRoute();
+
+      await vi.waitFor(() => expect(screen.getAllByText(ticketTag(1))).toHaveLength(2));
+      const panel = screen.getByRole("region", { name: "progressHeading" });
+      expect(within(panel).getByText(ticketTag(1))).toBeInTheDocument();
+      expect(screen.getByTestId("module-prize-finale")).toContainElement(
+        screen.getAllByText(ticketTag(1))[1]!,
+      );
+      expect(screen.queryByText("harmonica")).not.toBeInTheDocument();
+    });
+
+    test("WHEN the finale renders THEN it follows the list, which keeps one item per lesson", async () => {
+      renderRoute();
+
+      const finale = await screen.findByTestId("module-prize-finale");
+      const list = screen.getByRole("list");
+      expect(within(list).getAllByRole("listitem")).toHaveLength(lessons.length);
+      expect(list).not.toContainElement(finale);
+      expect(list.compareDocumentPosition(finale)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    test("WHEN every ticket is earned THEN both surfaces send the learner to claim the prize on the counter", async () => {
+      lessons.forEach((lesson) => markCompleteInStorage(lesson.id));
+      announceStorageChange();
+
+      renderRoute();
+
+      await vi.waitFor(() => expect(claimLinks()).toHaveLength(2));
+      for (const link of claimLinks()) {
+        expect(link).toHaveAttribute("href", `/achievements?claim=${courseModule.slug}`);
+      }
+    });
+
+    test("WHEN the prize was claimed THEN both surfaces name it and offer nothing to claim", async () => {
+      lessons.forEach((lesson) => markCompleteInStorage(lesson.id));
+      claimInStorage();
+      announceStorageChange();
+
+      renderRoute();
+
+      await vi.waitFor(() => expect(screen.getAllByText("harmonica")).toHaveLength(2));
+      expect(claimLinks()).toHaveLength(0);
+    });
+  });
+
   describe("GIVEN a step links to its lesson", () => {
     test("WHEN the route renders THEN each step's action targets that lesson's page", () => {
       renderRoute();

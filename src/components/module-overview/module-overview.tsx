@@ -3,7 +3,8 @@ import { ModuleRoute } from "@/components/module-route/module-route";
 import type { Course } from "@/domain/entities/course/course";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
 import type { Module } from "@/domain/entities/module/module";
-import { courseOverviewPath } from "@/i18n/lesson-routes";
+import type { ModuleWithLessons } from "@/domain/use-cases/find-module-for-view/find-module-for-view";
+import { courseOverviewPath, moduleEntryPath } from "@/i18n/lesson-routes";
 import { Link } from "@/i18n/navigation";
 import { splitRuntime } from "@/lib/module-route/module-route";
 
@@ -28,15 +29,19 @@ import { useTranslations } from "next-intl";
  * @param props.course - The course the module belongs to
  * @param props.module - The module being shown
  * @param props.lessons - The module's lessons, in sequence order
+ * @param props.nextModule - The course's next lesson (module) holding videos, which the route's prize
+ *                           finale offers once every ticket is in; absent for the course's last
  */
 export function ModuleOverview({
   course,
   module,
   lessons,
+  nextModule,
 }: {
   course: Course;
   module: Module;
   lessons: ReadonlyArray<Lesson>;
+  nextModule?: ModuleWithLessons;
 }) {
   const t = useTranslations("CourseCatalog.moduleOverview");
   const moduleNumber = String(module.sequence).padStart(2, "0");
@@ -83,6 +88,14 @@ export function ModuleOverview({
           course={course}
           module={module}
           lessons={lessons}
+          nextLesson={
+            nextModule
+              ? {
+                  sequence: nextModule.module.sequence,
+                  href: moduleEntryPath(course, nextModule.module, nextModule.lessons),
+                }
+              : undefined
+          }
         />
       </section>
     </article>

@@ -9,10 +9,21 @@ import { err, ok, Result, ResultAsync } from "@/domain/result/result";
 
 import type { FindModuleForViewErrors } from "./find-module-for-view.errors";
 
+/** A module together with its lessons, in `sequence` order. */
+export type ModuleWithLessons = {
+  module: Module;
+  lessons: Lesson[];
+};
+
 export type ModuleForView = {
   course: Course;
   module: Module;
   lessons: Lesson[];
+  /**
+   * The first later module of the course that holds lessons — where the learner
+   * goes once this one is done. Absent for the last module holding lessons.
+   */
+  nextModule?: ModuleWithLessons;
 };
 
 export type FindModuleForView = (input: {
@@ -58,14 +69,32 @@ export const makeFindModuleForView = (deps: {
         }),
       )
       .andThen(({ course, mod }) =>
-        ResultAsync.fromPromise(deps.lessons.listByCourse(course.id), toInternalError).map(
-          (lessons) => {
-            const inThisModule = lessons
-              .filter((lesson) => lesson.moduleId === mod.id)
-              .sort(bySequence);
-            return { course, module: mod, lessons: inThisModule };
-          },
-        ),
+        ResultAsync.fromPromise(
+          Promise.all([deps.modules.listByCourse(course.id), deps.lessons.listByCourse(course.id)]),
+          toInternalError,
+        ).map(([modules, lessons]) => {
+          const nextModule = findNextModuleWithLessons(mod, modules, lessons);
+          return {
+            course,
+            module: mod,
+            lessons: lessonsOf(mod, lessons),
+            ...(nextModule ? { nextModule } : {}),
+          };
+        }),
       );
   return useCase;
 };
+
+const lessonsOf = (mod: Module, lessons: ReadonlyArray<Lesson>): Lesson[] =>
+  lessons.filter((lesson) => lesson.moduleId === mod.id).sort(bySequence);
+
+const findNextModuleWithLessons = (
+  current: Module,
+  modules: ReadonlyArray<Module>,
+  lessons: ReadonlyArray<Lesson>,
+): ModuleWithLessons | undefined =>
+  [...modules]
+    .sort(bySequence)
+    .filter((candidate) => candidate.sequence > current.sequence)
+    .map((candidate) => ({ module: candidate, lessons: lessonsOf(candidate, lessons) }))
+    .find((candidate) => candidate.lessons.length > 0);

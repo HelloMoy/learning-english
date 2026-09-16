@@ -179,3 +179,106 @@ test.describe("Module overview route — a learner who returned to the start", (
     await expect(current).toContainText(LESSONS[2]!.title);
   });
 });
+
+/** Every Vowels video finished, and — when `isClaimed` — its prize claimed on the counter. */
+async function seedFinishedModule(
+  page: Page,
+  { isClaimed }: { isClaimed: boolean },
+): Promise<void> {
+  await page.addInitScript(
+    ({ lessonIds, moduleSlug, isClaimed }) => {
+      for (const id of lessonIds)
+        window.localStorage.setItem(`learning-english:completed:${id}`, "1");
+      if (isClaimed)
+        window.localStorage.setItem(`learning-english:prize-claimed:${moduleSlug}`, "1");
+    },
+    { lessonIds: LESSONS.map((lesson) => lesson.id), moduleSlug: MODULE.slug, isClaimed },
+  );
+}
+
+const prizePanel = (page: Page) => page.getByRole("region", { name: "Your progress" });
+const prizeFinale = (page: Page) => page.getByTestId("module-prize-finale");
+const claimLinks = (page: Page) => page.getByRole("link", { name: "Claim the Vowels prize" });
+
+test.describe("Module overview prize", () => {
+  test("WHEN a returning learner opens the module THEN the panel and the end of the route show the hidden prize with its tickets", async ({
+    page,
+  }) => {
+    await seedReturningLearner(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(MODULE_URL);
+
+    const tag = `${FINISHED_COUNT} / ${LESSONS.length}`;
+    await expect(prizeFinale(page).getByText(tag)).toBeVisible(COLD_ROUTE);
+    await expect(prizePanel(page).getByText(tag)).toBeVisible();
+    await expect(prizeFinale(page).getByText("???")).toBeVisible();
+    await expect(page.getByText("Harmonica")).toHaveCount(0);
+    await expect(route(page).getByRole("listitem")).toHaveCount(LESSONS.length);
+  });
+
+  test("WHEN every ticket is collected THEN Claim prize opens the counter asking for the Vowels prize", async ({
+    page,
+  }) => {
+    await seedFinishedModule(page, { isClaimed: false });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(MODULE_URL);
+
+    await expect(claimLinks(page)).toHaveCount(2, COLD_ROUTE);
+    await prizeFinale(page).getByRole("link", { name: "Claim the Vowels prize" }).click();
+
+    await page.waitForURL(`**/en/achievements?claim=${MODULE.slug}`, COLD_ROUTE);
+  });
+
+  test("WHEN every ticket is collected THEN Start Lesson 03 opens Consonants", async ({ page }) => {
+    await seedFinishedModule(page, { isClaimed: false });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(MODULE_URL);
+
+    await prizeFinale(page).getByRole("link", { name: "Start Lesson 03" }).click(COLD_ROUTE);
+
+    await page.waitForURL(`**/en/courses/${COURSE_SLUG}/modules/3-consonants`, COLD_ROUTE);
+  });
+
+  test("WHEN the prize was claimed THEN the end of the route still hands on to Start Lesson 03", async ({
+    page,
+  }) => {
+    await seedFinishedModule(page, { isClaimed: true });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(MODULE_URL);
+
+    await expect(prizeFinale(page).getByRole("link", { name: "Start Lesson 03" })).toBeVisible(
+      COLD_ROUTE,
+    );
+  });
+
+  test("WHEN the prize was claimed on the counter THEN the module page reveals the harmonica and offers nothing to claim", async ({
+    page,
+  }) => {
+    await seedFinishedModule(page, { isClaimed: true });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(MODULE_URL);
+
+    await expect(prizeFinale(page).getByText("Harmonica", { exact: true })).toBeVisible(COLD_ROUTE);
+    await expect(prizePanel(page).getByText("Harmonica", { exact: true })).toBeVisible();
+    await expect(claimLinks(page)).toHaveCount(0);
+  });
+
+  test("WHEN every ticket is collected on a 390px phone THEN the finale and its Claim prize link fit without sideways scrolling", async ({
+    page,
+  }) => {
+    await seedFinishedModule(page, { isClaimed: false });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(MODULE_URL);
+
+    const finaleLink = prizeFinale(page).getByRole("link", { name: "Claim the Vowels prize" });
+    await expect(finaleLink).toBeVisible(COLD_ROUTE);
+    const box = (await finaleLink.boundingBox())!;
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(390);
+
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBeLessThanOrEqual(0);
+  });
+});

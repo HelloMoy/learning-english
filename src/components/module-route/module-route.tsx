@@ -1,10 +1,12 @@
 "use client";
 
+import { ModulePrize, type NextLessonLink } from "@/components/module-prize/module-prize";
 import { ModuleProgressPanel } from "@/components/module-progress-panel/module-progress-panel";
 import { ModuleRouteStep } from "@/components/module-route-step/module-route-step";
 import type { Course } from "@/domain/entities/course/course";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
 import type { Module } from "@/domain/entities/module/module";
+import { useModulePrize } from "@/hooks/use-module-prize/use-module-prize";
 import { useModuleRoute, type ModuleRouteReading } from "@/hooks/use-module-route/use-module-route";
 import { lessonPath } from "@/i18n/lesson-routes";
 import type { RouteLesson, RouteStep } from "@/lib/module-route/module-route";
@@ -15,6 +17,8 @@ export type ModuleRouteProps = {
   module: Module;
   /** The module's lessons, in sequence order. */
   lessons: ReadonlyArray<Lesson>;
+  /** The course's next lesson, offered at the end of the route once every ticket is in. */
+  nextLesson?: NextLessonLink;
 };
 
 const NOT_STARTED: Pick<RouteStep, "state" | "watchedFraction"> = {
@@ -23,8 +27,9 @@ const NOT_STARTED: Pick<RouteStep, "state" | "watchedFraction"> = {
 };
 
 /**
- * The learner's route through a module: the progress panel and one step per
- * lesson, each showing whether it is finished, current or upcoming.
+ * The learner's route through a module: the progress panel, one step per
+ * lesson, each showing whether it is finished, current or upcoming, and the
+ * module's prize at the end of the route.
  *
  * @remarks
  * A client component because progress lives in `localStorage`. It reads that
@@ -34,6 +39,12 @@ const NOT_STARTED: Pick<RouteStep, "state" | "watchedFraction"> = {
  *
  * Until progress is read, every step renders as upcoming and the panel shows
  * no figures — the server-rendered frame asserts nothing about the learner.
+ *
+ * The prize is read once too, and handed to the panel's prize row and to the
+ * route's finale together with the route's own "read" signal: the ticket
+ * stores have none of their own, and the two surfaces must never disagree.
+ * The finale follows the list of steps rather than joining it, so the route
+ * keeps exactly one step per lesson.
  *
  * The panel comes first in the DOM, so its figures are read before the list at
  * every width; from `lg` it moves to a sticky right-hand column.
@@ -45,29 +56,50 @@ const NOT_STARTED: Pick<RouteStep, "state" | "watchedFraction"> = {
  *
  * @param props - {@link ModuleRouteProps}
  */
-export function ModuleRoute({ course, module, lessons }: ModuleRouteProps) {
+export function ModuleRoute({ course, module, lessons, nextLesson }: ModuleRouteProps) {
   const reading = useModuleRoute(lessons.map(toRouteLesson));
+  const prize = useModulePrize({ course, module, lessons });
 
   return (
     <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-16">
       <div className="lg:sticky lg:top-24 lg:order-last">
-        <ModuleProgressPanel reading={reading} />
+        <ModuleProgressPanel reading={reading}>
+          {prize.hasPrize ? (
+            <ModulePrize
+              module={module}
+              prize={prize}
+              isRead={reading.isRead}
+              layout="panel"
+            />
+          ) : null}
+        </ModuleProgressPanel>
       </div>
-      <ol className="flex min-w-0 flex-col">
-        {lessons.map((lesson) => {
-          const { state, watchedFraction } = stepFor(reading, lesson);
-          return (
-            <li key={lesson.id}>
-              <ModuleRouteStep
-                lesson={lesson}
-                href={lessonPath(course, module, lesson)}
-                state={state}
-                watchedFraction={watchedFraction}
-              />
-            </li>
-          );
-        })}
-      </ol>
+      <div className="flex min-w-0 flex-col">
+        <ol className="flex min-w-0 flex-col">
+          {lessons.map((lesson) => {
+            const { state, watchedFraction } = stepFor(reading, lesson);
+            return (
+              <li key={lesson.id}>
+                <ModuleRouteStep
+                  lesson={lesson}
+                  href={lessonPath(course, module, lesson)}
+                  state={state}
+                  watchedFraction={watchedFraction}
+                />
+              </li>
+            );
+          })}
+        </ol>
+        {prize.hasPrize ? (
+          <ModulePrize
+            module={module}
+            prize={prize}
+            isRead={reading.isRead}
+            layout="finale"
+            nextLesson={nextLesson}
+          />
+        ) : null}
+      </div>
     </div>
   );
 }

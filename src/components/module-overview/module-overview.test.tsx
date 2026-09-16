@@ -174,3 +174,64 @@ describe("ModuleOverview — route", () => {
     });
   });
 });
+
+describe("ModuleOverview — the next lesson", () => {
+  const nextModule = Module.parse({
+    id: "66666666-6666-4666-8666-666666666666",
+    courseId: course.id,
+    slug: "mod-2",
+    title: "Next Lesson",
+    sequence: 4,
+  });
+  const onlyVideo = Lesson.parse({
+    ...lessonA,
+    id: "77777777-7777-4777-8777-777777777777",
+    moduleId: nextModule.id,
+  });
+
+  const completeEveryLesson = (lessons: Lesson[]) => {
+    for (const lesson of lessons) {
+      window.localStorage.setItem(`learning-english:completed:${lesson.id}`, "1");
+    }
+    act(() => {
+      refreshSavedPlaybackPositions();
+      window.dispatchEvent(new StorageEvent("storage", { key: null }));
+    });
+  };
+
+  test("WHEN every ticket is in and a next lesson holds one video THEN the finale starts that video", async () => {
+    completeEveryLesson([lessonA, lessonB]);
+
+    render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonA, lessonB]}
+        nextModule={{ module: nextModule, lessons: [onlyVideo] }}
+      />,
+    );
+
+    const start = await screen.findByRole("link", {
+      name: key("startNextLesson", { number: "04" }),
+    });
+    expect(start).toHaveAttribute(
+      "href",
+      `/courses/course-1/modules/mod-2/lessons/${onlyVideo.id}`,
+    );
+  });
+
+  test("WHEN there is no next lesson THEN the finale offers none", async () => {
+    completeEveryLesson([lessonA, lessonB]);
+
+    render(
+      <ModuleOverview
+        course={course}
+        module={mod1}
+        lessons={[lessonA, lessonB]}
+      />,
+    );
+
+    await screen.findByTestId("module-prize-finale");
+    expect(screen.queryByText(/^startNextLesson/)).not.toBeInTheDocument();
+  });
+});
