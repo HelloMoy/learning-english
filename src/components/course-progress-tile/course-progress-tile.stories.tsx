@@ -56,7 +56,37 @@ export const Finished: Story = {
   },
 };
 
-/** Before progress is read: the course title and an empty ring. */
+/** The course's five prizes, one of them claimed: the rest stay silhouettes. */
+export const WithPrizes: Story = {
+  args: {
+    prizes: [
+      { prize: "whistle", isClaimed: true },
+      { prize: "harmonica", isClaimed: false },
+      { prize: "megaphone", isClaimed: false },
+      { prize: "drum", isClaimed: false },
+      { prize: "car", isClaimed: false },
+    ],
+  },
+};
+
+/** Every prize claimed — what the counter looks like from here once it is emptied. */
+export const EveryPrizeClaimed: Story = {
+  args: {
+    reading: {
+      status: "read",
+      tally: { completedCount: 48, lessonCount: 48, completedFraction: 1, secondsLeft: 0 },
+    },
+    prizes: [
+      { prize: "whistle", isClaimed: true },
+      { prize: "harmonica", isClaimed: true },
+      { prize: "megaphone", isClaimed: true },
+      { prize: "drum", isClaimed: true },
+      { prize: "car", isClaimed: true },
+    ],
+  },
+};
+
+/** Before progress is read: the course title and an empty ring, and no prize figures. */
 export const Pending: Story = {
   args: { reading: { status: "pending" } },
 };

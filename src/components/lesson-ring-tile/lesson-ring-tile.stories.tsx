@@ -116,6 +116,28 @@ export const NotStarted: Story = {
   },
 };
 
+/**
+ * Every video watched and the prize claimed on the counter: the toy is drawn in
+ * colour. Completing the lesson alone leaves it a silhouette — see `Completed`.
+ */
+export const PrizeClaimed: Story = {
+  args: {
+    isPrizeClaimed: true,
+    reading: {
+      status: "read",
+      progress: {
+        ...vowels,
+        completedCount: 17,
+        lessonCount: 17,
+        completedFraction: 1,
+        secondsLeft: 0,
+        status: "completed",
+        isCurrent: false,
+      },
+    },
+  },
+};
+
 /** Before this device's progress is read: size and runtime only, no ring fill. */
 export const Pending: Story = {
   args: { reading: { status: "pending" } },

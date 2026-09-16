@@ -86,6 +86,74 @@ describe("CourseProgressTile", () => {
     });
   });
 
+  describe("GIVEN the course's prizes", () => {
+    const prizes = [
+      { prize: "whistle", isClaimed: true },
+      { prize: "harmonica", isClaimed: false },
+      { prize: "megaphone", isClaimed: false },
+    ] as const;
+
+    test("WHEN the reading has arrived THEN the tile counts the prizes claimed", () => {
+      render(
+        <CourseProgressTile
+          course={course}
+          reading={{ status: "read", tally: tally({ completedCount: 2 }) }}
+          prizes={[...prizes]}
+        />,
+      );
+
+      expect(screen.getByTestId("course-progress-tile")).toHaveTextContent(
+        msg("prizesClaimed", { claimed: 1, total: 3 }),
+      );
+    });
+
+    test("WHEN it renders the prizes THEN each carries its own state AND none is a control", () => {
+      render(
+        <CourseProgressTile
+          course={course}
+          reading={{ status: "read", tally: tally({}) }}
+          prizes={[...prizes]}
+        />,
+      );
+
+      const tile = screen.getByTestId("course-progress-tile");
+      expect(tile.querySelector('svg[data-prize="whistle"][data-locked="false"]')).not.toBeNull();
+      expect(tile.querySelector('svg[data-prize="harmonica"][data-locked="true"]')).not.toBeNull();
+      expect(tile.querySelectorAll("button, a")).toHaveLength(0);
+    });
+
+    test("WHEN the prizes are drawn THEN each sits on its own scrim AND is big enough to read", () => {
+      // The row sits over the card, but the toys are small: without a veil the
+      // silhouettes blur into it.
+      render(
+        <CourseProgressTile
+          course={course}
+          reading={{ status: "read", tally: tally({}) }}
+          prizes={[...prizes]}
+        />,
+      );
+
+      const tile = screen.getByTestId("course-progress-tile");
+      const badge = tile.querySelector('[data-testid="course-progress-tile-prize"]');
+      expect(badge?.getAttribute("style") ?? "").toContain("radial-gradient");
+      expect(tile.querySelector('svg[data-prize="whistle"]')).toHaveAttribute("width", "30");
+    });
+
+    test("WHEN the reading has not arrived THEN it says nothing about prizes", () => {
+      // Claims are read on the device too: before they answer, "0 claimed"
+      // would be an assertion the page cannot justify.
+      render(
+        <CourseProgressTile
+          course={course}
+          reading={{ status: "pending" }}
+          prizes={[...prizes]}
+        />,
+      );
+
+      expect(screen.getByTestId("course-progress-tile")).not.toHaveTextContent("prizesClaimed");
+    });
+  });
+
   describe("GIVEN progress is not known yet", () => {
     test("WHEN the tile renders THEN it names the course AND asserts no progress", () => {
       // Act

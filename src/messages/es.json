@@ -431,6 +431,7 @@
       "timeLeft": "Quedan {duration}",
       "watchAgain": "Ver de nuevo",
       "percentComplete": "{percent, number, percent}",
+      "prizesClaimed": "{claimed} de {total} premios",
       "completedOfTotal": "{completed} de {total} videos",
       "continueWhereLeftOff": "Continuar donde lo dejaste",
       "statusCompleted": "Completada",

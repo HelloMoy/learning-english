@@ -73,6 +73,7 @@ const readingOf = (
 const renderTile = (
   entry: ReturnType<typeof moduleWith>,
   reading: Parameters<typeof LessonRingTile>[0]["reading"],
+  isPrizeClaimed = false,
 ) =>
   render(
     <LessonRingTile
@@ -80,6 +81,7 @@ const renderTile = (
       module={entry.module}
       summary={entry.summary}
       reading={reading}
+      isPrizeClaimed={isPrizeClaimed}
     />,
   );
 
@@ -188,6 +190,69 @@ describe("LessonRingTile", () => {
         "href",
         `/courses/basic-course/modules/2-vowels/lessons/${entry.summary.lessons[0]!.id}`,
       );
+    });
+  });
+
+  describe("GIVEN the prize this lesson redeems", () => {
+    test("WHEN the prize is unclaimed THEN the tile carries it as a silhouette", () => {
+      const entry = moduleWith(17);
+
+      renderTile(entry, readingOf(entry, {}));
+
+      const tile = screen.getByTestId("lesson-ring-tile");
+      // `2-vowels` redeems the harmonica.
+      expect(tile).toHaveAttribute("data-prize", "harmonica");
+      expect(tile).toHaveAttribute("data-prize-claimed", "false");
+      expect(tile.querySelector('svg[data-prize="harmonica"][data-locked="true"]')).not.toBeNull();
+    });
+
+    test("WHEN the artwork behind it is busy THEN the prize sits on its own scrim", () => {
+      // The band carries real posters — faces, titles, high contrast — and an
+      // unbacked toy dissolves into them.
+      const entry = moduleWith(17);
+
+      renderTile(entry, readingOf(entry, {}));
+
+      const backdrop = screen.getByTestId("lesson-ring-tile-prize");
+      expect(backdrop.getAttribute("style") ?? "").toContain("radial-gradient");
+    });
+
+    test("WHEN the prize has been claimed THEN the tile draws it in colour", () => {
+      const entry = moduleWith(17);
+
+      renderTile(
+        entry,
+        readingOf(entry, { completedCount: 17, completedFraction: 1, status: "completed" }),
+        true,
+      );
+
+      const tile = screen.getByTestId("lesson-ring-tile");
+      expect(tile).toHaveAttribute("data-prize-claimed", "true");
+      expect(tile.querySelector('svg[data-prize="harmonica"][data-locked="false"]')).not.toBeNull();
+    });
+
+    test("WHEN a lesson is completed but unclaimed THEN its prize stays hidden", () => {
+      // Completing readies the prize; only claiming it on the counter reveals it.
+      const entry = moduleWith(3);
+
+      renderTile(
+        entry,
+        readingOf(entry, { completedCount: 3, completedFraction: 1, status: "completed" }),
+      );
+
+      expect(
+        screen.getByTestId("lesson-ring-tile").querySelector('svg[data-locked="true"]'),
+      ).not.toBeNull();
+    });
+
+    test("WHEN the tile renders THEN the prize is decoration AND adds no control", () => {
+      const entry = moduleWith(17);
+
+      renderTile(entry, readingOf(entry, {}), true);
+
+      const prize = screen.getByTestId("lesson-ring-tile").querySelector("svg[data-prize]");
+      expect(prize).toHaveAttribute("aria-hidden", "true");
+      expect(screen.getAllByRole("link")).toHaveLength(1);
     });
   });
 
