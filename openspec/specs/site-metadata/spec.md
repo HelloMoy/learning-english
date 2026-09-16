@@ -3,7 +3,6 @@
 ## Purpose
 TBD - created by archiving change site-metadata-foundation. Update Purpose after archive.
 ## Requirements
-
 ### Requirement: The application resolves one absolute site URL
 
 The application SHALL resolve a single absolute origin for every absolute URL it publishes, from the first of these that is set: `NEXT_PUBLIC_SITE_URL`, `https://${VERCEL_PROJECT_PRODUCTION_URL}`, `https://${VERCEL_URL}`, `http://localhost:${PORT ?? 3000}`.
@@ -142,7 +141,7 @@ The application SHALL declare a theme color for each of its two themes rather th
 
 The application SHALL generate a 1200×630 sharing image per catalog route — the home, each course, each module and each lesson — from that route's own catalog data and in the locale it is served in, rather than serving one static image for the whole site.
 
-The personal routes — onboarding, My learning and Profile — describe no catalog content and are not meant to be shared. They SHALL NOT render their own sharing image and SHALL publish the home's sharing image for their locale.
+The personal routes — onboarding, My learning, Achievements and Profile — describe no catalog content and are not meant to be shared. They SHALL NOT render their own sharing image and SHALL publish the home's sharing image for their locale.
 
 The image SHALL carry the application's visual identity: the Immersion Cinema ground, its radial gold glow, the letterbox scrim, and the `ENGLISH·COURSE` wordmark, so that a card is recognisable as this product before any text is read.
 
@@ -163,6 +162,10 @@ All four catalog route kinds SHALL render through one shared card component. Fou
 #### Scenario: A personal route shares the home card
 - **WHEN** the metadata for `/es/learning` is generated
 - **THEN** its Open Graph image is the `es` home sharing image and no route-specific image file exists for it
+
+#### Scenario: Achievements shares the home card
+- **WHEN** the metadata for `/pt/achievements` is generated
+- **THEN** its Open Graph image is the `pt` home sharing image and no route-specific image file exists for it
 
 ### Requirement: A withheld course renders no sharing image
 
@@ -197,3 +200,4 @@ This matters because a path containing a dot is deliberately excluded from the l
 #### Scenario: A supported locale is unaffected
 - **WHEN** a request arrives for a path under a configured locale
 - **THEN** metadata is built exactly as before, with the canonical URL, the locale alternates and the sharing tags the `site-metadata` requirements already specify
+

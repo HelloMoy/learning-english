@@ -1,9 +1,5 @@
-# Capability: cinema-course-overview
+## MODIFIED Requirements
 
-## Purpose
-
-Define the Immersion Cinema presentation of the course overview route (`/[locale]/courses/[courseSlug]`). The course is presented as a numbered index of its modules: a course header with gold count pills, then one full-width showcase card per module, each preceded by its ordinal. A card pairs the module's title, an explicit video count and duration, and a call to action with a receding gallery of that module's leading lesson artwork, so a module reads as a container of several videos rather than as one video to play. A primary "Start course" action targets the deterministic first lesson. Neither the earlier interactive practice track nor the poster grid that replaced it remains in this view.
-## Requirements
 ### Requirement: The course overview opens with a continue tile and the course's progress
 
 The course overview (`/[locale]/courses/[courseSlug]`) SHALL open with two tiles, side by side
@@ -158,4 +154,3 @@ title.
 #### Scenario: The page does not scroll sideways on a phone
 - **WHEN** the course overview renders at 390px wide
 - **THEN** each lesson tile is a full-width row and the document does not scroll horizontally
-
