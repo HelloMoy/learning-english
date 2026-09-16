@@ -225,6 +225,27 @@
 }
 
 /*
+ * The browser's own fullscreen, fitted the same way.
+ *
+ * In fullscreen the browser owns the player's box — it is always the screen —
+ * so the 16:9 bound above cannot be put on the player. It goes one level down,
+ * on the provider: on a screen wider than 16:9 (an Android phone in landscape)
+ * the band the embed is seen through would otherwise be shorter than
+ * `width x 9/16` and crop the video top and bottom. The player is a flex row,
+ * so `margin-inline: auto` centres the fitted band and the player's black
+ * background fills the sides. On a narrower screen the bound exceeds the width
+ * and does nothing.
+ *
+ * Only the provider shrinks. The layout, the gestures and the overlays are its
+ * siblings and keep the whole screen, and the embed frame's offsets are
+ * percentages of the provider, so the frame follows the band on its own.
+ */
+[data-media-player][data-fullscreen] [data-media-provider] {
+  max-width: calc(100dvh * 16 / 9);
+  margin-inline: auto;
+}
+
+/*
  * The centre play/pause control a touch device gets in the full chrome.
  *
  * Centred on the frame, where the YouTube embed paints its own play/pause

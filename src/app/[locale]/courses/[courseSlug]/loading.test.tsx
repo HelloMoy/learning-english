@@ -18,22 +18,23 @@ const renderShell = () =>
 
 describe("Course overview loading shell", () => {
   describe("GIVEN a navigation to a course whose payload has not arrived", () => {
-    test("WHEN the shell renders THEN it traces the hero, the carousel AND the progress panel", () => {
+    test("WHEN the shell renders THEN it traces the continue tile AND the course progress tile", () => {
       // Act
       renderShell();
 
       // Assert
-      expect(screen.getByTestId("course-shell-hero")).toBeInTheDocument();
-      expect(screen.getByTestId("course-shell-carousel")).toBeInTheDocument();
-      expect(screen.getByTestId("course-shell-panel")).toBeInTheDocument();
+      expect(screen.getByTestId("course-shell-continue")).toBeInTheDocument();
+      expect(screen.getByTestId("course-shell-course")).toBeInTheDocument();
     });
 
-    test("WHEN the shell renders THEN the carousel previews a selected poster between neighbours", () => {
+    test("WHEN the shell renders THEN it previews a row of lesson tiles AND no carousel", () => {
       // Act
       renderShell();
 
       // Assert
-      expect(screen.getAllByTestId("course-shell-poster").length).toBeGreaterThanOrEqual(3);
+      expect(screen.getAllByTestId("course-shell-lesson")).toHaveLength(5);
+      expect(screen.queryByTestId("course-shell-carousel")).toBeNull();
+      expect(screen.queryByTestId("course-shell-panel")).toBeNull();
     });
 
     test("WHEN the shell renders THEN it announces once and its shapes stay silent", () => {

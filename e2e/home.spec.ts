@@ -204,6 +204,35 @@ test.describe("My learning", () => {
     await page.getByRole("link", { name: "Resume" }).click();
     await page.waitForURL(new RegExp(`${FIRST_LESSON.id}$`), COLD_ROUTE);
   });
+
+  test("WHEN the opened lesson is finished THEN My learning AND the course overview both continue with the next video", async ({
+    page,
+  }) => {
+    const nextLesson = modulesOfCourse(FIRST_COURSE.slug)
+      .flatMap((module) => lessonsOfModule(module.id))
+      .find((lesson) => lesson.id !== FIRST_LESSON.id)!;
+    await withProfile(page);
+    await page.goto(FIRST_LESSON_URL);
+    await expect(page.getByRole("heading", { name: FIRST_LESSON.title })).toBeVisible(COLD_ROUTE);
+    await page.evaluate(
+      (id) => window.localStorage.setItem(`learning-english:completed:${id}`, "1"),
+      FIRST_LESSON.id,
+    );
+
+    await page.goto("/en/learning");
+    await expect(page.getByRole("link", { name: "Resume" })).toHaveAttribute(
+      "href",
+      new RegExp(`${nextLesson.id}$`),
+      COLD_ROUTE,
+    );
+
+    await page.goto(`/en/courses/${FIRST_COURSE.slug}`);
+    await expect(page.getByTestId("continue-tile").getByRole("link")).toHaveAttribute(
+      "href",
+      new RegExp(`${nextLesson.id}$`),
+      COLD_ROUTE,
+    );
+  });
 });
 
 test.describe("Profile", () => {

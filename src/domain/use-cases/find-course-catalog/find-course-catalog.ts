@@ -40,6 +40,10 @@ export type CourseCatalogEntry = {
   course: Course;
   firstLesson: Lesson | null;
   modules: Module[];
+  /**
+   * Every lesson's progress slice in learning order — by module `sequence`, then
+   * lesson `sequence` — so the continue-target rule can run over the whole course.
+   */
   lessonRuntimes: LessonProgressSlice[];
 };
 
@@ -70,6 +74,19 @@ export const toLessonProgressSlice = (lesson: Lesson): LessonProgressSlice => ({
   title: lesson.title,
   sequence: lesson.sequence,
 });
+
+/** Lessons ordered as a learner meets them: by their module's `sequence`, then their own. */
+const inLearningOrder = (
+  lessons: ReadonlyArray<Lesson>,
+  modules: ReadonlyArray<Module>,
+): Lesson[] => {
+  const moduleSequence = new Map(modules.map((module) => [module.id, module.sequence]));
+  const sequenceOfModule = (lesson: Lesson) =>
+    moduleSequence.get(lesson.moduleId) ?? Number.POSITIVE_INFINITY;
+  return [...lessons].sort(
+    (a, b) => sequenceOfModule(a) - sequenceOfModule(b) || a.sequence - b.sequence,
+  );
+};
 
 const pickFirstLesson = (lessons: ReadonlyArray<Lesson>): Lesson | null => {
   if (lessons.length === 0) return null;
@@ -103,7 +120,7 @@ export const makeFindCourseCatalog = (deps: {
                   course,
                   firstLesson: pickFirstLesson(lessonsInFirstModule),
                   modules,
-                  lessonRuntimes: lessons.map(toLessonProgressSlice),
+                  lessonRuntimes: inLearningOrder(lessons, modules).map(toLessonProgressSlice),
                 };
               }),
             ),

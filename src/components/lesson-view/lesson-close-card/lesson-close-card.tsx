@@ -24,6 +24,12 @@ import { useTranslations } from "next-intl";
  * the same closing surface everywhere; the rail card went with the collapse,
  * so the next lesson is still offered exactly once.
  *
+ * Up next is a different question from "continue": it is simply the lesson
+ * after this one in the course, whatever the learner has watched. Where to
+ * continue — which may skip finished videos — is answered only by
+ * `findContinueTarget`, used by the course overview, the module overview and
+ * My learning.
+ *
  * The completion control arrives as `children` rather than being rendered
  * here, so this component stays presentational — it knows nothing of the
  * Server Action, the lesson id or the progress store, and nothing of whether

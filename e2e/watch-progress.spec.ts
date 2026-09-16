@@ -123,15 +123,15 @@ test.describe("watch progress", () => {
     await expect(row.getByRole("progressbar")).toHaveCount(0);
   });
 
-  test("the course overview's progress panel counts the finished lesson", async ({ page }) => {
+  test("the course overview's lesson tile counts the finished lesson", async ({ page }) => {
     await page.goto(courseUrl("en"));
 
     // The seeded positions put the learner part-way through the first module,
-    // so the carousel opens on it and the panel reads its progress.
-    const panel = page.getByTestId("lesson-progress-panel");
-    await expect(panel).toHaveAttribute("data-state", "in-progress", { timeout: 60_000 });
-    await expect(panel).toContainText(`1 of ${MODULE_LESSONS.length} videos`);
-    await expect(panel).toContainText(`Pick up ${PARTLY_WATCHED_LESSON.title}`);
+    // so its tile reads in progress and the continue tile opens the part-watched video.
+    const tile = page.getByRole("link", { name: `Open lesson 1: ${MODULE.title}` });
+    await expect(tile).toHaveAttribute("data-status", "in-progress", { timeout: 60_000 });
+    await expect(tile).toContainText(`1/${MODULE_LESSONS.length}`);
+    await expect(page.getByTestId("continue-tile")).toContainText(PARTLY_WATCHED_LESSON.title);
   });
 
   test("a course the learner has not started shows no progress", async ({ context, page }) => {
@@ -147,10 +147,17 @@ test.describe("watch progress", () => {
     await page.goto(courseUrl("en"));
     await expect(page.getByTestId("course-overview")).toBeVisible();
 
-    await expect(page.getByTestId("lesson-progress-panel")).toHaveAttribute(
-      "data-state",
-      "not-started",
-    );
+    const statuses = page.getByTestId("lesson-ring-tile");
+    await expect(statuses.first()).toHaveAttribute("data-status", "not-started", {
+      timeout: 60_000,
+    });
+    expect(
+      new Set(
+        await statuses.evaluateAll((nodes) =>
+          nodes.map((node) => node.getAttribute("data-status")),
+        ),
+      ),
+    ).toEqual(new Set(["not-started"]));
     await expect(page.getByRole("progressbar")).toHaveCount(0);
   });
 });

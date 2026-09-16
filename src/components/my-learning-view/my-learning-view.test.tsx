@@ -244,6 +244,45 @@ describe("MyLearningView", () => {
       );
     });
 
+    test("WHEN the recorded video is already finished THEN Resume AND the lead card open the next video instead", async () => {
+      window.localStorage.setItem(`learning-english:completed:${continuedLesson.id}`, "1");
+      const nextVideo = vowelLessons[1]!;
+      const nextPanel: ContinueWatchingPanel = {
+        ...panel,
+        lessonSequence: 2,
+        lessonTitle: "The Vowel Sound Ih",
+        lessonHref: `/courses/basic-course/modules/module-2/lessons/${nextVideo.id}`,
+      };
+      renderInLocale(
+        <MyLearningView
+          levels={levels}
+          firstLesson={firstLesson}
+          profiles={makeStubLearnerProfileRepository({ profile })}
+          continueWatching={storing(location)}
+          resolve={async (asked) => (asked.lessonId === nextVideo.id ? nextPanel : panel)}
+          positions={watchedFor(null)}
+        />,
+      );
+
+      await waitFor(() =>
+        expect(screen.getByRole("link", { name: "Resume" })).toHaveAttribute(
+          "href",
+          expect.stringContaining(nextPanel.lessonHref),
+        ),
+      );
+      expect(
+        screen.getByText("Basic Course · Lesson 2 · Vowels · Video 2 of 2"),
+      ).toBeInTheDocument();
+      const [lead] = within(
+        screen.getByRole("list", { name: "Lessons in Basic Course" }),
+      ).getAllByRole("listitem");
+      expect(lead).toHaveTextContent(nextPanel.lessonTitle);
+      expect(within(lead!).getByRole("link", { name: "Continue" })).toHaveAttribute(
+        "href",
+        expect.stringContaining(nextPanel.lessonHref),
+      );
+    });
+
     test("WHEN rendered THEN only the continued course invites the learner to continue", async () => {
       renderReturning();
 

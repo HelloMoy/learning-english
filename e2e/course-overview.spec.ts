@@ -4,111 +4,103 @@ import { lessonsOfModule, modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
 
 /**
- * E2E coverage for the course overview's hero, poster carousel and progress
- * panel (capabilities: `cinema-course-overview`, `course-vocabulary`).
+ * E2E coverage for the course overview's continue tile, course progress tile
+ * and lesson ring tiles (capabilities: `cinema-course-overview`,
+ * `course-vocabulary`).
  *
- * These are the assertions jsdom cannot make: that poster artwork actually
- * loads, that navigation lands on real routes, that progress saved in this
- * browser's storage drives the panel after hydration, and that the layout
- * neither overlaps the title nor widens the page on a phone.
+ * These are the assertions jsdom cannot make: that tile artwork actually loads,
+ * that tiles navigate to real routes, that progress saved in this browser's
+ * storage — and the continue-watching record a lesson page writes — drive the
+ * tiles after hydration, and that the layout does not widen the page on a phone.
  */
 const COURSE_SLUG = "basic-course";
 const MODULES = modulesOfCourse(COURSE_SLUG);
 const COMPLETED_KEY_PREFIX = "learning-english:completed:";
+const CONTINUE_WATCHING_KEY = "learning-english:continue-watching";
 
 /** Compiling a route on a cold `pnpm dev` overruns the default 5s timeout. */
 const COLD_ROUTE = { timeout: 60_000 };
 
 const courseUrl = (locale: string) => `/${locale}/courses/${COURSE_SLUG}`;
-const moduleUrl = (moduleSlug: string) => `/en/courses/${COURSE_SLUG}/modules/${moduleSlug}`;
+const moduleUrl = (moduleSlug: string, locale = "en") =>
+  `/${locale}/courses/${COURSE_SLUG}/modules/${moduleSlug}`;
+const lessonUrl = (moduleSlug: string, lessonId: string, locale = "en") =>
+  `${moduleUrl(moduleSlug, locale)}/lessons/${lessonId}`;
 
 const indexOfFirstModuleWith = (predicate: (lessonCount: number) => boolean) =>
   MODULES.findIndex((module) => predicate(lessonsOfModule(module.id).length));
 
-const dot = (page: Page, index: number) => page.getByTestId("carousel-dot").nth(index);
-const selectedPoster = (page: Page) => page.locator('a[data-testid="carousel-poster"]');
+const tiles = (page: Page) => page.getByTestId("lesson-ring-tile");
+const tileOf = (page: Page, index: number) =>
+  page.getByRole("link", { name: `Open lesson ${index + 1}: ${MODULES[index]!.title}` });
 
 test.describe("Course overview", () => {
   test.describe("GIVEN a learner with no progress on this device", () => {
-    test("WHEN the page renders THEN the selected poster's artwork loads", async ({ page }) => {
+    test("WHEN the page renders THEN every lesson is a tile in order AND its artwork loads", async ({
+      page,
+    }) => {
       // Act
       await page.goto(courseUrl("en"));
 
       // Assert
-      const image = selectedPoster(page).locator("img").first();
+      await expect(tiles(page)).toHaveCount(MODULES.length, COLD_ROUTE);
+      expect(
+        await tiles(page).evaluateAll((nodes) =>
+          nodes.map((node) => node.getAttribute("aria-label")),
+        ),
+      ).toEqual(MODULES.map((module, index) => `Open lesson ${index + 1}: ${module.title}`));
+      const artwork = tileOf(page, 0).locator("img").last();
       await expect
-        .poll(() => image.evaluate((node) => (node as HTMLImageElement).naturalWidth), COLD_ROUTE)
+        .poll(() => artwork.evaluate((node) => (node as HTMLImageElement).naturalWidth), COLD_ROUTE)
         .toBeGreaterThan(0);
     });
 
-    test("WHEN the next arrow is pressed THEN the second module becomes selected", async ({
+    test("WHEN progress settles THEN Start course opens the course's first video", async ({
       page,
     }) => {
       // Arrange
-      await page.goto(courseUrl("en"));
-      await expect(dot(page, 0)).toHaveAttribute("aria-current", "true", COLD_ROUTE);
+      const firstVideo = lessonsOfModule(MODULES[0]!.id)[0]!;
 
       // Act
-      await page.getByRole("button", { name: "Next lesson" }).click();
+      await page.goto(courseUrl("en"));
 
       // Assert
-      await expect(dot(page, 1)).toHaveAttribute("aria-current", "true");
+      const start = page.getByTestId("continue-tile").getByRole("link", { name: "Start course" });
+      await expect(start).toHaveAttribute(
+        "href",
+        lessonUrl(MODULES[0]!.slug, firstVideo.id),
+        COLD_ROUTE,
+      );
+      await expect(page.getByTestId("course-progress-tile")).toContainText("0%");
     });
 
-    test("WHEN the selected poster of a module with several videos is clicked THEN its module overview opens", async ({
+    test("WHEN the tile of a lesson with several videos is clicked THEN its module overview opens", async ({
       page,
     }) => {
       // Arrange
       const index = indexOfFirstModuleWith((count) => count > 1);
       await page.goto(courseUrl("en"));
-      await dot(page, index).click(COLD_ROUTE);
 
       // Act
-      await selectedPoster(page).click();
+      await tileOf(page, index).click(COLD_ROUTE);
 
       // Assert
       await page.waitForURL(`**${moduleUrl(MODULES[index]!.slug)}`, COLD_ROUTE);
     });
 
-    test("WHEN the selected poster of a one-video module is clicked THEN that video opens", async ({
+    test("WHEN the tile of a one-video lesson is clicked THEN that video opens", async ({
       page,
     }) => {
       // Arrange
       const index = indexOfFirstModuleWith((count) => count === 1);
       const onlyLesson = lessonsOfModule(MODULES[index]!.id)[0]!;
       await page.goto(courseUrl("en"));
-      await dot(page, index).click(COLD_ROUTE);
 
       // Act
-      await selectedPoster(page).click();
+      await tileOf(page, index).click(COLD_ROUTE);
 
       // Assert
-      await page.waitForURL(
-        `**${moduleUrl(MODULES[index]!.slug)}/lessons/${onlyLesson.id}`,
-        COLD_ROUTE,
-      );
-    });
-
-    test("WHEN Start this lesson is activated in the panel THEN the module's first video opens", async ({
-      page,
-    }) => {
-      // Arrange
-      const index = indexOfFirstModuleWith((count) => count > 1);
-      const firstVideo = lessonsOfModule(MODULES[index]!.id)[0]!;
-      await page.goto(courseUrl("en"));
-      await dot(page, index).click(COLD_ROUTE);
-
-      // Act
-      await page
-        .getByTestId("lesson-progress-panel")
-        .getByRole("link", { name: "Start this lesson" })
-        .click();
-
-      // Assert
-      await page.waitForURL(
-        `**${moduleUrl(MODULES[index]!.slug)}/lessons/${firstVideo.id}`,
-        COLD_ROUTE,
-      );
+      await page.waitForURL(`**${lessonUrl(MODULES[index]!.slug, onlyLesson.id)}`, COLD_ROUTE);
     });
 
     for (const locale of ["en", "es"]) {
@@ -130,8 +122,8 @@ test.describe("Course overview", () => {
     }
   });
 
-  test.describe("GIVEN a learner part-way through a module", () => {
-    test("WHEN the page hydrates THEN that module is selected AND the panel offers to continue its first unfinished video", async ({
+  test.describe("GIVEN a learner part-way through a lesson", () => {
+    test("WHEN the page hydrates THEN that lesson's tile is in progress AND Continue opens its first unfinished video", async ({
       page,
     }) => {
       // Arrange
@@ -148,42 +140,91 @@ test.describe("Course overview", () => {
       await page.goto(courseUrl("en"));
 
       // Assert
-      await expect(dot(page, index)).toHaveAttribute("aria-current", "true", COLD_ROUTE);
-      const panel = page.getByTestId("lesson-progress-panel");
-      await expect(panel).toHaveAttribute("data-state", "in-progress");
-      await expect(panel).toContainText(`Pick up ${lessons[3]!.title}`);
-      await expect(panel.getByRole("link", { name: "Continue" })).toHaveAttribute(
+      const tile = tileOf(page, index);
+      await expect(tile).toHaveAttribute("data-status", "in-progress", COLD_ROUTE);
+      await expect(tile).toHaveAttribute("data-current", "true");
+      await expect(tile).toContainText(`3/${lessons.length}`);
+      await expect(page.getByRole("link", { name: "Continue where you left off" })).toHaveAttribute(
         "href",
-        `${moduleUrl(MODULES[index]!.slug)}/lessons/${lessons[3]!.id}`,
+        lessonUrl(MODULES[index]!.slug, lessons[3]!.id),
       );
     });
   });
 
-  for (const viewport of [
-    { width: 1440, height: 900 },
-    { width: 390, height: 844 },
-  ]) {
-    test.describe(`GIVEN a ${viewport.width}px-wide viewport`, () => {
-      test.use({ viewport });
+  test.describe("GIVEN a learner who opened a lesson of this course", () => {
+    test("WHEN they return to the course THEN the continue tile offers that video", async ({
+      page,
+    }) => {
+      // Arrange
+      const index = indexOfFirstModuleWith((count) => count > 2);
+      const lesson = lessonsOfModule(MODULES[index]!.id)[2]!;
+      const openedLesson = lessonUrl(MODULES[index]!.slug, lesson.id, "es");
+      await page.goto(openedLesson);
+      await expect
+        .poll(
+          () => page.evaluate((key) => window.localStorage.getItem(key), CONTINUE_WATCHING_KEY),
+          COLD_ROUTE,
+        )
+        .toContain(lesson.id);
 
-      test("WHEN the page renders THEN the meta line sits below the title AND the page does NOT scroll sideways", async ({
-        page,
-      }) => {
-        // Act
-        await page.goto(courseUrl("en"));
-        const title = page.getByRole("heading", { level: 1 });
-        await expect(title).toBeVisible(COLD_ROUTE);
+      // Act
+      await page.goto(courseUrl("es"));
 
-        // Assert
-        const titleBox = (await title.boundingBox())!;
-        const metaBox = (await page.getByTestId("course-hero-meta").boundingBox())!;
-        expect(metaBox.y).toBeGreaterThanOrEqual(titleBox.y + titleBox.height - 1);
-        const overflow = await page.evaluate(() => ({
-          scrollWidth: document.documentElement.scrollWidth,
-          clientWidth: document.documentElement.clientWidth,
-        }));
-        expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.clientWidth);
-      });
+      // Assert
+      const action = page.getByTestId("continue-tile").getByRole("link");
+      await expect(action).toHaveText("Continuar donde lo dejaste", COLD_ROUTE);
+      await expect(action).toHaveAttribute("href", openedLesson);
+      await expect(page.getByTestId("continue-tile")).toContainText(lesson.title);
     });
-  }
+  });
+
+  test.describe("GIVEN a 390px-wide viewport", () => {
+    test.use({ viewport: { width: 390, height: 844 } });
+
+    test("WHEN the page renders THEN each lesson is a full-width row AND the page does NOT scroll sideways", async ({
+      page,
+    }) => {
+      // Act
+      await page.goto(courseUrl("en"));
+      await expect(tiles(page).first()).toBeVisible(COLD_ROUTE);
+
+      // Assert
+      const box = (await tiles(page).first().boundingBox())!;
+      expect(box.width).toBeGreaterThanOrEqual(390 - 2 * 16 - 1);
+      const overflow = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      }));
+      expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.clientWidth);
+    });
+  });
+
+  test.describe("GIVEN a 1440px-wide viewport", () => {
+    test.use({ viewport: { width: 1440, height: 900 } });
+
+    test("WHEN the page renders THEN the continue tile sits beside the course tile AND the lessons share one row", async ({
+      page,
+    }) => {
+      // Act
+      await page.goto(courseUrl("en"));
+      // The pending tiles are replaced by new elements once progress is read, so
+      // measuring before then can catch a tile mid-swap with no box at all.
+      await expect(page.getByTestId("continue-tile")).toHaveAttribute(
+        "data-status",
+        "read",
+        COLD_ROUTE,
+      );
+      await expect(page.getByTestId("course-progress-tile")).toHaveAttribute("data-status", "read");
+
+      // Assert
+      const continueBox = (await page.getByTestId("continue-tile").boundingBox())!;
+      const courseBox = (await page.getByTestId("course-progress-tile").boundingBox())!;
+      expect(Math.abs(continueBox.y - courseBox.y)).toBeLessThan(2);
+      expect(courseBox.x).toBeGreaterThan(continueBox.x + continueBox.width - 1);
+      const tops = await tiles(page).evaluateAll((nodes) =>
+        nodes.map((node) => Math.round(node.getBoundingClientRect().top)),
+      );
+      expect(new Set(tops).size).toBe(1);
+    });
+  });
 });

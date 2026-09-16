@@ -18,6 +18,7 @@ import {
 import type { ContinueWatchingRepository } from "@/domain/ports/continue-watching-repository/continue-watching-repository";
 import type { LearnerProfileRepository } from "@/domain/ports/learner-profile-repository/learner-profile-repository";
 import type { PlaybackPositionRepository } from "@/domain/ports/playback-position-repository/playback-position-repository";
+import { useCourseContinueTarget } from "@/hooks/use-course-continue-target/use-course-continue-target";
 import { useCourseWatchProgress } from "@/hooks/use-course-watch-progress/use-course-watch-progress";
 import { useLearnerProfile } from "@/hooks/use-learner-profile/use-learner-profile";
 import { useLearnerRedirect } from "@/hooks/use-learner-redirect/use-learner-redirect";
@@ -46,9 +47,12 @@ type Continued = {
  * has answered it renders a shell, and a device without a profile is sent to
  * the onboarding.
  *
- * The continue-watching record decides the rest. While it resolves, only the
- * panel is reserved; a resolved record puts Resume in the panel, opens the
- * continued lesson's row and marks its course in the table. With nothing to
+ * The continue-watching record decides the rest. It names the video opened
+ * last; the page continues with that course's continue target instead (see
+ * {@link useCourseContinueTarget}), so a finished video hands over to the next
+ * one exactly as the course and module overviews do. While either resolves,
+ * only the panel is reserved; a resolved target puts Resume in the panel, opens
+ * its lesson's row and marks its course in the table. With nothing to
  * continue — or a record whose course is no longer in the catalog — the panel
  * offers the first video and the first course's progress is listed.
  *
@@ -115,7 +119,13 @@ function LearnerPage({
   positions?: PlaybackPositionRepository;
 }) {
   const lastLesson = useResolvedContinueWatching({ continueWatching, resolve });
-  const continued = findContinued(lastLesson, levels);
+  const recordedLevel = levelOf(lastLesson, levels);
+  const target = useCourseContinueTarget({
+    course: recordedLevel ?? firstLevel,
+    lastLesson: recordInCatalog(lastLesson, recordedLevel),
+    resolve,
+  });
+  const continued = findContinued(target, levels);
   const progressLevel = continued?.level ?? firstLevel;
   const progress = useCourseWatchProgress(progressLevel.lessonRuntimes);
 
@@ -124,7 +134,7 @@ function LearnerPage({
       <section className="flex flex-col gap-8">
         <Greeting profile={profile} />
         <div className="max-w-2xl">
-          {lastLesson.status === "resolving" ? (
+          {target.status === "resolving" ? (
             <ResumePanelSkeleton />
           ) : continued ? (
             <ContinuedPanel
@@ -167,13 +177,33 @@ function LearnerPage({
   );
 }
 
+const NOTHING_CONTINUED: ReturnType<typeof useResolvedContinueWatching> = { status: "none" };
+
 function findContinued(
   lastLesson: ReturnType<typeof useResolvedContinueWatching>,
   levels: ReadonlyArray<HomeLevel>,
 ): Continued | null {
+  const level = levelOf(lastLesson, levels);
+  return level && lastLesson.status === "resolved"
+    ? { panel: lastLesson.panel, lessonId: lastLesson.lessonId, level }
+    : null;
+}
+
+/** The catalog course a resolved record belongs to, or `null`. */
+function levelOf(
+  lastLesson: ReturnType<typeof useResolvedContinueWatching>,
+  levels: ReadonlyArray<HomeLevel>,
+): HomeLevel | null {
   if (lastLesson.status !== "resolved") return null;
-  const level = levels.find((candidate) => candidate.course.slug === lastLesson.panel.courseSlug);
-  return level ? { panel: lastLesson.panel, lessonId: lastLesson.lessonId, level } : null;
+  return levels.find((candidate) => candidate.course.slug === lastLesson.panel.courseSlug) ?? null;
+}
+
+/** A resolved record whose course is not in the catalog continues nothing; any other state passes through. */
+function recordInCatalog(
+  lastLesson: ReturnType<typeof useResolvedContinueWatching>,
+  level: HomeLevel | null,
+): ReturnType<typeof useResolvedContinueWatching> {
+  return lastLesson.status === "resolved" && level === null ? NOTHING_CONTINUED : lastLesson;
 }
 
 function Greeting({ profile }: { profile: LearnerProfile }) {
