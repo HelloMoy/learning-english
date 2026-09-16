@@ -4,7 +4,7 @@ import type { Course } from "@/domain/entities/course/course";
 import type { Module } from "@/domain/entities/module/module";
 import type { ModuleSummary } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
 import { useRuntimeLabel } from "@/hooks/use-runtime-label/use-runtime-label";
-import { lessonPath, moduleOverviewPath } from "@/i18n/lesson-routes";
+import { moduleEntryPath } from "@/i18n/lesson-routes";
 import { Link } from "@/i18n/navigation";
 import type {
   ModuleOverviewProgress,
@@ -97,7 +97,7 @@ export function LessonRingTile({
 
   return (
     <Link
-      href={tileHref(course, module, summary) as never}
+      href={moduleEntryPath(course, module, summary.lessons) as never}
       aria-label={t("openLessonTile", { number: module.sequence, title: module.title })}
       data-testid="lesson-ring-tile"
       data-status={progress?.status ?? "pending"}
@@ -280,10 +280,4 @@ function TileMeta({
       {remaining}
     </span>
   );
-}
-
-function tileHref(course: Course, module: Module, summary: ModuleSummary): string {
-  const [onlyLesson] = summary.lessons;
-  if (summary.lessons.length === 1 && onlyLesson) return lessonPath(course, module, onlyLesson);
-  return moduleOverviewPath(course, module);
 }

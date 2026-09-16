@@ -61,6 +61,22 @@ describe("ModuleProgressPanel", () => {
     });
   });
 
+  describe("GIVEN a prize row handed to the panel", () => {
+    test("WHEN it renders THEN the prize row sits below the figures, inside the panel", () => {
+      render(
+        <ModuleProgressPanel reading={readRoute(5, 17, 98 * 60)}>
+          <p>prize row</p>
+        </ModuleProgressPanel>,
+      );
+
+      const panel = screen.getByRole("region", { name: "progressHeading" });
+      const figures = screen.getByText(key("videosFinished", { finished: 5, total: 17 }));
+      const prizeRow = screen.getByText("prize row");
+      expect(panel).toContainElement(prizeRow);
+      expect(figures.compareDocumentPosition(prizeRow)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+  });
+
   describe("GIVEN progress not read yet", () => {
     test("WHEN it renders THEN it shows its heading and no figures", () => {
       render(<ModuleProgressPanel reading={{ isRead: false }} />);

@@ -339,6 +339,14 @@
       "claimLabel": "Resgatar o prêmio de {module}",
       "readyLabel": "Prêmio oculto de {module}: pronto para resgatar"
     },
+    "ModulePrize": {
+      "eyebrow": "Prêmio da aula",
+      "readyEyebrow": "Prêmio pronto",
+      "claimedEyebrow": "Prêmio resgatado",
+      "ticketsLeft": "Faltam {count, plural, one {# ticket} other {# tickets}} para resgatá-lo",
+      "allTickets": "Você juntou {count, plural, one {o único ticket} other {os # tickets}}",
+      "startNextLesson": "Começar Aula {number}"
+    },
     "LearnerAvatar": {
       "label": "Avatar de {name}",
       "labelUnnamed": "Avatar"

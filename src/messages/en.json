@@ -339,6 +339,14 @@
       "claimLabel": "Claim the {module} prize",
       "readyLabel": "Hidden prize of {module}: ready to claim"
     },
+    "ModulePrize": {
+      "eyebrow": "Lesson prize",
+      "readyEyebrow": "Prize ready",
+      "claimedEyebrow": "Prize redeemed",
+      "ticketsLeft": "{count, plural, one {# ticket} other {# tickets}} left to claim it",
+      "allTickets": "You collected {count, plural, one {the only ticket} other {all # tickets}}",
+      "startNextLesson": "Start Lesson {number}"
+    },
     "LearnerAvatar": {
       "label": "Avatar: {name}",
       "labelUnnamed": "Avatar"

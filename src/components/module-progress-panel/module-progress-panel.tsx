@@ -3,6 +3,7 @@ import type { ModuleRouteReading } from "@/hooks/use-module-route/use-module-rou
 import { splitRuntime, type ModuleRoute } from "@/lib/module-route/module-route";
 
 import { useFormatter, useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 
 const RING_SIZE = 84;
 const RING_STROKE = 8;
@@ -13,6 +14,8 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 export type ModuleProgressPanelProps = {
   /** The learner's route through the module, or the fact it is not read yet. */
   reading: ModuleRouteReading;
+  /** What the panel carries below its figures — the module's prize row. */
+  children?: ReactNode;
 };
 
 /**
@@ -29,6 +32,9 @@ export type ModuleProgressPanelProps = {
  *
  * The ring is decorative; the percentage is real text beside it.
  *
+ * Below the figures the panel carries whatever it is handed — on the module
+ * overview, the module's prize row.
+ *
  * @example
  * ```tsx
  * <ModuleProgressPanel reading={useModuleRoute(lessons)} />
@@ -36,25 +42,31 @@ export type ModuleProgressPanelProps = {
  *
  * @param props - {@link ModuleProgressPanelProps}
  */
-export function ModuleProgressPanel({ reading }: ModuleProgressPanelProps) {
+export function ModuleProgressPanel({ reading, children }: ModuleProgressPanelProps) {
   const t = useTranslations("CourseCatalog.moduleOverview");
   const fraction = reading.isRead ? finishedFraction(reading.route) : 0;
 
   return (
-    <section className="flex items-center gap-4 rounded-2xl border border-border bg-card/85 p-4 lg:p-6">
-      <div className="relative size-15 shrink-0 lg:size-21">
-        <ProgressRing fraction={fraction} />
-        {reading.isRead ? <PercentLabel fraction={fraction} /> : null}
+    <section
+      aria-label={t("progressHeading")}
+      className="flex flex-col gap-4 rounded-2xl border border-border bg-card/85 p-4 lg:gap-5 lg:p-6"
+    >
+      <div className="flex items-center gap-4">
+        <div className="relative size-15 shrink-0 lg:size-21">
+          <ProgressRing fraction={fraction} />
+          {reading.isRead ? <PercentLabel fraction={fraction} /> : null}
+        </div>
+        <div className="flex min-w-0 flex-col gap-1">
+          <Eyebrow
+            as="h2"
+            className="text-[10px] tracking-[0.28em]"
+          >
+            {t("progressHeading")}
+          </Eyebrow>
+          {reading.isRead ? <ProgressFigures route={reading.route} /> : null}
+        </div>
       </div>
-      <div className="flex min-w-0 flex-col gap-1">
-        <Eyebrow
-          as="h2"
-          className="text-[10px] tracking-[0.28em]"
-        >
-          {t("progressHeading")}
-        </Eyebrow>
-        {reading.isRead ? <ProgressFigures route={reading.route} /> : null}
-      </div>
+      {children}
     </section>
   );
 }

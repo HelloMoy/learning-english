@@ -1,4 +1,5 @@
 import {
+  seedVowelsPrizeClaimed,
   seedVowelsProgress,
   vowelsCourse,
   vowelsLessons,
@@ -38,6 +39,16 @@ export const Default: Story = {
 /** Videos 1–5 finished and video 6 at 40%. */
 export const ReturningLearner: Story = {
   beforeEach: () => seedVowelsProgress(5, 0.4),
+};
+
+/** Every video finished: the hidden prize waits to be claimed, in the panel and at the end of the route. */
+export const PrizeReady: Story = {
+  beforeEach: () => seedVowelsProgress(vowelsLessons.length, 0),
+};
+
+/** The prize claimed on the counter: the harmonica is revealed on the module page. */
+export const PrizeClaimed: Story = {
+  beforeEach: () => seedVowelsPrizeClaimed(),
 };
 
 const SHARED_PREFIX_LESSON_COUNT = 6;

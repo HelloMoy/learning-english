@@ -2,6 +2,8 @@ import { Course } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
+import { refreshEarnedTickets } from "@/hooks/use-earned-tickets/use-earned-tickets";
+import { refreshPrizeClaims } from "@/hooks/use-prize-claims/use-prize-claims";
 import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
 
 /**
@@ -74,9 +76,13 @@ export const vowelsLessons: Lesson[] = VOWEL_LESSONS.map(
 
 const COMPLETED_KEY_PREFIX = "learning-english:completed:";
 const PLAYBACK_KEY_PREFIX = "learning-english:playback:";
+const TICKET_KEY_PREFIX = "learning-english:ticket-earned:";
+const PRIZE_CLAIM_KEY = `learning-english:prize-claimed:${vowelsModule.slug}`;
 
 function announceStorageChange(): void {
   refreshSavedPlaybackPositions();
+  refreshEarnedTickets();
+  refreshPrizeClaims();
   window.dispatchEvent(new StorageEvent("storage", { key: null }));
 }
 
@@ -84,7 +90,11 @@ function announceStorageChange(): void {
  * Seeds the browser with a learner who finished the first `finishedCount`
  * videos and is `currentFraction` of the way through the next one.
  *
- * @returns A cleanup that removes the seeded progress again
+ * Opening the route records the tickets of finished videos, so the cleanup
+ * removes those tickets too — otherwise one story's prize would leak into the
+ * next.
+ *
+ * @returns A cleanup that removes the seeded progress and its tickets again
  */
 export function seedVowelsProgress(finishedCount: number, currentFraction: number): () => void {
   const finished = vowelsLessons.slice(0, finishedCount);
@@ -103,7 +113,25 @@ export function seedVowelsProgress(finishedCount: number, currentFraction: numbe
     for (const lesson of vowelsLessons) {
       window.localStorage.removeItem(`${COMPLETED_KEY_PREFIX}${lesson.id}`);
       window.localStorage.removeItem(`${PLAYBACK_KEY_PREFIX}${lesson.id}`);
+      window.localStorage.removeItem(`${TICKET_KEY_PREFIX}${lesson.id}`);
     }
     announceStorageChange();
+  };
+}
+
+/**
+ * Seeds a learner who finished every Vowels video and claimed its prize on the
+ * counter.
+ *
+ * @returns A cleanup that removes the progress, the tickets and the claim again
+ */
+export function seedVowelsPrizeClaimed(): () => void {
+  const clearProgress = seedVowelsProgress(vowelsLessons.length, 0);
+  window.localStorage.setItem(PRIZE_CLAIM_KEY, "1");
+  announceStorageChange();
+
+  return () => {
+    window.localStorage.removeItem(PRIZE_CLAIM_KEY);
+    clearProgress();
   };
 }
