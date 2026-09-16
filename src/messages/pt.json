@@ -52,9 +52,12 @@
     "sectionLesson": "Aula",
     "sectionStart": "Começar",
     "sectionLearning": "Meu aprendizado",
+    "sectionAchievements": "Conquistas",
     "sectionProfile": "Perfil",
     "learnerMenuLabel": "Menu de aluno de {name}",
+    "learnerMenuLabelWithPrizes": "Menu de aluno de {name} — {count, plural, one {# prêmio para resgatar} other {# prêmios para resgatar}}",
     "myLearning": "Meu aprendizado",
+    "achievements": "Conquistas",
     "profile": "Perfil"
   },
   "LocaleSwitcher": {
@@ -288,6 +291,54 @@
     "LoadingStatus": {
       "label": "Carregando"
     },
+    "LearnerAchievements": {
+      "ticketCount": "<number>{earned}</number> de {count, plural, one {# ticket} other {# tickets}}",
+      "prizeCount": "<number>{earned}</number> de {count, plural, one {# prêmio} other {# prêmios}}"
+    },
+    "AchievementsGuideModal": {
+      "title": "Como funcionam os tickets e os prêmios?",
+      "description": "Tudo aqui é conquistado concluindo aulas neste dispositivo.",
+      "ticketTitle": "Tickets",
+      "ticketBody": "Conclua uma aula para ganhar o ticket dela. Ele traz o som da aula.",
+      "prizeTitle": "Prêmios",
+      "prizeBody": "Junte todos os tickets de um módulo para resgatar o prêmio dele no balcão.",
+      "distinctionTitle": "Distinção",
+      "distinctionBody": "Conclua um curso e seu cartão fica bronze. Conclua todos e ele fica ouro.",
+      "close": "Entendi"
+    },
+    "PrizeIcon": {
+      "names": {
+        "whistle": "Apito",
+        "harmonica": "Gaita",
+        "megaphone": "Megafone",
+        "drum": "Tambor",
+        "car": "Carrinho de corrida",
+        "microphone": "Microfone",
+        "kazoo": "Kazoo",
+        "spring": "Mola",
+        "kaleidoscope": "Caleidoscópio",
+        "yoyo": "Ioiô",
+        "top": "Pião",
+        "walkie": "Walkie-talkie",
+        "tinphone": "Telefone de lata",
+        "crown": "Coroa",
+        "robot": "Robô de corda",
+        "gift": "Caixa de presente"
+      }
+    },
+    "PrizeCounter": {
+      "shelfNote": "{redeemed} de {count, plural, one {# prêmio} other {# prêmios}}"
+    },
+    "PrizeShelfItem": {
+      "redeemed": "Resgatado",
+      "hiddenName": "???",
+      "tag": "{earned} / {count}",
+      "redeemedLabel": "{prize}: prêmio resgatado",
+      "hiddenLabel": "Prêmio oculto de {module}: {earned} de {count, plural, one {# ticket} other {# tickets}}",
+      "claim": "Resgatar prêmio",
+      "claimLabel": "Resgatar o prêmio de {module}",
+      "readyLabel": "Prêmio oculto de {module}: pronto para resgatar"
+    },
     "LearnerAvatar": {
       "label": "Avatar de {name}",
       "labelUnnamed": "Avatar"
@@ -300,7 +351,11 @@
       "progress": "{completed} de {total, plural, one {# vídeo} other {# vídeos}}",
       "progressPercent": "{percent, number, percent}",
       "progressRemaining": "{count, plural, one {Falta # em {course}} other {Faltam # em {course}}}",
-      "progressComplete": "{course} concluído"
+      "progressComplete": "{course} concluído",
+      "distinction": {
+        "bronze": "Bronze",
+        "gold": "Ouro"
+      }
     },
     "AvatarPicker": {
       "label": "Avatar",
@@ -331,6 +386,24 @@
       "note": "{course} · {minutes, plural, one {# minuto} other {# minutos}}",
       "noteNoDuration": "{course}",
       "action": "Assistir ao primeiro vídeo"
+    },
+    "TicketToast": {
+      "earned": "+1 ticket · {lesson}",
+      "progress": "{earned} de {count, plural, one {# ticket} other {# tickets}} para o prêmio de {module}"
+    },
+    "PrizeRedeemedModal": {
+      "continue": "Continuar o curso",
+      "redeeming": "Resgatando {count, plural, one {# ticket} other {# tickets}}…",
+      "eyebrow": "Prêmio resgatado",
+      "description": "Você juntou {count, plural, one {o único ticket} other {os # tickets}} de {module}.",
+      "close": "Que bom!"
+    },
+    "PrizeReadyModal": {
+      "eyebrow": "Prêmio pronto",
+      "title": "Tem um prêmio esperando por você",
+      "description": "Você juntou {count, plural, one {o único ticket} other {os # tickets}} de {module}.",
+      "goClaim": "Ir resgatar o prêmio",
+      "keepLearning": "Continuar aprendendo"
     }
   },
   "CourseCatalog": {
@@ -358,6 +431,7 @@
       "timeLeft": "Faltam {duration}",
       "watchAgain": "Assistir de novo",
       "percentComplete": "{percent, number, percent}",
+      "prizesClaimed": "{claimed} de {total} prêmios",
       "completedOfTotal": "{completed} de {total} vídeos",
       "continueWhereLeftOff": "Continuar de onde parou",
       "statusCompleted": "Concluída",
@@ -416,6 +490,8 @@
     "startDescription": "Adicione seu nome e escolha um avatar para começar o curso.",
     "learningTitle": "Meu aprendizado",
     "learningDescription": "Retome sua última lição e veja seu progresso neste dispositivo.",
+    "achievementsTitle": "Conquistas",
+    "achievementsDescription": "Os tickets, prêmios e a distinção que você conquistou neste dispositivo.",
     "profileTitle": "Perfil",
     "profileDescription": "Mude o nome e o avatar do seu cartão de aluno."
   },
@@ -431,7 +507,7 @@
     "name": {
       "heading": "Vamos criar seu cartão de aluno",
       "fieldLabel": "Seu nome",
-      "placeholder": "Seu nome e sobrenome",
+      "placeholder": "Seu nome",
       "continue": "Continuar"
     },
     "avatar": {
@@ -439,6 +515,14 @@
       "intro": "Toque em um para colocá-lo no seu cartão, ou fique com suas iniciais.",
       "continue": "Continuar"
     }
+  },
+  "Achievements": {
+    "continueCourse": "Continuar o curso",
+    "startCourse": "Começar o curso",
+    "eyebrow": "Conquistas",
+    "heading": "Suas conquistas",
+    "intro": "Cada aula concluída rende um ticket. Junte todos os tickets de um módulo para resgatar o prêmio dele.",
+    "howItWorks": "Como funcionam?"
   },
   "Profile": {
     "eyebrow": "Perfil",

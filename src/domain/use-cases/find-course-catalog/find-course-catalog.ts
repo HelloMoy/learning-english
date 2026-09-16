@@ -11,7 +11,8 @@ import type { FindCourseCatalogErrors } from "./find-course-catalog.errors";
 
 /**
  * One lesson reduced to what progress accounting needs: which lesson it is,
- * the module it belongs to, and how long it runs.
+ * the module it belongs to, how long it runs, and its title and order so
+ * progress can be itemised lesson by lesson.
  *
  * @remarks
  * A reading lesson reports a `durationSeconds` of zero — there is nothing to
@@ -22,6 +23,10 @@ export type LessonProgressSlice = {
   id: LessonId;
   moduleId: ModuleId;
   durationSeconds: number;
+  /** Names the lesson where progress is itemised, such as an achievement ticket. */
+  title: string;
+  /** The lesson's order within its module. */
+  sequence: number;
 };
 
 /**
@@ -66,6 +71,8 @@ export const toLessonProgressSlice = (lesson: Lesson): LessonProgressSlice => ({
   id: lesson.id,
   moduleId: lesson.moduleId,
   durationSeconds: lesson.kind === "video" ? lesson.durationSeconds : 0,
+  title: lesson.title,
+  sequence: lesson.sequence,
 });
 
 /** Lessons ordered as a learner meets them: by their module's `sequence`, then their own. */

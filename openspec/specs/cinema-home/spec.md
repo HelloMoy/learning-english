@@ -6,9 +6,9 @@ Define the Immersion Cinema presentation of the locale layout and home route. Th
 ## Requirements
 ### Requirement: Global header shows brand and section chrome
 
-The locale layout SHALL render an Immersion Cinema header containing the `ENGLISH·COURSE` wordmark, a section eyebrow of the form `IMMERSION CINEMA · <SECTION>` where `<SECTION>` derives from the current route (`HOME`, `COURSE`, `MODULE`, `LESSON`, `START`, `MY LEARNING`, `PROFILE`), and the existing locale switcher and theme toggle re-styled as chips. The header SHALL remain a landmark, keep locale switching and theme toggling functional, and be localized.
+The locale layout SHALL render an Immersion Cinema header containing the `ENGLISH·COURSE` wordmark, a section eyebrow of the form `IMMERSION CINEMA · <SECTION>` where `<SECTION>` derives from the current route (`HOME`, `COURSE`, `MODULE`, `LESSON`, `START`, `MY LEARNING`, `ACHIEVEMENTS`, `PROFILE`), and the existing locale switcher and theme toggle re-styled as chips. The header SHALL remain a landmark, keep locale switching and theme toggling functional, and be localized.
 
-When the device holds a learner profile, the header SHALL additionally render the learner's avatar as a menu trigger whose accessible name includes the learner's name, opening a menu with **My learning** and **Profile** links for the active locale. Without a profile, and before the profile is known, the trigger SHALL NOT render.
+When the device holds a learner profile, the header SHALL additionally render the learner's avatar as a menu trigger whose accessible name includes the learner's name, opening a menu with **My learning**, **Achievements** and **Profile** links, in that order, for the active locale. Without a profile, and before the profile is known, the trigger SHALL NOT render.
 
 On phone-class viewports (below `sm`) with a learner profile, the wordmark, the locale control and three 44px controls cannot share the width, so the theme control SHALL move out of the header row and into the avatar menu as an item that toggles the theme and names the current theme in its accessible name. From `sm` up, and whenever there is no profile, the theme toggle SHALL stay in the header row and the menu SHALL NOT repeat it.
 
@@ -28,13 +28,17 @@ At every width the locale control, the theme control (in the header row, or in t
 - **WHEN** the user is on the locale home
 - **THEN** the header eyebrow reads `IMMERSION CINEMA · HOME`; on a lesson route it reads `IMMERSION CINEMA · LESSON`; on `/learning` it reads `IMMERSION CINEMA · MY LEARNING`
 
+#### Scenario: Section label names the Achievements route
+- **WHEN** the user is on `/en/achievements`
+- **THEN** the header eyebrow reads `IMMERSION CINEMA · ACHIEVEMENTS`
+
 #### Scenario: Locale and theme controls remain functional
 - **WHEN** the header renders with the chip-styled controls
 - **THEN** changing the locale and toggling the theme behave exactly as before the re-skin
 
 #### Scenario: The avatar menu appears with a profile
 - **WHEN** the header renders on a device with a saved learner profile
-- **THEN** an avatar trigger renders, and opening it offers My learning and Profile links for the active locale
+- **THEN** an avatar trigger renders, and opening it offers My learning, Achievements and Profile links, in that order, for the active locale
 
 #### Scenario: On a phone with a profile, the theme control lives in the avatar menu
 - **WHEN** the header renders at a 320px viewport width on a device with a learner profile

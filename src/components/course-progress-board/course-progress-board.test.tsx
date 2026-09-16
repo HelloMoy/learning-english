@@ -5,6 +5,7 @@ import { Module } from "@/domain/entities/module/module";
 import type { ContinueWatchingRepository } from "@/domain/ports/continue-watching-repository/continue-watching-repository";
 import type { ModuleSummary } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
 import { useIsHydrated } from "@/hooks/use-is-hydrated/use-is-hydrated";
+import { refreshPrizeClaims } from "@/hooks/use-prize-claims/use-prize-claims";
 
 import { faker } from "@faker-js/faker";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -91,6 +92,9 @@ describe("CourseProgressBoard", () => {
     vi.mocked(useTranslations).mockImplementation(() => msg as never);
     vi.mocked(useIsHydrated).mockReturnValue(true);
     window.localStorage.clear();
+    // The claims store caches its snapshot, so clearing storage is not enough:
+    // without this, one test's claim is still claimed in the next.
+    refreshPrizeClaims();
   });
 
   describe("GIVEN progress is not known yet", () => {
@@ -167,6 +171,72 @@ describe("CourseProgressBoard", () => {
         expect(screen.getByTestId("course-progress-tile")).toHaveAttribute("data-status", "read"),
       );
       expect(screen.queryByTestId("continue-tile")).toBeNull();
+    });
+  });
+
+  describe("GIVEN the prizes these lessons redeem", () => {
+    const claimPrizeOf = (moduleSlug: string) => {
+      window.localStorage.setItem(`learning-english:prize-claimed:${moduleSlug}`, "1");
+      refreshPrizeClaims();
+    };
+
+    test("WHEN a prize has been claimed THEN its tile says so AND the others do not", async () => {
+      claimPrizeOf("module-1");
+
+      renderBoard(storedLocation(Promise.resolve(null)));
+
+      await waitFor(() =>
+        expect(screen.getByTestId("course-progress-tile")).toHaveAttribute("data-status", "read"),
+      );
+      const claimed = screen
+        .getAllByTestId("lesson-ring-tile")
+        .map((tile) => tile.getAttribute("data-prize-claimed"));
+      expect(claimed).toEqual(["true", "false"]);
+    });
+
+    test("WHEN no prize has been claimed THEN every tile carries its prize unclaimed", async () => {
+      renderBoard(storedLocation(Promise.resolve(null)));
+
+      await waitFor(() =>
+        expect(screen.getByTestId("course-progress-tile")).toHaveAttribute("data-status", "read"),
+      );
+      const tiles = screen.getAllByTestId("lesson-ring-tile");
+      expect(tiles.map((tile) => tile.getAttribute("data-prize-claimed"))).toEqual([
+        "false",
+        "false",
+      ]);
+      // Every module carries a prize: a slug the catalogue does not know still
+      // redeems the gift box.
+      expect(tiles.every((tile) => (tile.getAttribute("data-prize") ?? "").length > 0)).toBe(true);
+    });
+
+    test("WHEN the board settles THEN the course tile counts the prizes claimed", async () => {
+      claimPrizeOf("module-1");
+
+      renderBoard(storedLocation(Promise.resolve(null)));
+
+      await waitFor(() =>
+        expect(screen.getByTestId("course-progress-tile")).toHaveTextContent(
+          msg("prizesClaimed", { claimed: 1, total: 2 }),
+        ),
+      );
+    });
+
+    test("WHEN a lesson holds no videos THEN it is counted in neither prize figure", async () => {
+      // Nothing to redeem, so it is no prize — the counter counts it the same way.
+      const summaries = moduleSummaries.map((summary, index) =>
+        index === 1
+          ? { ...summary, lessonCount: 0, totalDurationSeconds: 0, lessons: [] }
+          : summary,
+      );
+
+      renderBoard(storedLocation(Promise.resolve(null)), summaries);
+
+      await waitFor(() =>
+        expect(screen.getByTestId("course-progress-tile")).toHaveTextContent(
+          msg("prizesClaimed", { claimed: 0, total: 1 }),
+        ),
+      );
     });
   });
 });

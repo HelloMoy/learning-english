@@ -26,10 +26,12 @@ const vowels = buildModule(2, "Vowels");
 const consonants = buildModule(3, "Consonants");
 
 const slicesFor = (module: Module, count: number): LessonProgressSlice[] =>
-  Array.from({ length: count }, () => ({
+  Array.from({ length: count }, (_, index) => ({
     id: LessonId.parse(faker.string.uuid()),
     moduleId: module.id,
     durationSeconds: 300,
+    title: faker.lorem.words(3),
+    sequence: index + 1,
   }));
 
 const introductionLessons = slicesFor(introduction, 1);

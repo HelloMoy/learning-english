@@ -17,12 +17,14 @@ import type { ModuleSummary } from "@/domain/use-cases/find-course-for-view/find
 import { useContinueWatching } from "@/hooks/use-continue-watching/use-continue-watching";
 import { useIsHydrated } from "@/hooks/use-is-hydrated/use-is-hydrated";
 import { useCompletedLessons } from "@/hooks/use-lesson-completion/use-lesson-completion";
+import { useClaimedPrizes } from "@/hooks/use-prize-claims/use-prize-claims";
 import { useSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
 import {
   courseOverviewProgress,
   type CourseOverviewEntry,
   type CourseOverviewProgress,
 } from "@/lib/course-overview-progress/course-overview-progress";
+import { prizeForModule } from "@/lib/module-prizes/module-prizes";
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -68,6 +70,17 @@ export function CourseProgressBoard({
   const t = useTranslations("CourseCatalog.courseOverview");
   const entries = pairWithSummaries(modules, moduleSummaries);
   const progress = useBoardProgress(course, entries, continueWatching);
+  // Read once, like the three readings above: the tally and every tile draw
+  // from the same claims, so no two of them can disagree.
+  const claimedPrizes = useClaimedPrizes();
+  // A lesson with no videos has nothing to redeem, so it is no prize — the same
+  // rule the counter counts by.
+  const coursePrizes = entries
+    .filter((entry) => entry.summary.lessons.length > 0)
+    .map((entry) => ({
+      prize: prizeForModule(entry.module.slug),
+      isClaimed: claimedPrizes.has(entry.module.slug),
+    }));
   const hasVideos = entries.some(({ summary }) => summary.lessons.length > 0);
   const continueReading = continueReadingOf(progress, entries);
 
@@ -86,6 +99,7 @@ export function CourseProgressBoard({
           <CourseProgressTile
             course={course}
             reading={courseReadingOf(progress)}
+            prizes={coursePrizes}
           />
         </div>
       </div>
@@ -103,6 +117,7 @@ export function CourseProgressBoard({
               module={entry.module}
               summary={entry.summary}
               reading={lessonReadingOf(progress, index)}
+              isPrizeClaimed={claimedPrizes.has(entry.module.slug)}
             />
           </li>
         ))}

@@ -14,6 +14,8 @@ const lessonRuntimes = Array.from({ length: 48 }, (_, index) => ({
   id: LessonId.parse(`00000000-0000-4000-8000-${String(index).padStart(12, "0")}`),
   moduleId,
   durationSeconds: 480,
+  title: `Video ${index + 1}`,
+  sequence: index + 1,
 }));
 
 /**

@@ -123,8 +123,11 @@ test.describe("Onboarding", () => {
     await page.getByRole("link", { name: "Start course" }).first().click(COLD_ROUTE);
     await page.waitForURL(/\/en\/start$/, COLD_ROUTE);
 
-    await page.getByRole("textbox", { name: "Your name" }).fill("Ana García");
-    await page.getByRole("button", { name: "Continue" }).click();
+    // The name is typed in the card itself, and Enter there continues the step.
+    const name = page.getByRole("textbox", { name: "Your name" });
+    await expect(page.getByTestId("learner-card")).toContainText("Level 1", COLD_ROUTE);
+    await name.fill("Ana García");
+    await name.press("Enter");
     await page.waitForURL(/\/en\/start\/avatar$/, COLD_ROUTE);
 
     await page.getByRole("radio", { name: "Echo" }).click();

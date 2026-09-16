@@ -18,14 +18,16 @@ const introduction = {
 };
 const vowels = { id: ModuleId.parse(faker.string.uuid()), slug: Slug.parse("2-vowels") };
 
-const sliceOf = (moduleId: string) => ({
+const sliceOf = (moduleId: string, sequence = 1) => ({
   id: LessonId.parse(faker.string.uuid()),
   moduleId: ModuleId.parse(moduleId),
   durationSeconds: 600,
+  title: faker.lorem.words(3),
+  sequence,
 });
 
 const introductionVideo = sliceOf(introduction.id);
-const vowelVideos = [sliceOf(vowels.id), sliceOf(vowels.id), sliceOf(vowels.id)];
+const vowelVideos = [sliceOf(vowels.id, 1), sliceOf(vowels.id, 2), sliceOf(vowels.id, 3)];
 
 const course: ContinueCourse = {
   course: { slug: Slug.parse("basic-course") },

@@ -114,8 +114,20 @@ describe("useCourseWatchProgress", () => {
       // not whole lessons, and must count exactly as the outline does.
       const moduleId = makeModuleId();
       const slices = [
-        { id: LessonId.parse(faker.string.uuid()), moduleId, durationSeconds: 600 },
-        { id: LessonId.parse(faker.string.uuid()), moduleId, durationSeconds: 600 },
+        {
+          id: LessonId.parse(faker.string.uuid()),
+          moduleId,
+          durationSeconds: 600,
+          title: faker.lorem.words(3),
+          sequence: 1,
+        },
+        {
+          id: LessonId.parse(faker.string.uuid()),
+          moduleId,
+          durationSeconds: 600,
+          title: faker.lorem.words(3),
+          sequence: 2,
+        },
       ];
       storePosition(slices[0]!.id, finishThresholdSeconds(600));
       announceStorageChange();

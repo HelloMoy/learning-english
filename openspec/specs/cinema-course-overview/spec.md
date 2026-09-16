@@ -15,7 +15,13 @@ on wide viewports and stacked on narrow ones:
   locale-aware lesson path;
 - a **course progress tile** presenting the course title as the page's level-one heading, a
   ring filled to the share of the course's videos that count as complete, that share as a
-  percentage, the watched count out of the total, and the time left.
+  percentage, the watched count out of the total, the time left, and **how many of the course's
+  prizes the learner has claimed**, with the course's prizes drawn small beneath it.
+
+The prize tally SHALL count the prizes claimed on the counter over the course's modules that hold
+lessons — a module with no lessons has nothing to redeem and is counted by neither figure. Each drawn
+prize SHALL be the coloured illustration when that module's prize has been claimed and the silhouette
+until then, and SHALL be hidden from assistive technology, which hears the tally's sentence instead.
 
 The video and the action's label SHALL be decided from this device's progress with
 `countsAsComplete`:
@@ -34,6 +40,7 @@ Time left SHALL be the sum, over incomplete videos, of each runtime minus its sa
 Because progress is read from this device after hydration, the tiles SHALL render on the
 server and before progress is known without asserting any state: the course title, an
 unfilled ring with no percentage, and placeholders of the continue tile's text and action.
+Before the claims have been read, no prize SHALL render as claimed.
 When the course has no lessons, the page SHALL render no continue tile.
 
 #### Scenario: A new learner is invited to start
@@ -68,6 +75,14 @@ When the course has no lessons, the page SHALL render no continue tile.
 - **WHEN** 2 of 48 videos are complete and the remaining runtime minus saved positions is 10 h 7 min
 - **THEN** the course tile shows 4 %, "2 of 48 videos" and "10 h 7 min left"
 
+#### Scenario: The course tile states the prizes claimed
+- **WHEN** the learner has claimed the prize of `Introduction` and the course holds five lessons
+- **THEN** the course tile states 1 of 5 prizes, drawing the `Introduction` prize in colour and the other four as silhouettes
+
+#### Scenario: A finished course whose prizes are unclaimed counts none
+- **WHEN** every video of the course counts as complete and no prize has been claimed
+- **THEN** the course tile shows 100 % and states 0 of 5 prizes, with every prize a silhouette
+
 #### Scenario: The server render asserts no progress
 - **WHEN** the course overview is rendered on the server
 - **THEN** the course title is present, the ring is unfilled with no percentage, and the continue tile shows placeholders instead of a label
@@ -82,10 +97,16 @@ Below the opening tiles the course overview SHALL render one tile per lesson (mo
 `sequence` order, all visible without paging. A tile SHALL show the lesson's artwork (the first
 video's poster, or a decorative placeholder), the lesson ordinal as an outlined numeral, a ring
 filled to the share of the lesson's videos that count as complete with that share as a
-percentage, the lesson title, and the watched count out of the lesson's videos with the time
-left in the lesson (**All watched** when completed). On wide viewports the tile SHALL also show a
+percentage, the lesson title, the watched count out of the lesson's videos with the time
+left in the lesson (**All watched** when completed), and **the prize that lesson redeems**. On wide
+viewports the tile SHALL also show a
 status chip — **Completed**, **In progress** or **Not started**; on narrow viewports the row's
 leading ring and meta line carry that state and no chip renders.
+
+The prize SHALL be drawn on the tile's artwork, opposite the ordinal: the coloured illustration once the
+learner has claimed it on the counter, and the silhouette until then — completing the lesson readies its
+prize but does not reveal it. The illustration SHALL be decoration, hidden from assistive technology and
+adding no control and no tab stop to the tile.
 
 A tile SHALL NOT list the lesson's videos. Activating a tile SHALL open the lesson's module
 overview for the active locale — or, when the lesson holds exactly one video, that video's
@@ -97,7 +118,8 @@ On wide viewports the tiles SHALL sit in a grid of up to five per row; on narrow
 tile SHALL be a full-width row led by its ring. The page SHALL NOT scroll horizontally.
 
 Before progress is known, tiles SHALL render with unfilled rings, no percentage and no status,
-and their meta line SHALL state the lesson's video count and runtime. All tile copy SHALL be
+their prize as a silhouette, and their meta line SHALL state the lesson's video count and runtime. All
+tile copy SHALL be
 localized (en/es/pt) and every tile SHALL carry an accessible name that includes the lesson
 title.
 
@@ -112,6 +134,14 @@ title.
 #### Scenario: A completed lesson reads as completed
 - **WHEN** every video of Introduction is complete
 - **THEN** its tile shows 100 %, Completed and All watched
+
+#### Scenario: A completed lesson keeps its prize hidden until it is claimed
+- **WHEN** every video of Introduction is complete and its prize has not been claimed
+- **THEN** its tile draws the prize as a silhouette
+
+#### Scenario: A claimed prize is drawn in colour
+- **WHEN** the learner has claimed the prize of Introduction on the counter
+- **THEN** its tile draws the whistle in colour, and the illustration is hidden from assistive technology
 
 #### Scenario: A tile opens the module overview
 - **WHEN** the learner activates the tile of a lesson holding several videos

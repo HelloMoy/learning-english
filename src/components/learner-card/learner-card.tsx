@@ -4,6 +4,7 @@ import { LearnerAvatar } from "@/components/learner-avatar/learner-avatar";
 import { ProgressRing } from "@/components/progress-ring/progress-ring";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip/tooltip";
 import type { LearnerAvatar as LearnerAvatarValue } from "@/domain/entities/learner-profile/learner-profile";
+import type { Distinction } from "@/lib/learner-achievements/learner-achievements";
 import { cn } from "@/lib/utils/utils";
 
 import { useTranslations } from "next-intl";
@@ -21,6 +22,17 @@ export type LearnerCardProgress = {
   total: number;
 };
 
+const PLAIN_FINISH =
+  "border border-gold/45 bg-[radial-gradient(90%_120%_at_0%_0%,color-mix(in_oklab,var(--glow)_30%,var(--card)),var(--card)_60%)]";
+
+/** The border and glow each distinction gives the card. */
+const FINISH_CLASSES: Record<Distinction, string> = {
+  student: PLAIN_FINISH,
+  bronze:
+    "border-2 border-bronze bg-[radial-gradient(90%_120%_at_0%_0%,color-mix(in_oklab,var(--bronze)_40%,var(--card)),var(--card)_62%)]",
+  gold: "border-2 border-gold bg-[radial-gradient(90%_120%_at_0%_0%,color-mix(in_oklab,var(--glow)_45%,var(--card)),var(--card)_62%)] outline-8 outline-[color-mix(in_oklab,var(--glow)_12%,transparent)]",
+};
+
 /** The completed share in `[0, 1]`; a course with no videos has nothing done. */
 const completedShare = ({ completed, total }: LearnerCardProgress): number =>
   total > 0 ? Math.min(completed / total, 1) : 0;
@@ -33,6 +45,10 @@ const completedShare = ({ completed, total }: LearnerCardProgress): number =>
  * The onboarding and the Profile page both edit the card live, so it renders
  * whatever it is given, including a name still being typed: a blank name shows
  * a placeholder rather than an empty line.
+ *
+ * The onboarding goes one step further and hands the card the name *field*, so
+ * the learner types where the name will live. The card only makes room for it —
+ * the field, its value and its label belong to the step that owns them.
  *
  * The wordmark here is decoration, not the header's home link, so it is a
  * plain text mark hidden from assistive technology.
@@ -49,6 +65,9 @@ const completedShare = ({ completed, total }: LearnerCardProgress): number =>
  * @param level - The level and course line
  * @param progress - Completed and total videos of the level's course
  * @param size - `large` widens the card and its type for the Profile preview
+ * @param distinction - The finish earned by completing courses; omitted, the card keeps its plain look
+ * @param nameField - Stands where the name goes, for the onboarding step that collects it; omitted,
+ *                    the card prints the name as it always has
  */
 export function LearnerCard({
   name,
@@ -56,23 +75,31 @@ export function LearnerCard({
   level,
   progress,
   size = "default",
+  distinction,
+  nameField,
 }: {
   name: string;
   avatar: LearnerAvatarValue;
   level: LearnerCardLevel;
   progress: LearnerCardProgress;
   size?: "default" | "large";
+  distinction?: Distinction;
+  nameField?: ReactNode;
 }) {
   const t = useTranslations("Components.LearnerCard");
   const trimmedName = name.trim();
   const isLarge = size === "large";
   const share = completedShare(progress);
   const isComplete = progress.total > 0 && progress.completed >= progress.total;
+  const accentText = distinction === "bronze" ? "text-bronze-text" : "text-gold";
 
   return (
     <div
+      data-testid="learner-card"
+      data-distinction={distinction}
       className={cn(
-        "flex w-full flex-col gap-[1.125rem] rounded-[1.25rem] border border-gold/45 bg-[radial-gradient(90%_120%_at_0%_0%,color-mix(in_oklab,var(--glow)_30%,var(--card)),var(--card)_60%)] p-5 text-left shadow-[0_40px_80px_-40px_rgba(0,0,0,0.9)] sm:p-[1.625rem]",
+        "flex w-full flex-col gap-[1.125rem] rounded-[1.25rem] p-5 text-left shadow-[0_40px_80px_-40px_rgba(0,0,0,0.9)] sm:p-[1.625rem]",
+        distinction ? FINISH_CLASSES[distinction] : PLAIN_FINISH,
         isLarge ? "max-w-full" : "max-w-[27.5rem]",
       )}
     >
@@ -81,10 +108,12 @@ export function LearnerCard({
           aria-hidden="true"
           className="font-sans text-[13px] leading-none font-extrabold tracking-[0.18em] text-foreground uppercase"
         >
-          ENGLISH<span className="px-[0.15em] text-gold">·</span>COURSE
+          ENGLISH<span className={cn("px-[0.15em]", accentText)}>·</span>COURSE
         </span>
-        <span className="text-[10px] font-bold tracking-[0.3em] text-gold uppercase">
-          {t("tag")}
+        <span className={cn("text-[10px] font-bold tracking-[0.3em] uppercase", accentText)}>
+          {distinction === "bronze" || distinction === "gold"
+            ? t(`distinction.${distinction}`)
+            : t("tag")}
         </span>
       </div>
       <div className="flex items-center gap-4">
@@ -94,15 +123,17 @@ export function LearnerCard({
           size={isLarge ? "xl" : "lg"}
         />
         <div className="flex min-w-0 flex-col gap-1.5">
-          <p
-            className={cn(
-              "truncate leading-[1.05] font-extrabold tracking-tight",
-              isLarge ? "text-2xl sm:text-[2.125rem]" : "text-2xl sm:text-3xl",
-              trimmedName ? "text-foreground" : "text-muted-foreground",
-            )}
-          >
-            {trimmedName || t("namePlaceholder")}
-          </p>
+          {nameField ?? (
+            <p
+              className={cn(
+                "truncate leading-[1.05] font-extrabold tracking-tight",
+                isLarge ? "text-2xl sm:text-[2.125rem]" : "text-2xl sm:text-3xl",
+                trimmedName ? "text-foreground" : "text-muted-foreground",
+              )}
+            >
+              {trimmedName || t("namePlaceholder")}
+            </p>
+          )}
           <p className="text-[13px] text-muted-foreground">
             {t("level", { number: level.number, course: level.courseTitle })}
           </p>
@@ -172,6 +203,7 @@ function ProgressTooltip({ label, children }: { label: string; children: ReactNo
     >
       <TooltipTrigger
         ref={triggerRef}
+        type="button"
         onPointerDown={rememberOpenState}
         onClick={toggle}
         className="relative cursor-help rounded-sm underline decoration-muted-foreground/50 decoration-dotted underline-offset-4 transition-colors after:absolute after:-inset-x-2 after:-inset-y-3.5 after:content-[''] hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"

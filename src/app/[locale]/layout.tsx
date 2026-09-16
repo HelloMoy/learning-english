@@ -18,6 +18,8 @@ import { SiteHeader } from "@/components/site-header/site-header";
 import { SkipLink } from "@/components/skip-link/skip-link";
 import { routing } from "@/i18n/routing";
 
+import { catalogLevels, loadCatalogEntries } from "./catalog-levels";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -94,6 +96,10 @@ export default async function LocaleLayout({ children, params }: Props) {
   // Enable static rendering for all Server Components below this layout.
   setRequestLocale(locale);
 
+  // Resolved once per request and shared by both: the header counts the prizes
+  // waiting to be claimed, and the providers decide where a won prize stands.
+  const levels = catalogLevels(await loadCatalogEntries());
+
   return (
     // `suppressHydrationWarning` is required on <html> when using next-themes:
     // the provider injects a script that sets `class="dark"` on <html> before
@@ -122,8 +128,8 @@ export default async function LocaleLayout({ children, params }: Props) {
             <StructuredData data={websiteSchema({ siteUrl: siteUrl(), locale })} />
             <SkipLink />
             <CinemaBackground />
-            <SiteHeader />
-            <GlobalProviders>
+            <SiteHeader levels={levels} />
+            <GlobalProviders levels={levels}>
               <div className="flex-1">{children}</div>
             </GlobalProviders>
           </ThemeProvider>

@@ -1,10 +1,12 @@
 "use client";
 
 import { Eyebrow } from "@/components/eyebrow/eyebrow";
+import { TicketToast } from "@/components/ticket-toast/ticket-toast";
 import type { LessonId } from "@/domain/entities/ids/ids";
 import type { Lesson, VideoLesson } from "@/domain/entities/lesson/lesson";
 import type { Resource } from "@/domain/entities/resource/resource";
 import type { LessonView as LessonViewData } from "@/domain/use-cases/find-lesson-for-view/find-lesson-for-view";
+import { useLessonRewardMoment } from "@/hooks/use-lesson-reward-moment/use-lesson-reward-moment";
 import { youtubeVideoIdFrom } from "@/lib/youtube-source/youtube-source";
 
 import { useTranslations } from "next-intl";
@@ -41,6 +43,10 @@ import { ResourceList } from "../resource-list/resource-list";
  * the center column, so the learner still meets the materials right after
  * the lesson's own content and the closing card last. Nothing else on the
  * page offers the next lesson.
+ *
+ * Completing the lesson while the page is open earns its ticket, shown as a
+ * `TicketToast`, or redeems the module's prize in a dialog when it was the
+ * module's last ticket — see `useLessonRewardMoment`.
  *
  * `notesResource` is not rendered. It is the identity the Resources card
  * filters by, so the `readme.md` the Notes tab already renders inline is not
@@ -92,8 +98,18 @@ export function LessonView({
 
   const nonNotesResources = resources.filter((r) => r.id !== notesResource?.id);
 
+  const { ticket, dismissTicket } = useLessonRewardMoment({
+    lesson,
+    module,
+    moduleLessons: lessonsByModuleId.get(module.id) ?? [lesson],
+  });
+
   return (
     <div className="grid gap-8 lg:grid-cols-[260px_1fr_280px]">
+      <TicketToast
+        moment={ticket}
+        onDone={dismissTicket}
+      />
       <OutlineDrawer
         course={course}
         modules={modules}

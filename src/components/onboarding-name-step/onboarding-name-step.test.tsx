@@ -3,7 +3,7 @@ import { useRouter } from "@/i18n/navigation";
 import { renderInLocale, type TestLocale } from "@/test-setup/render-in-locale";
 import { makeStubLearnerProfileRepository } from "@/test-setup/stubs/domain-repos";
 
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -77,18 +77,51 @@ describe("OnboardingNameStep", () => {
         await screen.findByRole("heading", { level: 1, name: "Let’s make your learner card" }),
       ).toBeInTheDocument();
       expect(screen.getByText("Step 1 of 2")).toBeInTheDocument();
-      expect(screen.getByText("Your name")).toBeInTheDocument();
+      expect(screen.getByRole("textbox", { name: "Your name" })).toHaveValue("");
       expect(screen.getByText("0 of 48 videos")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
     });
 
-    test("WHEN the learner types a name THEN the card shows it and its initials", async () => {
+    test("WHEN the step opens THEN the name is typed in the card, and nowhere else", async () => {
+      // Two places asking for one name is what sent learners clicking at the
+      // card's placeholder while the field that answered sat below it.
+      renderStep();
+
+      const card = await screen.findByTestId("learner-card");
+      expect(within(card).getByRole("textbox", { name: "Your name" })).toBeInTheDocument();
+      expect(screen.getAllByRole("textbox")).toHaveLength(1);
+    });
+
+    test("WHEN the card's field is read THEN it keeps what the step has always offered", async () => {
+      renderStep();
+
+      const field = await screen.findByRole("textbox", { name: "Your name" });
+      // Short enough to fit where the name goes, at the name's size.
+      expect(field).toHaveAttribute("placeholder", "Your name");
+      expect(field).toHaveAttribute("autocomplete", "name");
+      expect(field).toHaveAttribute("maxlength");
+    });
+
+    test("WHEN the field reads as a field THEN it carries its own line and focus ring", async () => {
+      // In-place editing fails the other way round when nothing looks editable.
+      const field = await (renderStep(), screen.findByRole("textbox", { name: "Your name" }));
+
+      expect(field.className).toContain("border-b");
+      expect(field.className).toContain("focus-visible:");
+    });
+
+    // Enter continuing the step is covered in `e2e/home.spec.ts`: jsdom does not
+    // perform a form's implicit submission, so here it would test the test.
+
+    test("WHEN the learner types a name THEN the card carries it and its initials", async () => {
       const user = userEvent.setup();
       renderStep();
 
-      await user.type(await screen.findByRole("textbox", { name: "Your name" }), "Ana García");
+      const field = await screen.findByRole("textbox", { name: "Your name" });
+      await user.type(field, "Ana García");
 
-      expect(screen.getByText("Ana García")).toBeInTheDocument();
+      // The name lives in the field now, so the card holds it once, not twice.
+      expect(field).toHaveValue("Ana García");
       expect(screen.getByRole("img", { name: "Avatar: Ana García" })).toHaveTextContent("AG");
       expect(screen.getByRole("button", { name: "Continue" })).toBeEnabled();
     });
@@ -135,7 +168,7 @@ describe("OnboardingNameStep", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Seu nome" })).toHaveAttribute(
       "placeholder",
-      "Seu nome e sobrenome",
+      "Seu nome",
     );
   });
 });

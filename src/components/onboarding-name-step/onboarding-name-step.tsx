@@ -20,9 +20,13 @@ import { useState, type FormEvent } from "react";
 const INITIALS: LearnerAvatar = { kind: "initials" };
 
 /**
- * Onboarding step 1: the learner types their name into a live learner card.
+ * Onboarding step 1: the learner types their name into the learner card itself.
  *
  * @remarks
+ * The field lives in the card, where the name will live, and it is the step's
+ * only one. A card that merely previewed the name put the same words — `Your
+ * name` — in two places, and learners clicked the one that could not answer.
+ *
  * Continue saves a profile with the name and the initials avatar — a complete
  * profile, so a learner who leaves before step 2 still has a card — and opens
  * step 2.
@@ -77,25 +81,28 @@ export function OnboardingNameStep({
       <h1 className="font-sans text-[2rem] leading-[1.05] font-extrabold tracking-tight text-balance text-foreground sm:text-[2.875rem]">
         {t("name.heading")}
       </h1>
-      <LearnerCard
-        name={name}
-        avatar={INITIALS}
-        level={level}
-        progress={{ completed: 0, total: videoCount }}
-      />
       <form
         onSubmit={handleSubmit}
-        className="flex w-full max-w-[27.5rem] flex-col gap-3"
+        className="flex w-full max-w-[27.5rem] flex-col gap-5"
       >
-        <input
-          type="text"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          aria-label={t("name.fieldLabel")}
-          placeholder={t("name.placeholder")}
-          autoComplete="name"
-          maxLength={LEARNER_NAME_MAX_LENGTH}
-          className="min-h-14 w-full rounded-xl border border-border bg-card px-[1.125rem] text-lg text-foreground placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none"
+        <LearnerCard
+          name={name}
+          avatar={INITIALS}
+          level={level}
+          progress={{ completed: 0, total: videoCount }}
+          nameField={
+            <input
+              type="text"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              aria-label={t("name.fieldLabel")}
+              placeholder={t("name.placeholder")}
+              autoComplete="name"
+              autoFocus
+              maxLength={LEARNER_NAME_MAX_LENGTH}
+              className="w-full min-w-0 truncate border-b border-dashed border-muted-foreground/50 bg-transparent pb-1 text-2xl leading-[1.05] font-extrabold tracking-tight text-foreground caret-gold transition-colors placeholder:font-extrabold placeholder:text-muted-foreground/60 focus-visible:border-solid focus-visible:border-gold focus-visible:outline-none sm:text-3xl"
+            />
+          }
         />
         <button
           type="submit"

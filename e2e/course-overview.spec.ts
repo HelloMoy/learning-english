@@ -178,6 +178,42 @@ test.describe("Course overview", () => {
     });
   });
 
+  test.describe("GIVEN the prizes these lessons redeem", () => {
+    test("WHEN a prize has been claimed THEN its tile says so AND the course tile counts it", async ({
+      page,
+    }) => {
+      // Arrange: the claim the counter writes when the learner takes the prize.
+      await page.addInitScript((slug) => {
+        window.localStorage.setItem(`learning-english:prize-claimed:${slug}`, "1");
+      }, MODULES[0]!.slug);
+
+      // Act
+      await page.goto(courseUrl("en"));
+
+      // Assert
+      await expect(tileOf(page, 0)).toHaveAttribute("data-prize-claimed", "true", COLD_ROUTE);
+      await expect(tileOf(page, 1)).toHaveAttribute("data-prize-claimed", "false");
+      await expect(page.getByTestId("course-progress-tile")).toContainText(
+        `1 of ${MODULES.length} prizes`,
+      );
+    });
+
+    test("WHEN nothing has been claimed THEN every prize stays hidden", async ({ page }) => {
+      // Act
+      await page.goto(courseUrl("en"));
+
+      // Assert
+      await expect(page.getByTestId("course-progress-tile")).toContainText(
+        `0 of ${MODULES.length} prizes`,
+        COLD_ROUTE,
+      );
+      const locked = await tiles(page).evaluateAll((nodes) =>
+        nodes.map((node) => node.querySelector("svg[data-prize]")?.getAttribute("data-locked")),
+      );
+      expect(new Set(locked)).toEqual(new Set(["true"]));
+    });
+  });
+
   test.describe("GIVEN a 390px-wide viewport", () => {
     test.use({ viewport: { width: 390, height: 844 } });
 

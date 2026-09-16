@@ -15,10 +15,12 @@ import { ProfileView } from "./profile-view";
 const level = { number: 1, courseTitle: "Basic Course" };
 
 const moduleId = ModuleId.parse(faker.string.uuid());
-const lessonRuntimes = [0, 1].map(() => ({
+const lessonRuntimes = [0, 1].map((index) => ({
   id: LessonId.parse(faker.string.uuid()),
   moduleId,
   durationSeconds: 300,
+  title: faker.lorem.words(3),
+  sequence: index + 1,
 }));
 
 const profile = LearnerProfile.parse({ name: "Ana García", avatar: { kind: "initials" } });

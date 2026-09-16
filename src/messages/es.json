@@ -52,9 +52,12 @@
     "sectionLesson": "Lección",
     "sectionStart": "Empezar",
     "sectionLearning": "Mi aprendizaje",
+    "sectionAchievements": "Logros",
     "sectionProfile": "Perfil",
     "learnerMenuLabel": "Menú de estudiante de {name}",
+    "learnerMenuLabelWithPrizes": "Menú de estudiante de {name} — {count, plural, one {# premio por reclamar} other {# premios por reclamar}}",
     "myLearning": "Mi aprendizaje",
+    "achievements": "Logros",
     "profile": "Perfil"
   },
   "LocaleSwitcher": {
@@ -288,6 +291,54 @@
     "LoadingStatus": {
       "label": "Cargando"
     },
+    "LearnerAchievements": {
+      "ticketCount": "<number>{earned}</number> de {count, plural, one {# ticket} other {# tickets}}",
+      "prizeCount": "<number>{earned}</number> de {count, plural, one {# premio} other {# premios}}"
+    },
+    "AchievementsGuideModal": {
+      "title": "¿Cómo funcionan los tickets y los premios?",
+      "description": "Todo lo de aquí se gana completando lecciones en este dispositivo.",
+      "ticketTitle": "Tickets",
+      "ticketBody": "Completa una lección para ganar su ticket. Lleva el sonido de la lección.",
+      "prizeTitle": "Premios",
+      "prizeBody": "Junta todos los tickets de un módulo para reclamar su premio en el mostrador.",
+      "distinctionTitle": "Distinción",
+      "distinctionBody": "Completa un curso y tu tarjeta pasa a bronce. Completa todos y pasa a oro.",
+      "close": "Entendido"
+    },
+    "PrizeIcon": {
+      "names": {
+        "whistle": "Silbato",
+        "harmonica": "Armónica",
+        "megaphone": "Megáfono",
+        "drum": "Tambor",
+        "car": "Carrito de carreras",
+        "microphone": "Micrófono",
+        "kazoo": "Kazoo",
+        "spring": "Resorte",
+        "kaleidoscope": "Caleidoscopio",
+        "yoyo": "Yo-yo",
+        "top": "Trompo",
+        "walkie": "Walkie-talkie",
+        "tinphone": "Teléfono de latas",
+        "crown": "Corona",
+        "robot": "Robot de cuerda",
+        "gift": "Caja de regalo"
+      }
+    },
+    "PrizeCounter": {
+      "shelfNote": "{redeemed} de {count, plural, one {# premio} other {# premios}}"
+    },
+    "PrizeShelfItem": {
+      "redeemed": "Canjeado",
+      "hiddenName": "???",
+      "tag": "{earned} / {count}",
+      "redeemedLabel": "{prize}: premio canjeado",
+      "hiddenLabel": "Premio oculto de {module}: {earned} de {count, plural, one {# ticket} other {# tickets}}",
+      "claim": "Reclamar premio",
+      "claimLabel": "Reclamar el premio de {module}",
+      "readyLabel": "Premio oculto de {module}: listo para reclamar"
+    },
     "LearnerAvatar": {
       "label": "Avatar de {name}",
       "labelUnnamed": "Avatar"
@@ -300,7 +351,11 @@
       "progress": "{completed} de {total, plural, one {# video} other {# videos}}",
       "progressPercent": "{percent, number, percent}",
       "progressRemaining": "{count, plural, one {Falta # en {course}} other {Faltan # en {course}}}",
-      "progressComplete": "{course} completado"
+      "progressComplete": "{course} completado",
+      "distinction": {
+        "bronze": "Bronce",
+        "gold": "Oro"
+      }
     },
     "AvatarPicker": {
       "label": "Avatar",
@@ -331,6 +386,24 @@
       "note": "{course} · {minutes, plural, one {# minuto} other {# minutos}}",
       "noteNoDuration": "{course}",
       "action": "Ver el primer video"
+    },
+    "TicketToast": {
+      "earned": "+1 ticket · {lesson}",
+      "progress": "{earned} de {count, plural, one {# ticket} other {# tickets}} para el premio de {module}"
+    },
+    "PrizeRedeemedModal": {
+      "continue": "Seguir con el curso",
+      "redeeming": "Canjeando {count, plural, one {# ticket} other {# tickets}}…",
+      "eyebrow": "Premio canjeado",
+      "description": "Juntaste {count, plural, one {el único ticket} other {los # tickets}} de {module}.",
+      "close": "¡Genial!"
+    },
+    "PrizeReadyModal": {
+      "eyebrow": "Premio listo",
+      "title": "Tienes un premio esperando",
+      "description": "Juntaste {count, plural, one {el único ticket} other {los # tickets}} de {module}.",
+      "goClaim": "Ir a reclamar premio",
+      "keepLearning": "Seguir aprendiendo"
     }
   },
   "CourseCatalog": {
@@ -358,6 +431,7 @@
       "timeLeft": "Quedan {duration}",
       "watchAgain": "Ver de nuevo",
       "percentComplete": "{percent, number, percent}",
+      "prizesClaimed": "{claimed} de {total} premios",
       "completedOfTotal": "{completed} de {total} videos",
       "continueWhereLeftOff": "Continuar donde lo dejaste",
       "statusCompleted": "Completada",
@@ -416,6 +490,8 @@
     "startDescription": "Añade tu nombre y elige un avatar para empezar el curso.",
     "learningTitle": "Mi aprendizaje",
     "learningDescription": "Retoma tu última lección y mira tu progreso en este dispositivo.",
+    "achievementsTitle": "Logros",
+    "achievementsDescription": "Los tickets, premios y distinción que has ganado en este dispositivo.",
     "profileTitle": "Perfil",
     "profileDescription": "Cambia el nombre y el avatar de tu tarjeta de estudiante."
   },
@@ -431,7 +507,7 @@
     "name": {
       "heading": "Creemos tu tarjeta de estudiante",
       "fieldLabel": "Tu nombre",
-      "placeholder": "Tu nombre y apellido",
+      "placeholder": "Tu nombre",
       "continue": "Continuar"
     },
     "avatar": {
@@ -439,6 +515,14 @@
       "intro": "Toca uno para ponerlo en tu tarjeta, o quédate con tus iniciales.",
       "continue": "Continuar"
     }
+  },
+  "Achievements": {
+    "continueCourse": "Continuar con el curso",
+    "startCourse": "Empezar el curso",
+    "eyebrow": "Logros",
+    "heading": "Tus logros",
+    "intro": "Cada lección que completas te da un ticket. Junta todos los tickets de un módulo para canjear su premio.",
+    "howItWorks": "¿Cómo funcionan?"
   },
   "Profile": {
     "eyebrow": "Perfil",

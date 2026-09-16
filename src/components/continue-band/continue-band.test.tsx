@@ -10,10 +10,12 @@ import { beforeEach, describe, expect, test } from "vitest";
 import { ContinueBand } from "./continue-band";
 
 const moduleId = ModuleId.parse(faker.string.uuid());
-const lessonRuntimes = [0, 1, 2].map(() => ({
+const lessonRuntimes = [0, 1, 2].map((index) => ({
   id: LessonId.parse(faker.string.uuid()),
   moduleId,
   durationSeconds: 300,
+  title: faker.lorem.words(3),
+  sequence: index + 1,
 }));
 
 const profile = LearnerProfile.parse({

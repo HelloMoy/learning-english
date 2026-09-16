@@ -40,7 +40,16 @@ function readStorage(): ReadonlySet<string> {
   return completed;
 }
 
-function refresh(): void {
+/**
+ * Re-reads storage and notifies every subscriber.
+ *
+ * @remarks
+ * The `storage` event only fires for writes made by *other* tabs, so anything
+ * that seeds or clears these keys directly — a test, a reset — has to say so.
+ * {@link markLessonComplete} and {@link unmarkLessonComplete} call it for their
+ * own writes.
+ */
+export function refreshCompletedLessons(): void {
   snapshot = readStorage();
   for (const listener of listeners) listener();
 }
@@ -50,10 +59,10 @@ function subscribe(listener: () => void): () => void {
   listeners.add(listener);
   // A `storage` event fires when *another* tab writes, so completing a
   // lesson in one tab is reflected in the others for free.
-  window.addEventListener("storage", refresh);
+  window.addEventListener("storage", refreshCompletedLessons);
   return () => {
     listeners.delete(listener);
-    if (listeners.size === 0) window.removeEventListener("storage", refresh);
+    if (listeners.size === 0) window.removeEventListener("storage", refreshCompletedLessons);
   };
 }
 
@@ -130,7 +139,7 @@ export function useLessonCompletion(lessonId: LessonId): boolean {
  */
 export async function markLessonComplete(lessonId: LessonId): Promise<void> {
   await tracker.markComplete(lessonId);
-  refresh();
+  refreshCompletedLessons();
 }
 
 /**
@@ -151,5 +160,5 @@ export async function markLessonComplete(lessonId: LessonId): Promise<void> {
  */
 export async function unmarkLessonComplete(lessonId: LessonId): Promise<void> {
   await tracker.unmarkComplete(lessonId);
-  refresh();
+  refreshCompletedLessons();
 }

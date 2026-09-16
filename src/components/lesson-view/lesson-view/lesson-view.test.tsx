@@ -4,6 +4,10 @@ import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
 import { Resource } from "@/domain/entities/resource/resource";
 import type { LessonView as LessonViewData } from "@/domain/use-cases/find-lesson-for-view/find-lesson-for-view";
+import {
+  markLessonComplete,
+  unmarkLessonComplete,
+} from "@/hooks/use-lesson-completion/use-lesson-completion";
 import { emitPlayerEvent, findPlayerIn } from "@/test-setup/stubs/vidstack-player";
 
 import { faker } from "@faker-js/faker";
@@ -397,5 +401,40 @@ describe("LessonView", () => {
     // Assert
     expect(screen.getByTestId("lesson-notes-tabs")).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "notes" })).toBeInTheDocument();
+  });
+
+  test("WHEN the lesson on screen becomes complete THEN a ticket notification is announced", async () => {
+    // Arrange — a second lesson keeps the module unredeemed, so a ticket
+    // notification rather than the prize dialog is the moment.
+    const { view } = fixtures();
+    const otherLesson = Lesson.parse({
+      kind: "reading",
+      id: LessonId.parse(faker.string.uuid()),
+      courseId: view.course.id,
+      moduleId: view.module.id,
+      sequence: 2,
+      title: "Other lesson",
+      body: "body",
+    });
+    render(
+      <LessonView
+        view={{ ...view, lessons: [view.lesson, otherLesson] }}
+        notes={null}
+        notesResource={null}
+        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
+        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
+      />,
+    );
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+    const ticketNotification = () =>
+      screen.getAllByRole("status").find((status) => status.textContent?.includes("progress"));
+    expect(ticketNotification()).toBeUndefined();
+
+    // Act
+    await act(() => markLessonComplete(view.lesson.id));
+
+    // Assert
+    expect(ticketNotification()).toBeDefined();
+    await act(() => unmarkLessonComplete(view.lesson.id));
   });
 });

@@ -1,3 +1,4 @@
+import { PrizeIcon } from "@/components/prize-icon/prize-icon";
 import { ProgressRing } from "@/components/progress-ring/progress-ring";
 import type { Course } from "@/domain/entities/course/course";
 import type { Module } from "@/domain/entities/module/module";
@@ -9,6 +10,7 @@ import type {
   ModuleOverviewProgress,
   ModuleStatus,
 } from "@/lib/course-overview-progress/course-overview-progress";
+import { prizeForModule, type PrizeId } from "@/lib/module-prizes/module-prizes";
 import { cn } from "@/lib/utils/utils";
 
 import { useTranslations } from "next-intl";
@@ -27,6 +29,11 @@ export type LessonRingTileProps = {
   module: Module;
   summary: ModuleSummary;
   reading: LessonRingReading;
+  /**
+   * Whether the learner has claimed this lesson's prize on the counter.
+   * Completing the lesson readies the prize; only claiming it reveals it.
+   */
+  isPrizeClaimed?: boolean;
 };
 
 const STATUS_KEY: Record<
@@ -46,6 +53,13 @@ const STATUS_CHIP: Record<ModuleStatus, string> = {
 
 const PLACEHOLDER_GLOW =
   "radial-gradient(120% 90% at 30% 20%, color-mix(in oklab, var(--glow) 30%, var(--background)), var(--background) 72%)";
+
+/**
+ * The veil behind the prize. The band carries real posters — faces, titles,
+ * high contrast — and an unbacked toy dissolves into them.
+ */
+const PRIZE_SCRIM =
+  "radial-gradient(closest-side, color-mix(in oklab, var(--background) 82%, transparent), transparent)";
 
 /**
  * One lesson (module) of the course overview: its artwork, ordinal, a progress
@@ -68,11 +82,18 @@ const PLACEHOLDER_GLOW =
  * <LessonRingTile course={course} module={module} summary={summary} reading={{ status: "pending" }} />
  * ```
  */
-export function LessonRingTile({ course, module, summary, reading }: LessonRingTileProps) {
+export function LessonRingTile({
+  course,
+  module,
+  summary,
+  reading,
+  isPrizeClaimed = false,
+}: LessonRingTileProps) {
   const t = useTranslations("CourseCatalog.courseOverview");
   const progress = reading.status === "read" ? reading.progress : null;
   const ordinal = String(module.sequence).padStart(2, "0");
   const poster = summary.lessons[0]?.poster;
+  const prize = prizeForModule(module.slug);
 
   return (
     <Link
@@ -81,6 +102,8 @@ export function LessonRingTile({ course, module, summary, reading }: LessonRingT
       data-testid="lesson-ring-tile"
       data-status={progress?.status ?? "pending"}
       data-current={progress?.isCurrent ? "true" : "false"}
+      data-prize={prize}
+      data-prize-claimed={isPrizeClaimed ? "true" : "false"}
       className={cn(
         "group relative flex items-center gap-4 overflow-hidden rounded-[20px] border bg-card p-4 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none motion-reduce:transition-none lg:flex-col lg:items-stretch lg:gap-0 lg:rounded-3xl lg:p-0",
         progress?.isCurrent
@@ -91,6 +114,8 @@ export function LessonRingTile({ course, module, summary, reading }: LessonRingT
       <TileArtwork
         poster={poster}
         ordinal={ordinal}
+        prize={prize}
+        isPrizeClaimed={isPrizeClaimed}
       />
       <span className="relative shrink-0 lg:hidden">
         <TileRing
@@ -128,7 +153,17 @@ export function LessonRingTile({ course, module, summary, reading }: LessonRingT
   );
 }
 
-function TileArtwork({ poster, ordinal }: { poster: string | undefined; ordinal: string }) {
+function TileArtwork({
+  poster,
+  ordinal,
+  prize,
+  isPrizeClaimed,
+}: {
+  poster: string | undefined;
+  ordinal: string;
+  prize: PrizeId;
+  isPrizeClaimed: boolean;
+}) {
   return (
     <>
       <span
@@ -142,6 +177,24 @@ function TileArtwork({ poster, ordinal }: { poster: string | undefined; ordinal:
         <span
           data-testid="lesson-ring-tile-phone-scrim"
           className="absolute inset-0 bg-linear-to-r from-card from-15% via-card/75 via-55% to-card/10"
+        />
+      </span>
+      {/* The prize takes the corner opposite the ordinal: the body below is a
+          fixed rhythm — chip, title, meta — that a fourth element would stretch. */}
+      <span
+        aria-hidden="true"
+        data-testid="lesson-ring-tile-prize"
+        style={{ background: PRIZE_SCRIM }}
+        className={cn(
+          "absolute top-1.5 right-2 z-10 rounded-full p-1.5",
+          isPrizeClaimed &&
+            "drop-shadow-[0_0_14px_color-mix(in_oklab,var(--glow)_45%,transparent)]",
+        )}
+      >
+        <PrizeIcon
+          prize={prize}
+          locked={!isPrizeClaimed}
+          size={40}
         />
       </span>
       <span

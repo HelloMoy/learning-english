@@ -153,7 +153,7 @@ describe("findCourseCatalog", () => {
     }
   });
 
-  it("projects each lesson's id, module and runtime for progress accounting", async () => {
+  it("projects each lesson's id, module, runtime, title and sequence for progress accounting", async () => {
     const readingLesson = Lesson.parse({
       kind: "reading",
       id: LessonId.parse("55555555-5555-4555-8555-555555555555"),
@@ -179,8 +179,20 @@ describe("findCourseCatalog", () => {
       // A reading lesson has nothing to watch to the end, so it reports zero —
       // the same convention `findCourseForView` uses for its lesson runtimes.
       expect(result.value.entries[0]?.lessonRuntimes).toEqual([
-        { id: lesson1.id, moduleId: module_.id, durationSeconds: 10 },
-        { id: readingLesson.id, moduleId: module_.id, durationSeconds: 0 },
+        {
+          id: lesson1.id,
+          moduleId: module_.id,
+          durationSeconds: 10,
+          title: "Lesson 1",
+          sequence: 1,
+        },
+        {
+          id: readingLesson.id,
+          moduleId: module_.id,
+          durationSeconds: 0,
+          title: "Reading",
+          sequence: 3,
+        },
       ]);
     }
   });
