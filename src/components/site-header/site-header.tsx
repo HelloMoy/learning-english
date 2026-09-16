@@ -14,12 +14,14 @@ import {
 } from "@/components/ui/dropdown-menu/dropdown-menu";
 import type { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
 import { useCanInstallToHomeScreen } from "@/hooks/use-can-install-to-home-screen/use-can-install-to-home-screen";
+import { useLearnerAchievements } from "@/hooks/use-learner-achievements/use-learner-achievements";
 import { useLearnerProfile } from "@/hooks/use-learner-profile/use-learner-profile";
 import { useThemeChoice } from "@/hooks/use-theme-choice/use-theme-choice";
 import { Link, usePathname } from "@/i18n/navigation";
+import type { AchievementLevel } from "@/lib/learner-achievements/learner-achievements";
 import { cn } from "@/lib/utils/utils";
 
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 
 /**
  * The Immersion Cinema top bar: the `ENGLISH·COURSE` wordmark, a section
@@ -36,22 +38,29 @@ export function sectionKey(
   | "sectionLesson"
   | "sectionStart"
   | "sectionLearning"
+  | "sectionAchievements"
   | "sectionProfile" {
   if (path.includes("/lessons/")) return "sectionLesson";
   if (path.includes("/modules/")) return "sectionModule";
   if (path.includes("/courses/")) return "sectionCourse";
   if (path === "/start" || path.startsWith("/start/")) return "sectionStart";
   if (path === "/learning") return "sectionLearning";
+  if (path === "/achievements") return "sectionAchievements";
   if (path === "/profile") return "sectionProfile";
   return "sectionHome";
 }
 
-export function SiteHeader() {
+/**
+ * @param levels - Every catalog course, for counting the prizes waiting to be
+ *                 claimed; a route that cannot resolve the catalog marks nothing
+ */
+export function SiteHeader({ levels = [] }: { levels?: ReadonlyArray<AchievementLevel> }) {
   const t = useTranslations("SiteHeader");
   const pathname = usePathname();
   const canInstall = useCanInstallToHomeScreen();
   const learner = useLearnerProfile();
   const section = t(sectionKey(pathname));
+  const prizesReady = usePrizesReady(levels);
 
   return (
     <header
@@ -85,7 +94,12 @@ export function SiteHeader() {
           >
             <ThemeToggle />
           </span>
-          {learner.status === "present" ? <LearnerMenu profile={learner.profile} /> : null}
+          {learner.status === "present" ? (
+            <LearnerMenu
+              profile={learner.profile}
+              prizesReady={prizesReady}
+            />
+          ) : null}
         </div>
       </div>
     </header>
@@ -93,28 +107,75 @@ export function SiteHeader() {
 }
 
 /**
+ * How many prizes are waiting on the counter.
+ *
+ * @remarks
+ * Counted here from the same derivation the Achievements page uses, rather than
+ * from a stored tally, so "ready to claim" keeps one definition — including for
+ * a learner who has never opened that page, who is exactly who the mark is for.
+ */
+function usePrizesReady(levels: ReadonlyArray<AchievementLevel>): number {
+  const { courses } = useLearnerAchievements(levels);
+  return courses
+    .flatMap((course) => course.modules)
+    .filter((achievements) => achievements.prizeState === "ready").length;
+}
+
+/**
  * The learner's avatar as a menu of their own pages. On a phone it also holds
  * the theme control, which the header row has no room for there.
+ *
+ * @remarks
+ * A prize waiting to be claimed is marked on the avatar, which is what a learner
+ * sees with the menu closed, and on the Achievements item, which is where the
+ * mark is pointing. Both marks are decoration; the count reaches assistive
+ * technology as a sentence on the menu's own name, so it is heard once.
  */
-function LearnerMenu({ profile }: { profile: LearnerProfile }) {
+function LearnerMenu({ profile, prizesReady }: { profile: LearnerProfile; prizesReady: number }) {
   const t = useTranslations("SiteHeader");
   const { name, avatar } = profile;
+  const hasPrizesReady = prizesReady > 0;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        aria-label={t("learnerMenuLabel", { name })}
-        className="inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+        aria-label={
+          hasPrizesReady
+            ? t("learnerMenuLabelWithPrizes", { name, count: prizesReady })
+            : t("learnerMenuLabel", { name })
+        }
+        className="relative inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
       >
         <LearnerAvatar
           name={name}
           avatar={avatar}
           size="sm"
         />
+        {hasPrizesReady ? (
+          <PrizeMark
+            count={prizesReady}
+            testId="prize-mark"
+            className="absolute -top-0.5 -right-0.5"
+          />
+        ) : null}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
           <Link href="/learning">{t("myLearning")}</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            href="/achievements"
+            className="justify-between gap-6"
+          >
+            {t("achievements")}
+            {hasPrizesReady ? (
+              <PrizeMark
+                count={prizesReady}
+                testId="prize-mark-item"
+              />
+            ) : null}
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/profile">{t("profile")}</Link>
@@ -122,6 +183,39 @@ function LearnerMenu({ profile }: { profile: LearnerProfile }) {
         <PhoneThemeItem />
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+/**
+ * How many prizes are waiting, as a count on the avatar and on the menu item.
+ *
+ * @remarks
+ * Deliberately not gold: gold is what a prize wears once it has been claimed,
+ * and a mark in that colour would spend the moment the learner is being sent to
+ * collect.
+ */
+function PrizeMark({
+  count,
+  testId,
+  className,
+}: {
+  count: number;
+  testId: string;
+  className?: string;
+}) {
+  const format = useFormatter();
+
+  return (
+    <span
+      data-testid={testId}
+      aria-hidden="true"
+      className={cn(
+        "inline-flex min-w-5 items-center justify-center rounded-full border-2 border-background bg-foreground px-1 text-[0.6875rem] leading-4 font-bold text-background",
+        className,
+      )}
+    >
+      {format.number(count)}
+    </span>
   );
 }
 

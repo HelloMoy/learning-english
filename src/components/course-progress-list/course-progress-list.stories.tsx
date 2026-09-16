@@ -35,6 +35,8 @@ const lessonRuntimes: LessonProgressSlice[] = LESSONS.flatMap(([, videos], modul
     ),
     moduleId: modules[moduleIndex]!.id,
     durationSeconds: 480,
+    title: `Video ${videoIndex + 1}`,
+    sequence: videoIndex + 1,
   })),
 );
 

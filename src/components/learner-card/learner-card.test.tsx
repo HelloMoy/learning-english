@@ -1,8 +1,8 @@
 import { renderInLocale } from "@/test-setup/render-in-locale";
 
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
 import { LearnerCard } from "./learner-card";
 
@@ -10,6 +10,67 @@ const level = { number: 1, courseTitle: "Basic Course" };
 const noProgress = { completed: 0, total: 48 };
 
 describe("LearnerCard", () => {
+  describe("GIVEN a distinction", () => {
+    test("WHEN the learner holds bronze THEN the card takes the bronze finish AND names it in the tag", () => {
+      renderInLocale(
+        <LearnerCard
+          name="Ana García"
+          avatar={{ kind: "initials" }}
+          level={level}
+          progress={noProgress}
+          distinction="bronze"
+        />,
+      );
+
+      expect(screen.getByText("Bronze")).toBeInTheDocument();
+      expect(screen.queryByText("Learner")).not.toBeInTheDocument();
+      expect(screen.getByTestId("learner-card")).toHaveAttribute("data-distinction", "bronze");
+    });
+
+    test("WHEN the learner holds gold in es THEN the tag reads Oro", () => {
+      renderInLocale(
+        <LearnerCard
+          name="Ana García"
+          avatar={{ kind: "initials" }}
+          level={level}
+          progress={noProgress}
+          distinction="gold"
+        />,
+        "es",
+      );
+
+      expect(screen.getByText("Oro")).toBeInTheDocument();
+    });
+
+    test("WHEN the learner is a student THEN the tag keeps the Learner label", () => {
+      renderInLocale(
+        <LearnerCard
+          name="Ana García"
+          avatar={{ kind: "initials" }}
+          level={level}
+          progress={noProgress}
+          distinction="student"
+        />,
+      );
+
+      expect(screen.getByText("Learner")).toBeInTheDocument();
+      expect(screen.getByTestId("learner-card")).toHaveAttribute("data-distinction", "student");
+    });
+  });
+
+  test("WHEN no distinction is given THEN the card carries none", () => {
+    renderInLocale(
+      <LearnerCard
+        name="Ana García"
+        avatar={{ kind: "initials" }}
+        level={level}
+        progress={noProgress}
+      />,
+    );
+
+    expect(screen.getByTestId("learner-card")).not.toHaveAttribute("data-distinction");
+  });
+
   test("WHEN rendered THEN it carries the brand, the Learner tag, the level line and the progress label", () => {
     renderInLocale(
       <LearnerCard
@@ -128,6 +189,69 @@ describe("LearnerCard", () => {
     const tooltip = await screen.findByRole("tooltip");
     expect(tooltip).toHaveTextContent("0%");
     expect(tooltip).not.toHaveTextContent("complete");
+  });
+
+  describe("GIVEN a name field to carry", () => {
+    test("WHEN the card is given one THEN it stands where the name goes", () => {
+      renderInLocale(
+        <LearnerCard
+          name="Ana"
+          avatar={{ kind: "initials" }}
+          level={level}
+          progress={noProgress}
+          nameField={
+            <input
+              aria-label="Your name"
+              defaultValue="Ana"
+            />
+          }
+        />,
+      );
+
+      const card = screen.getByTestId("learner-card");
+      expect(within(card).getByRole("textbox", { name: "Your name" })).toBeInTheDocument();
+      // The field holds the name now; the card must not print it twice.
+      expect(within(card).queryByText("Ana")).not.toBeInTheDocument();
+      expect(within(card).queryByText("Your name")).not.toBeInTheDocument();
+      // The rest of the card is untouched: the avatar still follows the name.
+      expect(screen.getByRole("img", { name: "Avatar: Ana" })).toHaveTextContent("A");
+    });
+
+    test("WHEN the card is given none THEN it prints the name as it always has", () => {
+      renderInLocale(
+        <LearnerCard
+          name="Ana García"
+          avatar={{ kind: "initials" }}
+          level={level}
+          progress={noProgress}
+        />,
+      );
+
+      expect(screen.getByText("Ana García")).toBeInTheDocument();
+      expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    });
+  });
+
+  test("WHEN the card sits inside a form THEN its progress label never submits it", async () => {
+    // The onboarding puts the card in its form. A button with no type submits,
+    // and this one comes first in the DOM — so Enter in the name field would
+    // open a tooltip instead of continuing the step.
+    const user = userEvent.setup();
+    const onSubmit = vi.fn((event: { preventDefault: () => void }) => event.preventDefault());
+    renderInLocale(
+      <form onSubmit={onSubmit}>
+        <LearnerCard
+          name="Ana García"
+          avatar={{ kind: "initials" }}
+          level={level}
+          progress={noProgress}
+        />
+      </form>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "0 of 48 videos" }));
+
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 
   test("WHEN the name is empty THEN a placeholder stands in for it", () => {

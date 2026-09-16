@@ -52,9 +52,12 @@
     "sectionLesson": "Lesson",
     "sectionStart": "Start",
     "sectionLearning": "My learning",
+    "sectionAchievements": "Achievements",
     "sectionProfile": "Profile",
     "learnerMenuLabel": "Learner menu for {name}",
+    "learnerMenuLabelWithPrizes": "Learner menu for {name} — {count, plural, one {# prize to claim} other {# prizes to claim}}",
     "myLearning": "My learning",
+    "achievements": "Achievements",
     "profile": "Profile"
   },
   "LocaleSwitcher": {
@@ -288,6 +291,54 @@
     "LoadingStatus": {
       "label": "Loading"
     },
+    "LearnerAchievements": {
+      "ticketCount": "<number>{earned}</number> of {count, plural, one {# ticket} other {# tickets}}",
+      "prizeCount": "<number>{earned}</number> of {count, plural, one {# prize} other {# prizes}}"
+    },
+    "AchievementsGuideModal": {
+      "title": "How do tickets and prizes work?",
+      "description": "Everything here is earned by completing lessons on this device.",
+      "ticketTitle": "Tickets",
+      "ticketBody": "Complete a lesson to earn its ticket. It carries the lesson's sound.",
+      "prizeTitle": "Prizes",
+      "prizeBody": "Collect every ticket of a module to claim its prize at the counter.",
+      "distinctionTitle": "Distinction",
+      "distinctionBody": "Complete a course to turn your card bronze. Complete every course to turn it gold.",
+      "close": "Got it"
+    },
+    "PrizeIcon": {
+      "names": {
+        "whistle": "Whistle",
+        "harmonica": "Harmonica",
+        "megaphone": "Megaphone",
+        "drum": "Drum",
+        "car": "Race car",
+        "microphone": "Microphone",
+        "kazoo": "Kazoo",
+        "spring": "Spring",
+        "kaleidoscope": "Kaleidoscope",
+        "yoyo": "Yo-yo",
+        "top": "Spinning top",
+        "walkie": "Walkie-talkie",
+        "tinphone": "Tin-can phone",
+        "crown": "Crown",
+        "robot": "Wind-up robot",
+        "gift": "Gift box"
+      }
+    },
+    "PrizeCounter": {
+      "shelfNote": "{redeemed} of {count, plural, one {# prize} other {# prizes}}"
+    },
+    "PrizeShelfItem": {
+      "redeemed": "Redeemed",
+      "hiddenName": "???",
+      "tag": "{earned} / {count}",
+      "redeemedLabel": "{prize}: prize redeemed",
+      "hiddenLabel": "Hidden prize of {module}: {earned} of {count, plural, one {# ticket} other {# tickets}}",
+      "claim": "Claim prize",
+      "claimLabel": "Claim the {module} prize",
+      "readyLabel": "Hidden prize of {module}: ready to claim"
+    },
     "LearnerAvatar": {
       "label": "Avatar: {name}",
       "labelUnnamed": "Avatar"
@@ -300,7 +351,11 @@
       "progress": "{completed} of {total, plural, one {# video} other {# videos}}",
       "progressPercent": "{percent, number, percent}",
       "progressRemaining": "{count, plural, one {# to go in {course}} other {# to go in {course}}}",
-      "progressComplete": "{course} complete"
+      "progressComplete": "{course} complete",
+      "distinction": {
+        "bronze": "Bronze",
+        "gold": "Gold"
+      }
     },
     "AvatarPicker": {
       "label": "Avatar",
@@ -331,6 +386,24 @@
       "note": "{course} · {minutes, plural, one {# minute} other {# minutes}}",
       "noteNoDuration": "{course}",
       "action": "Watch the first video"
+    },
+    "TicketToast": {
+      "earned": "+1 ticket · {lesson}",
+      "progress": "{earned} of {count, plural, one {# ticket} other {# tickets}} for the {module} prize"
+    },
+    "PrizeRedeemedModal": {
+      "continue": "Continue the course",
+      "redeeming": "Redeeming {count, plural, one {# ticket} other {# tickets}}…",
+      "eyebrow": "Prize redeemed",
+      "description": "You collected all {count, plural, one {# ticket} other {# tickets}} of {module}.",
+      "close": "Great"
+    },
+    "PrizeReadyModal": {
+      "eyebrow": "Prize ready",
+      "title": "A prize is waiting for you",
+      "description": "You collected all {count, plural, one {# ticket} other {# tickets}} of {module}.",
+      "goClaim": "Go and claim the prize",
+      "keepLearning": "Keep learning"
     }
   },
   "CourseCatalog": {
@@ -426,6 +499,8 @@
     "startDescription": "Add your name and pick an avatar to start the course.",
     "learningTitle": "My learning",
     "learningDescription": "Pick up your last lesson and see your progress on this device.",
+    "achievementsTitle": "Achievements",
+    "achievementsDescription": "The tickets, prizes and distinction you have earned on this device.",
     "profileTitle": "Profile",
     "profileDescription": "Change the name and avatar on your learner card."
   },
@@ -441,7 +516,7 @@
     "name": {
       "heading": "Let’s make your learner card",
       "fieldLabel": "Your name",
-      "placeholder": "Your first and last name",
+      "placeholder": "Your name",
       "continue": "Continue"
     },
     "avatar": {
@@ -449,6 +524,14 @@
       "intro": "Tap one to put it on your card, or keep your initials.",
       "continue": "Continue"
     }
+  },
+  "Achievements": {
+    "continueCourse": "Continue the course",
+    "startCourse": "Start the course",
+    "eyebrow": "Achievements",
+    "heading": "Your achievements",
+    "intro": "Each lesson you complete earns a ticket. Collect every ticket of a module to redeem its prize.",
+    "howItWorks": "How do they work?"
   },
   "Profile": {
     "eyebrow": "Profile",

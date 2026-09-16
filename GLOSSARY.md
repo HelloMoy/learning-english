@@ -35,6 +35,16 @@ See also: Transcript, Lecture, Player.
 
 ---
 
+### Claim
+
+🟢 The act of taking a **Prize** whose **Tickets** are all earned. The Learner claims it on the prize counter, with the **Claim prize** control; the claim is recorded on the device before the reveal plays, and the Prize is revealed — illustration and name — only then.
+
+A claim is permanent: the Tickets were exchanged for the toy, so un-marking a Lesson afterwards leaves the Prize claimed. It is one of the two facts this platform stores about rewards, the other being an earned Ticket.
+
+See also: Prize, Ticket, Achievements.
+
+---
+
 ### Course
 
 🟢 A structured learning product, owned by an **Instructor**, composed of **Modules** and **Lessons**. A **Learner** enrolls in a course to gain access to its lessons.
@@ -42,6 +52,14 @@ See also: Transcript, Lecture, Player.
 Example: _"Basic — Foundational Pronunciation"_.
 
 See also: Module, Lesson, Enrollment, Instructor, Learner.
+
+---
+
+### Distinction
+
+🟢 The finish of the **Learner** card, earned by completing whole **Courses**: _student_ until a Course is complete, _bronze_ once one is, _gold_ once every Course holding Lessons is. Like **Tickets** and **Prizes**, it is derived from this device's completion on every read, never stored.
+
+See also: Learner, Ticket, Prize, Progress.
 
 ---
 
@@ -169,6 +187,16 @@ See also: Player, Lecture.
 
 ---
 
+### Prize
+
+🟢 The arcade-counter toy a **Module** holds, redeemed for every **Ticket** of the Module. Each Module has its own Prize, chosen by the Module's slug (`prizeForModule`); a Module missing from the catalog gets the gift box. Until the Learner claims it, the Prize shows only as a silhouette with its name withheld (`???`).
+
+States: `claimed` (the Learner claimed it), `ready` (every Ticket earned, not claimed yet), `collecting` (some Tickets), `locked` (none). Only a claimed Prize counts among the prizes redeemed. The Achievements page shows every Prize on the prize counter, which is the only place a Prize is revealed.
+
+See also: Ticket, Claim, Module, Distinction.
+
+---
+
 ### Progress
 
 🟡 The Learner's completion state within a Course — which lessons are complete, current resume position per Lecture, percent of the Course completed. Not yet implemented. Will arrive with Persistence and a use case like `markLessonComplete` and `getResumePosition`.
@@ -217,6 +245,16 @@ See also: Resource, Lesson, Module, Course, Workbook.
 🟡 The action of continuing a Lecture from a saved **Progress** position, plus the affordance on the Lesson Page that says _"Resume at 12:34"_. Not yet implemented.
 
 See also: Progress, Player, Up next.
+
+---
+
+### Ticket
+
+🟢 What a **Lesson** earns the first time it counts as complete — marked with **Mark as complete** or watched past the finish threshold. It carries the Lesson's sound (the first text between slashes in its title) or, failing that, the Lesson's position in its Module.
+
+A Ticket is **kept once earned**: it is stored per Lesson, un-marking the Lesson does not take it away, and completing the Lesson again earns no second one. Earning one while the **Lesson Page** is open shows the ticket notification; when it is the Module's last Ticket, the notification is followed by the dialog that sends the Learner to **Claim** the **Prize**.
+
+See also: Prize, Claim, Mark as complete, Progress.
 
 ---
 
@@ -320,6 +358,8 @@ canonical term in the row's "Say" column.
 | _user_       | _learner_ (in this context)                        | "User" is a system term; "learner" is a domain term.           |
 | _tutorial_   | _lecture_                                          | Tutorial implies step-by-step; lecture is a concept unit.      |
 | _clip_       | _video_ (asset)                                    | Clip implies short.                                            |
+| _seal_       | _ticket_                                           | Looked too much like a badge; a ticket is collected and spent. |
+| _badge_      | _prize_                                            | Generic; a prize is redeemed with tickets, one per module.     |
 
 ---
 
@@ -340,6 +380,9 @@ canonical term in the row's "Say" column.
 | 2026-07-07 | **No sticky video on scroll** in v1                                              | Simpler layout; sticky is a v2 polish once the page composition is settled.                                                                                                                                                                       |
 | 2026-07-07 | **Caption + Interactive Transcript deferred** to a future change                 | v1 has no `<track>` and no Transcript; accessibility/learning overlay lands in a follow-up.                                                                                                                                                       |
 | 2026-07-07 | **Lesson content in Course's `language` only** (i18n Option A)                   | `title` and `description` are stored in a single string; the Course's `language` field is the source of truth. The UI chrome (buttons, headers) is translated via `next-intl` as before. Multilingual Lesson content (Option B) is a v2 refactor. |
+| 2026-09-15 | A **Prize** is revealed only when the Learner **claims** it on the counter       | The reveal is worth a walk: the Lesson Page hands over ("a prize is waiting"), and the counter pays out. It also gives the Achievements page a reason to be visited beyond reading numbers.                                                       |
+| 2026-09-15 | A **Ticket** is kept once earned; un-marking a Lesson does not take it back      | The Ticket records what the Learner did; the Lesson rows record where they are now. Taking a reward back for tidying up your own progress reads as punishment.                                                                                    |
+| 2026-09-15 | **Ticket** per Lesson and **Prize** per Module over _seal_ and _badge_           | A seal and a badge read as the same round medal. Arcade tickets redeemed for a toy make the two levels distinct in shape and in meaning, and a hidden prize per module gives a reason to finish it.                                               |
 
 ---
 

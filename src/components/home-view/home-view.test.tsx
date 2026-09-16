@@ -56,6 +56,8 @@ const slice = (moduleId: ModuleId) => ({
   id: LessonId.parse(faker.string.uuid()),
   moduleId,
   durationSeconds: 480,
+  title: faker.lorem.words(3),
+  sequence: faker.number.int({ min: 1, max: 30 }),
 });
 
 const introductionLesson = slice(introduction.id);

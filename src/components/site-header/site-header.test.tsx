@@ -1,8 +1,16 @@
+import { Course } from "@/domain/entities/course/course";
+import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
+import { Module } from "@/domain/entities/module/module";
+import type { LessonProgressSlice } from "@/domain/use-cases/find-course-catalog/find-course-catalog";
 import { useCanInstallToHomeScreen } from "@/hooks/use-can-install-to-home-screen/use-can-install-to-home-screen";
+import { refreshEarnedTickets } from "@/hooks/use-earned-tickets/use-earned-tickets";
 import { useLearnerProfile } from "@/hooks/use-learner-profile/use-learner-profile";
+import { refreshPrizeClaims } from "@/hooks/use-prize-claims/use-prize-claims";
 import { usePathname } from "@/i18n/navigation";
+import type { AchievementLevel } from "@/lib/learner-achievements/learner-achievements";
 
+import { faker } from "@faker-js/faker";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useTranslations } from "next-intl";
@@ -29,6 +37,7 @@ vi.mock("@/hooks/use-can-install-to-home-screen/use-can-install-to-home-screen",
 vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
   useLocale: vi.fn(() => "en"),
+  useFormatter: vi.fn(() => ({ number: (value: number) => String(value) })),
 }));
 
 vi.mock("@/hooks/use-learner-profile/use-learner-profile", () => ({
@@ -176,6 +185,7 @@ describe("sectionKey for the learner's own routes", () => {
     ["/start", "sectionStart"],
     ["/start/avatar", "sectionStart"],
     ["/learning", "sectionLearning"],
+    ["/achievements", "sectionAchievements"],
     ["/profile", "sectionProfile"],
   ])("derives %s → %s", (path, expected) => {
     expect(sectionKey(path)).toBe(expected);
@@ -201,7 +211,7 @@ describe("SiteHeader learner menu", () => {
     expect(screen.queryByRole("button", { name: "learnerMenuLabel" })).not.toBeInTheDocument();
   });
 
-  test("GIVEN a learner profile WHEN the avatar is opened THEN it offers My learning and Profile", async () => {
+  test("GIVEN a learner profile WHEN the avatar is opened THEN it offers My learning, Achievements and Profile in order", async () => {
     const user = userEvent.setup();
     mockUseLearnerProfile.mockReturnValue({
       status: "present",
@@ -212,11 +222,16 @@ describe("SiteHeader learner menu", () => {
     render(<SiteHeader />);
     await user.click(screen.getByRole("button", { name: "learnerMenuLabel" }));
 
-    expect(await screen.findByRole("menuitem", { name: "myLearning" })).toHaveAttribute(
-      "href",
-      "/learning",
-    );
-    expect(screen.getByRole("menuitem", { name: "profile" })).toHaveAttribute("href", "/profile");
+    await screen.findByRole("menuitem", { name: "myLearning" });
+    const links = screen
+      .getAllByRole("menuitem")
+      .filter((item) => item.hasAttribute("href"))
+      .map((item) => [item.textContent, item.getAttribute("href")]);
+    expect(links).toEqual([
+      ["myLearning", "/learning"],
+      ["achievements", "/achievements"],
+      ["profile", "/profile"],
+    ]);
   });
 
   describe("GIVEN a phone-width header with a learner profile", () => {
@@ -286,6 +301,115 @@ describe("SiteHeader learner menu", () => {
     render(<SiteHeader />);
 
     expect(screen.getByTestId("header-theme-toggle")).not.toHaveClass("hidden");
+  });
+});
+
+describe("SiteHeader prize mark", () => {
+  const courseId = CourseId.parse(faker.string.uuid());
+  const vowels = Module.parse({
+    id: ModuleId.parse(faker.string.uuid()),
+    courseId,
+    slug: "2-vowels",
+    title: "Vowels",
+    sequence: 1,
+  });
+  const lessons: LessonProgressSlice[] = [0, 1].map((index) => ({
+    id: LessonId.parse(faker.string.uuid()),
+    moduleId: vowels.id,
+    durationSeconds: 300,
+    title: faker.lorem.words(3),
+    sequence: index + 1,
+  }));
+  const levels: AchievementLevel[] = [
+    {
+      course: Course.parse({
+        id: courseId,
+        slug: "basic-course",
+        title: "Basic Course",
+        description: faker.lorem.sentence(),
+        language: "en",
+        lessonCount: lessons.length,
+        moduleCount: 1,
+        sequence: 1,
+      }),
+      modules: [vowels],
+      lessonRuntimes: lessons,
+    },
+  ];
+
+  /** Every ticket of the module earned, so its prize is ready to claim. */
+  const earnEveryTicket = () => {
+    for (const lesson of lessons) {
+      window.localStorage.setItem(`learning-english:ticket-earned:${lesson.id}`, "1");
+    }
+    refreshEarnedTickets();
+  };
+
+  beforeEach(() => {
+    window.localStorage.clear();
+    refreshEarnedTickets();
+    refreshPrizeClaims();
+    mockUsePathname.mockReturnValue("/");
+    mockUseLearnerProfile.mockReturnValue({
+      status: "present",
+      profile: LearnerProfile.parse({ name: "Ana García", avatar: { kind: "initials" } }),
+      save: vi.fn(),
+    });
+  });
+
+  test("GIVEN a prize is ready to claim WHEN rendered THEN the avatar is marked with how many", () => {
+    earnEveryTicket();
+
+    render(<SiteHeader levels={levels} />);
+
+    expect(screen.getByTestId("prize-mark")).toHaveTextContent("1");
+  });
+
+  test("GIVEN a prize is ready to claim WHEN rendered THEN the menu says so in a sentence", () => {
+    // The mark itself is decoration; the trigger's name is what is heard.
+    earnEveryTicket();
+
+    render(<SiteHeader levels={levels} />);
+
+    expect(screen.getByRole("button", { name: "learnerMenuLabelWithPrizes" })).toBeInTheDocument();
+  });
+
+  test("GIVEN no prize is ready WHEN rendered THEN nothing is marked", () => {
+    render(<SiteHeader levels={levels} />);
+
+    expect(screen.queryByTestId("prize-mark")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "learnerMenuLabel" })).toBeInTheDocument();
+  });
+
+  test("GIVEN the prize has been claimed WHEN rendered THEN the mark is gone", () => {
+    earnEveryTicket();
+    window.localStorage.setItem(`learning-english:prize-claimed:${vowels.slug}`, "1");
+    refreshPrizeClaims();
+
+    render(<SiteHeader levels={levels} />);
+
+    expect(screen.queryByTestId("prize-mark")).not.toBeInTheDocument();
+  });
+
+  test("GIVEN a prize is ready to claim WHEN the menu is opened THEN the Achievements item is marked too", async () => {
+    const user = userEvent.setup();
+    earnEveryTicket();
+
+    render(<SiteHeader levels={levels} />);
+    await user.click(screen.getByRole("button", { name: "learnerMenuLabelWithPrizes" }));
+
+    const achievements = await screen.findByRole("menuitem", { name: /achievements/ });
+    expect(within(achievements).getByTestId("prize-mark-item")).toHaveTextContent("1");
+  });
+
+  test("GIVEN no learner card WHEN a prize would be ready THEN there is no avatar to mark", () => {
+    // Without a card there is no menu at all, so nothing carries the mark.
+    earnEveryTicket();
+    mockUseLearnerProfile.mockReturnValue(withoutProfile);
+
+    render(<SiteHeader levels={levels} />);
+
+    expect(screen.queryByTestId("prize-mark")).not.toBeInTheDocument();
   });
 });
 

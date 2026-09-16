@@ -12,6 +12,8 @@ const runtime = (inModule: ModuleId) => ({
   id: LessonId.parse(faker.string.uuid()),
   moduleId: inModule,
   durationSeconds: faker.number.int({ min: 0, max: 900 }),
+  title: faker.lorem.words(3),
+  sequence: faker.number.int({ min: 1, max: 30 }),
 });
 
 describe("countModuleLessons", () => {
