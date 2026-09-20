@@ -58,7 +58,9 @@
     "learnerMenuLabelWithPrizes": "Menú de estudiante de {name} — {count, plural, one {# premio por reclamar} other {# premios por reclamar}}",
     "myLearning": "Mi aprendizaje",
     "achievements": "Logros",
-    "profile": "Perfil"
+    "profile": "Perfil",
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión"
   },
   "LocaleSwitcher": {
     "label": "Idioma",
@@ -297,7 +299,7 @@
     },
     "AchievementsGuideModal": {
       "title": "¿Cómo funcionan los tickets y los premios?",
-      "description": "Todo lo de aquí se gana completando lecciones en este dispositivo.",
+      "description": "Todo lo de aquí se gana completando lecciones.",
       "ticketTitle": "Tickets",
       "ticketBody": "Completa una lección para ganar su ticket. Lleva el sonido de la lección.",
       "prizeTitle": "Premios",
@@ -497,9 +499,9 @@
     "startTitle": "Crea tu tarjeta de estudiante",
     "startDescription": "Añade tu nombre y elige un avatar para empezar el curso.",
     "learningTitle": "Mi aprendizaje",
-    "learningDescription": "Retoma tu última lección y mira tu progreso en este dispositivo.",
+    "learningDescription": "Retoma tu última lección y mira tu progreso.",
     "achievementsTitle": "Logros",
-    "achievementsDescription": "Los tickets, premios y distinción que has ganado en este dispositivo.",
+    "achievementsDescription": "Los tickets, premios y distinción que has ganado.",
     "profileTitle": "Perfil",
     "profileDescription": "Cambia el nombre y el avatar de tu tarjeta de estudiante."
   },
@@ -535,13 +537,139 @@
   "Profile": {
     "eyebrow": "Perfil",
     "heading": "Edita tu tarjeta de estudiante",
-    "intro": "Tu nombre y tu avatar se guardan en este dispositivo.",
+    "intro": "Tu nombre y tu avatar se guardan en tu cuenta.",
     "nameLabel": "Nombre",
     "avatarLabel": "Avatar",
     "discard": "Descartar",
     "save": "Guardar cambios",
     "saved": "Tarjeta actualizada",
     "previewLabel": "Tu tarjeta de estudiante",
-    "previewNote": "Los cambios aparecen en tu tarjeta mientras editas."
+    "previewNote": "Los cambios aparecen en tu tarjeta mientras editas.",
+    "deleteAccount": {
+      "heading": "Borrar cuenta",
+      "description": "Borra tu cuenta y todo lo guardado con ella. No se puede deshacer.",
+      "button": "Borrar cuenta",
+      "dialogTitle": "¿Borrar tu cuenta?",
+      "dialogConsequence": "Se borrarán tu progreso, tus tickets, tus premios y tu tarjeta de estudiante.",
+      "dialogIrreversible": "No se puede deshacer.",
+      "dialogEmail": "Te enviaremos un enlace de confirmación por correo. No se borra nada hasta que lo abras con la sesión iniciada.",
+      "cancel": "Cancelar",
+      "confirm": "Enviar correo de confirmación",
+      "sending": "Enviando…",
+      "sent": "Te enviamos un enlace de confirmación a tu correo. Ábrelo con la sesión iniciada para borrar tu cuenta.",
+      "error": "No pudimos enviar el correo de confirmación. Inténtalo de nuevo en un momento."
+    }
+  },
+  "Emails": {
+    "VerifyEmail": {
+      "subject": "Confirma tu correo para English Course",
+      "preview": "Un clic y tu cuenta está lista.",
+      "heading": "Confirma tu correo",
+      "body": "Te registraste en English Course con esta dirección. Confírmala para empezar a aprender.",
+      "button": "Confirmar mi correo",
+      "linkIntro": "O pega este enlace en tu navegador:",
+      "ignore": "Si no te registraste, puedes ignorar este correo."
+    },
+    "ResetPassword": {
+      "subject": "Restablece tu contraseña de English Course",
+      "preview": "Elige una contraseña nueva para tu cuenta.",
+      "heading": "Restablece tu contraseña",
+      "body": "Alguien pidió restablecer la contraseña de esta cuenta. Elige una nueva con el botón de abajo.",
+      "button": "Elegir una contraseña nueva",
+      "linkIntro": "O pega este enlace en tu navegador:",
+      "ignore": "Si no lo pediste, ignora este correo: tu contraseña no cambia."
+    },
+    "DeleteAccount": {
+      "subject": "Confirma que quieres borrar tu cuenta de English Course",
+      "preview": "Esto borra tu cuenta y tu progreso para siempre.",
+      "heading": "¿Borrar tu cuenta?",
+      "body": "Al seguir este enlace se borran para siempre tu cuenta de English Course y todo tu progreso, tickets y premios. Necesitas tener la sesión iniciada al abrirlo.",
+      "button": "Borrar mi cuenta",
+      "linkIntro": "O pega este enlace en tu navegador:",
+      "ignore": "Si no lo pediste, ignora este correo: no se borrará nada."
+    }
+  },
+  "Account": {
+    "shell": {
+      "brand": "English Course"
+    },
+    "fields": {
+      "name": "Tu nombre",
+      "email": "Correo",
+      "password": "Contraseña",
+      "newPassword": "Contraseña nueva",
+      "passwordHint": "Entre 8 y 128 caracteres."
+    },
+    "divider": "o",
+    "google": "Continuar con Google",
+    "challenge": "Verificación de seguridad",
+    "signIn": {
+      "metaTitle": "Iniciar sesión",
+      "title": "Hola de nuevo",
+      "subtitle": "Inicia sesión para seguir donde lo dejaste.",
+      "submit": "Iniciar sesión",
+      "submitting": "Iniciando sesión…",
+      "forgot": "¿Olvidaste tu contraseña?",
+      "noAccount": "¿Eres nuevo?",
+      "signUpLink": "Crea una cuenta",
+      "passwordUpdated": "Tu contraseña se actualizó. Inicia sesión con la nueva."
+    },
+    "signUp": {
+      "metaTitle": "Crea tu cuenta",
+      "title": "Crea tu cuenta",
+      "subtitle": "Tu progreso, tickets y premios te seguirán en todos tus dispositivos.",
+      "submit": "Crear cuenta",
+      "submitting": "Creando cuenta…",
+      "haveAccount": "¿Ya tienes una cuenta?",
+      "signInLink": "Inicia sesión",
+      "checkInboxTitle": "Revisa tu correo",
+      "checkInboxBody": "Enviamos un enlace a {email}. Ábrelo para confirmar tu dirección y empezar a aprender."
+    },
+    "forgotPassword": {
+      "metaTitle": "Restablece tu contraseña",
+      "title": "¿Olvidaste tu contraseña?",
+      "subtitle": "Escribe tu correo y te enviaremos un enlace para elegir una nueva.",
+      "submit": "Enviar enlace",
+      "submitting": "Enviando…",
+      "sentTitle": "Revisa tu correo",
+      "sentBody": "Si existe una cuenta para {email}, le enviamos un enlace para restablecer la contraseña.",
+      "backToSignIn": "Volver a iniciar sesión"
+    },
+    "resetPassword": {
+      "metaTitle": "Elige una contraseña nueva",
+      "title": "Elige una contraseña nueva",
+      "subtitle": "Al guardarla se cerrará tu sesión en los demás dispositivos.",
+      "submit": "Guardar contraseña",
+      "submitting": "Guardando…",
+      "invalidTitle": "Este enlace ya no funciona",
+      "invalidBody": "Los enlaces de restablecimiento se usan una sola vez y caducan. Pide uno nuevo.",
+      "requestNew": "Enviarme un enlace nuevo"
+    },
+    "validation": {
+      "nameRequired": "Escribe tu nombre.",
+      "nameTooLong": "Usa 40 caracteres o menos.",
+      "emailInvalid": "Escribe un correo válido.",
+      "passwordLength": "Usa entre 8 y 128 caracteres."
+    },
+    "errors": {
+      "invalidCredentials": "El correo o la contraseña no son correctos.",
+      "emailNotVerified": "Primero confirma tu correo: abre el enlace que te enviamos y luego inicia sesión.",
+      "captchaFailed": "La verificación de seguridad no pasó. Inténtalo de nuevo.",
+      "tooManyRequests": "Demasiados intentos. Espera un minuto y vuelve a intentarlo.",
+      "invalidToken": "Este enlace ya no funciona. Pide uno nuevo.",
+      "passwordLength": "Usa entre 8 y 128 caracteres.",
+      "generic": "Algo salió mal. Inténtalo de nuevo en un momento."
+    },
+    "accountDeleted": {
+      "metaTitle": "Cuenta borrada",
+      "title": "Tu cuenta se borró",
+      "subtitle": "Tu cuenta y todo tu progreso, tickets y premios se borraron para siempre.",
+      "homeLink": "Volver al inicio"
+    }
+  },
+  "GlobalError": {
+    "title": "Algo salió mal",
+    "body": "La página no pudo cargarse. Inténtalo de nuevo o vuelve en un momento.",
+    "retry": "Reintentar"
   }
 }
