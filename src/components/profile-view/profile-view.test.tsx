@@ -1,7 +1,7 @@
 import { LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
 import { useRouter } from "@/i18n/navigation";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 import { renderInLocale } from "@/test-setup/render-in-locale";
 import { makeStubLearnerProfileRepository } from "@/test-setup/stubs/domain-repos";
 
@@ -30,7 +30,6 @@ const router = { replace: vi.fn(), push: vi.fn() };
 beforeEach(() => {
   window.localStorage.clear();
   act(() => {
-    refreshSavedPlaybackPositions();
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
   router.replace.mockClear();
@@ -75,8 +74,17 @@ describe("ProfileView", () => {
       expect(screen.getByText("0 of 2 videos")).toBeInTheDocument();
     });
 
+    test("WHEN the page opens THEN it ends with the section that deletes the account", async () => {
+      renderProfile();
+
+      expect(
+        await screen.findByRole("heading", { level: 2, name: "Delete account" }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Delete account" })).toBeInTheDocument();
+    });
+
     test("WHEN videos are complete THEN the card counts them", async () => {
-      window.localStorage.setItem(`learning-english:completed:${lessonRuntimes[0]!.id}`, "1");
+      givenLearner.completed([lessonRuntimes[0]!.id]);
       act(() => {
         window.dispatchEvent(new StorageEvent("storage", { key: null }));
       });
