@@ -1,7 +1,5 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
-import { type Page } from "@playwright/test";
-
 import { lessonsOfModule, modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
 
@@ -45,15 +43,6 @@ const lessonUrl = (courseSlug: string, moduleSlug: string, lessonId: string) =>
 /** Compiling a route on a cold `pnpm dev` overruns the default 5s timeout. */
 const COLD_ROUTE = { timeout: 60_000 };
 
-/** My learning belongs to a learner, so the device needs a card before it opens. */
-const withLearnerCard = (page: Page) =>
-  page.addInitScript(() =>
-    window.localStorage.setItem(
-      "learning-english:learner-profile",
-      JSON.stringify({ name: "Ana García", avatar: { kind: "initials" } }),
-    ),
-  );
-
 test.describe("Home and My learning — one click to the course, one to the lesson", () => {
   test("WHEN a level row's link is pressed THEN the course overview opens", async ({ page }) => {
     await page.goto("/en");
@@ -72,7 +61,6 @@ test.describe("Home and My learning — one click to the course, one to the less
   test("WHEN a lesson has been opened THEN My learning's Resume returns to it", async ({
     page,
   }) => {
-    await withLearnerCard(page);
     const lessonPath = lessonUrl(
       SECOND_COURSE.slug,
       SECOND_COURSE_START.module.slug,
@@ -95,7 +83,6 @@ test.describe("Home and My learning — one click to the course, one to the less
   test("WHEN a lesson has been opened THEN My learning's quieter link still opens the course", async ({
     page,
   }) => {
-    await withLearnerCard(page);
     await page.goto(
       lessonUrl(SECOND_COURSE.slug, SECOND_COURSE_START.module.slug, SECOND_COURSE_START.lesson.id),
     );

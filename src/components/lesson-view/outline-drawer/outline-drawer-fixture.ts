@@ -2,7 +2,8 @@ import { Course } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { resetLearnerStore } from "@/lib/learner-store/learner-store";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
 
@@ -113,21 +114,15 @@ export function makeCourseFixture({
  * Marks the given lessons complete in the browser's own store.
  *
  * @remarks
- * Shared by the drawer's tests and its stories: completion lives in
- * `localStorage`, so the only way to show a part-finished course is to put one
- * there. Both stores cache their snapshot, so the write has to be announced or
- * the component reads the stale one.
+ * Shared by the drawer's tests and its stories: completion is the learner's,
+ * so the only way to show a part-finished course is to seed the learner store.
  *
  * @param lessons - The lessons to mark complete
  *
  * @internal
  */
 export function seedCompletedLessons(lessons: readonly Lesson[]): void {
-  for (const lesson of lessons) {
-    window.localStorage.setItem(`learning-english:completed:${lesson.id}`, "1");
-  }
-  refreshSavedPlaybackPositions();
-  window.dispatchEvent(new StorageEvent("storage", { key: null }));
+  givenLearner.completed(lessons.map((lesson) => lesson.id));
 }
 
 /**
@@ -140,7 +135,5 @@ export function seedCompletedLessons(lessons: readonly Lesson[]): void {
  * @internal
  */
 export function clearWatchProgress(): void {
-  window.localStorage.clear();
-  refreshSavedPlaybackPositions();
-  window.dispatchEvent(new StorageEvent("storage", { key: null }));
+  resetLearnerStore();
 }

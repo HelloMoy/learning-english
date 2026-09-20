@@ -4,12 +4,12 @@ import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Module } from "@/domain/entities/module/module";
 import type { ContinueWatchingRepository } from "@/domain/ports/continue-watching-repository/continue-watching-repository";
 import type { ModuleSummary } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
+import { resetLearnerStore } from "@/lib/learner-store/learner-store";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { CourseProgressBoard } from "./course-progress-board";
-
-const COMPLETED_KEY_PREFIX = "learning-english:completed:";
 
 const course = Course.parse({
   id: CourseId.parse("5b0c4a7e-1f3d-4c1e-9a55-0c8a1e2f3b4d"),
@@ -83,8 +83,8 @@ const meta = {
   parameters: { layout: "fullscreen" },
   args: { course, modules, moduleSummaries, continueWatching: storedLocation(null) },
   beforeEach: () => {
-    window.localStorage.clear();
-    return () => window.localStorage.clear();
+    resetLearnerStore();
+    return () => resetLearnerStore();
   },
 } satisfies Meta<typeof CourseProgressBoard>;
 
@@ -106,9 +106,9 @@ export const ReturningLearner: Story = {
     ),
   },
   beforeEach: () => {
-    for (const lesson of [...moduleSummaries[0]!.lessons, moduleSummaries[1]!.lessons[0]!]) {
-      window.localStorage.setItem(`${COMPLETED_KEY_PREFIX}${lesson.id}`, "1");
-    }
+    givenLearner.completed(
+      [...moduleSummaries[0]!.lessons, moduleSummaries[1]!.lessons[0]!].map((lesson) => lesson.id),
+    );
   },
 };
 

@@ -1,6 +1,6 @@
 import { LessonId } from "@/domain/entities/ids/ids";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
 import { finishThresholdSeconds } from "@/lib/watch-progress/watch-progress";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
 import { act, render, screen } from "@testing-library/react";
@@ -13,17 +13,16 @@ import { LessonCompletionMark } from "./lesson-completion-mark";
 const LESSON_DURATION_SECONDS = 600;
 
 const markCompleteInStorage = (lessonId: LessonId): void => {
-  window.localStorage.setItem(`learning-english:completed:${lessonId}`, "1");
+  givenLearner.completed([lessonId]);
 };
 
 const storePosition = (lessonId: LessonId, seconds: number): void => {
-  window.localStorage.setItem(`learning-english:playback:${lessonId}`, seconds.toString());
+  givenLearner.positions({ [lessonId]: seconds });
 };
 
 /** Both stores cache their snapshot, so seeded storage has to be announced. */
 const announceStorageChange = (): void => {
   act(() => {
-    refreshSavedPlaybackPositions();
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 };

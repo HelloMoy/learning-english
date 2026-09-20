@@ -1,29 +1,25 @@
 import { LessonId } from "@/domain/entities/ids/ids";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { PlaybackPositionedVideoPlayer } from "./playback-positioned-video-player";
 
 /**
- * Each story owns a distinct lesson id so their `localStorage` entries never
+ * Each story owns a distinct lesson id so their saved positions never
  * collide, and a decorator seeds the saved position before the wrapper's
  * mount-read runs. That is the only way to drive this component from
  * Storybook — it reads persistence directly rather than taking the position
  * as a prop.
  */
-const STORAGE_KEY_PREFIX = "learning-english:playback:";
 
 const COLD_LESSON_ID = LessonId.parse("11111111-1111-4111-8111-111111111111");
 const MID_LESSON_ID = LessonId.parse("22222222-2222-4222-8222-222222222222");
 const NEAR_END_LESSON_ID = LessonId.parse("33333333-3333-4333-8333-333333333333");
 
 const seedPosition = (lessonId: string, seconds: number | null) => {
-  const key = `${STORAGE_KEY_PREFIX}${lessonId}`;
-  if (seconds === null) {
-    window.localStorage.removeItem(key);
-    return;
-  }
-  window.localStorage.setItem(key, String(seconds));
+  if (seconds === null) givenLearner.withoutPositions([lessonId]);
+  else givenLearner.positions({ [lessonId]: seconds });
 };
 
 const meta = {

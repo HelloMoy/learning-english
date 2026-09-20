@@ -2,9 +2,9 @@ import { Course } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Module } from "@/domain/entities/module/module";
 import type { LessonProgressSlice } from "@/domain/use-cases/find-course-catalog/find-course-catalog";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
 import type { AchievementLevel } from "@/lib/learner-achievements/learner-achievements";
 import { finishThresholdSeconds } from "@/lib/watch-progress/watch-progress";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
 import { act, renderHook } from "@testing-library/react";
@@ -53,17 +53,16 @@ const aModuleWithLessons = (lessonCount = 3) => {
 };
 
 const markCompleteInStorage = (lessonId: LessonId): void => {
-  window.localStorage.setItem(`learning-english:completed:${lessonId}`, "1");
+  givenLearner.completed([lessonId]);
 };
 
 const storePosition = (lessonId: LessonId, seconds: number): void => {
-  window.localStorage.setItem(`learning-english:playback:${lessonId}`, seconds.toString());
+  givenLearner.positions({ [lessonId]: seconds });
 };
 
 /** Both stores cache their snapshot, so seeded storage has to be announced. */
 const announceStorageChange = (): void => {
   act(() => {
-    refreshSavedPlaybackPositions();
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 };
@@ -107,7 +106,7 @@ describe("useLearnerAchievements", () => {
     // Achievements page does on a visit.
     expect(earnedTicketIds(levels)).toEqual([lessons[2]!.id]);
 
-    window.localStorage.removeItem(`learning-english:completed:${lessons[2]!.id}`);
+    givenLearner.notCompleted([lessons[2]!.id]);
     announceStorageChange();
 
     expect(earnedTicketIds(levels)).toEqual([lessons[2]!.id]);
@@ -115,7 +114,7 @@ describe("useLearnerAchievements", () => {
 
   test("WHEN a prize has been claimed THEN its module reads as claimed", () => {
     const { vowels, levels } = aModuleWithLessons();
-    window.localStorage.setItem(`learning-english:prize-claimed:${vowels.slug}`, "1");
+    givenLearner.claimedPrizes([vowels.slug]);
     announceStorageChange();
 
     const { result } = renderHook(() => useLearnerAchievements(levels));

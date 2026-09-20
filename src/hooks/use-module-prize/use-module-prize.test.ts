@@ -2,7 +2,7 @@ import { Course } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
 import { act, renderHook } from "@testing-library/react";
@@ -51,16 +51,15 @@ const aModuleWithLessons = (lessonCount = 3) => {
 };
 
 const markComplete = (lesson: Lesson): void => {
-  window.localStorage.setItem(`learning-english:completed:${lesson.id}`, "1");
+  givenLearner.completed([lesson.id]);
 };
 
 const claim = (courseModule: Module): void => {
-  window.localStorage.setItem(`learning-english:prize-claimed:${courseModule.slug}`, "1");
+  givenLearner.claimedPrizes([courseModule.slug]);
 };
 
 const announceStorageChange = (): void => {
   act(() => {
-    refreshSavedPlaybackPositions();
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 };
@@ -125,7 +124,7 @@ describe("useModulePrize", () => {
     announceStorageChange();
     expect(readPrize(courseModule, lessons).current).toMatchObject({ state: "ready" });
 
-    window.localStorage.removeItem(`learning-english:completed:${lessons[0]!.id}`);
+    givenLearner.notCompleted([lessons[0]!.id]);
     announceStorageChange();
 
     expect(readPrize(courseModule, lessons).current).toMatchObject({

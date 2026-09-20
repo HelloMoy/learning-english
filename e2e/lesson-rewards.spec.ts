@@ -74,6 +74,7 @@ test.describe("Reward moments on the Lesson Page", () => {
 
   test("WHEN the last ticket is earned in fullscreen THEN the ticket shows there AND the dialog waits for the learner to come out", async ({
     page,
+    learnerState,
   }) => {
     await page.goto(lessonPath(INTRODUCTION!.slug, INTRODUCTION_LESSON.id));
     await page.getByRole("button", { name: "Marcar como completada" }).waitFor(COLD_ROUTE);
@@ -81,12 +82,13 @@ test.describe("Reward moments on the Lesson Page", () => {
     await page.getByRole("button", { name: "Pantalla completa" }).click({ force: true });
     await expect.poll(() => page.evaluate(() => Boolean(document.fullscreenElement))).toBe(true);
 
-    // Watching to the end is how a ticket is earned without leaving the video.
-    await page.evaluate((lessonId) => {
-      const key = `learning-english:playback:${lessonId}`;
-      window.localStorage.setItem(key, "99999");
-      window.dispatchEvent(new StorageEvent("storage", { key }));
-    }, INTRODUCTION_LESSON.id);
+    // A ticket earned while the video fills the screen — here through the
+    // completion control, which the fullscreen player covers but the page
+    // still holds (the finish rule itself is covered by watch-progress.spec).
+    await page.getByRole("button", { name: "Marcar como completada" }).dispatchEvent("click");
+    await expect
+      .poll(() => learnerState.isCompleted(INTRODUCTION_LESSON.id), COLD_ROUTE)
+      .toBe(true);
 
     // The browser paints only what it presents, so the notification has to be inside it.
     await expect
@@ -114,10 +116,13 @@ test.describe("Reward moments on the Lesson Page", () => {
 
   test("WHEN the learner un-marks a lesson THEN the ticket it earned stays on the counter", async ({
     page,
+    learnerState,
   }) => {
     const hiddenPrize = `Premio oculto de ${VOWELS!.title}: 1 de ${VOWELS_LESSONS.length} tickets`;
     await page.goto(lessonPath(VOWELS!.slug, VOWELS_LESSONS[0]!.id));
     await page.getByRole("button", { name: "Marcar como completada" }).click(COLD_ROUTE);
+    // A full page load cancels a save still in flight; wait for it to land.
+    await expect.poll(() => learnerState.isCompleted(VOWELS_LESSONS[0]!.id), COLD_ROUTE).toBe(true);
 
     await page.goto("/es/achievements");
     await expect(page.getByText(hiddenPrize, { exact: true })).toBeAttached(COLD_ROUTE);
@@ -135,10 +140,16 @@ test.describe("Reward moments on the Lesson Page", () => {
 
   test("WHEN the learner moves on before the notification leaves THEN the prize is announced on the page they open", async ({
     page,
+    learnerState,
   }) => {
     await page.goto(lessonPath(INTRODUCTION!.slug, INTRODUCTION_LESSON.id));
 
     await page.getByRole("button", { name: "Marcar como completada" }).click(COLD_ROUTE);
+    // The in-app ways on keep a save in flight; the full page load below would
+    // cancel it, so it waits for the save first.
+    await expect
+      .poll(() => learnerState.isCompleted(INTRODUCTION_LESSON.id), COLD_ROUTE)
+      .toBe(true);
 
     // The notification is still on screen, so the dialog is still seconds away:
     // leaving now is what used to lose the announcement altogether.
@@ -152,10 +163,15 @@ test.describe("Reward moments on the Lesson Page", () => {
 
   test("WHEN a prize is waiting THEN the avatar carries the count until the learner claims it", async ({
     page,
+    learnerState,
   }) => {
     await page.goto(lessonPath(INTRODUCTION!.slug, INTRODUCTION_LESSON.id));
 
     await page.getByRole("button", { name: "Marcar como completada" }).click(COLD_ROUTE);
+    // A full page load cancels a save still in flight; wait for it to land.
+    await expect
+      .poll(() => learnerState.isCompleted(INTRODUCTION_LESSON.id), COLD_ROUTE)
+      .toBe(true);
 
     // The mark follows them off the lesson page: it is how an unclaimed prize
     // stays findable without interrupting anything.

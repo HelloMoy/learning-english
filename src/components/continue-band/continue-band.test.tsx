@@ -1,6 +1,6 @@
 import { LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 import { renderInLocale } from "@/test-setup/render-in-locale";
 
 import { faker } from "@faker-js/faker";
@@ -39,7 +39,6 @@ const renderBand = (locale?: "en" | "es" | "pt") =>
 beforeEach(() => {
   window.localStorage.clear();
   act(() => {
-    refreshSavedPlaybackPositions();
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 });
@@ -56,7 +55,7 @@ describe("ContinueBand", () => {
   });
 
   test("WHEN rendered THEN it shows the learner card with their progress through the course", () => {
-    window.localStorage.setItem(`learning-english:completed:${lessonRuntimes[0]!.id}`, "1");
+    givenLearner.completed([lessonRuntimes[0]!.id]);
     act(() => {
       window.dispatchEvent(new StorageEvent("storage", { key: null }));
     });

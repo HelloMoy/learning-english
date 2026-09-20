@@ -2,7 +2,7 @@ import { Course } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
 import { act, render, screen, within } from "@testing-library/react";
@@ -56,12 +56,11 @@ const lessons = Array.from({ length: 3 }, (_, index) =>
 );
 
 const markCompleteInStorage = (lessonId: LessonId): void => {
-  window.localStorage.setItem(`learning-english:completed:${lessonId}`, "1");
+  givenLearner.completed([lessonId]);
 };
 
 const announceStorageChange = (): void => {
   act(() => {
-    refreshSavedPlaybackPositions();
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 };
@@ -134,7 +133,7 @@ describe("ModuleRoute", () => {
 
   describe("GIVEN the module's prize", () => {
     const claimInStorage = (): void => {
-      window.localStorage.setItem(`learning-english:prize-claimed:${courseModule.slug}`, "1");
+      givenLearner.claimedPrizes([courseModule.slug]);
     };
     const ticketTag = (earned: number) => key("tag", { earned, count: lessons.length });
     const claimLinks = () =>

@@ -2,10 +2,11 @@ import { contentCatalog } from "@/adapters/persistence/content-manifest/content-
 import type { VideoLesson } from "@/domain/entities/lesson/lesson";
 import { finishThresholdSeconds } from "@/lib/watch-progress/watch-progress";
 
-import { type BrowserContext, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
 
 import { modulesOfCourse } from "./content-seed-fixtures";
-import { expect, seedLearnerProfile, test } from "./learner-profile-fixture";
+import { expect, test } from "./learner-profile-fixture";
+import type { LearnerState } from "./learner-state-fixture";
 
 /**
  * E2E tests for the `watch-progress` capability.
@@ -42,8 +43,6 @@ const MODULE_LESSONS = contentCatalog.lessonRows
 const FINISHED_LESSON = MODULE_LESSONS[0]!;
 const PARTLY_WATCHED_LESSON = MODULE_LESSONS[1]!;
 
-const playbackKeyFor = (lessonId: string): string => `learning-english:playback:${lessonId}`;
-
 const moduleUrl = (locale: string): string =>
   `/${locale}/courses/${COURSE_SLUG}/modules/${MODULE.slug}`;
 
@@ -57,38 +56,20 @@ const courseUrl = (locale: string): string => `/${locale}/courses/${COURSE_SLUG}
  * see is the derived rule — the whole point of deriving it rather than
  * backfilling a completion key.
  */
-async function seedPositions(context: BrowserContext) {
-  const finished = finishThresholdSeconds(FINISHED_LESSON.durationSeconds);
-  const partly = PARTLY_WATCHED_LESSON.durationSeconds / 4;
-
-  await context.addInitScript(
-    ([entries]) => {
-      try {
-        window.localStorage.clear();
-        for (const [key, value] of entries as [string, string][]) {
-          window.localStorage.setItem(key, value);
-        }
-      } catch {
-        // localStorage might not be available; ignore.
-      }
-    },
-    [
-      [
-        [playbackKeyFor(FINISHED_LESSON.id), String(finished)],
-        [playbackKeyFor(PARTLY_WATCHED_LESSON.id), String(partly)],
-      ],
-    ],
+async function seedPositions(learnerState: LearnerState) {
+  await learnerState.position(
+    FINISHED_LESSON.id,
+    finishThresholdSeconds(FINISHED_LESSON.durationSeconds),
   );
-  // After the clear, so the wipe does not take the learner card with it.
-  await seedLearnerProfile(context);
+  await learnerState.position(PARTLY_WATCHED_LESSON.id, PARTLY_WATCHED_LESSON.durationSeconds / 4);
 }
 
 /** The row for one lesson in the module overview's video list. */
 const rowFor = (page: Page, title: string) => page.getByRole("listitem").filter({ hasText: title });
 
 test.describe("watch progress", () => {
-  test.beforeEach(async ({ context }) => {
-    await seedPositions(context);
+  test.beforeEach(async ({ learnerState }) => {
+    await seedPositions(learnerState);
   });
 
   test("a lesson watched to its end reads full and carries the completion mark", async ({
@@ -133,17 +114,10 @@ test.describe("watch progress", () => {
     await expect(tile).toContainText(`1/${MODULE_LESSONS.length}`);
     await expect(page.getByTestId("continue-tile")).toContainText(PARTLY_WATCHED_LESSON.title);
   });
+});
 
-  test("a course the learner has not started shows no progress", async ({ context, page }) => {
-    await context.addInitScript(() => {
-      try {
-        window.localStorage.clear();
-      } catch {
-        // ignore
-      }
-    });
-    await seedLearnerProfile(context);
-
+test.describe("watch progress, for a learner with none", () => {
+  test("a course the learner has not started shows no progress", async ({ page }) => {
     await page.goto(courseUrl("en"));
     await expect(page.getByTestId("course-overview")).toBeVisible();
 

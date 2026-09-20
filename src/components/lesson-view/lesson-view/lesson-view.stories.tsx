@@ -88,8 +88,6 @@ export const HappyPath: Story = {
     view: happyPathView,
     notes: null,
     notesResource: null,
-    markComplete: () => Promise.resolve({ data: { completed: true } }),
-    unmarkComplete: () => Promise.resolve({ data: { unmarked: true } }),
   },
 };
 
@@ -98,8 +96,6 @@ export const NoResources: Story = {
     view: { ...happyPathView, resources: [] },
     notes: null,
     notesResource: null,
-    markComplete: () => Promise.resolve({ data: { completed: true } }),
-    unmarkComplete: () => Promise.resolve({ data: { unmarked: true } }),
   },
 };
 
@@ -108,8 +104,6 @@ export const CourseCompleted: Story = {
     view: { ...happyPathView, nextLesson: null },
     notes: null,
     notesResource: null,
-    markComplete: () => Promise.resolve({ data: { completed: true } }),
-    unmarkComplete: () => Promise.resolve({ data: { unmarked: true } }),
   },
 };
 
@@ -118,8 +112,6 @@ export const ReadingLesson: Story = {
     view: { ...happyPathView, lesson: readingLesson, nextLesson: null },
     notes: null,
     notesResource: null,
-    markComplete: () => Promise.resolve({ data: { completed: true } }),
-    unmarkComplete: () => Promise.resolve({ data: { unmarked: true } }),
   },
 };
 
@@ -138,7 +130,5 @@ export const WithInlineNotes: Story = {
     view: { ...happyPathView, resources: [resource, notesResource] },
     notes: "# Welcome\n\nThese are the inline notes rendered safely.",
     notesResource,
-    markComplete: () => Promise.resolve({ data: { completed: true } }),
-    unmarkComplete: () => Promise.resolve({ data: { unmarked: true } }),
   },
 };

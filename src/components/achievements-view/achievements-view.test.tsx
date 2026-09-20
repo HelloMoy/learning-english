@@ -5,12 +5,10 @@ import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
 import { Module } from "@/domain/entities/module/module";
 import type { ContinueWatchingRepository } from "@/domain/ports/continue-watching-repository/continue-watching-repository";
-import { refreshEarnedTickets } from "@/hooks/use-earned-tickets/use-earned-tickets";
-import { refreshCompletedLessons } from "@/hooks/use-lesson-completion/use-lesson-completion";
-import { refreshPrizeClaims } from "@/hooks/use-prize-claims/use-prize-claims";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
 import { useRouter } from "@/i18n/navigation";
 import type { AchievementLevel } from "@/lib/learner-achievements/learner-achievements";
+import { learnerStore } from "@/lib/learner-store/learner-store";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 import { renderInLocale } from "@/test-setup/render-in-locale";
 import { makeStubLearnerProfileRepository } from "@/test-setup/stubs/domain-repos";
 
@@ -63,17 +61,13 @@ const announceStorageChange = () => {
     // Every store caches its snapshot, and tickets and claims outlive a lesson's
     // completion — so clearing storage has to reach all four, or one test's
     // rewards leak into the next.
-    refreshCompletedLessons();
-    refreshSavedPlaybackPositions();
-    refreshEarnedTickets();
-    refreshPrizeClaims();
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 };
 
 const markComplete = (...lessons: ReadonlyArray<{ id: LessonId }>) => {
   for (const lesson of lessons) {
-    window.localStorage.setItem(`learning-english:completed:${lesson.id}`, "1");
+    givenLearner.completed([lesson.id]);
   }
   announceStorageChange();
 };
@@ -233,9 +227,7 @@ describe("AchievementsView", () => {
       await user.click(claim);
 
       // The claim is recorded before the reveal plays, so closing early keeps it.
-      expect(
-        window.localStorage.getItem(`learning-english:prize-claimed:${vowels.slug}`),
-      ).not.toBeNull();
+      expect(learnerStore.getState().claimedPrizes.has(vowels.slug)).toBe(true);
       expect(await screen.findByRole("dialog", { name: "Harmonica" })).toBeInTheDocument();
 
       await user.keyboard("{Escape}");

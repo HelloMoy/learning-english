@@ -4,8 +4,8 @@ import {
   toLessonProgressSlice,
   type LessonProgressSlice,
 } from "@/domain/use-cases/find-course-catalog/find-course-catalog";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
 import { finishThresholdSeconds } from "@/lib/watch-progress/watch-progress";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
 import { act, renderHook } from "@testing-library/react";
@@ -50,17 +50,16 @@ const makeModuleLessons = (moduleId: ModuleId, lessonCount: number): LessonProgr
   );
 
 const markCompleteInStorage = (lessonId: LessonId): void => {
-  window.localStorage.setItem(`learning-english:completed:${lessonId}`, "1");
+  givenLearner.completed([lessonId]);
 };
 
 const storePosition = (lessonId: LessonId, seconds: number): void => {
-  window.localStorage.setItem(`learning-english:playback:${lessonId}`, seconds.toString());
+  givenLearner.positions({ [lessonId]: seconds });
 };
 
 /** Both stores cache their snapshot, so seeded storage has to be announced. */
 const announceStorageChange = (): void => {
   act(() => {
-    refreshSavedPlaybackPositions();
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 };

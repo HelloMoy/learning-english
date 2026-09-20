@@ -1,7 +1,7 @@
 import { Course } from "@/domain/entities/course/course";
 import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { act, render, screen, within } from "@testing-library/react";
 import { useTranslations } from "next-intl";
@@ -78,7 +78,6 @@ beforeEach(() => {
   mockUseTranslations.mockImplementation(() => key as never);
   window.localStorage.clear();
   act(() => {
-    refreshSavedPlaybackPositions();
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 });
@@ -148,7 +147,7 @@ describe("ModuleOverview — route", () => {
     });
 
     test("WHEN it renders THEN the retired per-row completion mark is gone", () => {
-      window.localStorage.setItem(`learning-english:completed:${lessonA.id}`, "1");
+      givenLearner.completed([lessonA.id]);
 
       const { container } = renderOverview([lessonA, lessonB]);
 
@@ -191,10 +190,9 @@ describe("ModuleOverview — the next lesson", () => {
 
   const completeEveryLesson = (lessons: Lesson[]) => {
     for (const lesson of lessons) {
-      window.localStorage.setItem(`learning-english:completed:${lesson.id}`, "1");
+      givenLearner.completed([lesson.id]);
     }
     act(() => {
-      refreshSavedPlaybackPositions();
       window.dispatchEvent(new StorageEvent("storage", { key: null }));
     });
   };

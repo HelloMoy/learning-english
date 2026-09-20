@@ -15,8 +15,6 @@ import { expect, test } from "./learner-profile-fixture";
  */
 const COURSE_SLUG = "basic-course";
 const MODULES = modulesOfCourse(COURSE_SLUG);
-const COMPLETED_KEY_PREFIX = "learning-english:completed:";
-const CONTINUE_WATCHING_KEY = "learning-english:continue-watching";
 
 /** Compiling a route on a cold `pnpm dev` overruns the default 5s timeout. */
 const COLD_ROUTE = { timeout: 60_000 };
@@ -125,16 +123,12 @@ test.describe("Course overview", () => {
   test.describe("GIVEN a learner part-way through a lesson", () => {
     test("WHEN the page hydrates THEN that lesson's tile is in progress AND Continue opens its first unfinished video", async ({
       page,
+      learnerState,
     }) => {
       // Arrange
       const index = indexOfFirstModuleWith((count) => count > 4);
       const lessons = lessonsOfModule(MODULES[index]!.id);
-      const completedKeys = lessons
-        .slice(0, 3)
-        .map((lesson) => `${COMPLETED_KEY_PREFIX}${lesson.id}`);
-      await page.addInitScript((keys) => {
-        for (const key of keys) window.localStorage.setItem(key, "1");
-      }, completedKeys);
+      await learnerState.completed(lessons.slice(0, 3).map((lesson) => lesson.id));
 
       // Act
       await page.goto(courseUrl("en"));
@@ -154,18 +148,14 @@ test.describe("Course overview", () => {
   test.describe("GIVEN a learner who opened a lesson of this course", () => {
     test("WHEN they return to the course THEN the continue tile offers that video", async ({
       page,
+      learnerState,
     }) => {
       // Arrange
       const index = indexOfFirstModuleWith((count) => count > 2);
       const lesson = lessonsOfModule(MODULES[index]!.id)[2]!;
       const openedLesson = lessonUrl(MODULES[index]!.slug, lesson.id, "es");
       await page.goto(openedLesson);
-      await expect
-        .poll(
-          () => page.evaluate((key) => window.localStorage.getItem(key), CONTINUE_WATCHING_KEY),
-          COLD_ROUTE,
-        )
-        .toContain(lesson.id);
+      await expect.poll(() => learnerState.lastOpenedLessonId(), COLD_ROUTE).toBe(lesson.id);
 
       // Act
       await page.goto(courseUrl("es"));
@@ -181,11 +171,10 @@ test.describe("Course overview", () => {
   test.describe("GIVEN the prizes these lessons redeem", () => {
     test("WHEN a prize has been claimed THEN its tile says so AND the course tile counts it", async ({
       page,
+      learnerState,
     }) => {
-      // Arrange: the claim the counter writes when the learner takes the prize.
-      await page.addInitScript((slug) => {
-        window.localStorage.setItem(`learning-english:prize-claimed:${slug}`, "1");
-      }, MODULES[0]!.slug);
+      // Arrange: the claim the counter records when the learner takes the prize.
+      await learnerState.claimedPrizes([MODULES[0]!.slug]);
 
       // Act
       await page.goto(courseUrl("en"));

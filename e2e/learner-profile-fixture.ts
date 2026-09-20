@@ -1,16 +1,19 @@
-import { LEARNER_PROFILE_STORAGE_KEY } from "@/adapters/persistence/browser-local-storage/browser-local-storage-learner-profile-repository/browser-local-storage-learner-profile-repository";
 import type { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
 
-import { test as base, expect, type BrowserContext } from "@playwright/test";
+import { expect, test as signedIn } from "./learner-account-fixture";
+import type { LearnerState } from "./learner-state-fixture";
 
 /**
  * Learner-card fixtures for specs that open course routes.
  *
+ * Built on `learner-account-fixture`: every context is signed in first, since
+ * course routes require a session before they require a card.
+ *
  * @remarks
- * Course, module and lesson routes send a device without a learner profile to
- * the onboarding (capability: `learner-onboarding`). Specs that exercise the
- * course itself are not about the onboarding, so they run as a learner who has
- * already made their card.
+ * Course, module and lesson routes send a learner without a card to the
+ * onboarding (capability: `learner-onboarding`). Specs that exercise the course
+ * itself are not about the onboarding, so they run as a learner who has already
+ * made their card.
  */
 
 /** The learner every onboarded spec runs as. */
@@ -20,26 +23,23 @@ export const ONBOARDED_LEARNER: LearnerProfile = {
 };
 
 /**
- * Stores {@link ONBOARDED_LEARNER} on every page load of this context.
+ * Saves {@link ONBOARDED_LEARNER} as the signed-in learner's card.
  *
  * @remarks
- * Init scripts run in registration order, so a spec that clears storage from
- * its own init script must call this after that script to keep the card.
+ * Call it before opening the page: the card arrives with the page's learner
+ * snapshot, as it would for a learner who made it on another device.
  *
- * @param context - The browser context to seed
+ * @param learnerState - The signed-in learner's rows
  */
-export async function seedLearnerProfile(context: BrowserContext): Promise<void> {
-  await context.addInitScript(([key, value]) => window.localStorage.setItem(key, value), [
-    LEARNER_PROFILE_STORAGE_KEY,
-    JSON.stringify(ONBOARDED_LEARNER),
-  ] as const);
+export async function seedLearnerProfile(learnerState: LearnerState): Promise<void> {
+  await learnerState.profile(ONBOARDED_LEARNER);
 }
 
-/** Playwright's `test`, with every context already holding a learner card. */
-export const test = base.extend<{ onboardedLearner: void }>({
+/** Playwright's `test`, with every context signed in and holding a learner card. */
+export const test = signedIn.extend<{ onboardedLearner: void }>({
   onboardedLearner: [
-    async ({ context }, use) => {
-      await seedLearnerProfile(context);
+    async ({ learnerState }, use) => {
+      await seedLearnerProfile(learnerState);
       await use();
     },
     { auto: true },

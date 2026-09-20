@@ -1,15 +1,12 @@
 import { LessonId } from "@/domain/entities/ids/ids";
 import type { ModuleLesson } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, test } from "vitest";
 
 import { useModuleProgress } from "./use-module-progress";
-
-const COMPLETED_KEY_PREFIX = "learning-english:completed:";
-const PLAYBACK_KEY_PREFIX = "learning-english:playback:";
 
 const aModule = (count: number): ModuleLesson[] =>
   Array.from({ length: count }, (_, index) => ({
@@ -21,7 +18,6 @@ const aModule = (count: number): ModuleLesson[] =>
 
 const announceStorageChange = () => {
   act(() => {
-    refreshSavedPlaybackPositions();
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 };
@@ -49,8 +45,8 @@ describe("useModuleProgress", () => {
     test("WHEN the hook reads the module THEN it reports progress from both stores", () => {
       // Arrange
       const lessons = aModule(4);
-      window.localStorage.setItem(`${COMPLETED_KEY_PREFIX}${lessons[0]!.id}`, "1");
-      window.localStorage.setItem(`${PLAYBACK_KEY_PREFIX}${lessons[1]!.id}`, "120");
+      givenLearner.completed([lessons[0]!.id]);
+      givenLearner.positions({ [lessons[1]!.id]: 120 });
 
       // Act
       const { result } = renderHook(() => useModuleProgress(lessons));

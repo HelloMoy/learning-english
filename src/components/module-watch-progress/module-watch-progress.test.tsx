@@ -1,6 +1,6 @@
 import { LessonId } from "@/domain/entities/ids/ids";
 import type { LessonRuntime } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { act, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
@@ -18,13 +18,12 @@ const runtimes = (count: number): LessonRuntime[] =>
   }));
 
 const markCompleteInStorage = (lessonId: LessonId): void => {
-  window.localStorage.setItem(`learning-english:completed:${lessonId}`, "1");
+  givenLearner.completed([lessonId]);
 };
 
 /** Both stores cache their snapshot, so seeded storage has to be announced. */
 const announceStorageChange = (): void => {
   act(() => {
-    refreshSavedPlaybackPositions();
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 };

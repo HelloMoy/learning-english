@@ -1,42 +1,45 @@
+import {
+  markLessonCompleteAction,
+  unmarkLessonCompleteAction,
+} from "@/app/[locale]/learner-actions";
 import { LessonId } from "@/domain/entities/ids/ids";
+import { EMPTY_LEARNER_SNAPSHOT } from "@/lib/learner-snapshot/learner-snapshot";
+import { seedLearnerStore } from "@/lib/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
 import { act, renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import {
   markLessonComplete,
   serverCompletionSnapshot,
   unmarkLessonComplete,
+  useCompletedLessons,
   useLessonCompletion,
 } from "./use-lesson-completion";
 
-const STORAGE_KEY_PREFIX = "learning-english:completed:";
+vi.mock("@/app/[locale]/learner-actions", () => ({
+  markLessonCompleteAction: vi.fn(),
+  unmarkLessonCompleteAction: vi.fn(),
+}));
+
+const aLesson = () => LessonId.parse(faker.string.uuid());
 
 beforeEach(() => {
-  window.localStorage.clear();
-  // The store caches its snapshot; clearing storage behind its back would
-  // leave it stale, so tell it to re-read.
-  act(() => {
-    window.dispatchEvent(new StorageEvent("storage", { key: null }));
-  });
+  vi.mocked(markLessonCompleteAction).mockResolvedValue({ data: { completed: true } } as never);
+  vi.mocked(unmarkLessonCompleteAction).mockResolvedValue({ data: { unmarked: true } } as never);
 });
 
 describe("useLessonCompletion", () => {
   test("WHEN a lesson has not been marked THEN it reports incomplete", () => {
-    const lessonId = LessonId.parse(faker.string.uuid());
-
-    const { result } = renderHook(() => useLessonCompletion(lessonId));
+    const { result } = renderHook(() => useLessonCompletion(aLesson()));
 
     expect(result.current).toBe(false);
   });
 
-  test("WHEN storage already holds the lesson THEN it reports complete after mount", () => {
-    const lessonId = LessonId.parse(faker.string.uuid());
-    window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessonId}`, "1");
-    act(() => {
-      window.dispatchEvent(new StorageEvent("storage", { key: null }));
-    });
+  test("WHEN the learner's snapshot holds the lesson THEN it reports complete", () => {
+    const lessonId = aLesson();
+    seedLearnerStore({ ...EMPTY_LEARNER_SNAPSHOT, completedLessonIds: [lessonId] });
 
     const { result } = renderHook(() => useLessonCompletion(lessonId));
 
@@ -44,7 +47,7 @@ describe("useLessonCompletion", () => {
   });
 
   test("WHEN a lesson is marked THEN every subscriber updates without a reload", async () => {
-    const lessonId = LessonId.parse(faker.string.uuid());
+    const lessonId = aLesson();
     const first = renderHook(() => useLessonCompletion(lessonId));
     const second = renderHook(() => useLessonCompletion(lessonId));
 
@@ -56,45 +59,55 @@ describe("useLessonCompletion", () => {
     // shared store buys over per-component state.
     expect(first.result.current).toBe(true);
     expect(second.result.current).toBe(true);
+    expect(markLessonCompleteAction).toHaveBeenCalledWith({ lessonId });
   });
 
-  test("WHEN another tab marks a lesson THEN subscribers pick it up", () => {
-    const lessonId = LessonId.parse(faker.string.uuid());
+  test("WHEN the server accepts a mark THEN the call reports success", async () => {
+    await expect(markLessonComplete(aLesson())).resolves.toBe(true);
+  });
+
+  test("WHEN the server refuses a mark THEN it is withdrawn and the call reports failure", async () => {
+    vi.mocked(markLessonCompleteAction).mockResolvedValue({ serverError: "no session" } as never);
+    const lessonId = aLesson();
     const { result } = renderHook(() => useLessonCompletion(lessonId));
 
-    act(() => {
-      window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessonId}`, "1");
-      window.dispatchEvent(
-        new StorageEvent("storage", { key: `${STORAGE_KEY_PREFIX}${lessonId}` }),
-      );
+    let saved = true;
+    await act(async () => {
+      saved = await markLessonComplete(lessonId);
     });
 
-    expect(result.current).toBe(true);
+    expect(saved).toBe(false);
+    expect(result.current).toBe(false);
   });
 
   test("WHEN one lesson is marked THEN another is unaffected", async () => {
-    const marked = LessonId.parse(faker.string.uuid());
-    const other = LessonId.parse(faker.string.uuid());
-    const { result } = renderHook(() => useLessonCompletion(other));
+    const { result } = renderHook(() => useLessonCompletion(aLesson()));
 
     await act(async () => {
-      await markLessonComplete(marked);
+      await markLessonComplete(aLesson());
     });
 
     expect(result.current).toBe(false);
   });
 });
 
+describe("useCompletedLessons", () => {
+  test("WHEN nothing changes THEN the same set is returned, so readers do not loop", () => {
+    const { result, rerender } = renderHook(() => useCompletedLessons());
+    const first = result.current;
+
+    rerender();
+
+    expect(result.current).toBe(first);
+  });
+});
+
 describe("unmarkLessonComplete", () => {
   test("WHEN a completed lesson is unmarked THEN every subscriber sees it incomplete", async () => {
-    const lessonId = LessonId.parse(faker.string.uuid());
+    const lessonId = aLesson();
+    seedLearnerStore({ ...EMPTY_LEARNER_SNAPSHOT, completedLessonIds: [lessonId] });
     const first = renderHook(() => useLessonCompletion(lessonId));
     const second = renderHook(() => useLessonCompletion(lessonId));
-
-    await act(async () => {
-      await markLessonComplete(lessonId);
-    });
-    expect(first.result.current).toBe(true);
 
     await act(async () => {
       await unmarkLessonComplete(lessonId);
@@ -104,28 +117,26 @@ describe("unmarkLessonComplete", () => {
     // no surface is left claiming the lesson is complete.
     expect(first.result.current).toBe(false);
     expect(second.result.current).toBe(false);
+    expect(unmarkLessonCompleteAction).toHaveBeenCalledWith({ lessonId });
   });
 
-  test("WHEN a lesson is unmarked THEN the others stay complete", async () => {
-    const unmarked = LessonId.parse(faker.string.uuid());
-    const kept = LessonId.parse(faker.string.uuid());
-    const { result } = renderHook(() => useLessonCompletion(kept));
+  test("WHEN the server refuses an un-mark THEN the mark comes back and the call reports failure", async () => {
+    vi.mocked(unmarkLessonCompleteAction).mockResolvedValue({ serverError: "no session" } as never);
+    const lessonId = aLesson();
+    seedLearnerStore({ ...EMPTY_LEARNER_SNAPSHOT, completedLessonIds: [lessonId] });
 
-    await act(async () => {
-      await markLessonComplete(unmarked);
-      await markLessonComplete(kept);
-      await unmarkLessonComplete(unmarked);
-    });
+    await expect(unmarkLessonComplete(lessonId)).resolves.toBe(false);
 
+    const { result } = renderHook(() => useLessonCompletion(lessonId));
     expect(result.current).toBe(true);
   });
 });
 
 describe("serverCompletionSnapshot", () => {
   test("WHEN rendering on the server THEN the snapshot is empty", () => {
-    // The server cannot read localStorage, so it must render no marks —
-    // and the first client render must agree, or React warns about a
-    // hydration mismatch on every page carrying an indicator.
+    // The server renders no marks, and the first client render must agree,
+    // or React warns about a hydration mismatch on every page carrying an
+    // indicator.
     expect(serverCompletionSnapshot().size).toBe(0);
   });
 
