@@ -1,0 +1,8 @@
+{
+  "driver": "turso",
+  "connection": {
+    "url": "http://127.0.0.1:8081",
+    "token": ""
+  },
+  "port": 4010
+}

@@ -1,0 +1,25 @@
+# Local stack for `pnpm dev`: the database and the mail inbox the app needs.
+# The Next.js app itself runs on the host. See `.env.example` for the URLs.
+#
+#   docker compose up -d        start (data survives restarts)
+#   docker compose down -v      stop and wipe the database
+#
+# The libsql tag is also pinned in src/test-setup/libsql-container — a test
+# keeps the two equal, so tests and development run the same engine.
+services:
+  libsql:
+    image: ghcr.io/tursodatabase/libsql-server:v0.24.32
+    ports:
+      # 8080 on the host belongs to `pnpm docs:serve`.
+      - "8081:8080"
+    volumes:
+      - libsql-data:/var/lib/sqld
+
+  mailpit:
+    image: axllent/mailpit:v1.31.1
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # inbox UI and API
+
+volumes:
+  libsql-data:
