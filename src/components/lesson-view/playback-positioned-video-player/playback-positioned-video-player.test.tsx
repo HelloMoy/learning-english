@@ -1,6 +1,8 @@
 import "@testing-library/jest-dom/vitest";
 
 import { LessonId } from "@/domain/entities/ids/ids";
+import { learnerStore } from "@/lib/learner-store/learner-store";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 import { emitPlayerEvent } from "@/test-setup/stubs/vidstack-player";
 
 import { faker } from "@faker-js/faker";
@@ -48,9 +50,6 @@ vi.mock("@/hooks/use-lesson-completion/use-lesson-completion", () => ({
 const { markLessonComplete } = await import("@/hooks/use-lesson-completion/use-lesson-completion");
 
 const mockUseTranslations = vi.mocked(useTranslations);
-
-const mockStorage = new Map<string, string>();
-const storageKeyFor = (lessonId: string) => `learning-english:playback:${lessonId}`;
 
 const DURATION_SECONDS = 600;
 const RESUMABLE_SECONDS = 180;
@@ -123,27 +122,9 @@ beforeEach(() => {
   mockUseTranslations.mockReturnValue(((key: string, values?: Record<string, unknown>) =>
     values === undefined ? key : `${key} ${Object.values(values).join(" ")}`) as never);
   vi.mocked(markLessonComplete).mockClear();
-  mockStorage.clear();
-  Object.defineProperty(window, "localStorage", {
-    configurable: true,
-    writable: true,
-    value: {
-      getItem: (key: string) => mockStorage.get(key) ?? null,
-      setItem: (key: string, value: string) => {
-        mockStorage.set(key, value);
-      },
-      removeItem: (key: string) => {
-        mockStorage.delete(key);
-      },
-      clear: () => mockStorage.clear(),
-      key: () => null,
-      length: 0,
-    },
-  });
 });
 
 afterEach(() => {
-  mockStorage.clear();
   canPlay = false;
 });
 
@@ -151,7 +132,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
   describe("GIVEN the learner has only just arrived", () => {
     test("WHEN a resumable position is stored THEN nothing is offered until playback begins", async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
+      givenLearner.positions({ [lessonId]: RESUMABLE_SECONDS });
 
       renderPlayer({ lessonId });
       await settle();
@@ -161,12 +142,12 @@ describe("PlaybackPositionedVideoPlayer", () => {
 
     test("WHEN the page has loaded THEN the stored position is not overwritten", async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
+      givenLearner.positions({ [lessonId]: RESUMABLE_SECONDS });
 
       renderPlayer({ lessonId });
       await settle();
 
-      expect(mockStorage.get(storageKeyFor(lessonId))).toBe(String(RESUMABLE_SECONDS));
+      expect(learnerStore.getState().positions.get(lessonId)).toBe(RESUMABLE_SECONDS);
     });
 
     test("WHEN the player renders THEN its keyboard shortcuts are live", () => {
@@ -179,7 +160,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
   describe("GIVEN the play request has been issued but playback has not begun", () => {
     test("WHEN the player emits play THEN it is not held and no overlay appears", async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
+      givenLearner.positions({ [lessonId]: RESUMABLE_SECONDS });
 
       const { playerRef } = renderPlayer({ lessonId });
       await settle();
@@ -198,7 +179,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
 
     test("WHEN playback then begins THEN the player is held and the overlay appears", async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
+      givenLearner.positions({ [lessonId]: RESUMABLE_SECONDS });
 
       const { playerRef } = renderPlayer({ lessonId });
       await settle();
@@ -215,7 +196,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
   describe("GIVEN playback begins", () => {
     test("WHEN a resumable position is stored THEN the overlay appears inside the player", async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
+      givenLearner.positions({ [lessonId]: RESUMABLE_SECONDS });
 
       const { playerRef } = renderPlayer({ lessonId });
       await settle();
@@ -231,7 +212,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
       // a bare iframe: this composition must not fork. A YouTube lecture keeps
       // the same overlay, in the same place, on the same event.
       const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
+      givenLearner.positions({ [lessonId]: RESUMABLE_SECONDS });
 
       const { playerRef } = renderPlayer({
         lessonId,
@@ -247,7 +228,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
 
     test("WHEN the overlay is open THEN the player's keyboard shortcuts are suppressed", async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
+      givenLearner.positions({ [lessonId]: RESUMABLE_SECONDS });
 
       const { playerRef } = renderPlayer({ lessonId });
       await settle();
@@ -265,7 +246,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
       ["the position is near the end", String(DURATION_SECONDS - 5)],
     ])("WHEN %s THEN no overlay appears", async (_case, stored) => {
       const lessonId = LessonId.parse(faker.string.uuid());
-      if (stored !== null) mockStorage.set(storageKeyFor(lessonId), stored);
+      if (stored !== null) givenLearner.positions({ [lessonId]: Number(stored) });
 
       const { playerRef } = renderPlayer({ lessonId });
       await settle();
@@ -277,7 +258,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
 
     test("WHEN the lesson has no known duration THEN no overlay appears", async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
+      givenLearner.positions({ [lessonId]: RESUMABLE_SECONDS });
 
       const { playerRef } = renderPlayer({ lessonId, durationSeconds: 0 });
       await settle();
@@ -291,7 +272,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
   describe("GIVEN the learner answers the overlay", () => {
     const openOverlay = async () => {
       const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
+      givenLearner.positions({ [lessonId]: RESUMABLE_SECONDS });
 
       const rendered = renderPlayer({ lessonId });
       await settle();
@@ -334,7 +315,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
       // Dismissal issues no delete of its own. Playback then restarts from
       // the top and the ordinary cadence overwrites the value with where the
       // learner actually is — which a real browser does and jsdom cannot.
-      expect(mockStorage.has(storageKeyFor(lessonId))).toBe(true);
+      expect(learnerStore.getState().positions.has(lessonId)).toBe(true);
     });
 
     test("WHEN it is answered THEN the player's keyboard shortcuts come back", async () => {
@@ -402,7 +383,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
       // The player reports 0 under jsdom, so this asserts *that* a write
       // happened once the gate opened, not which value — the value is
       // `usePersistPlaybackPosition`'s test.
-      expect(mockStorage.has(storageKeyFor(lessonId))).toBe(true);
+      expect(learnerStore.getState().positions.has(lessonId)).toBe(true);
     });
 
     test("WHEN they pause without ever playing THEN nothing is persisted", async () => {
@@ -413,7 +394,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
       emit(playerRef.current, "pause");
       await settle();
 
-      expect(mockStorage.has(storageKeyFor(lessonId))).toBe(false);
+      expect(learnerStore.getState().positions.has(lessonId)).toBe(false);
     });
   });
 
@@ -514,7 +495,7 @@ describe("PlaybackPositionedVideoPlayer", () => {
     test("WHEN the player is ready THEN the resume overlay still takes the frame", async () => {
       canPlay = true;
       const lessonId = LessonId.parse(faker.string.uuid());
-      mockStorage.set(storageKeyFor(lessonId), String(RESUMABLE_SECONDS));
+      givenLearner.positions({ [lessonId]: RESUMABLE_SECONDS });
 
       const { playerRef } = renderPlayer({ lessonId });
       await settle();

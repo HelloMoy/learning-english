@@ -14,8 +14,6 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { cache } from "react";
 
-import { markLessonCompleteAction, unmarkLessonCompleteAction } from "./actions";
-
 type Props = {
   params: Promise<{
     locale: string;
@@ -166,8 +164,6 @@ export default async function LessonPage({ params }: Props) {
         view={view}
         notes={notesMarkdown}
         notesResource={notesResource}
-        markComplete={markLessonCompleteAction}
-        unmarkComplete={unmarkLessonCompleteAction}
       />
     </main>
   );

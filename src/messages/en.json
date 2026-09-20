@@ -58,7 +58,9 @@
     "learnerMenuLabelWithPrizes": "Learner menu for {name} — {count, plural, one {# prize to claim} other {# prizes to claim}}",
     "myLearning": "My learning",
     "achievements": "Achievements",
-    "profile": "Profile"
+    "profile": "Profile",
+    "signIn": "Sign in",
+    "signOut": "Sign out"
   },
   "LocaleSwitcher": {
     "label": "Language",
@@ -297,7 +299,7 @@
     },
     "AchievementsGuideModal": {
       "title": "How do tickets and prizes work?",
-      "description": "Everything here is earned by completing lessons on this device.",
+      "description": "Everything here is earned by completing lessons.",
       "ticketTitle": "Tickets",
       "ticketBody": "Complete a lesson to earn its ticket. It carries the lesson's sound.",
       "prizeTitle": "Prizes",
@@ -497,9 +499,9 @@
     "startTitle": "Make your learner card",
     "startDescription": "Add your name and pick an avatar to start the course.",
     "learningTitle": "My learning",
-    "learningDescription": "Pick up your last lesson and see your progress on this device.",
+    "learningDescription": "Pick up your last lesson and see your progress.",
     "achievementsTitle": "Achievements",
-    "achievementsDescription": "The tickets, prizes and distinction you have earned on this device.",
+    "achievementsDescription": "The tickets, prizes and distinction you have earned.",
     "profileTitle": "Profile",
     "profileDescription": "Change the name and avatar on your learner card."
   },
@@ -535,13 +537,139 @@
   "Profile": {
     "eyebrow": "Profile",
     "heading": "Edit your learner card",
-    "intro": "Your name and avatar are saved on this device.",
+    "intro": "Your name and avatar are saved to your account.",
     "nameLabel": "Name",
     "avatarLabel": "Avatar",
     "discard": "Discard",
     "save": "Save changes",
     "saved": "Card updated",
     "previewLabel": "Your learner card",
-    "previewNote": "Changes show on your card as you edit."
+    "previewNote": "Changes show on your card as you edit.",
+    "deleteAccount": {
+      "heading": "Delete account",
+      "description": "Deletes your account and everything saved with it. This cannot be undone.",
+      "button": "Delete account",
+      "dialogTitle": "Delete your account?",
+      "dialogConsequence": "Your progress, tickets, prizes and learner card will be deleted.",
+      "dialogIrreversible": "This cannot be undone.",
+      "dialogEmail": "We will email you a confirmation link. Nothing is deleted until you open it while signed in.",
+      "cancel": "Cancel",
+      "confirm": "Send confirmation email",
+      "sending": "Sending…",
+      "sent": "We sent a confirmation link to your email address. Open it while signed in to delete your account.",
+      "error": "We could not send the confirmation email. Try again in a moment."
+    }
+  },
+  "Emails": {
+    "VerifyEmail": {
+      "subject": "Confirm your email for English Course",
+      "preview": "One click and your account is ready.",
+      "heading": "Confirm your email",
+      "body": "You signed up for English Course with this address. Confirm it to start learning.",
+      "button": "Confirm my email",
+      "linkIntro": "Or paste this link into your browser:",
+      "ignore": "If you did not sign up, you can ignore this email."
+    },
+    "ResetPassword": {
+      "subject": "Reset your English Course password",
+      "preview": "Choose a new password for your account.",
+      "heading": "Reset your password",
+      "body": "Someone asked to reset the password for this account. Choose a new one with the button below.",
+      "button": "Choose a new password",
+      "linkIntro": "Or paste this link into your browser:",
+      "ignore": "If you did not ask for this, ignore this email: your password stays the same."
+    },
+    "DeleteAccount": {
+      "subject": "Confirm deleting your English Course account",
+      "preview": "This permanently deletes your account and progress.",
+      "heading": "Delete your account?",
+      "body": "Following this link deletes your English Course account and all your progress, tickets and prizes, permanently. You need to be signed in when you open it.",
+      "button": "Delete my account",
+      "linkIntro": "Or paste this link into your browser:",
+      "ignore": "If you did not ask for this, ignore this email: nothing will be deleted."
+    }
+  },
+  "Account": {
+    "shell": {
+      "brand": "English Course"
+    },
+    "fields": {
+      "name": "Your name",
+      "email": "Email",
+      "password": "Password",
+      "newPassword": "New password",
+      "passwordHint": "Between 8 and 128 characters."
+    },
+    "divider": "or",
+    "google": "Continue with Google",
+    "challenge": "Security check",
+    "signIn": {
+      "metaTitle": "Sign in",
+      "title": "Welcome back",
+      "subtitle": "Sign in to pick up where you left off.",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "forgot": "Forgot your password?",
+      "noAccount": "New here?",
+      "signUpLink": "Create an account",
+      "passwordUpdated": "Your password was updated. Sign in with the new one."
+    },
+    "signUp": {
+      "metaTitle": "Create your account",
+      "title": "Create your account",
+      "subtitle": "Your progress, tickets and prizes will follow you on every device.",
+      "submit": "Create account",
+      "submitting": "Creating account…",
+      "haveAccount": "Already have an account?",
+      "signInLink": "Sign in",
+      "checkInboxTitle": "Check your inbox",
+      "checkInboxBody": "We sent a link to {email}. Open it to confirm your address and start learning."
+    },
+    "forgotPassword": {
+      "metaTitle": "Reset your password",
+      "title": "Forgot your password?",
+      "subtitle": "Enter your email and we will send you a link to choose a new one.",
+      "submit": "Send reset link",
+      "submitting": "Sending…",
+      "sentTitle": "Check your inbox",
+      "sentBody": "If an account exists for {email}, we sent it a link to reset the password.",
+      "backToSignIn": "Back to sign in"
+    },
+    "resetPassword": {
+      "metaTitle": "Choose a new password",
+      "title": "Choose a new password",
+      "subtitle": "Signing in with it will sign you out everywhere else.",
+      "submit": "Save new password",
+      "submitting": "Saving…",
+      "invalidTitle": "This link no longer works",
+      "invalidBody": "Reset links can be used once and expire after a while. Ask for a new one.",
+      "requestNew": "Send me a new link"
+    },
+    "validation": {
+      "nameRequired": "Enter your name.",
+      "nameTooLong": "Use 40 characters or fewer.",
+      "emailInvalid": "Enter a valid email address.",
+      "passwordLength": "Use between 8 and 128 characters."
+    },
+    "errors": {
+      "invalidCredentials": "The email or password is incorrect.",
+      "emailNotVerified": "Confirm your email first: open the link we sent you, then sign in.",
+      "captchaFailed": "The security check did not pass. Try again.",
+      "tooManyRequests": "Too many attempts. Wait a minute and try again.",
+      "invalidToken": "This link no longer works. Ask for a new one.",
+      "passwordLength": "Use between 8 and 128 characters.",
+      "generic": "Something went wrong. Try again in a moment."
+    },
+    "accountDeleted": {
+      "metaTitle": "Account deleted",
+      "title": "Your account was deleted",
+      "subtitle": "Your account and all your progress, tickets and prizes are gone for good.",
+      "homeLink": "Back to the home page"
+    }
+  },
+  "GlobalError": {
+    "title": "Something went wrong",
+    "body": "The page could not load. Try again, or come back in a moment.",
+    "retry": "Try again"
   }
 }

@@ -37,6 +37,10 @@ export default defineMain({
   viteFinal: async (config) => {
     config.resolve = config.resolve ?? {};
     config.resolve.alias = {
+      // Before "@", which would otherwise claim the specifier first. See
+      // `.storybook/learner-actions-stub.ts` for why the real module cannot
+      // be bundled into the preview.
+      "@/app/[locale]/learner-actions": path.resolve(storybookDir, "learner-actions-stub.ts"),
       ...config.resolve.alias,
       "@": path.resolve(process.cwd(), "src"),
       // See `.storybook/vitest-stub.js` for the full rationale. The short

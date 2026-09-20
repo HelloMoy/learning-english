@@ -1,12 +1,9 @@
 "use client";
 
+import { claimPrizeAction } from "@/app/[locale]/learner-actions";
+import { learnerStore, writeThrough } from "@/lib/learner-store/learner-store";
+
 import { useSyncExternalStore } from "react";
-
-const STORAGE_KEY_PREFIX = "learning-english:prize-claimed:";
-
-/** Shared across every subscriber, so no two surfaces can disagree. */
-let snapshot: ReadonlySet<string> = new Set();
-const listeners = new Set<() => void>();
 
 /**
  * Stable empty snapshot. `useSyncExternalStore` compares by identity, so
@@ -14,57 +11,15 @@ const listeners = new Set<() => void>();
  */
 const EMPTY: ReadonlySet<string> = new Set();
 
-function readStorage(): ReadonlySet<string> {
-  if (typeof window === "undefined") return EMPTY;
-  const claimed = new Set<string>();
-  try {
-    for (let index = 0; index < window.localStorage.length; index++) {
-      const key = window.localStorage.key(index);
-      if (key?.startsWith(STORAGE_KEY_PREFIX)) {
-        claimed.add(key.slice(STORAGE_KEY_PREFIX.length));
-      }
-    }
-  } catch {
-    // Storage blocked: behave as if no prize had been claimed.
-    return EMPTY;
-  }
-  return claimed;
-}
-
-/**
- * Re-reads storage and notifies every subscriber.
- *
- * @remarks
- * The `storage` event only fires for writes made by *other* tabs, so anything
- * that seeds or clears these keys directly — a test, a reset — has to say so.
- * {@link claimPrize} calls it for its own writes.
- */
-export function refreshPrizeClaims(): void {
-  snapshot = readStorage();
-  for (const listener of listeners) listener();
-}
-
-function subscribe(listener: () => void): () => void {
-  if (listeners.size === 0) snapshot = readStorage();
-  listeners.add(listener);
-  // A `storage` event fires when *another* tab writes, so a prize claimed in
-  // one tab reaches the others for free.
-  window.addEventListener("storage", refreshPrizeClaims);
-  return () => {
-    listeners.delete(listener);
-    if (listeners.size === 0) window.removeEventListener("storage", refreshPrizeClaims);
-  };
-}
-
-function getSnapshot(): ReadonlySet<string> {
-  return snapshot;
+function claimedPrizes(): ReadonlySet<string> {
+  return learnerStore.getState().claimedPrizes;
 }
 
 /**
  * The snapshot the server renders with: always empty.
  *
  * @remarks
- * The server cannot read `localStorage`, so it must render no claims — and the
+ * The server renders no learner state, so it must render no claims — and the
  * first client render has to agree, or React reports a hydration mismatch.
  *
  * @returns A stable empty set
@@ -74,7 +29,7 @@ export function claimedPrizesServerSnapshot(): ReadonlySet<string> {
 }
 
 /**
- * Every prize claimed on this device, as one snapshot of module slugs.
+ * Every prize the signed-in learner has claimed, as one snapshot of module slugs.
  *
  * @remarks
  * Claiming is an act, not a consequence of completion, so it is the one thing
@@ -89,7 +44,7 @@ export function claimedPrizesServerSnapshot(): ReadonlySet<string> {
  * @returns A stable set of module slugs; empty before hydration
  */
 export function useClaimedPrizes(): ReadonlySet<string> {
-  return useSyncExternalStore(subscribe, getSnapshot, claimedPrizesServerSnapshot);
+  return useSyncExternalStore(learnerStore.subscribe, claimedPrizes, claimedPrizesServerSnapshot);
 }
 
 /**
@@ -103,12 +58,9 @@ export function useClaimedPrizes(): ReadonlySet<string> {
  * @param moduleSlug - The module whose prize was claimed
  */
 export function claimPrize(moduleSlug: string): void {
-  if (snapshot.has(moduleSlug)) return;
-  try {
-    window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${moduleSlug}`, "1");
-  } catch {
-    // Storage blocked: the prize stays ready to claim rather than claimed.
-    return;
-  }
-  refreshPrizeClaims();
+  if (claimedPrizes().has(moduleSlug)) return;
+  void writeThrough(
+    (state) => ({ claimedPrizes: new Set(state.claimedPrizes).add(moduleSlug) }),
+    async () => (await claimPrizeAction({ moduleSlug }))?.data?.claimed === true,
+  );
 }

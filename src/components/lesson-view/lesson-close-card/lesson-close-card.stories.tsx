@@ -57,13 +57,7 @@ const meta = {
   ],
   args: {
     course,
-    children: (
-      <LessonCompletionToggle
-        lessonId={LessonId.parse(faker.string.uuid())}
-        markComplete={async () => ({ data: { completed: true } })}
-        unmarkComplete={async () => ({ data: { unmarked: true } })}
-      />
-    ),
+    children: <LessonCompletionToggle lessonId={LessonId.parse(faker.string.uuid())} />,
   },
 } satisfies Meta<typeof LessonCloseCard>;
 

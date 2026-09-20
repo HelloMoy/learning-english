@@ -1,6 +1,6 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
-import { Page } from "@playwright/test";
+import { Page, test as visitor } from "@playwright/test";
 
 import { moduleOfCourse, modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
@@ -164,8 +164,10 @@ for (const viewport of PHONE_WIDTHS) {
   });
 }
 
-test.describe("Mobile viewport fit — header controls at 320px", () => {
-  test.use({ viewport: { width: 320, height: 720 } });
+// A visitor without a session or card: the header shows the locale and theme
+// controls themselves, not the learner menu that absorbs the theme.
+visitor.describe("Mobile viewport fit — header controls at 320px", () => {
+  visitor.use({ viewport: { width: 320, height: 720 } });
 
   /** Worst case for label length: Spanish "Idioma"/"Oscuro" run longer than English. */
   const HOME = "/es";
@@ -181,21 +183,22 @@ test.describe("Mobile viewport fit — header controls at 320px", () => {
     page.getByRole("switch", { name: /tema/i }).or(page.getByRole("button", { name: /tema/i })),
   ];
 
-  test("WHEN the header renders THEN both controls are fully within the viewport", async ({
-    page,
-  }) => {
-    await gotoRendered(page, HOME);
+  visitor(
+    "WHEN the header renders THEN both controls are fully within the viewport",
+    async ({ page }) => {
+      await gotoRendered(page, HOME);
 
-    const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
+      const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
 
-    for (const control of headerControls(page)) {
-      const box = (await control.boundingBox())!;
-      expect(box.x).toBeGreaterThanOrEqual(0);
-      expect(box.x + box.width).toBeLessThanOrEqual(clientWidth);
-    }
-  });
+      for (const control of headerControls(page)) {
+        const box = (await control.boundingBox())!;
+        expect(box.x).toBeGreaterThanOrEqual(0);
+        expect(box.x + box.width).toBeLessThanOrEqual(clientWidth);
+      }
+    },
+  );
 
-  test("WHEN the header renders THEN both controls offer a 44x44 hit area", async ({ page }) => {
+  visitor("WHEN the header renders THEN both controls offer a 44x44 hit area", async ({ page }) => {
     await gotoRendered(page, HOME);
 
     const controls = headerControls(page);
@@ -207,52 +210,46 @@ test.describe("Mobile viewport fit — header controls at 320px", () => {
     }
   });
 
-  test("WHEN the locale control renders THEN it shows the active locale's short code", async ({
-    page,
-  }) => {
-    await gotoRendered(page, HOME);
+  visitor(
+    "WHEN the locale control renders THEN it shows the active locale's short code",
+    async ({ page }) => {
+      await gotoRendered(page, HOME);
 
-    // The value stays visible on a phone — abbreviated, never hidden.
-    await expect(page.getByRole("button", { name: /idioma/i })).toContainText("ES");
-  });
+      // The value stays visible on a phone — abbreviated, never hidden.
+      await expect(page.getByRole("button", { name: /idioma/i })).toContainText("ES");
+    },
+  );
 
-  test("WHEN a language is chosen from the menu THEN the app navigates to that locale", async ({
-    page,
-  }) => {
-    await gotoInteractive(page, HOME);
+  visitor(
+    "WHEN a language is chosen from the menu THEN the app navigates to that locale",
+    async ({ page }) => {
+      await gotoInteractive(page, HOME);
 
-    await page.getByRole("button", { name: /idioma/i }).click();
-    await page.getByRole("menuitemradio", { name: /inglés/i }).click();
+      await page.getByRole("button", { name: /idioma/i }).click();
+      await page.getByRole("menuitemradio", { name: /inglés/i }).click();
 
-    await expect(page).toHaveURL(/\/en$/);
-  });
+      await expect(page).toHaveURL(/\/en$/);
+    },
+  );
 
-  test("WHEN the locale menu is open THEN it does not push the document sideways", async ({
-    page,
-  }) => {
-    await gotoInteractive(page, HOME);
+  visitor(
+    "WHEN the locale menu is open THEN it does not push the document sideways",
+    async ({ page }) => {
+      await gotoInteractive(page, HOME);
 
-    await page.getByRole("button", { name: /idioma/i }).click();
-    await expect(page.getByRole("menu")).toBeVisible();
+      await page.getByRole("button", { name: /idioma/i }).click();
+      await expect(page.getByRole("menu")).toBeVisible();
 
-    const { scrollWidth, clientWidth } = await documentOverflow(page);
-    expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
-  });
+      const { scrollWidth, clientWidth } = await documentOverflow(page);
+      expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+    },
+  );
 });
 
 test.describe("Mobile viewport fit — header with a learner card at 320px", () => {
   test.use({ viewport: { width: 320, height: 720 } });
 
   const LEARNER_NAME = "Ana García";
-
-  test.beforeEach(async ({ page }) => {
-    await page.addInitScript((name) => {
-      window.localStorage.setItem(
-        "learning-english:learner-profile",
-        JSON.stringify({ name, avatar: { kind: "initials" } }),
-      );
-    }, LEARNER_NAME);
-  });
 
   for (const locale of LOCALES) {
     test(`WHEN the header renders in '${locale}' with a learner card THEN the avatar fits, the theme moves into its menu and the wordmark is not clipped`, async ({

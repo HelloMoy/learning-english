@@ -54,37 +54,20 @@ import { useTransition } from "react";
  * and un-marking never celebrates.
  *
  * The control is a Client Component because it owns a transition and reads
- * browser storage.
+ * the learner store.
  *
- * `markComplete` is injected rather than imported so the component stays
- * testable without a server. Its type is written structurally — the
- * `{ data }` envelope is what `next-safe-action` resolves to, but naming
- * that library's types here would drag a server concern into the view. A
- * result without `data` means validation rejected the input, so the control
- * stays in the state it was in and nothing is recorded.
+ * Marking and un-marking go through the completion composition root
+ * (`use-lesson-completion`): it shows the change at once, saves it through
+ * the learner's Server Actions, and withdraws it if the save is refused. The
+ * control celebrates only a mark that was saved.
  *
  * @param lessonId - The lesson this control marks and un-marks
- * @param markComplete - The Server Action that records the completion
- * @param unmarkComplete - The Server Action that clears it, run only after
- *                         the learner confirms in {@link UnmarkLessonModal}
  */
-export function LessonCompletionToggle({
-  lessonId,
-  markComplete,
-  unmarkComplete,
-}: {
-  lessonId: LessonId;
-  markComplete: (input: {
-    lessonId: LessonId;
-  }) => Promise<{ data?: { completed: boolean } } | undefined>;
-  unmarkComplete: (input: {
-    lessonId: LessonId;
-  }) => Promise<{ data?: { unmarked: boolean } } | undefined>;
-}) {
+export function LessonCompletionToggle({ lessonId }: { lessonId: LessonId }) {
   const t = useTranslations("Components.LessonCompletionToggle");
   const completed = useLessonCompletion(lessonId);
-  // Completion lives in `localStorage`, which the server cannot read. Until the
-  // browser has, the control knows neither state — and rendering the incomplete
+  // The server renders no learner state. Until the learner store is seeded
+  // after hydration, the control knows neither state — and rendering the incomplete
   // one tells a learner who already finished the lesson something false, in the
   // page's closing call to action, where it is least likely to go unnoticed.
   const isHydrated = useIsHydrated();
@@ -92,11 +75,8 @@ export function LessonCompletionToggle({
 
   const onMark = () => {
     startTransition(async () => {
-      const result = await markComplete({ lessonId });
-      if (result?.data?.completed === true) {
-        await markLessonComplete(lessonId);
-        void celebrateLessonCompletion();
-      }
+      const saved = await markLessonComplete(lessonId);
+      if (saved) void celebrateLessonCompletion();
     });
   };
 
@@ -104,10 +84,7 @@ export function LessonCompletionToggle({
     const confirmed = await NiceModal.show(UnmarkLessonModal);
     if (confirmed !== true) return;
     startTransition(async () => {
-      const result = await unmarkComplete({ lessonId });
-      if (result?.data?.unmarked === true) {
-        await unmarkLessonComplete(lessonId);
-      }
+      await unmarkLessonComplete(lessonId);
     });
   };
 

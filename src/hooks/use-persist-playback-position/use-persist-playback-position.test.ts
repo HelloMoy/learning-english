@@ -14,15 +14,18 @@ function makePlayerAt(seconds: number): PositionedPlayer & { currentTime: number
   return { currentTime: seconds };
 }
 
-function makeRecordingRepository(): PlaybackPositionRepository & { writes: number[] } {
+function makeRecordingRepository() {
   const writes: number[] = [];
-  return {
+  const repository = {
     writes,
+    flush: vi.fn(async () => {}),
+    flushWithBeacon: vi.fn(),
     getPosition: async () => null,
-    setPosition: async (_lessonId, seconds) => {
+    setPosition: async (_lessonId: LessonId, seconds: number) => {
       writes.push(seconds);
     },
   };
+  return repository satisfies PlaybackPositionRepository;
 }
 
 function renderPersistence({
@@ -119,6 +122,7 @@ describe("usePersistPlaybackPosition", () => {
       await flushWrites();
 
       expect(repository.writes).toEqual([45]);
+      expect(repository.flush).toHaveBeenCalled();
     });
 
     test("WHEN an arbitrary position is reached and the player pauses THEN that exact position is stored", async () => {
@@ -175,9 +179,10 @@ describe("usePersistPlaybackPosition", () => {
       await flushWrites();
 
       expect(repository.writes).toEqual([120]);
+      expect(repository.flush).toHaveBeenCalled();
     });
 
-    test("WHEN the window unloads THEN the latest position is written", async () => {
+    test("WHEN the page is hidden THEN the latest position is written and leaves by beacon", async () => {
       const player = makePlayerAt(200);
       const { result, repository } = renderPersistence({ player });
 
@@ -185,14 +190,15 @@ describe("usePersistPlaybackPosition", () => {
         result.current.openWriteGate();
       });
       act(() => {
-        window.dispatchEvent(new Event("beforeunload"));
+        window.dispatchEvent(new Event("pagehide"));
       });
       await flushWrites();
 
       expect(repository.writes).toEqual([200]);
+      expect(repository.flushWithBeacon).toHaveBeenCalled();
     });
 
-    test("WHEN the hook has unmounted THEN unloading writes nothing more", async () => {
+    test("WHEN the hook has unmounted THEN hiding the page writes nothing more", async () => {
       const player = makePlayerAt(200);
       const { result, repository, unmount } = renderPersistence({ player });
 
@@ -203,12 +209,14 @@ describe("usePersistPlaybackPosition", () => {
       await flushWrites();
       repository.writes.length = 0;
 
+      repository.flushWithBeacon.mockClear();
       act(() => {
-        window.dispatchEvent(new Event("beforeunload"));
+        window.dispatchEvent(new Event("pagehide"));
       });
       await flushWrites();
 
       expect(repository.writes).toEqual([]);
+      expect(repository.flushWithBeacon).not.toHaveBeenCalled();
     });
   });
 

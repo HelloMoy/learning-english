@@ -112,7 +112,6 @@ describe("LessonView", () => {
   test("WHEN rendered for a video lesson THEN it shows the player, title, description, resources, and up next", () => {
     // Arrange
     const { view } = fixtures();
-    const markComplete = vi.fn().mockResolvedValue({ data: { completed: true } });
 
     // Act
     render(
@@ -120,8 +119,6 @@ describe("LessonView", () => {
         view={view}
         notes={null}
         notesResource={null}
-        markComplete={markComplete}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
 
@@ -153,8 +150,6 @@ describe("LessonView", () => {
         view={{ ...view, nextLesson, lessons: [view.lesson, nextLesson] }}
         notes={null}
         notesResource={null}
-        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
 
@@ -187,8 +182,6 @@ describe("LessonView", () => {
         view={view}
         notes={null}
         notesResource={null}
-        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
 
@@ -215,7 +208,6 @@ describe("LessonView", () => {
         // etc.; construct it cleanly to satisfy the Zod schema.
       } as LessonViewData["lesson"],
     };
-    const markComplete = vi.fn().mockResolvedValue({ data: { completed: true } });
 
     // Act
     render(
@@ -223,8 +215,6 @@ describe("LessonView", () => {
         view={readingView}
         notes={null}
         notesResource={null}
-        markComplete={markComplete}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
 
@@ -240,8 +230,6 @@ describe("LessonView", () => {
         view={view}
         notes={null}
         notesResource={null}
-        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
     // Without a poster the frame is black, so the cover is the only cover
@@ -259,8 +247,6 @@ describe("LessonView", () => {
         view={view}
         notes={null}
         notesResource={null}
-        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
     // The thumbnail is the cover; painting titles over it would be the
@@ -279,8 +265,6 @@ describe("LessonView", () => {
         view={view}
         notes={null}
         notesResource={null}
-        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
 
@@ -295,8 +279,6 @@ describe("LessonView", () => {
         view={view}
         notes={null}
         notesResource={null}
-        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
     const player = findPlayerIn(screen.getByRole("region", { name: "videoPlayerLabel" }));
@@ -324,8 +306,6 @@ describe("LessonView", () => {
         view={view}
         notes={"# Intro\n\nTexto ES.\n\nEnglish text."}
         notesResource={null}
-        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
     expect(screen.getByTestId("lesson-notes-tabs")).toBeInTheDocument();
@@ -347,8 +327,6 @@ describe("LessonView", () => {
         view={{ ...view, resources: [...view.resources, notesResource] }}
         notes={"# Intro\n\nTexto ES."}
         notesResource={notesResource}
-        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
 
@@ -371,8 +349,6 @@ describe("LessonView", () => {
         view={{ ...view, resources: [notesResource] }}
         notes={"# Intro\n\nTexto ES."}
         notesResource={notesResource}
-        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
 
@@ -393,8 +369,6 @@ describe("LessonView", () => {
         view={{ ...view, resources: [notesResource] }}
         notes={"# Intro\n\nTexto ES."}
         notesResource={notesResource}
-        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
 
@@ -421,8 +395,6 @@ describe("LessonView", () => {
         view={{ ...view, lessons: [view.lesson, otherLesson] }}
         notes={null}
         notesResource={null}
-        markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
       />,
     );
     await act(() => new Promise((resolve) => setTimeout(resolve, 0)));

@@ -2,9 +2,7 @@ import { Course } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
-import { refreshEarnedTickets } from "@/hooks/use-earned-tickets/use-earned-tickets";
-import { refreshPrizeClaims } from "@/hooks/use-prize-claims/use-prize-claims";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 /**
  * Story fixtures for the module route: the Basic Course's Vowels module with
@@ -74,15 +72,7 @@ export const vowelsLessons: Lesson[] = VOWEL_LESSONS.map(
     }),
 );
 
-const COMPLETED_KEY_PREFIX = "learning-english:completed:";
-const PLAYBACK_KEY_PREFIX = "learning-english:playback:";
-const TICKET_KEY_PREFIX = "learning-english:ticket-earned:";
-const PRIZE_CLAIM_KEY = `learning-english:prize-claimed:${vowelsModule.slug}`;
-
 function announceStorageChange(): void {
-  refreshSavedPlaybackPositions();
-  refreshEarnedTickets();
-  refreshPrizeClaims();
   window.dispatchEvent(new StorageEvent("storage", { key: null }));
 }
 
@@ -99,21 +89,16 @@ function announceStorageChange(): void {
 export function seedVowelsProgress(finishedCount: number, currentFraction: number): () => void {
   const finished = vowelsLessons.slice(0, finishedCount);
   const current = vowelsLessons[finishedCount];
-  for (const lesson of finished)
-    window.localStorage.setItem(`${COMPLETED_KEY_PREFIX}${lesson.id}`, "1");
+  for (const lesson of finished) givenLearner.completed([lesson.id]);
   if (current?.kind === "video" && currentFraction > 0) {
-    window.localStorage.setItem(
-      `${PLAYBACK_KEY_PREFIX}${current.id}`,
-      String(current.durationSeconds * currentFraction),
-    );
+    givenLearner.positions({ [current.id]: current.durationSeconds * currentFraction });
   }
   announceStorageChange();
 
   return () => {
     for (const lesson of vowelsLessons) {
-      window.localStorage.removeItem(`${COMPLETED_KEY_PREFIX}${lesson.id}`);
-      window.localStorage.removeItem(`${PLAYBACK_KEY_PREFIX}${lesson.id}`);
-      window.localStorage.removeItem(`${TICKET_KEY_PREFIX}${lesson.id}`);
+      givenLearner.notCompleted([lesson.id]);
+      givenLearner.withoutEarnedTickets([lesson.id]);
     }
     announceStorageChange();
   };
@@ -127,11 +112,11 @@ export function seedVowelsProgress(finishedCount: number, currentFraction: numbe
  */
 export function seedVowelsPrizeClaimed(): () => void {
   const clearProgress = seedVowelsProgress(vowelsLessons.length, 0);
-  window.localStorage.setItem(PRIZE_CLAIM_KEY, "1");
+  givenLearner.claimedPrizes([vowelsModule.slug]);
   announceStorageChange();
 
   return () => {
-    window.localStorage.removeItem(PRIZE_CLAIM_KEY);
+    givenLearner.withoutClaimedPrizes([vowelsModule.slug]);
     clearProgress();
   };
 }

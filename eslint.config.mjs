@@ -55,7 +55,8 @@ const FOLDER_STRUCTURE_WATCHED_ROOTS = [
   "src/hooks",
   "src/adapters/persistence/in-memory",
   "src/adapters/persistence/local-filesystem",
-  "src/adapters/persistence/browser-local-storage",
+  "src/adapters/persistence/turso",
+  "src/adapters/persistence/learner-store",
 ];
 
 const folderStructurePlugin = {

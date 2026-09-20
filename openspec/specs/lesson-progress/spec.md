@@ -8,59 +8,11 @@ Completion is per-device in v1 (`localStorage`), not per-user: there is no auth 
 
 The ubiquitous language is `GLOSSARY.md`.
 ## Requirements
-### Requirement: `BrowserLocalStorageProgressTracker` persists completion in `localStorage`
-
-The `BrowserLocalStorageProgressTracker` adapter SHALL implement the existing `ProgressTracker` port by reading and writing `window.localStorage` under the key namespace `learning-english:completed:{lessonId}`, where `{lessonId}` is the lesson identifier verbatim. The presence of the key SHALL mean the lesson is complete and its absence SHALL mean it is not; there SHALL be no third state.
-
-The adapter SHALL also implement `unmarkComplete(lessonId)`, which removes that same
-key. Removing a key that is not present SHALL succeed and leave the lesson incomplete,
-so un-marking is idempotent in the way marking already is.
-
-The adapter SHALL guard against `window.localStorage` being `undefined` (SSR, tests, restricted environments) by treating any read as "not complete" and any write as a no-op, without throwing. A write that the browser rejects (quota exceeded, storage blocked) SHALL NOT propagate an exception to the caller.
-
-The adapter SHALL be browser-only and MUST NOT be imported from Server Components, Server Actions, or the server dependency graph, which continues to bind `InMemoryProgressTracker`.
-
-#### Scenario: A completed lesson round-trips
-- **WHEN** `markComplete(lessonId)` is called and the same browser session then calls `isComplete(lessonId)`
-- **THEN** `isComplete(lessonId)` resolves to `true`
-
-#### Scenario: An unmarked lesson reads as incomplete
-- **WHEN** `isComplete(lessonId)` is called for a lesson that was never marked
-- **THEN** it resolves to `false`
-
-#### Scenario: An un-marked lesson reads as incomplete again
-- **WHEN** `markComplete(lessonId)` is called and the same browser session then calls `unmarkComplete(lessonId)`
-- **THEN** `isComplete(lessonId)` resolves to `false`
-
-#### Scenario: Un-marking is idempotent
-- **WHEN** `unmarkComplete(lessonId)` is called for a lesson that was never marked
-- **THEN** it resolves without throwing and `isComplete(lessonId)` still resolves to `false`
-
-#### Scenario: Un-marking one lesson leaves the others alone
-- **WHEN** two lessons are marked complete and `unmarkComplete` is called for one of them
-- **THEN** the other lesson is still reported complete
-
-#### Scenario: Marking is idempotent
-- **WHEN** `markComplete(lessonId)` is called twice for the same lesson
-- **THEN** the second call succeeds and `isComplete(lessonId)` still resolves to `true`
-
-#### Scenario: Lessons are isolated
-- **WHEN** `markComplete(lessonA)` is called and then `isComplete(lessonB)` is called for a different lesson
-- **THEN** `isComplete(lessonB)` resolves to `false`
-
-#### Scenario: The adapter no-ops when `localStorage` is unavailable
-- **WHEN** the adapter is constructed in an environment where `window` or `window.localStorage` is `undefined`
-- **THEN** `isComplete` resolves to `false`, and `markComplete` and `unmarkComplete` both resolve without throwing
-
-#### Scenario: A rejected write does not break the caller
-- **WHEN** the underlying `Storage.setItem` or `Storage.removeItem` throws (for example, quota exceeded or storage blocked)
-- **THEN** `markComplete` and `unmarkComplete` resolve without propagating the exception
-
 ### Requirement: Completion survives reloads on the device that recorded it
 
-A lesson marked complete SHALL still be reported complete after a page reload, after a navigation to another route and back, and after a server restart, on the same browser profile.
+A lesson marked complete SHALL still be reported complete after a page reload, after a navigation to another route and back, after a server restart, and on any other device or browser where the same learner signs in.
 
-Completion SHALL be per-device, not per-user: the application has no authentication, so completion recorded in one browser SHALL NOT be expected to appear in another browser or on another device.
+Completion SHALL be per account, not per device: it belongs to the signed-in learner and is stored in the database.
 
 #### Scenario: A mark survives a reload
 - **WHEN** a learner marks a lesson complete and then reloads the page
@@ -68,15 +20,17 @@ Completion SHALL be per-device, not per-user: the application has no authenticat
 
 #### Scenario: A mark survives a server restart
 - **WHEN** a learner marks a lesson complete and the server is restarted
-- **THEN** the lesson is still reported complete, because the state lives in the browser and not in the server's memory
+- **THEN** the lesson is still reported complete, because the state lives in the database and not in the server's memory
+
+#### Scenario: A mark follows the learner to another device
+- **WHEN** a learner marks a lesson complete in one browser and signs in to another
+- **THEN** the second browser reports the lesson complete after hydration
 
 ### Requirement: The client reads completion through a single composition root
 
-The browser SHALL read completion through one client-side composition root — the only place permitted to name the concrete browser adapter — mirroring the role `usePlaybackPosition` plays for playback and `getCoursePlatformDeps` plays on the server. Components SHALL NOT read `window.localStorage` directly.
+The browser SHALL read completion through one client-side composition root, the only client module permitted to call the completion Server Actions, mirroring the role `usePlaybackPosition` plays for playback and the learner-repositories factory plays on the server. Components SHALL NOT read `window.localStorage` for completion, and SHALL NOT call the completion actions directly.
 
-The composition root SHALL be the only place that writes completion too — both the
-mark and the un-mark — so no component reaches the adapter or `window.localStorage` to
-clear a mark either.
+The composition root SHALL be the only place that writes completion too, both the mark and the un-mark, so no component reaches an action to clear a mark either.
 
 The composition root SHALL expose a single shared snapshot, so that every surface showing completion agrees at any moment and a lesson marked on one surface is immediately reflected on another rendered at the same time.
 

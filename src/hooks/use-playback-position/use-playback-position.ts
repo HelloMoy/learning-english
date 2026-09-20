@@ -1,37 +1,72 @@
 "use client";
 
-import { BrowserLocalStoragePlaybackPositionRepository } from "@/adapters/persistence/browser-local-storage/browser-local-storage-playback-position-repository/browser-local-storage-playback-position-repository";
+import { LearnerStorePlaybackPositionRepository } from "@/adapters/persistence/learner-store/learner-store-playback-position-repository/learner-store-playback-position-repository";
+import { recordPlaybackPositionAction } from "@/app/[locale]/learner-actions";
 import type { LessonId } from "@/domain/entities/ids/ids";
 import { PlaybackPosition } from "@/domain/ports/playback-position-repository/playback-position";
 import type { PlaybackPositionRepository } from "@/domain/ports/playback-position-repository/playback-position-repository";
 import { makeGetPlaybackPosition } from "@/domain/use-cases/get-playback-position/get-playback-position";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
 
 import { useMemo } from "react";
+
+/** Where the page-hide beacon delivers the last position of a visit. */
+const PLAYBACK_BEACON_URL = "/api/learner/playback-position";
+
+/**
+ * The one browser adapter every lesson shares: its write windows are per
+ * lesson, and the learner store behind it is shared by the whole tab.
+ */
+const learnerPositions = new LearnerStorePlaybackPositionRepository({
+  record: async (lessonId, seconds) =>
+    (await recordPlaybackPositionAction({ lessonId, seconds }))?.data?.recorded === true,
+  beacon: (position) => navigator.sendBeacon(PLAYBACK_BEACON_URL, JSON.stringify(position)),
+});
+
+/**
+ * A playback port that can also send positions still waiting for their
+ * server window — the default adapter, or a test's recording fake.
+ *
+ * @category Hooks
+ */
+export type FlushablePlaybackPositions = PlaybackPositionRepository & {
+  flush?: () => Promise<void>;
+  flushWithBeacon?: () => void;
+};
+
+/**
+ * What {@link usePlaybackPosition} hands its caller.
+ *
+ * @category Hooks
+ */
+export type PlaybackPositionHandle = {
+  /** The saved seconds for the lesson, or `null` when none is saved. */
+  get: () => Promise<number | null>;
+  /** Saves a position; resolves `false` when the value is not a valid position. */
+  set: (seconds: number) => Promise<boolean>;
+  /** Writes any position still waiting for its server window, now. */
+  flush: () => Promise<void>;
+  /** Hands any waiting position to `navigator.sendBeacon`, for a page being hidden. */
+  flushWithBeacon: () => void;
+};
 
 /**
  * Client hook: reads and writes the playback position for one lesson.
  *
  * @remarks
  * This hook is the client's composition root for playback persistence — the
- * one place allowed to name a concrete adapter, the same role
- * `getCoursePlatformDeps` plays on the server. Everything downstream of it
- * sees only the `PlaybackPositionRepository` port.
+ * one place allowed to name a concrete adapter, the same role the learner
+ * dependencies play on the server. Everything downstream of it sees only the
+ * `PlaybackPositionRepository` port.
  *
- * Reads go through the `getPlaybackPosition` use case rather than calling
- * the adapter, so the domain owns the "no entry yet" semantics. Writes are
- * validated by the `PlaybackPosition` value object first: a `<video>` that
- * has been detached mid-teardown reports `NaN` for `currentTime`, and that
- * must never reach storage.
+ * The default adapter shows every position at once on every progress bar
+ * (through the learner store) and saves it for the signed-in learner at most
+ * every ten seconds per lesson; `flush` and `flushWithBeacon` send what is
+ * still waiting. Writes are validated by the `PlaybackPosition` value object
+ * first: a `<video>` detached mid-teardown reports `NaN` for `currentTime`,
+ * and that must never be saved.
  *
- * Writes deliberately do **not** run `recordPlaybackPosition`. That use case
- * checks the lesson exists via `LessonRepository`, which has no browser-side
- * implementation — reaching it needs the Server Action path, which is where
- * this moves when per-user sync arrives with auth.
- *
- * A successful write notifies `useSavedPlaybackPositions`, the sibling store
- * that lists every saved position for the progress indicators. A write that
- * fails validation notifies nothing — there is nothing new to read.
+ * Reads go through the `getPlaybackPosition` use case rather than calling the
+ * adapter, so the domain owns the "no entry yet" semantics.
  *
  * The returned object is memoized on the lesson, so consumers can list it in
  * a `useEffect` dependency array without retriggering on every render.
@@ -39,10 +74,9 @@ import { useMemo } from "react";
  * Browser-side only — do NOT call from a Server Component or Server Action.
  *
  * @param lessonId - The lesson whose position is being tracked
- * @param repository - Overrides the storage adapter; tests inject a fake here
- *                     instead of monkey-patching `window.localStorage`
- * @returns `get` resolving to the saved seconds (or `null`), and `set`
- *          resolving to whether the value passed validation and persisted
+ * @param repository - Overrides the adapter; tests inject a fake here. A port
+ *                     without flush methods has nothing to flush.
+ * @returns `get`, `set`, `flush` and `flushWithBeacon`
  *
  * @example
  * ```ts
@@ -54,19 +88,10 @@ import { useMemo } from "react";
  */
 export function usePlaybackPosition(
   lessonId: LessonId,
-  repository?: PlaybackPositionRepository,
-): {
-  get: () => Promise<number | null>;
-  set: (seconds: number) => Promise<boolean>;
-} {
-  // The adapter is stateless and keyed per call, so one instance serves every
-  // lesson — it does not need rebuilding when `lessonId` changes.
-  const positions = useMemo(
-    () => repository ?? new BrowserLocalStoragePlaybackPositionRepository(),
-    [repository],
-  );
-
+  repository?: FlushablePlaybackPositions,
+): PlaybackPositionHandle {
   return useMemo(() => {
+    const positions: FlushablePlaybackPositions = repository ?? learnerPositions;
     const getPlaybackPosition = makeGetPlaybackPosition({ positions });
 
     return {
@@ -76,15 +101,16 @@ export function usePlaybackPosition(
       },
       set: async (seconds: number) => {
         const position = PlaybackPosition.safeParse({ lessonId, seconds });
-        if (!position.success) {
-          return false;
-        }
+        if (!position.success) return false;
         await positions.setPosition(position.data.lessonId, position.data.seconds);
-        // The `storage` event only fires for *other* tabs, so a progress bar
-        // mounted beside the player would go stale without this.
-        refreshSavedPlaybackPositions();
         return true;
       },
+      flush: async () => {
+        await positions.flush?.();
+      },
+      flushWithBeacon: () => {
+        positions.flushWithBeacon?.();
+      },
     };
-  }, [positions, lessonId]);
+  }, [repository, lessonId]);
 }

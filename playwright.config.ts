@@ -6,6 +6,8 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./e2e",
+  // Every personal route needs a session, and sessions need the Compose stack.
+  globalSetup: "./e2e/global-setup.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -26,7 +28,8 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: "pnpm dev",
+    // CI serves the production build (`E2E_SERVER_COMMAND="pnpm start"`).
+    command: process.env.E2E_SERVER_COMMAND ?? "pnpm dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

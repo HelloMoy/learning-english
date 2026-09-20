@@ -1,10 +1,17 @@
 "use client";
 
-import { BrowserLocalStorageContinueWatchingRepository } from "@/adapters/persistence/browser-local-storage/browser-local-storage-continue-watching-repository/browser-local-storage-continue-watching-repository";
+import { LearnerStoreContinueWatchingRepository } from "@/adapters/persistence/learner-store/learner-store-continue-watching-repository/learner-store-continue-watching-repository";
+import { recordContinueWatchingAction } from "@/app/[locale]/learner-actions";
 import { ContinueWatchingLocation } from "@/domain/entities/continue-watching-location/continue-watching-location";
 import type { ContinueWatchingRepository } from "@/domain/ports/continue-watching-repository/continue-watching-repository";
 
 import { useMemo } from "react";
+
+/** The one browser adapter: a single slot, shared by every caller in the tab. */
+const learnerLocations = new LearnerStoreContinueWatchingRepository({
+  record: async (location) =>
+    (await recordContinueWatchingAction(location))?.data?.recorded === true,
+});
 
 /**
  * Client hook: reads and writes the one location the learner was last at.
@@ -12,13 +19,12 @@ import { useMemo } from "react";
  * @remarks
  * This hook is the client's composition root for the continue-watching
  * record — the one place allowed to name a concrete adapter, the same role
- * {@link usePlaybackPosition} plays for playback and
- * `getCoursePlatformDeps` plays on the server. Everything downstream of it
+ * {@link usePlaybackPosition} plays for playback and the learner
+ * dependencies play on the server. Everything downstream of it
  * sees only the `ContinueWatchingRepository` port.
  *
  * Writes are validated by the `ContinueWatchingLocation` value object first,
- * so a route triple assembled from a malformed URL segment can never reach
- * storage. A rejected write reports `false` rather than throwing: failing to
+ * so a route triple assembled from a malformed URL segment is never saved. A rejected write reports `false` rather than throwing: failing to
  * remember where the learner was is not worth breaking the page they are on.
  *
  * Reads go straight to the port rather than through a use case. There is no
@@ -30,8 +36,7 @@ import { useMemo } from "react";
  *
  * Browser-side only — do NOT call from a Server Component or Server Action.
  *
- * @param repository - Overrides the storage adapter; tests inject a fake here
- *                     instead of monkey-patching `window.localStorage`
+ * @param repository - Overrides the adapter; tests inject a fake here
  * @returns `get` resolving to the stored location (or `null`), and `set`
  *          resolving to whether the value passed validation and persisted
  */
@@ -39,12 +44,7 @@ export function useContinueWatching(repository?: ContinueWatchingRepository): {
   get: () => Promise<ContinueWatchingLocation | null>;
   set: (location: unknown) => Promise<boolean>;
 } {
-  // The adapter is stateless and holds a single slot, so one instance serves
-  // every caller and never needs rebuilding.
-  const locations = useMemo(
-    () => repository ?? new BrowserLocalStorageContinueWatchingRepository(),
-    [repository],
-  );
+  const locations = repository ?? learnerLocations;
 
   return useMemo(
     () => ({

@@ -1,7 +1,7 @@
 import { LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Module } from "@/domain/entities/module/module";
 import type { LessonProgressSlice } from "@/domain/use-cases/find-course-catalog/find-course-catalog";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 import { renderInLocale } from "@/test-setup/render-in-locale";
 
 import { faker } from "@faker-js/faker";
@@ -45,12 +45,10 @@ const continuedInVowels: ContinuedLesson = {
   lessonHref: `/courses/basic-course/modules/module-2/lessons/${vowelLessons[1]!.id}`,
 };
 
-const markComplete = (lessonId: LessonId) =>
-  window.localStorage.setItem(`learning-english:completed:${lessonId}`, "1");
+const markComplete = (lessonId: LessonId) => givenLearner.completed([lessonId]);
 
 const announceStorageChange = () =>
   act(() => {
-    refreshSavedPlaybackPositions();
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 

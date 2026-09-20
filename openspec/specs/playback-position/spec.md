@@ -92,36 +92,6 @@ cases.
 - **THEN** execution returns a `Result`; no exception escapes the use case
   boundary
 
-### Requirement: `BrowserLocalStoragePlaybackPositionRepository` persists positions in `localStorage`
-
-The `BrowserLocalStoragePlaybackPositionRepository` adapter SHALL implement
-`PlaybackPositionRepository` by reading and writing `window.localStorage`
-under the key namespace `learning-english:playback:{lessonId}`, where
-`{lessonId}` is the lesson identifier verbatim. The adapter SHALL guard
-against `window.localStorage` being `undefined` (SSR / test environment) by
-treating any read or write as a no-op.
-
-#### Scenario: A previously saved position round-trips
-- **WHEN** `setPosition(lessonId, 123)` is called and the same browser session
-  then invokes `getPosition(lessonId)`
-- **THEN** `getPosition(lessonId)` returns `123`
-
-#### Scenario: An unsaved lesson returns `null`
-- **WHEN** `getPosition(lessonId)` is called for a lesson with no saved key
-- **THEN** it returns `null`
-
-#### Scenario: Different lessons are isolated
-- **WHEN** `setPosition(lessonA, 60)` is called and then `getPosition(lessonB)`
-  is called for a different `lessonB`
-- **THEN** `getPosition(lessonB)` returns `null`
-
-#### Scenario: The adapter no-ops when `window.localStorage` is undefined
-- **WHEN** the adapter is instantiated in an environment where `window` or
-  `window.localStorage` is `undefined`
-- **THEN** both methods return as if no key exists — specifically,
-  `getPosition` returns `null` and `setPosition` resolves to `void` — and no
-  exception is thrown
-
 ### Requirement: The Lesson Page persists playback position on a debounced cadence and on lifecycle events
 
 The component responsible for wrapping the player SHALL persist the playback position

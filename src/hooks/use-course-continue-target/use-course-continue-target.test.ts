@@ -3,14 +3,13 @@ import type { ContinueWatchingLocation } from "@/domain/entities/continue-watchi
 import { LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Slug } from "@/domain/entities/slug/slug";
 import type { ResolvedContinueWatching } from "@/hooks/use-resolved-continue-watching/use-resolved-continue-watching";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, test } from "vitest";
 
 import { useCourseContinueTarget, type ContinueCourse } from "./use-course-continue-target";
-
-const COMPLETED_KEY_PREFIX = "learning-english:completed:";
 
 const introduction = {
   id: ModuleId.parse(faker.string.uuid()),
@@ -64,7 +63,7 @@ const recordingResolver = () => {
 };
 
 const markComplete = (...ids: string[]) => {
-  for (const id of ids) window.localStorage.setItem(`${COMPLETED_KEY_PREFIX}${id}`, "1");
+  givenLearner.completed(ids);
 };
 
 describe("useCourseContinueTarget", () => {

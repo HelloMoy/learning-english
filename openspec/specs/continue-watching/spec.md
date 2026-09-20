@@ -33,26 +33,6 @@ Implementations SHALL live under `src/adapters/**`, never under `src/domain/**`.
 - **WHEN** `get()` is called before any `set`
 - **THEN** it resolves to `null`, never to a partial or fabricated location
 
-### Requirement: `BrowserLocalStorageContinueWatchingRepository` persists the location in `localStorage`
-
-A browser-only adapter SHALL implement `ContinueWatchingRepository` against `window.localStorage` under the single key `learning-english:continue-watching`, storing the location as JSON. It SHALL accept an optional injected `Storage` so tests can drive it without monkey-patching globals.
-
-The adapter SHALL degrade rather than throw: when `localStorage` is undefined (SSR, restricted environments) reads resolve to `null` and writes are no-ops; when the stored value is absent, is not valid JSON, or does not satisfy `ContinueWatchingLocation`, reads resolve to `null`; when a write throws (quota exceeded, storage blocked) the failure is swallowed and the record simply does not stick.
-
-It MUST NOT be imported from a Server Component, a Server Action, or `getCoursePlatformDeps`.
-
-#### Scenario: A written location survives a read
-- **WHEN** `set` writes a location and `get` is called on a repository over the same storage
-- **THEN** `get` resolves to an equal location
-
-#### Scenario: Corrupt stored JSON reads as absent
-- **WHEN** the storage key holds `"{not json"` or a JSON object missing `lessonId`
-- **THEN** `get` resolves to `null` and no exception escapes
-
-#### Scenario: Unavailable storage degrades silently
-- **WHEN** the adapter is constructed with no usable `Storage`
-- **THEN** `get` resolves to `null` and `set` resolves without throwing
-
 ### Requirement: `findContinueWatching` resolves a stored location through the domain
 
 The domain SHALL expose a use case `findContinueWatching({ courseSlug, moduleSlug, lessonId }) => ResultAsync<{ course, module, lesson }, ContinueWatchingErrors>` that resolves the three identifiers into their entities through `CourseRepository`, `ModuleRepository` and `LessonRepository`. It SHALL NOT load resources, the next lesson, or the course's other modules and lessons.

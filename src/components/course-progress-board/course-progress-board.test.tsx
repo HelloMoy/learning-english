@@ -5,7 +5,7 @@ import { Module } from "@/domain/entities/module/module";
 import type { ContinueWatchingRepository } from "@/domain/ports/continue-watching-repository/continue-watching-repository";
 import type { ModuleSummary } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
 import { useIsHydrated } from "@/hooks/use-is-hydrated/use-is-hydrated";
-import { refreshPrizeClaims } from "@/hooks/use-prize-claims/use-prize-claims";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -21,8 +21,6 @@ vi.mock("next-intl", () => ({
 vi.mock("@/hooks/use-is-hydrated/use-is-hydrated", () => ({
   useIsHydrated: vi.fn(),
 }));
-
-const COMPLETED_KEY_PREFIX = "learning-english:completed:";
 
 const msg = (key: string, values?: Record<string, unknown>) =>
   values ? `${key}:${JSON.stringify(values)}` : key;
@@ -94,7 +92,6 @@ describe("CourseProgressBoard", () => {
     window.localStorage.clear();
     // The claims store caches its snapshot, so clearing storage is not enough:
     // without this, one test's claim is still claimed in the next.
-    refreshPrizeClaims();
   });
 
   describe("GIVEN progress is not known yet", () => {
@@ -125,7 +122,7 @@ describe("CourseProgressBoard", () => {
     test("WHEN the board settles THEN the tiles read progress AND Continue opens the recorded video", async () => {
       // Arrange
       for (const lesson of moduleSummaries[0]!.lessons) {
-        window.localStorage.setItem(`${COMPLETED_KEY_PREFIX}${lesson.id}`, "1");
+        givenLearner.completed([lesson.id]);
       }
       const location = ContinueWatchingLocation.parse({
         courseSlug: course.slug,
@@ -176,8 +173,7 @@ describe("CourseProgressBoard", () => {
 
   describe("GIVEN the prizes these lessons redeem", () => {
     const claimPrizeOf = (moduleSlug: string) => {
-      window.localStorage.setItem(`learning-english:prize-claimed:${moduleSlug}`, "1");
-      refreshPrizeClaims();
+      givenLearner.claimedPrizes([moduleSlug]);
     };
 
     test("WHEN a prize has been claimed THEN its tile says so AND the others do not", async () => {

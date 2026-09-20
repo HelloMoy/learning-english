@@ -44,7 +44,7 @@ test.describe("robots", () => {
 });
 
 test.describe("sitemap", () => {
-  test("WHEN the sitemap is requested THEN it lists every locale of every route", async ({
+  test("WHEN the sitemap is requested THEN it lists the home of every locale and nothing else", async ({
     request,
   }) => {
     const response = await request.get("/sitemap.xml");
@@ -52,12 +52,10 @@ test.describe("sitemap", () => {
     expect(response.headers()["content-type"]).toMatch(/xml/);
 
     const body = await response.text();
-    const lessonPath = `/courses/${COURSE_SLUG}/modules/${FIRST_MODULE.slug}/lessons/${FIRST_LESSON.id}`;
-
-    for (const locale of ["en", "es", "pt"] as const) {
-      expect(body, `${locale} home should be listed`).toContain(`<loc>http://localhost`);
-      expect(body).toContain(`/${locale}${lessonPath}</loc>`);
-    }
+    const listed = [...body.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
+      ([, url]) => new URL(url).pathname,
+    );
+    expect(listed.sort()).toEqual(["/en", "/es", "/pt"]);
   });
 
   test("WHEN an entry is read THEN it declares its locale alternates", async ({ request }) => {
@@ -68,16 +66,10 @@ test.describe("sitemap", () => {
     }
   });
 
-  test("WHEN a course is withheld from its page THEN it is absent from the sitemap", async ({
-    request,
-  }) => {
-    // Asserts agreement rather than a fixed outcome: in development drafts are
-    // served and listed, in production neither. A sitemap advertising a URL
-    // that renders not-found is the bug.
-    const page = await request.get(`/en/courses/${COURSE_SLUG}`);
+  test("WHEN courses require a session THEN no course URL is advertised", async ({ request }) => {
     const body = await (await request.get("/sitemap.xml")).text();
 
-    expect(body.includes(`/en/courses/${COURSE_SLUG}</loc>`)).toBe(page.status() === 200);
+    expect(body).not.toContain("/courses/");
   });
 });
 

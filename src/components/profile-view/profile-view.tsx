@@ -1,6 +1,7 @@
 "use client";
 
 import { AvatarPicker } from "@/components/avatar-picker/avatar-picker";
+import { DeleteAccountSection } from "@/components/delete-account-section/delete-account-section";
 import { Eyebrow } from "@/components/eyebrow/eyebrow";
 import { LearnerCard, type LearnerCardLevel } from "@/components/learner-card/learner-card";
 import { Skeleton } from "@/components/ui/skeleton/skeleton";
@@ -34,7 +35,7 @@ import { useState } from "react";
  * stored card.
  *
  * The page edits an existing card, so a device without one is sent to the
- * onboarding to make it.
+ * onboarding to make it. It ends with {@link DeleteAccountSection}.
  *
  * @param profiles - Overrides the profile storage adapter; tests inject a stub
  * @param level - The level line the card shows
@@ -174,6 +175,7 @@ function ProfileEditor({
             {t("saved")}
           </p>
         ) : null}
+        <DeleteAccountSection />
       </div>
       <CardPreview
         name={name}

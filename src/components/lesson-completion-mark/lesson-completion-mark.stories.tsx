@@ -1,12 +1,9 @@
 import { LessonId } from "@/domain/entities/ids/ids";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { LessonCompletionMark } from "./lesson-completion-mark";
-
-const STORAGE_KEY_PREFIX = "learning-english:completed:";
-const PLAYBACK_KEY_PREFIX = "learning-english:playback:";
 
 const DURATION_SECONDS = 600;
 
@@ -15,20 +12,14 @@ const NOT_COMPLETED = LessonId.parse("22222222-2222-4222-8222-222222222222");
 const WATCHED_TO_THE_END = LessonId.parse("33333333-3333-4333-8333-333333333333");
 
 /**
- * Seeds browser storage so the "completed" stories have something to read.
- * The component's whole input is `localStorage`, so a story cannot show the
- * completed state without writing there first.
+ * Seeds the learner store so the "completed" stories have something to read.
+ * The component's whole input is the learner's completion, so a story cannot
+ * show the completed state without seeding it first.
  */
 function seedCompletion() {
-  window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${COMPLETED}`, "1");
-  window.localStorage.removeItem(`${STORAGE_KEY_PREFIX}${NOT_COMPLETED}`);
-  window.localStorage.removeItem(`${STORAGE_KEY_PREFIX}${WATCHED_TO_THE_END}`);
-  window.localStorage.setItem(
-    `${PLAYBACK_KEY_PREFIX}${WATCHED_TO_THE_END}`,
-    String(DURATION_SECONDS),
-  );
-  refreshSavedPlaybackPositions();
-  window.dispatchEvent(new StorageEvent("storage", { key: null }));
+  givenLearner.completed([COMPLETED]);
+  givenLearner.notCompleted([NOT_COMPLETED, WATCHED_TO_THE_END]);
+  givenLearner.positions({ [WATCHED_TO_THE_END]: DURATION_SECONDS });
 }
 
 const meta: Meta<typeof LessonCompletionMark> = {
@@ -68,7 +59,7 @@ export const WatchedToTheEnd: Story = {
 /**
  * An uncompleted lesson renders **nothing** — deliberately, not by oversight.
  *
- * Completion lives in `localStorage`, which the server cannot read, so the
+ * Completion arrives with the learner's snapshot after hydration, so the
  * first frame of any page necessarily shows no marks. If this component also
  * drew a "not completed" state, that frame would assert something false
  * about the learner's progress. Absence is the neutral state, so hydration
