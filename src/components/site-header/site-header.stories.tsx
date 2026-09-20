@@ -1,18 +1,15 @@
-import { LEARNER_PROFILE_STORAGE_KEY } from "@/adapters/persistence/browser-local-storage/browser-local-storage-learner-profile-repository/browser-local-storage-learner-profile-repository";
 import { Course as CourseEntity } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Module } from "@/domain/entities/module/module";
 import type { LessonProgressSlice } from "@/domain/use-cases/find-course-catalog/find-course-catalog";
-import { refreshEarnedTickets } from "@/hooks/use-earned-tickets/use-earned-tickets";
-import { refreshPrizeClaims } from "@/hooks/use-prize-claims/use-prize-claims";
 import type { AchievementLevel } from "@/lib/learner-achievements/learner-achievements";
+import { EMPTY_LEARNER_SNAPSHOT } from "@/lib/learner-snapshot/learner-snapshot";
+import { seedLearnerStore } from "@/lib/learner-store/learner-store";
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, userEvent, within } from "storybook/test";
 
 import { SiteHeader } from "./site-header";
-
-const TICKET_KEY_PREFIX = "learning-english:ticket-earned:";
 
 const COURSE_ID = CourseId.parse("11111111-1111-4111-8111-111111111111");
 const MODULE_ID = ModuleId.parse("22222222-2222-4222-8222-222222222222");
@@ -56,30 +53,17 @@ const LEVELS: AchievementLevel[] = [
 type HeaderState = { learner?: boolean; prizesReady?: boolean };
 
 /**
- * Seeds browser storage so the header has a learner and, where a story asks for
- * one, a prize waiting to be claimed. Both come from `localStorage`, so a story
- * cannot show either state without writing there first — and every story resets
- * what the previous one left behind.
+ * Gives the header a learner card and, where a story asks for one, a prize
+ * waiting to be claimed (every ticket of the module earned) — through the
+ * learner store, as the server's snapshot would. Seeding replaces the whole
+ * store, so every story starts from what it asks for.
  */
 function seedHeader({ learner = false, prizesReady = false }: HeaderState) {
-  window.localStorage.removeItem(LEARNER_PROFILE_STORAGE_KEY);
-  for (const lesson of LESSONS) {
-    window.localStorage.removeItem(`${TICKET_KEY_PREFIX}${lesson.id}`);
-  }
-  if (learner) {
-    window.localStorage.setItem(
-      LEARNER_PROFILE_STORAGE_KEY,
-      JSON.stringify({ name: "Ana García", avatar: { kind: "initials" } }),
-    );
-  }
-  if (prizesReady) {
-    for (const lesson of LESSONS) {
-      window.localStorage.setItem(`${TICKET_KEY_PREFIX}${lesson.id}`, "1");
-    }
-  }
-  refreshEarnedTickets();
-  refreshPrizeClaims();
-  window.dispatchEvent(new StorageEvent("storage", { key: null }));
+  seedLearnerStore({
+    ...EMPTY_LEARNER_SNAPSHOT,
+    profile: learner ? { name: "Ana García", avatar: { kind: "initials" } } : null,
+    earnedTicketLessonIds: prizesReady ? LESSONS.map((lesson) => lesson.id) : [],
+  });
 }
 
 /**
@@ -189,7 +173,7 @@ export const WithLearner: Story = {
     nextjs: { navigation: { pathname: "/" } },
     header: { learner: true },
   },
-  args: { levels: LEVELS },
+  args: { levels: LEVELS, signedIn: true },
 };
 
 /** A prize waiting on the counter: the avatar carries how many. */
@@ -198,7 +182,7 @@ export const WithPrizeReady: Story = {
     nextjs: { navigation: { pathname: "/" } },
     header: { learner: true, prizesReady: true },
   },
-  args: { levels: LEVELS },
+  args: { levels: LEVELS, signedIn: true },
 };
 
 /**
@@ -210,7 +194,7 @@ export const WithPrizeReadyMenuOpen: Story = {
     nextjs: { navigation: { pathname: "/" } },
     header: { learner: true, prizesReady: true },
   },
-  args: { levels: LEVELS },
+  args: { levels: LEVELS, signedIn: true },
   play: async () => {
     const body = within(document.body);
     await userEvent.click(await body.findByRole("button", { name: /Ana García/ }));
@@ -227,7 +211,7 @@ export const WithPrizeReadyInSpanish: Story = {
     nextjs: { navigation: { pathname: "/" } },
     header: { learner: true, prizesReady: true },
   },
-  args: { levels: LEVELS },
+  args: { levels: LEVELS, signedIn: true },
 };
 
 /** The mark at iPhone width, where the avatar sits closest to the screen edge. */
@@ -239,6 +223,16 @@ export const WithPrizeReadyOnPhone: Story = {
       options: { phone390: { name: "390px", styles: { width: "390px", height: "844px" } } },
     },
   },
-  args: { levels: LEVELS },
+  args: { levels: LEVELS, signedIn: true },
   globals: { viewport: { value: "phone390" } },
+};
+
+/** A visitor without a session: Sign in takes the place of the learner's menu. */
+export const SignedOut: Story = {
+  args: { signedIn: false },
+};
+
+/** Signed in before making a learner card: a plain Sign out, since there is no avatar yet. */
+export const SignedInWithoutCard: Story = {
+  args: { signedIn: true },
 };
