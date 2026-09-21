@@ -536,15 +536,31 @@
   },
   "Profile": {
     "eyebrow": "Profile",
-    "heading": "Edit your learner card",
-    "intro": "Your name and avatar are saved to your account.",
+    "intro": "Your card, your account and your preferences.",
+    "sections": {
+      "identity": "Identity",
+      "identityNote": "Changes show on your card as you edit.",
+      "preferences": "Preferences"
+    },
+    "progress": {
+      "heading": "Your progress in {course}",
+      "videos": "{completed} of {total, plural, one {# video} other {# videos}}",
+      "percent": "{percent, number, percent}",
+      "ticketsLabel": "Tickets earned",
+      "prizesLabel": "Prizes claimed"
+    },
     "nameLabel": "Name",
     "avatarLabel": "Avatar",
+    "preferences": {
+      "languageLabel": "Interface language",
+      "themeLabel": "Theme"
+    },
     "discard": "Discard",
     "save": "Save changes",
     "saved": "Card updated",
-    "previewLabel": "Your learner card",
-    "previewNote": "Changes show on your card as you edit.",
+    "saveBar": {
+      "unsaved": "You have unsaved changes"
+    },
     "account": {
       "heading": "Account",
       "emailLabel": "Email address",

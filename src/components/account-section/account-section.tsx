@@ -25,6 +25,10 @@ const METHOD_KEYS: Readonly<Record<SignInMethod, "methodPassword" | "methodGoogl
  * that change each.
  *
  * @remarks
+ * It carries no heading of its own: the page wraps it in a `ProfileSection`,
+ * which owns the `h2` and the region, so every section of the page is titled
+ * the same way.
+ *
  * The address is printed, not put in a field: the only editable address on the
  * page belongs to {@link ChangeEmailSection}, so nothing invites a learner to
  * type over the one on file and wonder why it did not save.
@@ -35,7 +39,9 @@ const METHOD_KEYS: Readonly<Record<SignInMethod, "methodPassword" | "methodGoogl
  *
  * @example
  * ```tsx
- * <AccountSection account={account} />
+ * <ProfileSection title={t("account.heading")}>
+ *   <AccountSection account={account} />
+ * </ProfileSection>
  * ```
  *
  * @category Components
@@ -45,17 +51,8 @@ export function AccountSection({ account }: AccountSectionProps) {
   const hasPassword = account.signInMethods.includes("password");
 
   return (
-    <section
-      aria-labelledby="account-heading"
-      className="flex flex-col gap-6 border-t border-border pt-8"
-    >
+    <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
-        <h2
-          id="account-heading"
-          className="text-lg font-bold text-foreground"
-        >
-          {t("heading")}
-        </h2>
         <Detail label={t("emailLabel")}>
           <p className="text-[0.9375rem] text-foreground">{account.email}</p>
         </Detail>
@@ -79,7 +76,7 @@ export function AccountSection({ account }: AccountSectionProps) {
           <ChangeEmailSection currentEmail={account.email} />
         </>
       ) : null}
-    </section>
+    </div>
   );
 }
 

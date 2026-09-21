@@ -16,6 +16,10 @@ type DeletionStatus = "idle" | "sending" | "sent" | "error";
  * The last section of the Profile page: deletes the learner's account.
  *
  * @remarks
+ * It carries neither heading nor description: the page wraps it in a
+ * `ProfileSection`, which owns the `h2`, the supporting line and the region,
+ * so the page's last section is titled like every other one.
+ *
  * The button opens {@link DeleteAccountModal}. Confirming there asks Better
  * Auth for a confirmation email whose link returns to this locale's
  * account-deleted page; nothing is deleted until the learner opens that link
@@ -35,7 +39,9 @@ type DeletionStatus = "idle" | "sending" | "sent" | "error";
  *
  * @example
  * ```tsx
- * <DeleteAccountSection />
+ * <ProfileSection title={t("deleteAccount.heading")} note={t("deleteAccount.description")}>
+ *   <DeleteAccountSection />
+ * </ProfileSection>
  * ```
  *
  * @category Components
@@ -55,18 +61,8 @@ export function DeleteAccountSection() {
   };
 
   return (
-    <section
-      aria-labelledby="delete-account-heading"
-      className="relative flex flex-col gap-3 overflow-hidden border-t border-border pt-8"
-    >
+    <div className="relative flex flex-col gap-3 overflow-hidden">
       <AccountWait busy={status === "sending"}>
-        <h2
-          id="delete-account-heading"
-          className="text-lg font-bold text-foreground"
-        >
-          {t("heading")}
-        </h2>
-        <p className="text-sm text-muted-foreground">{t("description")}</p>
         <PendingButton
           type="button"
           variant="destructive"
@@ -95,6 +91,6 @@ export function DeleteAccountSection() {
           </p>
         ) : null}
       </AccountWait>
-    </section>
+    </div>
   );
 }
