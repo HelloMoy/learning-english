@@ -1,8 +1,5 @@
-# profile-page Specification
+## ADDED Requirements
 
-## Purpose
-TBD - created by archiving change learner-onboarding. Update Purpose after archive.
-## Requirements
 ### Requirement: The Profile page opens with the learner's card and their progress
 
 The Profile page SHALL open with a band holding the large learner card and, beside it, a progress
@@ -76,6 +73,20 @@ Every string SHALL come from `Profile.preferences.*` in `en`, `es` and `pt`.
 - **WHEN** `/pt/profile` renders
 - **THEN** the section's heading and both labels render from `pt.json`
 
+## MODIFIED Requirements
+
+### Requirement: Profile copy is localized
+
+Every string on the Profile page SHALL come from the active locale's messages in `en`, `es` and `pt`.
+
+The learner's own name is not one of those strings: the page's `h1` prints the name as stored, in
+every locale.
+
+#### Scenario: Profile in Portuguese
+- **WHEN** `/pt/profile` renders
+- **THEN** the eyebrow, the intro line, every section heading, Discard, Save and the confirmation
+  render from `pt.json`, and the `h1` is the learner's own name
+
 ### Requirement: The Profile page edits name and avatar with a live card
 
 The route `/[locale]/profile` SHALL render the name field and the avatar picker in its **Identity**
@@ -129,18 +140,6 @@ explanation.
 #### Scenario: Discarding restores the stored profile
 - **WHEN** the learner edits the name and presses Discard
 - **THEN** the field and the card show the stored name again and the bar leaves
-
-### Requirement: Profile copy is localized
-
-Every string on the Profile page SHALL come from the active locale's messages in `en`, `es` and `pt`.
-
-The learner's own name is not one of those strings: the page's `h1` prints the name as stored, in
-every locale.
-
-#### Scenario: Profile in Portuguese
-- **WHEN** `/pt/profile` renders
-- **THEN** the eyebrow, the intro line, every section heading, Discard, Save and the confirmation
-  render from `pt.json`, and the `h1` is the learner's own name
 
 ### Requirement: The Profile page offers to delete the account behind a confirmation
 
@@ -197,58 +196,3 @@ Every string SHALL come from `Profile.account.*` in `en`, `es` and `pt`.
 #### Scenario: The section in Portuguese
 - **WHEN** `/pt/profile` renders
 - **THEN** the Account section's heading, labels and method names render from `pt.json`
-
-### Requirement: The Profile page changes the password behind the current one
-
-For a learner whose account has a password, the Account section SHALL offer a change-password form with
-two labelled fields — the current password and the new one — and a submit action. Both fields SHALL be
-password inputs with the autocomplete the browser expects (`current-password` and `new-password`). The
-new password's rule SHALL be stated under its field. Submitting SHALL validate the length in the browser
-first, then ask the server, as the `learner-account` capability's "A learner changes their password from
-a signed-in session" defines.
-
-A successful change SHALL clear both fields and announce, as a status, that the password changed and
-that other devices were signed out. A refusal SHALL be shown as an alert in the section, and the fields
-SHALL keep what the learner typed. The submit action SHALL be unavailable while a request is in flight.
-
-Every string SHALL come from `Profile.password.*` in `en`, `es` and `pt`.
-
-#### Scenario: Changing the password confirms and clears
-- **WHEN** the learner submits the correct current password and a valid new one
-- **THEN** both fields are empty and the section announces that the password changed and other devices were signed out
-
-#### Scenario: A refusal keeps what was typed
-- **WHEN** the current password is wrong
-- **THEN** the section shows the localized refusal as an alert and both fields still hold what the learner typed
-
-#### Scenario: The form in Portuguese
-- **WHEN** `/pt/profile` renders
-- **THEN** the form's heading, both labels, the rule and the button render from `pt.json`
-
-### Requirement: The Profile page changes the email address behind a confirmation
-
-For a learner whose account has a password, the Account section SHALL offer a change-email form with one
-labelled field for the new address and a submit action, and SHALL say before submitting that a link will
-go to the address on file first. Submitting SHALL validate the address in the browser, then ask the
-server, as the `learner-account` capability's "A learner changes their email address by confirming on the
-old address and verifying on the new one" defines.
-
-An accepted request SHALL replace the form with a confirmation, announced as a status, that names the
-address the link was sent to — the one on file, not the requested one — and says the address does not
-change until both links are followed. A refusal SHALL be shown as an alert, and the field SHALL keep what
-the learner typed.
-
-Every string SHALL come from `Profile.email.*` in `en`, `es` and `pt`.
-
-#### Scenario: The confirmation names the address on file
-- **WHEN** a learner registered as `ana@example.com` submits `ana.g@example.com`
-- **THEN** the section announces that a link was sent to `ana@example.com` and that the address changes only after both links are followed
-
-#### Scenario: An invalid address is refused before submitting
-- **WHEN** the field holds `not-an-address`
-- **THEN** the form shows the address error and sends nothing
-
-#### Scenario: The form in Portuguese
-- **WHEN** `/pt/profile` renders
-- **THEN** the form's heading, label, the note about the link, the button and the confirmation render from `pt.json`
-
