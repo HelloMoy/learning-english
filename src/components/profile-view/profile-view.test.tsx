@@ -3,6 +3,7 @@ import { LearnerProfile } from "@/domain/entities/learner-profile/learner-profil
 import { useRouter } from "@/i18n/navigation";
 import { givenLearner } from "@/test-setup/learner-store/learner-store";
 import { renderInLocale } from "@/test-setup/render-in-locale";
+import { spokenRegions } from "@/test-setup/spoken-regions/spoken-regions";
 import { makeStubLearnerProfileRepository } from "@/test-setup/stubs/domain-repos";
 
 import { faker } from "@faker-js/faker";
@@ -152,7 +153,9 @@ describe("ProfileView", () => {
       await user.click(await screen.findByRole("radio", { name: "Plum" }));
       await user.click(screen.getByRole("button", { name: "Save changes" }));
 
-      expect(await screen.findByRole("status")).toHaveTextContent("Card updated");
+      // The delete section below keeps an empty live region mounted for its
+      // wait, so this asserts the confirmation rather than the first region
+      await waitFor(() => expect(spokenRegions()).toContain("Card updated"));
       expect(await profiles.get()).toEqual({
         name: "Ana García",
         avatar: { kind: "illustration", id: "plum" },

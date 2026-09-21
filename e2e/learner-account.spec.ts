@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { test as anonymous, expect, type Page } from "@playwright/test";
+import { test as anonymous, expect, type Locator, type Page } from "@playwright/test";
 
 import {
   aLearnerAccount,
@@ -23,6 +23,30 @@ async function submitWhenChallengePasses(page: Page, name: string): Promise<void
   await submit.click();
 }
 
+/**
+ * Types into an account field, once React is listening.
+ *
+ * Account pages are server-rendered and hydrate a moment later. Filling a
+ * controlled input before its `onChange` is attached puts the text in the DOM
+ * but never in React state: the form then submits empty, fails its own
+ * validation, and the field clears itself on the next render. Asserting the
+ * DOM value is not enough to catch that — the DOM is exactly where the lost
+ * text sits — so this waits for the hydration marker React puts on every host
+ * node it has claimed, and only then types.
+ */
+async function enter(field: Locator, value: string): Promise<void> {
+  await field.evaluate(
+    (input) =>
+      new Promise<void>((hydrated) => {
+        const claimed = () => Object.keys(input).some((key) => key.startsWith("__reactProps$"));
+        const poll = () => (claimed() ? hydrated() : requestAnimationFrame(poll));
+        poll();
+      }),
+  );
+  await field.fill(value);
+  await expect(field).toHaveValue(value);
+}
+
 anonymous.describe("without a session", () => {
   anonymous("a lesson link opens sign-in, carrying the lesson as next", async ({ page }) => {
     await page.goto("/en/courses/basic-course/modules/1-introduction");
@@ -44,9 +68,9 @@ anonymous.describe("without a session", () => {
     async ({ page }) => {
       const account = aLearnerAccount();
       await page.goto(`/es/sign-up?next=${encodeURIComponent("/achievements")}`);
-      await page.getByLabel("Tu nombre").fill(account.name);
-      await page.getByLabel("Correo").fill(account.email);
-      await page.getByLabel("Contraseña").fill(account.password);
+      await enter(page.getByLabel("Tu nombre"), account.name);
+      await enter(page.getByLabel("Correo"), account.email);
+      await enter(page.getByLabel("Contraseña"), account.password);
       await submitWhenChallengePasses(page, "Crear cuenta");
 
       await expect(page.getByRole("heading", { name: "Revisa tu correo" })).toBeVisible();
@@ -62,19 +86,19 @@ anonymous.describe("without a session", () => {
     const newPassword = faker.internet.password({ length: 18 });
 
     await page.goto("/en/forgot-password");
-    await page.getByLabel("Email").fill(account.email);
+    await enter(page.getByLabel("Email"), account.email);
     await submitWhenChallengePasses(page, "Send reset link");
     await expect(page.getByRole("heading", { name: "Check your inbox" })).toBeVisible();
     await page.goto(await authLinkMailedTo(page, account.email));
     await expect(page).toHaveURL(/\/en\/reset-password\?token=/);
-    await page.getByLabel("New password").fill(newPassword);
+    await enter(page.getByLabel("New password"), newPassword);
     await page.getByRole("button", { name: "Save new password" }).click();
 
-    await expect(page.getByRole("status")).toHaveText(
-      "Your password was updated. Sign in with the new one.",
-    );
-    await page.getByLabel("Email").fill(account.email);
-    await page.getByLabel("Password").fill(newPassword);
+    await expect(
+      page.getByRole("status").filter({ hasText: "Your password was updated" }),
+    ).toHaveText("Your password was updated. Sign in with the new one.");
+    await enter(page.getByLabel("Email"), account.email);
+    await enter(page.getByLabel("Password"), newPassword);
     await submitWhenChallengePasses(page, "Sign in");
     await expect(page).toHaveURL("/en/learning");
   });
@@ -84,14 +108,48 @@ anonymous.describe("without a session", () => {
     await registerVerifiedLearner(context, account);
 
     await page.goto("/en/sign-in");
-    await page.getByLabel("Email").fill(account.email);
-    await page.getByLabel("Password").fill("not-the-password");
+    await enter(page.getByLabel("Email"), account.email);
+    await enter(page.getByLabel("Password"), "not-the-password");
     await submitWhenChallengePasses(page, "Sign in");
 
     await expect(page.getByRole("alert").filter({ hasText: "incorrect" })).toHaveText(
       "The email or password is incorrect.",
     );
   });
+
+  anonymous(
+    "the wait covers the credentials request and the page still arrives",
+    async ({ page, context }) => {
+      const account = aLearnerAccount();
+      await registerVerifiedLearner(context, account);
+      // Hold the credentials back so the wait is observable — a local sign-in
+      // resolves far too fast to see, which is the one thing jsdom cannot show
+      await page.route("**/api/auth/sign-in/email", async (route) => {
+        await new Promise((resolve) => setTimeout(resolve, 2_000));
+        await route.continue();
+      });
+
+      await page.goto("/en/sign-in");
+      await enter(page.getByLabel("Email"), account.email);
+      await enter(page.getByLabel("Password"), account.password);
+      await submitWhenChallengePasses(page, "Sign in");
+
+      await expect(page.getByTestId("account-wait-beam")).toBeVisible();
+      await expect(page.getByTestId("spinner-arc")).toBeVisible();
+      await expect(page.getByRole("button", { name: "Signing in…" })).toBeDisabled();
+      await expect(page.getByRole("status")).toHaveCount(1);
+      await expect(page.getByRole("status")).toHaveText("Checking your details…");
+
+      // The fields are still there, and out of reach: `inert` keeps them from
+      // taking focus, which no jsdom test can prove
+      const email = page.getByLabel("Email");
+      await expect(email).toHaveValue(account.email);
+      await email.focus().catch(() => {});
+      await expect(email).not.toBeFocused();
+
+      await expect(page).toHaveURL("/en/learning", { timeout: 20_000 });
+    },
+  );
 
   anonymous(
     "Continue with Google hands off to Google with this site's callback",

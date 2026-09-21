@@ -19,6 +19,20 @@ describe("AccountShell", () => {
     expect(screen.getByRole("form", { name: "sign in" })).toBeInTheDocument();
   });
 
+  test("WHEN it renders THEN the card is where the wait's beam anchors and is clipped", () => {
+    render(
+      <AccountShell title="Welcome back">
+        <p>body</p>
+      </AccountShell>,
+    );
+
+    // The beam is absolutely positioned against this card and must not escape
+    // its rounded corners — see `AccountWait`
+    const card = screen.getByText("body").closest("section");
+    expect(card).toHaveClass("relative");
+    expect(card).toHaveClass("overflow-hidden");
+  });
+
   test("WHEN a footer is given THEN it follows the card's content", () => {
     render(
       <AccountShell

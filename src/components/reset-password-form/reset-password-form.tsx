@@ -3,6 +3,7 @@
 import { AccountConfirmation } from "@/components/account-confirmation/account-confirmation";
 import { AccountField } from "@/components/account-field/account-field";
 import { AccountSubmitArea } from "@/components/account-submit-area/account-submit-area";
+import { AccountWait } from "@/components/account-wait/account-wait";
 import { useAccountForm } from "@/hooks/use-account-form/use-account-form";
 import { useAccountSubmission } from "@/hooks/use-account-submission/use-account-submission";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -75,19 +76,24 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       onSubmit={handleSubmit}
       className="flex flex-col gap-4"
     >
-      <AccountField
-        {...form.field("password")}
-        type="password"
-        label={t("fields.newPassword")}
-        hint={t("fields.passwordHint")}
-        autoComplete="new-password"
-      />
-      <AccountSubmitArea
-        submission={submission}
-        challenged={false}
-        label={t("resetPassword.submit")}
-        pendingLabel={t("resetPassword.submitting")}
-      />
+      <AccountWait busy={submission.isPending}>
+        <AccountWait.Paused>
+          <AccountField
+            {...form.field("password")}
+            type="password"
+            label={t("fields.newPassword")}
+            hint={t("fields.passwordHint")}
+            autoComplete="new-password"
+          />
+        </AccountWait.Paused>
+        <AccountSubmitArea
+          submission={submission}
+          challenged={false}
+          label={t("resetPassword.submit")}
+          pendingLabel={t("resetPassword.submitting")}
+        />
+        <AccountWait.Status>{t("resetPassword.waiting")}</AccountWait.Status>
+      </AccountWait>
     </form>
   );
 }

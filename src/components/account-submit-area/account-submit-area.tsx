@@ -1,7 +1,8 @@
 "use client";
 
+import { AccountWait, useIsWaiting } from "@/components/account-wait/account-wait";
+import { PendingButton } from "@/components/pending-button/pending-button";
 import { TurnstileChallenge } from "@/components/turnstile-challenge/turnstile-challenge";
-import { Button } from "@/components/ui/button/button";
 import type { AccountSubmission } from "@/hooks/use-account-submission/use-account-submission";
 
 import { useTranslations } from "next-intl";
@@ -24,6 +25,17 @@ export type AccountSubmitAreaProps = {
  * challenged, the announced error of the last refused attempt, and the submit
  * button, which stays disabled until the form may be sent.
  *
+ * @remarks
+ * While the surface is waiting, the challenge dims and goes inert along with
+ * the fields — a passed challenge is the brightest thing left on the card
+ * otherwise, and the learner can no longer act on it. The button stays lit,
+ * because its arc and pending label are the wait.
+ *
+ * The button follows the *surface's* wait, not only the request's: sign-in goes
+ * on waiting after its credentials are accepted, through the navigation, and
+ * the button must not drop back to its resting label while the beam is still
+ * sweeping.
+ *
  * @example
  * ```tsx
  * <AccountSubmitArea submission={submission} challenged label={t("submit")} pendingLabel={t("submitting")} />
@@ -36,14 +48,19 @@ export function AccountSubmitArea({
   pendingLabel,
 }: AccountSubmitAreaProps) {
   const t = useTranslations("Account.errors");
+  // A surface can go on waiting after its request has resolved — sign-in does,
+  // through the navigation — and the button has to stay in flight with it
+  const isWaiting = useIsWaiting() || submission.isPending;
 
   return (
     <>
       {challenged ? (
-        <TurnstileChallenge
-          key={submission.challengeKey}
-          onToken={submission.onToken}
-        />
+        <AccountWait.Paused>
+          <TurnstileChallenge
+            key={submission.challengeKey}
+            onToken={submission.onToken}
+          />
+        </AccountWait.Paused>
       ) : null}
       {submission.errorKey ? (
         <p
@@ -53,14 +70,15 @@ export function AccountSubmitArea({
           {t(submission.errorKey)}
         </p>
       ) : null}
-      <Button
+      <PendingButton
         type="submit"
         size="lg"
         className="h-11 w-full"
+        isPending={isWaiting}
         disabled={!submission.isReady}
-      >
-        {submission.isPending ? pendingLabel : label}
-      </Button>
+        label={label}
+        pendingLabel={pendingLabel}
+      />
     </>
   );
 }

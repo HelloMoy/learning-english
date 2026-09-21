@@ -3,6 +3,7 @@
 import { AccountConfirmation } from "@/components/account-confirmation/account-confirmation";
 import { AccountField } from "@/components/account-field/account-field";
 import { AccountSubmitArea } from "@/components/account-submit-area/account-submit-area";
+import { AccountWait } from "@/components/account-wait/account-wait";
 import { GoogleSignInButton } from "@/components/google-sign-in-button/google-sign-in-button";
 import { useAccountForm } from "@/hooks/use-account-form/use-account-form";
 import { useAccountSubmission } from "@/hooks/use-account-submission/use-account-submission";
@@ -65,40 +66,47 @@ export function SignUpForm({ returnPath }: SignUpFormProps) {
 
   return (
     <div className="flex flex-col gap-5">
-      <GoogleSignInButton returnPath={returnPath} />
-      <p className="text-center text-xs tracking-wide text-muted-foreground uppercase">
-        {t("divider")}
-      </p>
-      <form
-        noValidate
-        onSubmit={handleSubmit}
-        className="flex flex-col gap-4"
-      >
-        <AccountField
-          {...form.field("name")}
-          label={t("fields.name")}
-          autoComplete="name"
-        />
-        <AccountField
-          {...form.field("email")}
-          type="email"
-          label={t("fields.email")}
-          autoComplete="email"
-        />
-        <AccountField
-          {...form.field("password")}
-          type="password"
-          label={t("fields.password")}
-          hint={t("fields.passwordHint")}
-          autoComplete="new-password"
-        />
-        <AccountSubmitArea
-          submission={submission}
-          challenged
-          label={t("signUp.submit")}
-          pendingLabel={t("signUp.submitting")}
-        />
-      </form>
+      <AccountWait busy={submission.isPending}>
+        <AccountWait.Paused className="flex flex-col gap-5">
+          <GoogleSignInButton returnPath={returnPath} />
+          <p className="text-center text-xs tracking-wide text-muted-foreground uppercase">
+            {t("divider")}
+          </p>
+        </AccountWait.Paused>
+        <form
+          noValidate
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4"
+        >
+          <AccountWait.Paused className="flex flex-col gap-4">
+            <AccountField
+              {...form.field("name")}
+              label={t("fields.name")}
+              autoComplete="name"
+            />
+            <AccountField
+              {...form.field("email")}
+              type="email"
+              label={t("fields.email")}
+              autoComplete="email"
+            />
+            <AccountField
+              {...form.field("password")}
+              type="password"
+              label={t("fields.password")}
+              hint={t("fields.passwordHint")}
+              autoComplete="new-password"
+            />
+          </AccountWait.Paused>
+          <AccountSubmitArea
+            submission={submission}
+            challenged
+            label={t("signUp.submit")}
+            pendingLabel={t("signUp.submitting")}
+          />
+        </form>
+        <AccountWait.Status>{t("signUp.waiting")}</AccountWait.Status>
+      </AccountWait>
     </div>
   );
 }

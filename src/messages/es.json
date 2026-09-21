@@ -582,6 +582,7 @@
       "cancel": "Cancelar",
       "confirm": "Enviar correo de confirmación",
       "sending": "Enviando…",
+      "waiting": "Enviando tu correo de confirmación…",
       "sent": "Te enviamos un enlace de confirmación a tu correo. Ábrelo con la sesión iniciada para borrar tu cuenta.",
       "error": "No pudimos enviar el correo de confirmación. Inténtalo de nuevo en un momento."
     }
@@ -653,6 +654,7 @@
       "subtitle": "Inicia sesión para seguir donde lo dejaste.",
       "submit": "Iniciar sesión",
       "submitting": "Iniciando sesión…",
+      "waiting": "Comprobando tus datos…",
       "forgot": "¿Olvidaste tu contraseña?",
       "noAccount": "¿Eres nuevo?",
       "signUpLink": "Crea una cuenta",
@@ -664,6 +666,7 @@
       "subtitle": "Tu progreso, tickets y premios te seguirán en todos tus dispositivos.",
       "submit": "Crear cuenta",
       "submitting": "Creando cuenta…",
+      "waiting": "Preparando tu cuenta…",
       "haveAccount": "¿Ya tienes una cuenta?",
       "signInLink": "Inicia sesión",
       "checkInboxTitle": "Revisa tu correo",
@@ -675,6 +678,7 @@
       "subtitle": "Escribe tu correo y te enviaremos un enlace para elegir una nueva.",
       "submit": "Enviar enlace",
       "submitting": "Enviando…",
+      "waiting": "Preparando tu enlace…",
       "sentTitle": "Revisa tu correo",
       "sentBody": "Si existe una cuenta para {email}, le enviamos un enlace para restablecer la contraseña.",
       "backToSignIn": "Volver a iniciar sesión"
@@ -685,6 +689,7 @@
       "subtitle": "Al guardarla se cerrará tu sesión en los demás dispositivos.",
       "submit": "Guardar contraseña",
       "submitting": "Guardando…",
+      "waiting": "Guardando tu nueva contraseña…",
       "invalidTitle": "Este enlace ya no funciona",
       "invalidBody": "Los enlaces de restablecimiento se usan una sola vez y caducan. Pide uno nuevo.",
       "requestNew": "Enviarme un enlace nuevo"

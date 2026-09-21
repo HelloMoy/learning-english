@@ -1,5 +1,6 @@
 import { redirectSignedInLearner } from "@/lib/auth/redirect-signed-in-learner/redirect-signed-in-learner";
 import { MESSAGES, renderInLocale } from "@/test-setup/render-in-locale";
+import { spokenRegions } from "@/test-setup/spoken-regions/spoken-regions";
 
 import { screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -63,7 +64,9 @@ describe("the sign-in page", () => {
   test("confirms a password reset when arriving from one", async () => {
     renderInLocale(await SignInPage({ params: params(), searchParams: search({ reset: "done" }) }));
 
-    expect(screen.getByRole("status")).toHaveTextContent("Your password was updated.");
+    // The sign-in form keeps an empty live region mounted for its wait, so this
+    // asserts the notice rather than whichever region happens to come first
+    expect(spokenRegions()).toEqual(["Your password was updated. Sign in with the new one."]);
   });
 
   test("links to sign-up, carrying next", async () => {

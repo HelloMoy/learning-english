@@ -1,6 +1,7 @@
 import { useRouter } from "@/i18n/navigation";
 import { authClient } from "@/lib/auth-client/auth-client";
 import { renderInLocale } from "@/test-setup/render-in-locale";
+import { spokenRegions } from "@/test-setup/spoken-regions/spoken-regions";
 
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -75,5 +76,33 @@ describe("ResetPasswordForm", () => {
     renderInLocale(<ResetPasswordForm token="reset-token" />);
 
     expect(screen.getByRole("button", { name: "Save new password" })).toBeEnabled();
+  });
+
+  test("WHEN the request is in flight THEN the form is covered rather than replaced", async () => {
+    resetPassword.mockReturnValue(new Promise(() => {}) as never);
+    renderInLocale(<ResetPasswordForm token="reset-token" />);
+    await userEvent.type(screen.getByLabelText("New password"), "brand-new-password");
+
+    await userEvent.click(screen.getByRole("button", { name: "Save new password" }));
+
+    expect(screen.getByLabelText("New password")).toHaveValue("brand-new-password");
+    expect(screen.getByTestId("account-wait-beam")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Saving…" })).toBeDisabled();
+    expect(spokenRegions()).toEqual(["Saving your new password…"]);
+  });
+
+  test("WHEN the request is refused THEN the form comes back holding what was typed", async () => {
+    resetPassword.mockResolvedValue({
+      data: null,
+      error: { code: "UNKNOWN", status: 500 },
+    } as never);
+    renderInLocale(<ResetPasswordForm token="reset-token" />);
+    await userEvent.type(screen.getByLabelText("New password"), "brand-new-password");
+
+    await userEvent.click(screen.getByRole("button", { name: "Save new password" }));
+
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    expect(screen.getByLabelText("New password")).toHaveValue("brand-new-password");
+    expect(screen.queryByTestId("account-wait-beam")).not.toBeInTheDocument();
   });
 });

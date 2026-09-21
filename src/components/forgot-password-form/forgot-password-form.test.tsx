@@ -1,5 +1,6 @@
 import { authClient } from "@/lib/auth-client/auth-client";
 import { renderInLocale } from "@/test-setup/render-in-locale";
+import { spokenRegions } from "@/test-setup/spoken-regions/spoken-regions";
 import { localizeGetPathname } from "@/test-setup/stubs/localized-pathname";
 import { PASSED_CHALLENGE_TOKEN } from "@/test-setup/stubs/turnstile-challenge";
 
@@ -64,5 +65,37 @@ describe("ForgotPasswordForm", () => {
 
     expect(screen.getByLabelText("Email")).toHaveAttribute("aria-invalid", "true");
     expect(requestReset).not.toHaveBeenCalled();
+  });
+
+  test("WHEN the request is in flight THEN the form is covered rather than replaced", async () => {
+    requestReset.mockReturnValue(new Promise(() => {}) as never);
+    const email = faker.internet.email();
+    renderInLocale(<ForgotPasswordForm />);
+    await userEvent.type(screen.getByLabelText("Email"), email);
+    await userEvent.click(screen.getByRole("button", { name: "pass challenge" }));
+
+    await userEvent.click(screen.getByRole("button", { name: "Send reset link" }));
+
+    expect(screen.getByLabelText("Email")).toHaveValue(email);
+    expect(screen.getByTestId("account-wait-beam")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sending…" })).toBeDisabled();
+    expect(spokenRegions()).toEqual(["Preparing your reset link…"]);
+  });
+
+  test("WHEN the request is refused THEN the form comes back holding what was typed", async () => {
+    requestReset.mockResolvedValue({
+      data: null,
+      error: { code: "UNKNOWN", status: 500 },
+    } as never);
+    const email = faker.internet.email();
+    renderInLocale(<ForgotPasswordForm />);
+    await userEvent.type(screen.getByLabelText("Email"), email);
+    await userEvent.click(screen.getByRole("button", { name: "pass challenge" }));
+
+    await userEvent.click(screen.getByRole("button", { name: "Send reset link" }));
+
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    expect(screen.getByLabelText("Email")).toHaveValue(email);
+    expect(screen.queryByTestId("account-wait-beam")).not.toBeInTheDocument();
   });
 });
