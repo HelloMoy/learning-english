@@ -18,7 +18,9 @@ async function requestDeletionFromProfile(page: Page): Promise<void> {
   const dialog = page.getByRole("dialog", { name: "Delete your account?" });
   await expect(dialog.getByRole("button", { name: "Cancel" })).toBeFocused();
   await dialog.getByRole("button", { name: "Send confirmation email" }).click();
-  await expect(page.getByRole("status")).toContainText("We sent a confirmation link");
+  await expect(
+    page.getByRole("status").filter({ hasText: "We sent a confirmation link" }),
+  ).toBeVisible();
 }
 
 test.describe("Account deletion", () => {

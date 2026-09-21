@@ -17,6 +17,13 @@ export type AccountShellProps = {
  * password. A heading, an optional subtitle, the page's content, and a footer
  * for the links between those pages.
  *
+ * @remarks
+ * The card is `relative overflow-hidden` so that `AccountWait`'s beam, which
+ * the form inside renders while its request is in flight, anchors to the card's
+ * top edge and is clipped by its rounded corners. That is the only reason for
+ * those two classes; the shell itself knows nothing about the wait and stays a
+ * server component.
+ *
  * @example
  * ```tsx
  * <AccountShell title={t("title")} subtitle={t("subtitle")} footer={<Link href="/sign-up">…</Link>}>
@@ -26,7 +33,7 @@ export type AccountShellProps = {
  */
 export function AccountShell({ title, subtitle, children, footer }: AccountShellProps) {
   return (
-    <section className="mx-auto flex w-full max-w-[26rem] flex-col gap-6 rounded-2xl border border-border bg-card/80 p-6 shadow-sm backdrop-blur sm:p-8">
+    <section className="relative mx-auto flex w-full max-w-[26rem] flex-col gap-6 overflow-hidden rounded-2xl border border-border bg-card/80 p-6 shadow-sm backdrop-blur sm:p-8">
       <header className="flex flex-col gap-2 text-center">
         <h1 className="font-sans text-[1.75rem] leading-tight font-extrabold tracking-tight text-balance text-foreground">
           {title}

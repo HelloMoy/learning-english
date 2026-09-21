@@ -1,5 +1,6 @@
 import { authClient } from "@/lib/auth-client/auth-client";
 import { MESSAGES, renderInLocale } from "@/test-setup/render-in-locale";
+import { spokenRegions } from "@/test-setup/spoken-regions/spoken-regions";
 import { localizeGetPathname } from "@/test-setup/stubs/localized-pathname";
 
 import NiceModal from "@ebay/nice-modal-react";
@@ -66,10 +67,45 @@ describe("DeleteAccountSection", () => {
 
     await confirmDeletion();
 
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      MESSAGES.en.Profile.deleteAccount.sent,
-    );
+    expect(spokenRegions()).toEqual([MESSAGES.en.Profile.deleteAccount.sent]);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  test("WHEN the request is in flight THEN the section waits like every account form", async () => {
+    deleteUser.mockReturnValue(new Promise(() => {}) as never);
+    const copy = MESSAGES.en.Profile.deleteAccount;
+    renderSection();
+
+    await confirmDeletion();
+
+    const button = screen.getByRole("button", { name: copy.sending });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("data-variant", "destructive");
+    expect(screen.getByTestId("spinner-arc")).toBeInTheDocument();
+    expect(screen.getByTestId("account-wait-beam")).toBeInTheDocument();
+    expect(spokenRegions()).toEqual([copy.waiting]);
+  });
+
+  test("WHEN the email has been sent THEN the wait is over and the button stays spent", async () => {
+    const copy = MESSAGES.en.Profile.deleteAccount;
+    renderSection();
+
+    await confirmDeletion();
+
+    expect(screen.queryByTestId("account-wait-beam")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: copy.button })).toBeDisabled();
+  });
+
+  test("WHEN the request is refused THEN the wait is over and the button can be pressed again", async () => {
+    deleteUser.mockResolvedValue({ data: null, error: { status: 500 } } as never);
+    const copy = MESSAGES.en.Profile.deleteAccount;
+    renderSection();
+
+    await confirmDeletion();
+
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    expect(screen.queryByTestId("account-wait-beam")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: copy.button })).toBeEnabled();
   });
 
   test("WHEN the request is refused THEN the section says so", async () => {

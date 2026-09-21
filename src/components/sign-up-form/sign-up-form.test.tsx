@@ -1,5 +1,6 @@
 import { authClient } from "@/lib/auth-client/auth-client";
 import { renderInLocale } from "@/test-setup/render-in-locale";
+import { spokenRegions } from "@/test-setup/spoken-regions/spoken-regions";
 import { localizeGetPathname } from "@/test-setup/stubs/localized-pathname";
 import { PASSED_CHALLENGE_TOKEN } from "@/test-setup/stubs/turnstile-challenge";
 
@@ -106,5 +107,37 @@ describe("SignUpForm", () => {
     renderInLocale(<SignUpForm returnPath="/learning" />);
 
     expect(screen.getByRole("button", { name: "Continue with Google" })).toBeInTheDocument();
+  });
+
+  test("WHEN the request is in flight THEN the form is covered rather than replaced", async () => {
+    signUp.mockReturnValue(new Promise(() => {}) as never);
+    const email = faker.internet.email();
+    renderInLocale(<SignUpForm returnPath="/learning" />);
+    await fillIn({ name: faker.person.fullName(), email, password: "long-enough-1" });
+    await userEvent.click(screen.getByRole("button", { name: "pass challenge" }));
+
+    await userEvent.click(screen.getByRole("button", { name: "Create account" }));
+
+    expect(screen.getByLabelText("Email")).toHaveValue(email);
+    expect(screen.getByTestId("account-wait-beam")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Creating account…" })).toBeDisabled();
+    expect(spokenRegions()).toEqual(["Setting up your account…"]);
+  });
+
+  test("WHEN the request is refused THEN the form comes back holding what was typed", async () => {
+    signUp.mockResolvedValue({
+      data: null,
+      error: { code: "UNKNOWN", status: 500 },
+    } as never);
+    const email = faker.internet.email();
+    renderInLocale(<SignUpForm returnPath="/learning" />);
+    await fillIn({ name: faker.person.fullName(), email, password: "long-enough-1" });
+    await userEvent.click(screen.getByRole("button", { name: "pass challenge" }));
+
+    await userEvent.click(screen.getByRole("button", { name: "Create account" }));
+
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    expect(screen.getByLabelText("Email")).toHaveValue(email);
+    expect(screen.queryByTestId("account-wait-beam")).not.toBeInTheDocument();
   });
 });

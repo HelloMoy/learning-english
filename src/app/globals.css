@@ -773,3 +773,76 @@
     animation: none;
   }
 }
+
+/*
+ * The wait an account request shows: a beam of projector light crossing the top
+ * of the card while the request is in flight, and the arc turning on the button
+ * that started it.
+ *
+ * Both are indeterminate by construction. A sweep and a rotation make no claim
+ * about how far along the request is, which is the honest shape here — nothing
+ * the client can observe would support a percentage or a step count.
+ *
+ * The two are given different anchors on purpose: the arc answers "did my press
+ * register" and lives on the control, the beam answers "is the page still
+ * alive" and spans the surface. Different rhythms (720ms against 1250ms) keep
+ * them from reading as one stuttering indicator.
+ *
+ * Plain CSS rather than per-component JavaScript, for the same reason as the
+ * guide and prize animations above: the `prefers-reduced-motion` block
+ * neutralises them for free. What survives it — the dimmed inert fields, the
+ * pending label, the status line — is the part that carries the meaning.
+ */
+/*
+ * The light is 42% of the rail, and `translateX` is a share of the light's own
+ * width — so it clears the left edge at -100% and the right edge at 238%
+ * (100 / 0.42). Travelling any further than that is time spent off-canvas.
+ */
+@keyframes account-wait-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(238%);
+  }
+}
+
+.account-wait-beam {
+  overflow: hidden;
+  background: color-mix(in oklab, var(--gold) 26%, transparent);
+}
+
+/*
+ * The travelling light itself; the bar above is the dim rail it runs along.
+ *
+ * Linear, deliberately. An ease-in-out dwells at both ends of its travel, and
+ * both ends of this travel are outside the card — which turns a sweep into two
+ * flashes at the edges with a long dark gap between them.
+ */
+.account-wait-beam::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 42%;
+  background: linear-gradient(90deg, transparent, var(--gold) 45%, var(--amber) 55%, transparent);
+  box-shadow: 0 0 14px 2px color-mix(in oklab, var(--glow) 55%, transparent);
+  animation: account-wait-sweep 1400ms linear infinite;
+}
+
+@keyframes spinner-arc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner-arc {
+  animation: spinner-arc-spin 720ms linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-wait-beam::after,
+  .spinner-arc {
+    animation: none;
+  }
+}
