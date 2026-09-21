@@ -1,7 +1,25 @@
-import { act, renderHook } from "@testing-library/react";
+import { MESSAGES } from "@/test-setup/render-in-locale";
+
+import { act, renderHook as render } from "@testing-library/react";
+import { NextIntlClientProvider } from "next-intl";
+import type { ReactNode } from "react";
 import { describe, expect, test, vi } from "vitest";
 
 import { useAccountSubmission } from "./use-account-submission";
+
+/** Every account form renders inside the locale provider; the hook reads it. */
+const renderHook: typeof render = (callback, options) =>
+  render(callback, {
+    wrapper: ({ children }: { children: ReactNode }) => (
+      <NextIntlClientProvider
+        locale="es"
+        messages={MESSAGES.es}
+      >
+        {children}
+      </NextIntlClientProvider>
+    ),
+    ...options,
+  });
 
 describe("useAccountSubmission", () => {
   test("WHEN challenged and no token has arrived THEN it is not ready", () => {
@@ -23,7 +41,20 @@ describe("useAccountSubmission", () => {
 
     await act(() => result.current.run(request));
 
-    expect(request).toHaveBeenCalledWith({ headers: { "x-captcha-response": "token-1" } });
+    expect(request).toHaveBeenCalledWith({
+      headers: { "x-captcha-response": "token-1", "x-app-locale": "es" },
+    });
+  });
+
+  test("WHEN a request runs THEN it states the locale the learner is acting in", async () => {
+    // The endpoints that email on success run outside any request locale, so
+    // the browser is the only one that knows which language to write in.
+    const request = vi.fn().mockResolvedValue({ error: null });
+    const { result } = renderHook(() => useAccountSubmission({ challenged: false }));
+
+    await act(() => result.current.run(request));
+
+    expect(request).toHaveBeenCalledWith({ headers: { "x-app-locale": "es" } });
   });
 
   test("WHEN the request succeeds THEN run reports success and no error", async () => {

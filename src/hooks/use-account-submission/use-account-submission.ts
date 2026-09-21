@@ -6,6 +6,7 @@ import {
   type AuthClientError,
 } from "@/lib/account-error-key/account-error-key";
 
+import { useLocale } from "next-intl";
 import { useState } from "react";
 
 /**
@@ -52,10 +53,16 @@ export type AccountSubmission = {
  * Turnstile token is single-use, so a refused attempt spends it: the token is
  * dropped and `challengeKey` changes, which remounts the widget for a new one.
  *
+ * Every request also states the locale as `x-app-locale`. The endpoints that
+ * email on success — a changed password, a completed reset — run their
+ * callbacks outside any request, so the browser is the only one that knows
+ * which of the three catalogues the message should be written in.
+ *
  * @param options - `challenged`: whether the endpoint requires a Turnstile token
  * @returns The submission state and `run`
  */
 export function useAccountSubmission({ challenged }: { challenged: boolean }): AccountSubmission {
+  const locale = useLocale();
   const [token, setToken] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [errorKey, setErrorKey] = useState<AccountErrorKey>();
@@ -73,9 +80,12 @@ export function useAccountSubmission({ challenged }: { challenged: boolean }): A
     setErrorKey(undefined);
     setIsPending(true);
     try {
-      const { error } = await request(
-        challenged && token ? { headers: { "x-captcha-response": token } } : {},
-      );
+      const { error } = await request({
+        headers: {
+          ...(challenged && token ? { "x-captcha-response": token } : {}),
+          "x-app-locale": locale,
+        },
+      });
       if (error) return refuse(accountErrorKey(error));
       setIsPending(false);
       return true;

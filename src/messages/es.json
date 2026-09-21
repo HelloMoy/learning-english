@@ -545,6 +545,32 @@
     "saved": "Tarjeta actualizada",
     "previewLabel": "Tu tarjeta de estudiante",
     "previewNote": "Los cambios aparecen en tu tarjeta mientras editas.",
+    "account": {
+      "heading": "Cuenta",
+      "emailLabel": "Correo",
+      "methodsLabel": "Cómo inicias sesión",
+      "methodPassword": "Correo y contraseña",
+      "methodGoogle": "Google",
+      "googleManaged": "Tu correo viene de Google, así que se cambia allí y esta cuenta no tiene contraseña."
+    },
+    "password": {
+      "heading": "Cambiar tu contraseña",
+      "description": "Al cambiarla se cierra tu sesión en todos los demás dispositivos.",
+      "currentLabel": "Contraseña actual",
+      "newLabel": "Contraseña nueva",
+      "hint": "Entre 8 y 128 caracteres.",
+      "submit": "Cambiar contraseña",
+      "submitting": "Cambiando…",
+      "changed": "Contraseña cambiada. Cerramos tu sesión en los demás dispositivos."
+    },
+    "email": {
+      "heading": "Cambiar tu correo",
+      "description": "Primero enviamos un enlace a {email}. Tu correo cambia solo después de que lo abras y confirmes en el correo nuevo.",
+      "newLabel": "Correo nuevo",
+      "submit": "Cambiar correo",
+      "submitting": "Enviando…",
+      "sent": "Enviamos un enlace a {email}. Ábrelo y luego confirma en el correo nuevo: nada cambia hasta que sigas los dos enlaces."
+    },
     "deleteAccount": {
       "heading": "Borrar cuenta",
       "description": "Borra tu cuenta y todo lo guardado con ella. No se puede deshacer.",
@@ -587,6 +613,24 @@
       "button": "Borrar mi cuenta",
       "linkIntro": "O pega este enlace en tu navegador:",
       "ignore": "Si no lo pediste, ignora este correo: no se borrará nada."
+    },
+    "ChangeEmail": {
+      "subject": "Aprueba el nuevo correo de tu cuenta de English Course",
+      "preview": "Tu correo sigue igual hasta que apruebes este cambio.",
+      "heading": "Aprueba tu nuevo correo",
+      "body": "Alguien pidió mover esta cuenta de English Course a {newEmail}. Apruébalo con el botón de abajo y enviaremos un enlace de confirmación a ese correo nuevo. El cambio solo ocurre cuando abras ese segundo enlace.",
+      "button": "Aprobar el cambio",
+      "linkIntro": "O pega este enlace en tu navegador:",
+      "ignore": "Si no lo pediste, ignora este correo: tu dirección seguirá igual."
+    },
+    "PasswordChanged": {
+      "subject": "Tu contraseña de English Course ha cambiado",
+      "preview": "Si no fuiste tú, recupera tu cuenta ahora.",
+      "heading": "Tu contraseña ha cambiado",
+      "body": "Acabamos de cambiar la contraseña de tu cuenta de English Course y cerramos la sesión en todos los demás dispositivos. Si fuiste tú, no tienes que hacer nada.",
+      "button": "No he sido yo",
+      "linkIntro": "O pega este enlace en tu navegador:",
+      "ignore": "Si no fuiste tú, alguien más tiene tu contraseña. Usa el botón de arriba para elegir una nueva ahora mismo."
     }
   },
   "Account": {
@@ -649,6 +693,7 @@
       "nameRequired": "Escribe tu nombre.",
       "nameTooLong": "Usa 40 caracteres o menos.",
       "emailInvalid": "Escribe un correo válido.",
+      "emailUnchanged": "Ese ya es tu correo. Escribe uno distinto.",
       "passwordLength": "Usa entre 8 y 128 caracteres."
     },
     "errors": {
@@ -658,6 +703,8 @@
       "tooManyRequests": "Demasiados intentos. Espera un minuto y vuelve a intentarlo.",
       "invalidToken": "Este enlace ya no funciona. Pide uno nuevo.",
       "passwordLength": "Usa entre 8 y 128 caracteres.",
+      "invalidPassword": "Esa no es tu contraseña actual.",
+      "noPassword": "Esta cuenta entra con Google, así que no tiene contraseña que cambiar.",
       "generic": "Algo salió mal. Inténtalo de nuevo en un momento."
     },
     "accountDeleted": {

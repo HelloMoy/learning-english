@@ -2,6 +2,8 @@ import { faker } from "@faker-js/faker";
 import { describe, expect, test } from "vitest";
 
 import {
+  changeEmailSchema,
+  changePasswordSchema,
   forgotPasswordSchema,
   formErrors,
   resetPasswordSchema,
@@ -44,6 +46,51 @@ describe("formErrors", () => {
     expect(formErrors(signUpSchema, { ...valid(), name: "x".repeat(41) })).toEqual({
       name: "nameTooLong",
     });
+  });
+
+  test("WHEN a password change carries both passwords THEN it is accepted", () => {
+    expect(
+      formErrors(changePasswordSchema, {
+        currentPassword: faker.internet.password({ length: 12 }),
+        newPassword: faker.internet.password({ length: 12 }),
+      }),
+    ).toEqual({});
+  });
+
+  test("WHEN the new password is too short THEN only it is refused", () => {
+    expect(
+      formErrors(changePasswordSchema, {
+        currentPassword: faker.internet.password({ length: 12 }),
+        newPassword: "1234567",
+      }),
+    ).toEqual({ newPassword: "passwordLength" });
+  });
+
+  test("WHEN the current password is missing THEN it is refused with the length message", () => {
+    expect(
+      formErrors(changePasswordSchema, {
+        currentPassword: "",
+        newPassword: faker.internet.password({ length: 12 }),
+      }),
+    ).toEqual({ currentPassword: "passwordLength" });
+  });
+
+  test("WHEN an email change carries a valid new address THEN it is accepted", () => {
+    expect(
+      formErrors(changeEmailSchema("ana@example.com"), { newEmail: faker.internet.email() }),
+    ).toEqual({});
+  });
+
+  test("WHEN an email change carries a malformed address THEN it is refused", () => {
+    expect(formErrors(changeEmailSchema("ana@example.com"), { newEmail: "ana@" })).toEqual({
+      newEmail: "emailInvalid",
+    });
+  });
+
+  test("WHEN an email change carries the address the account already holds THEN it is refused", () => {
+    expect(
+      formErrors(changeEmailSchema("ana@example.com"), { newEmail: "Ana@Example.com" }),
+    ).toEqual({ newEmail: "emailUnchanged" });
   });
 
   test("WHEN several fields are wrong THEN each reports its own first problem", () => {

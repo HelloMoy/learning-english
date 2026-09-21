@@ -38,6 +38,28 @@ describe("localeFromActionUrl", () => {
   test("falls back to the default locale for a string that is not a URL", () => {
     expect(localeFromActionUrl("not a url")).toBe("en");
   });
+
+  describe("GIVEN a link into the app rather than into the auth API", () => {
+    test("WHEN it carries no callbackURL THEN the locale comes from its first path segment", () => {
+      // The password-changed notice links straight at a page, so the locale it
+      // is written in is the one already spelled in the path.
+      expect(localeFromActionUrl("https://english-course.online/es/forgot-password")).toBe("es");
+      expect(localeFromActionUrl("http://localhost:3000/pt/forgot-password")).toBe("pt");
+    });
+
+    test("WHEN it carries a callbackURL too THEN that stays the source", () => {
+      expect(localeFromActionUrl("http://localhost:3000/en/x?callbackURL=%2Fpt%2Flearning")).toBe(
+        "pt",
+      );
+    });
+
+    test("WHEN its first segment is not a locale THEN the default still wins", () => {
+      expect(localeFromActionUrl("http://localhost:3000/api/auth/verify-email?token=abc")).toBe(
+        "en",
+      );
+      expect(localeFromActionUrl("http://localhost:3000/fr/forgot-password")).toBe("en");
+    });
+  });
 });
 
 describe("composeAccountEmail", () => {
@@ -64,6 +86,28 @@ describe("composeAccountEmail", () => {
 
     expect(email.subject).toBe(es.Emails.ResetPassword.subject);
     expect(email.html).toContain(url.replaceAll("&", "&amp;"));
+    expect(email.text).toContain(url);
+  });
+
+  test("writes a change-email approval that names the address it would move to", async () => {
+    const url = "http://localhost:3000/api/auth/verify-email?token=tok&callbackURL=%2Fes%2Fprofile";
+
+    const email = await composeAccountEmail("change-email", url, { newEmail: "ana.g@example.com" });
+
+    expect(email.subject).toBe(es.Emails.ChangeEmail.subject);
+    expect(email.text).toContain("ana.g@example.com");
+    expect(email.text).toContain(es.Emails.ChangeEmail.ignore);
+    expect(email.html).toContain(es.Emails.ChangeEmail.button);
+  });
+
+  test("writes a password-changed notice in the locale its own link spells", async () => {
+    const url = "https://english-course.online/es/forgot-password";
+
+    const email = await composeAccountEmail("password-changed", url);
+
+    expect(email.subject).toBe(es.Emails.PasswordChanged.subject);
+    expect(email.text).toContain(es.Emails.PasswordChanged.ignore);
+    expect(email.html).toContain(es.Emails.PasswordChanged.button);
     expect(email.text).toContain(url);
   });
 

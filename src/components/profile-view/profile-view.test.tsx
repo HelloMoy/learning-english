@@ -36,12 +36,22 @@ beforeEach(() => {
   vi.mocked(useRouter).mockReturnValue(router as never);
 });
 
-const renderProfile = (profiles = makeStubLearnerProfileRepository({ profile })) =>
+const account = {
+  name: "Ana García",
+  email: "ana@example.com",
+  signInMethods: ["password"] as const,
+};
+
+const renderProfile = (
+  profiles = makeStubLearnerProfileRepository({ profile }),
+  identity: typeof account | null = account,
+) =>
   renderInLocale(
     <ProfileView
       profiles={profiles}
       level={level}
       lessonRuntimes={lessonRuntimes}
+      account={identity}
     />,
   );
 
@@ -81,6 +91,23 @@ describe("ProfileView", () => {
         await screen.findByRole("heading", { level: 2, name: "Delete account" }),
       ).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Delete account" })).toBeInTheDocument();
+    });
+
+    test("WHEN the page opens THEN the account section stands between the card form and the deletion", async () => {
+      renderProfile();
+
+      const headings = (await screen.findAllByRole("heading", { level: 2 })).map(
+        (heading) => heading.textContent,
+      );
+      expect(headings).toEqual(["Account", "Delete account"]);
+      expect(screen.getByText("ana@example.com")).toBeInTheDocument();
+    });
+
+    test("WHEN the account is not known THEN the page still edits the card and offers no settings", async () => {
+      renderProfile(makeStubLearnerProfileRepository({ profile }), null);
+
+      expect(await screen.findByRole("textbox", { name: "Name" })).toHaveValue("Ana García");
+      expect(screen.queryByRole("heading", { level: 2, name: "Account" })).not.toBeInTheDocument();
     });
 
     test("WHEN videos are complete THEN the card counts them", async () => {

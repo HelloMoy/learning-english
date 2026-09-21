@@ -53,7 +53,7 @@ describe("SignInForm", () => {
 
     expect(signIn).toHaveBeenCalledWith(
       { email, password: "long-enough-1", callbackURL: "/es/courses/basics" },
-      { headers: { "x-captcha-response": PASSED_CHALLENGE_TOKEN } },
+      { headers: { "x-captcha-response": PASSED_CHALLENGE_TOKEN, "x-app-locale": "es" } },
     );
     expect(router.replace).toHaveBeenCalledWith("/courses/basics");
     expect(router.refresh).toHaveBeenCalled();

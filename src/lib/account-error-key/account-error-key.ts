@@ -8,6 +8,8 @@ const KEY_BY_CODE = {
   INVALID_TOKEN: "invalidToken",
   PASSWORD_TOO_SHORT: "passwordLength",
   PASSWORD_TOO_LONG: "passwordLength",
+  INVALID_PASSWORD: "invalidPassword",
+  CREDENTIAL_ACCOUNT_NOT_FOUND: "noPassword",
 } as const;
 
 /**

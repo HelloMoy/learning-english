@@ -1,5 +1,6 @@
 import { ProfileView } from "@/components/profile-view/profile-view";
 import { requireSupportedLocale } from "@/i18n/require-supported-locale/require-supported-locale";
+import { currentAccount } from "@/lib/auth/current-account/current-account";
 import { personalRouteMetadata } from "@/lib/share-metadata/share-metadata";
 
 import type { Metadata } from "next";
@@ -27,13 +28,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-/** The Profile page: the learner card's editor, with the first level's progress. */
+/**
+ * The Profile page: the learner card's editor, with the first level's
+ * progress, and the account settings the session answers for.
+ */
 export default function ProfilePage({ params }: Props) {
   const { locale } = use(params);
   setRequestLocale(locale);
 
   const first = firstLearnerLevel(use(loadCatalogEntries()));
   if (!first) notFound();
+
+  // The layout has already refused a request without a session, so the only
+  // account this can be missing is one signed out between the two reads.
+  const account = use(currentAccount());
 
   return (
     <main
@@ -43,6 +51,7 @@ export default function ProfilePage({ params }: Props) {
       <ProfileView
         level={first.level}
         lessonRuntimes={first.lessonRuntimes}
+        account={account}
       />
     </main>
   );

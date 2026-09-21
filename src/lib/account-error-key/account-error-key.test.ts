@@ -11,6 +11,8 @@ describe("accountErrorKey", () => {
     ["INVALID_TOKEN", "invalidToken"],
     ["PASSWORD_TOO_SHORT", "passwordLength"],
     ["PASSWORD_TOO_LONG", "passwordLength"],
+    ["INVALID_PASSWORD", "invalidPassword"],
+    ["CREDENTIAL_ACCOUNT_NOT_FOUND", "noPassword"],
   ])("WHEN Better Auth answers %s THEN the %s message is shown", (code, key) => {
     expect(accountErrorKey({ code, status: 400 })).toBe(key);
   });

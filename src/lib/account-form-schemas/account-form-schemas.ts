@@ -32,13 +32,36 @@ export const forgotPasswordSchema = z.object({ email });
 /** The reset-password form: the new password. */
 export const resetPasswordSchema = z.object({ password });
 
+/** The change-password form: the password in force and the one replacing it. */
+export const changePasswordSchema = z.object({ currentPassword: password, newPassword: password });
+
+/**
+ * The change-email form: the address the account would move to, which has to
+ * differ from the one it holds today.
+ *
+ * @remarks
+ * A schema per current address rather than a constant, because "already
+ * yours" is only answerable against the address the server gave the page.
+ * Better Auth refuses the same address too, but without an error code, so
+ * catching it here is what keeps the refusal a localized message.
+ *
+ * @param currentEmail - The address the account is registered with
+ * @returns The schema for that account's form
+ */
+export const changeEmailSchema = (currentEmail: string) =>
+  z.object({
+    newEmail: email.refine((value) => value.toLowerCase() !== currentEmail.toLowerCase(), {
+      error: "emailUnchanged",
+    }),
+  });
+
 /**
  * An `Account.validation.*` key.
  *
  * @category Auth
  */
 export type AccountValidationKey =
-  "emailInvalid" | "passwordLength" | "nameRequired" | "nameTooLong";
+  "emailInvalid" | "emailUnchanged" | "passwordLength" | "nameRequired" | "nameTooLong";
 
 /**
  * Validates form values and reports, per field, the first problem found.

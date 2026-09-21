@@ -545,6 +545,32 @@
     "saved": "Card updated",
     "previewLabel": "Your learner card",
     "previewNote": "Changes show on your card as you edit.",
+    "account": {
+      "heading": "Account",
+      "emailLabel": "Email address",
+      "methodsLabel": "How you sign in",
+      "methodPassword": "Email and password",
+      "methodGoogle": "Google",
+      "googleManaged": "Your address comes from Google, so it is changed there and this account has no password."
+    },
+    "password": {
+      "heading": "Change your password",
+      "description": "Changing it signs you out on every other device.",
+      "currentLabel": "Current password",
+      "newLabel": "New password",
+      "hint": "Between 8 and 128 characters.",
+      "submit": "Change password",
+      "submitting": "Changing…",
+      "changed": "Password changed. You were signed out on every other device."
+    },
+    "email": {
+      "heading": "Change your email address",
+      "description": "We send a link to {email} first. Your address changes only after you open it and confirm on the new address.",
+      "newLabel": "New email address",
+      "submit": "Change email",
+      "submitting": "Sending…",
+      "sent": "We sent a link to {email}. Open it, then confirm on the new address — nothing changes until you follow both links."
+    },
     "deleteAccount": {
       "heading": "Delete account",
       "description": "Deletes your account and everything saved with it. This cannot be undone.",
@@ -587,6 +613,24 @@
       "button": "Delete my account",
       "linkIntro": "Or paste this link into your browser:",
       "ignore": "If you did not ask for this, ignore this email: nothing will be deleted."
+    },
+    "ChangeEmail": {
+      "subject": "Approve the new email for your English Course account",
+      "preview": "Your address stays the same until you approve this.",
+      "heading": "Approve your new email address",
+      "body": "Someone asked to move this English Course account to {newEmail}. Approve it with the button below, and we will then send a confirmation link to that new address. The change only happens once you open that second link.",
+      "button": "Approve the change",
+      "linkIntro": "Or paste this link into your browser:",
+      "ignore": "If you did not ask for this, ignore this email: your address stays as it is."
+    },
+    "PasswordChanged": {
+      "subject": "Your English Course password was changed",
+      "preview": "If this was not you, recover your account now.",
+      "heading": "Your password was changed",
+      "body": "The password for your English Course account was just changed, and every other device was signed out. If that was you, there is nothing to do.",
+      "button": "I did not do this",
+      "linkIntro": "Or paste this link into your browser:",
+      "ignore": "If it was not you, someone else has your password. Use the button above to choose a new one straight away."
     }
   },
   "Account": {
@@ -649,6 +693,7 @@
       "nameRequired": "Enter your name.",
       "nameTooLong": "Use 40 characters or fewer.",
       "emailInvalid": "Enter a valid email address.",
+      "emailUnchanged": "That is already your address. Enter a different one.",
       "passwordLength": "Use between 8 and 128 characters."
     },
     "errors": {
@@ -658,6 +703,8 @@
       "tooManyRequests": "Too many attempts. Wait a minute and try again.",
       "invalidToken": "This link no longer works. Ask for a new one.",
       "passwordLength": "Use between 8 and 128 characters.",
+      "invalidPassword": "That is not your current password.",
+      "noPassword": "This account signs in with Google, so it has no password to change.",
       "generic": "Something went wrong. Try again in a moment."
     },
     "accountDeleted": {
