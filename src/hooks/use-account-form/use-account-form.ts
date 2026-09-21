@@ -25,9 +25,13 @@ export type AccountFieldBinding = {
  * Errors appear only after `validate()` — a learner is not told a field is
  * wrong while still typing into it for the first time.
  *
+ * `reset()` returns the form to those same initial values and clears the
+ * errors — what a form that succeeded and stays on the page needs, so the
+ * learner is not left looking at the password they just replaced.
+ *
  * @param schema - The form's schema, from `account-form-schemas`
  * @param initialValues - Every field, empty
- * @returns The current values, a binding per field, and `validate`
+ * @returns The current values, a binding per field, `validate` and `reset`
  *
  * @example
  * ```tsx
@@ -49,6 +53,11 @@ export function useAccountForm<Schema extends z.ZodObject, Values extends Record
     return Object.keys(invalid).length === 0;
   };
 
+  const reset = (): void => {
+    setValues(initialValues);
+    setErrors({});
+  };
+
   const field = (name: keyof Values & string): AccountFieldBinding => ({
     name,
     value: values[name],
@@ -56,5 +65,5 @@ export function useAccountForm<Schema extends z.ZodObject, Values extends Record
     error: errors[name] && t(errors[name]),
   });
 
-  return { values, field, validate };
+  return { values, field, validate, reset };
 }

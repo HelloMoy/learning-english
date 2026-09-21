@@ -1,5 +1,6 @@
 "use client";
 
+import { AccountSection } from "@/components/account-section/account-section";
 import { AvatarPicker } from "@/components/avatar-picker/avatar-picker";
 import { DeleteAccountSection } from "@/components/delete-account-section/delete-account-section";
 import { Eyebrow } from "@/components/eyebrow/eyebrow";
@@ -19,6 +20,7 @@ import {
   type LearnerProfileHandle,
 } from "@/hooks/use-learner-profile/use-learner-profile";
 import { useLearnerRedirect } from "@/hooks/use-learner-redirect/use-learner-redirect";
+import type { LearnerAccountIdentity } from "@/lib/account-identity/account-identity";
 
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -35,20 +37,26 @@ import { useState } from "react";
  * stored card.
  *
  * The page edits an existing card, so a device without one is sent to the
- * onboarding to make it. It ends with {@link DeleteAccountSection}.
+ * onboarding to make it. Below the card form it carries {@link AccountSection}
+ * — the address, the sign-in methods and the forms that change them — and it
+ * ends with {@link DeleteAccountSection}.
  *
  * @param profiles - Overrides the profile storage adapter; tests inject a stub
  * @param level - The level line the card shows
  * @param lessonRuntimes - The level's lessons, for the card's progress line
+ * @param account - Who the learner is to their account; `null` leaves the
+ *   settings out, which is what a session that ended mid-render looks like
  */
 export function ProfileView({
   profiles,
   level,
   lessonRuntimes,
+  account,
 }: {
   profiles?: LearnerProfileRepository;
   level: LearnerCardLevel;
   lessonRuntimes: ReadonlyArray<LessonProgressSlice>;
+  account: LearnerAccountIdentity | null;
 }) {
   const learner = useLearnerProfile(profiles);
   useLearnerRedirect(learner.status, { when: "absent", to: "/start" });
@@ -62,6 +70,7 @@ export function ProfileView({
       save={learner.save}
       level={level}
       lessonRuntimes={lessonRuntimes}
+      account={account}
     />
   );
 }
@@ -76,11 +85,13 @@ function ProfileEditor({
   save,
   level,
   lessonRuntimes,
+  account,
 }: {
   profile: LearnerProfile;
   save: LearnerProfileHandle["save"];
   level: LearnerCardLevel;
   lessonRuntimes: ReadonlyArray<LessonProgressSlice>;
+  account: LearnerAccountIdentity | null;
 }) {
   const t = useTranslations("Profile");
   const [name, setName] = useState(profile.name);
@@ -175,6 +186,7 @@ function ProfileEditor({
             {t("saved")}
           </p>
         ) : null}
+        {account ? <AccountSection account={account} /> : null}
         <DeleteAccountSection />
       </div>
       <CardPreview

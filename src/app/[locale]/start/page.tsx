@@ -1,5 +1,6 @@
 import { OnboardingNameStep } from "@/components/onboarding-name-step/onboarding-name-step";
 import { requireSupportedLocale } from "@/i18n/require-supported-locale/require-supported-locale";
+import { currentAccount } from "@/lib/auth/current-account/current-account";
 import { personalRouteMetadata } from "@/lib/share-metadata/share-metadata";
 
 import type { Metadata } from "next";
@@ -29,7 +30,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 /**
  * Onboarding step 1. A thin shell: it names the first level for the learner
- * card and hands the step to the client, which reads the device's profile.
+ * card, hands the step the name the account was created with, and lets the
+ * client read the device's profile.
  */
 export default function StartPage({ params }: Props) {
   const { locale } = use(params);
@@ -37,6 +39,10 @@ export default function StartPage({ params }: Props) {
 
   const first = firstLearnerLevel(use(loadCatalogEntries()));
   if (!first) notFound();
+
+  // The layout has already refused a request without a session, so the only
+  // account this can be missing is one signed out between the two reads.
+  const account = use(currentAccount());
 
   return (
     <main
@@ -46,6 +52,7 @@ export default function StartPage({ params }: Props) {
       <OnboardingNameStep
         level={first.level}
         videoCount={first.lessonRuntimes.length}
+        accountName={account?.name ?? ""}
       />
     </main>
   );

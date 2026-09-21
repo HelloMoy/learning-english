@@ -26,17 +26,35 @@ const meta = {
     profiles: freshDevice,
     level: { number: 1, courseTitle: "Basic Course" },
     videoCount: 48,
+    accountName: "Ana García",
   },
 } satisfies Meta<typeof OnboardingNameStep>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Before anything is typed: placeholder on the card, Continue unavailable. */
-export const Empty: Story = {};
+/** An account with no name to offer: placeholder on the card, Continue unavailable. */
+export const Empty: Story = {
+  args: { accountName: "" },
+};
+
+/**
+ * The usual case: the account carries the name typed on the sign-up form, so
+ * the card opens with it and the learner only has to confirm.
+ */
+export const SeededFromTheAccount: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(await canvas.findByRole("textbox", { name: "Your name" })).toHaveValue(
+      "Ana García",
+    );
+    await expect(canvas.getByRole("button", { name: "Continue" })).toBeEnabled();
+  },
+};
 
 /** Typing fills the card and its initials. */
 export const Typing: Story = {
+  args: { accountName: "" },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.type(await canvas.findByRole("textbox", { name: "Your name" }), "Ana García");

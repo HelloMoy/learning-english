@@ -1,12 +1,10 @@
 "use client";
 
+import { LearnerCardNameField } from "@/components/learner-card-name-field/learner-card-name-field";
 import { LearnerCard, type LearnerCardLevel } from "@/components/learner-card/learner-card";
 import { OnboardingProgress } from "@/components/onboarding-progress/onboarding-progress";
 import { OnboardingShell } from "@/components/onboarding-shell/onboarding-shell";
-import {
-  LEARNER_NAME_MAX_LENGTH,
-  type LearnerAvatar,
-} from "@/domain/entities/learner-profile/learner-profile";
+import type { LearnerAvatar } from "@/domain/entities/learner-profile/learner-profile";
 import type { LearnerProfileRepository } from "@/domain/ports/learner-profile-repository/learner-profile-repository";
 import { useLearnerProfile } from "@/hooks/use-learner-profile/use-learner-profile";
 import { useLearnerRedirect } from "@/hooks/use-learner-redirect/use-learner-redirect";
@@ -27,6 +25,12 @@ const INITIALS: LearnerAvatar = { kind: "initials" };
  * only one. A card that merely previewed the name put the same words — `Your
  * name` — in two places, and learners clicked the one that could not answer.
  *
+ * The field opens holding `accountName`, the name the account was created
+ * with, so the learner confirms a name instead of retyping the one they gave
+ * minutes ago on the sign-up form. It is a starting value and nothing more:
+ * clearing or rewriting it is what gets saved, and a blank account name opens
+ * an empty field.
+ *
  * Continue saves a profile with the name and the initials avatar — a complete
  * profile, so a learner who leaves before step 2 still has a card — and opens
  * step 2.
@@ -39,21 +43,24 @@ const INITIALS: LearnerAvatar = { kind: "initials" };
  * @param profiles - Overrides the profile storage adapter; tests inject a stub
  * @param level - The level line the card shows
  * @param videoCount - How many videos that course holds, for the card's progress line
+ * @param accountName - The name the account was created with, which seeds the field
  */
 export function OnboardingNameStep({
   profiles,
   level,
   videoCount,
+  accountName,
 }: {
   profiles?: LearnerProfileRepository;
   level: LearnerCardLevel;
   videoCount: number;
+  accountName: string;
 }) {
   const t = useTranslations("Onboarding");
   const learner = useLearnerProfile(profiles);
   const router = useRouter();
   const destinations = useOnboardingDestinations();
-  const [name, setName] = useState("");
+  const [name, setName] = useState(accountName.trim());
   const [isSaving, setIsSaving] = useState(false);
   useLearnerRedirect(isSaving ? "unknown" : learner.status, {
     when: "present",
@@ -91,16 +98,12 @@ export function OnboardingNameStep({
           level={level}
           progress={{ completed: 0, total: videoCount }}
           nameField={
-            <input
-              type="text"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              aria-label={t("name.fieldLabel")}
+            <LearnerCardNameField
+              label={t("name.fieldLabel")}
               placeholder={t("name.placeholder")}
-              autoComplete="name"
+              value={name}
+              onChange={setName}
               autoFocus
-              maxLength={LEARNER_NAME_MAX_LENGTH}
-              className="w-full min-w-0 truncate border-b border-dashed border-muted-foreground/50 bg-transparent pb-1 text-2xl leading-[1.05] font-extrabold tracking-tight text-foreground caret-gold transition-colors placeholder:font-extrabold placeholder:text-muted-foreground/60 focus-visible:border-solid focus-visible:border-gold focus-visible:outline-none sm:text-3xl"
             />
           }
         />

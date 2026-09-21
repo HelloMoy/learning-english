@@ -40,6 +40,11 @@ const meta = {
     profiles: learner,
     level: { number: 1, courseTitle: "Basic Course" },
     lessonRuntimes,
+    account: {
+      name: "Ana García",
+      email: "ana@example.com",
+      signInMethods: ["password"],
+    },
   },
   decorators: [
     (Story) => (

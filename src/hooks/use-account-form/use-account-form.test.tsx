@@ -45,6 +45,19 @@ describe("useAccountForm", () => {
     expect(result.current.field("password").error).toBe("Usa entre 8 y 128 caracteres.");
   });
 
+  test("WHEN reset THEN every field is empty again and no error is left behind", () => {
+    const { result } = renderForm();
+    act(() => {
+      result.current.field("email").onChange("ana@example.com");
+      result.current.validate();
+    });
+
+    act(() => result.current.reset());
+
+    expect(result.current.values).toEqual({ name: "", email: "", password: "" });
+    expect(result.current.field("name").error).toBeUndefined();
+  });
+
   test("WHEN validated with good values THEN it passes and no field carries an error", () => {
     const { result } = renderForm();
     act(() => {

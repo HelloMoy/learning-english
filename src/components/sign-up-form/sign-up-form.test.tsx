@@ -72,7 +72,7 @@ describe("SignUpForm", () => {
 
     expect(signUp).toHaveBeenCalledWith(
       { ...values, callbackURL: "/es/courses/basics" },
-      { headers: { "x-captcha-response": PASSED_CHALLENGE_TOKEN } },
+      { headers: { "x-captcha-response": PASSED_CHALLENGE_TOKEN, "x-app-locale": "es" } },
     );
   });
 

@@ -1,3 +1,5 @@
+import { LearnerCardNameField } from "@/components/learner-card-name-field/learner-card-name-field";
+
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, userEvent, within } from "storybook/test";
 
@@ -42,18 +44,19 @@ export const WithIllustration: Story = {
 };
 
 /**
- * Onboarding step 1 hands the card the name field itself, so the learner types
- * where the name will live. The field belongs to the step; the card only makes
- * room for it.
+ * Both onboarding steps hand the card the name field itself, so the learner
+ * types where the name will live. The field belongs to the step; the card only
+ * makes room for it. See `Components/LearnerCardNameField` for the field alone.
  */
 export const WithNameField: Story = {
   args: {
     name: "Ana García",
     nameField: (
-      <input
-        aria-label="Your name"
-        defaultValue="Ana García"
-        className="w-full min-w-0 truncate border-b border-dashed border-muted-foreground/50 bg-transparent pb-1 text-2xl leading-[1.05] font-extrabold tracking-tight text-foreground caret-gold transition-colors focus-visible:border-solid focus-visible:border-gold focus-visible:outline-none sm:text-3xl"
+      <LearnerCardNameField
+        label="Your name"
+        placeholder="Your name"
+        value="Ana García"
+        onChange={() => {}}
       />
     ),
   },

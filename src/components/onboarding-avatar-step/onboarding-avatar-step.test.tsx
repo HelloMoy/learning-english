@@ -69,11 +69,52 @@ describe("OnboardingAvatarStep", () => {
         await screen.findByRole("heading", { level: 1, name: "Now pick your avatar" }),
       ).toBeInTheDocument();
       expect(screen.getByText("Step 2 of 2")).toBeInTheDocument();
-      expect(screen.getByText("Ana García")).toBeInTheDocument();
+      expect(screen.getByRole("textbox", { name: "Your name" })).toHaveValue("Ana García");
       expect(screen.getByRole("radio", { name: "Initials" })).toHaveAttribute(
         "aria-checked",
         "true",
       );
+    });
+
+    test("WHEN the name is corrected on the card THEN the card follows and nothing is saved yet", async () => {
+      // The card is right there: a learner who spots a typo should not have to go back.
+      const user = userEvent.setup();
+      const profiles = makeStubLearnerProfileRepository({ profile });
+      renderStep({ profiles });
+
+      const field = await screen.findByRole("textbox", { name: "Your name" });
+      await user.clear(field);
+      await user.type(field, "Ana G.");
+
+      expect(screen.getByRole("img", { name: "Avatar: Ana G." })).toHaveTextContent("AG");
+      expect(await profiles.get()).toEqual(profile);
+    });
+
+    test("WHEN Continue is pressed after editing THEN the new name is saved with the avatar", async () => {
+      const user = userEvent.setup();
+      const profiles = makeStubLearnerProfileRepository({ profile });
+      renderStep({ profiles });
+
+      const field = await screen.findByRole("textbox", { name: "Your name" });
+      await user.clear(field);
+      await user.type(field, " Ana G. ");
+      await user.click(screen.getByRole("radio", { name: "Echo" }));
+      await user.click(screen.getByRole("button", { name: "Continue" }));
+
+      await waitFor(() => expect(router.push).toHaveBeenCalledWith("/learning"));
+      expect(await profiles.get()).toEqual({
+        name: "Ana G.",
+        avatar: { kind: "illustration", id: "echo" },
+      });
+    });
+
+    test("WHEN the name is emptied THEN Continue stays unavailable", async () => {
+      const user = userEvent.setup();
+      renderStep();
+
+      await user.clear(await screen.findByRole("textbox", { name: "Your name" }));
+
+      expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
     });
 
     test("WHEN an illustration is picked THEN the card shows it before anything is saved", async () => {

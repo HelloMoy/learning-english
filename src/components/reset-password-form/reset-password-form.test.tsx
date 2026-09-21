@@ -31,7 +31,7 @@ describe("ResetPasswordForm", () => {
 
     expect(resetPassword).toHaveBeenCalledWith(
       { newPassword: "brand-new-password", token: "reset-token" },
-      {},
+      { headers: { "x-app-locale": "en" } },
     );
     expect(router.replace).toHaveBeenCalledWith("/sign-in?reset=done");
   });
