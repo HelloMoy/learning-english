@@ -64,4 +64,25 @@ describe("DeleteAccount", () => {
   test("declares preview props so the preview server renders it alone", () => {
     expect(DeleteAccount.PreviewProps.url).toMatch(/^https?:\/\//);
   });
+
+  describe("GIVEN a link that cannot be taken back", () => {
+    test("WHEN the email is rendered THEN its call to action is destructive AND never the gold primary", async () => {
+      // Arrange
+      const url = faker.internet.url();
+
+      // Act
+      const html = await render(
+        <DeleteAccount
+          lang="en"
+          copy={copy}
+          url={url}
+        />,
+      );
+
+      // Assert
+      expect(html).toContain("background-color:#331512");
+      expect(html).toContain("color:#ef9d8c");
+      expect(html).not.toContain("background-color:#e7b64c");
+    });
+  });
 });
