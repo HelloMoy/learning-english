@@ -9,6 +9,11 @@
       "sizeDefault": "Predeterminado",
       "sizeLarge": "Grande"
     },
+    "LearnerCardNameField": {
+      "label": "Tu nombre",
+      "placeholder": "Tu nombre",
+      "seeded": "Ana García"
+    },
     "CinemaHero": {
       "eyebrow": "En reproducción",
       "title": "Habla con confianza",
