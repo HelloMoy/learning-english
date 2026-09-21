@@ -32,9 +32,7 @@ describe("AccountSection", () => {
   test("WHEN the learner signs in with a password THEN the address is text and both forms are offered", () => {
     renderSection(anAccount(["password"]));
 
-    expect(
-      screen.getByRole("heading", { level: 2, name: copy.account.heading }),
-    ).toBeInTheDocument();
+    expect(screen.getByText(copy.account.emailLabel)).toBeInTheDocument();
     expect(screen.getByText("ana@example.com")).toBeInTheDocument();
     expect(screen.getByText(copy.account.methodPassword)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: copy.password.heading })).toBeInTheDocument();
@@ -72,8 +70,14 @@ describe("AccountSection", () => {
     renderSection(anAccount(["password"]), "pt");
 
     const portuguese = MESSAGES.pt.Profile.account;
-    expect(screen.getByRole("heading", { level: 2, name: portuguese.heading })).toBeInTheDocument();
     expect(screen.getByText(portuguese.emailLabel)).toBeInTheDocument();
     expect(screen.getByText(portuguese.methodsLabel)).toBeInTheDocument();
+  });
+
+  test("WHEN it renders THEN it brings no heading of its own — the page's section owns it", () => {
+    renderSection(anAccount(["password"]));
+
+    expect(screen.queryByRole("heading", { level: 2 })).not.toBeInTheDocument();
+    expect(screen.queryByText(copy.account.heading)).not.toBeInTheDocument();
   });
 });

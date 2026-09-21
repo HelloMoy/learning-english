@@ -36,12 +36,19 @@ const confirmDeletion = async (copy = MESSAGES.en.Profile.deleteAccount) => {
 };
 
 describe("DeleteAccountSection", () => {
-  test("WHEN it renders in Portuguese THEN its heading and button come from pt", () => {
+  test("WHEN it renders in Portuguese THEN its button comes from pt", () => {
     renderSection("pt");
 
     const copy = MESSAGES.pt.Profile.deleteAccount;
-    expect(screen.getByRole("heading", { name: copy.heading })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: copy.button })).toBeInTheDocument();
+  });
+
+  test("WHEN it renders THEN it brings neither heading nor description — the page's section owns them", () => {
+    renderSection();
+
+    const copy = MESSAGES.en.Profile.deleteAccount;
+    expect(screen.queryByRole("heading")).not.toBeInTheDocument();
+    expect(screen.queryByText(copy.description)).not.toBeInTheDocument();
   });
 
   test("WHEN the learner cancels THEN nothing is requested", async () => {

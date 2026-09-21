@@ -8,7 +8,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { use } from "react";
 
-import { firstLearnerLevel, loadCatalogEntries } from "../catalog-levels";
+import { catalogLevels, firstLearnerLevel, loadCatalogEntries } from "../catalog-levels";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -36,21 +36,25 @@ export default function ProfilePage({ params }: Props) {
   const { locale } = use(params);
   setRequestLocale(locale);
 
-  const first = firstLearnerLevel(use(loadCatalogEntries()));
+  const entries = use(loadCatalogEntries());
+  const first = firstLearnerLevel(entries);
   if (!first) notFound();
 
   // The layout has already refused a request without a session, so the only
   // account this can be missing is one signed out between the two reads.
   const account = use(currentAccount());
 
+  // The save bar docks to the bottom of the viewport, so the page keeps that
+  // much room under its last section whether or not the bar is up.
   return (
     <main
       id="main"
-      className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-10 sm:px-11 sm:py-16"
+      className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 pt-10 pb-32 sm:px-11 sm:pt-16 sm:pb-36"
     >
       <ProfileView
         level={first.level}
         lessonRuntimes={first.lessonRuntimes}
+        levels={catalogLevels(entries)}
         account={account}
       />
     </main>

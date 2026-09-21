@@ -536,15 +536,31 @@
   },
   "Profile": {
     "eyebrow": "Perfil",
-    "heading": "Edita tu tarjeta de estudiante",
-    "intro": "Tu nombre y tu avatar se guardan en tu cuenta.",
+    "intro": "Tu tarjeta, tu cuenta y tus preferencias.",
+    "sections": {
+      "identity": "Identidad",
+      "identityNote": "Los cambios aparecen en tu tarjeta mientras editas.",
+      "preferences": "Preferencias"
+    },
+    "progress": {
+      "heading": "Tu progreso en {course}",
+      "videos": "{completed} de {total, plural, one {# vídeo} other {# vídeos}}",
+      "percent": "{percent, number, percent}",
+      "ticketsLabel": "Tickets ganados",
+      "prizesLabel": "Premios conseguidos"
+    },
     "nameLabel": "Nombre",
     "avatarLabel": "Avatar",
+    "preferences": {
+      "languageLabel": "Idioma de la interfaz",
+      "themeLabel": "Tema"
+    },
     "discard": "Descartar",
     "save": "Guardar cambios",
     "saved": "Tarjeta actualizada",
-    "previewLabel": "Tu tarjeta de estudiante",
-    "previewNote": "Los cambios aparecen en tu tarjeta mientras editas.",
+    "saveBar": {
+      "unsaved": "Tienes cambios sin guardar"
+    },
     "account": {
       "heading": "Cuenta",
       "emailLabel": "Correo",

@@ -1,7 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 
 import { attemptSignIn, signInAs, test } from "./learner-account-fixture";
-import { seedLearnerProfile } from "./learner-profile-fixture";
+import { ONBOARDED_LEARNER, seedLearnerProfile } from "./learner-profile-fixture";
 import { authLinkMailedTo } from "./mailpit-inbox";
 
 /**
@@ -61,7 +61,9 @@ test.describe("Account deletion", () => {
     await signInAs(later, learnerAccount);
     const laterPage = await later.newPage();
     await laterPage.goto("/en/profile");
-    await expect(laterPage.getByRole("heading", { level: 1 })).toHaveText("Edit your learner card");
+    // The Profile page is titled with the learner, so its heading is the proof
+    // that the account — and its card — outlived the link.
+    await expect(laterPage.getByRole("heading", { level: 1 })).toHaveText(ONBOARDED_LEARNER.name);
     await later.close();
   });
 });
