@@ -64,4 +64,24 @@ describe("ResetPassword", () => {
   test("declares preview props so the preview server renders it alone", () => {
     expect(ResetPassword.PreviewProps.url).toMatch(/^https?:\/\//);
   });
+
+  describe("GIVEN a link the learner can follow again", () => {
+    test("WHEN the email is rendered THEN its call to action is the gold primary", async () => {
+      // Arrange
+      const url = faker.internet.url();
+
+      // Act
+      const html = await render(
+        <ResetPassword
+          lang="en"
+          copy={copy}
+          url={url}
+        />,
+      );
+
+      // Assert
+      expect(html).toContain("background-color:#e7b64c");
+      expect(html).toContain("color:#1a1200");
+    });
+  });
 });
