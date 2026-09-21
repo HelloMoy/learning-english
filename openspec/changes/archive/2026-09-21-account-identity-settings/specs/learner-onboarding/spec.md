@@ -1,8 +1,5 @@
-# learner-onboarding Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change learner-onboarding. Update Purpose after archive.
-## Requirements
 ### Requirement: Step one asks for the learner's name on a live card
 
 The route `/[locale]/start` SHALL render step 1 of 2 of the onboarding: a heading inviting the learner
@@ -95,25 +92,6 @@ saved name unchanged.
 - **WHEN** the learner presses Continue on `/en/start/avatar?next=%2Fcourses%2Fc%2Fmodules%2Fm`
 - **THEN** the chosen avatar is saved and `/en/courses/c/modules/m` opens
 
-### Requirement: The onboarding steps are guarded by the profile
-
-After hydration, `/[locale]/start` SHALL replace itself with the valid `next` path when a profile
-already exists, or with `/[locale]/learning` when there is no valid `next`. `/[locale]/start/avatar`
-SHALL replace itself with `/[locale]/start` when no profile exists, carrying a valid `next` along.
-Until storage has been read each step SHALL render a placeholder of its own shape.
-
-#### Scenario: A learner with a profile skips onboarding
-- **WHEN** a device with a saved profile opens `/en/start`
-- **THEN** it lands on `/en/learning`
-
-#### Scenario: A learner with a profile goes straight to the requested course route
-- **WHEN** a device with a saved profile opens `/en/start?next=%2Fcourses%2Fc`
-- **THEN** it lands on `/en/courses/c`
-
-#### Scenario: Step two needs step one
-- **WHEN** a device without a profile opens `/en/start/avatar`
-- **THEN** it lands on `/en/start`
-
 ### Requirement: Onboarding copy is localized and marks its progress
 
 Every onboarding string SHALL come from the active locale's messages in `en`, `es` and `pt`, and each
@@ -127,47 +105,3 @@ Step 2's name field SHALL take its accessible name and placeholder from the same
 #### Scenario: Step two in Portuguese
 - **WHEN** `/pt/start/avatar` renders
 - **THEN** the heading, intro, the card's name field label, Continue and step label render from `pt.json`
-
-### Requirement: Course routes require a learner profile
-
-Every course route SHALL first require a session, as the `learner-account` capability's "Personal routes require a session" defines. A signed-in learner SHALL then, after hydration, be replaced to `/[locale]/start?next=<path>` when the device holds no learner profile. Course routes are `/[locale]/courses/[courseSlug]`,
-`/[locale]/courses/[courseSlug]/modules/[moduleSlug]` and
-`/[locale]/courses/[courseSlug]/modules/[moduleSlug]/lessons/[lessonId]`. `<path>` is the
-requested route's path without the locale prefix. The redirect SHALL apply however the route was
-reached (landing link, shared link, typed URL). Nothing SHALL be decided while the profile is
-unknown. The server SHALL render the route's full content only to a request with a valid session.
-
-#### Scenario: A lesson link on a device without a profile opens the onboarding
-- **WHEN** a signed-in learner whose device has no profile opens `/en/courses/c/modules/m/lessons/l`
-- **THEN** they land on `/en/start?next=%2Fcourses%2Fc%2Fmodules%2Fm%2Flessons%2Fl`
-
-#### Scenario: A landing catalog card on a device without a profile opens the onboarding
-- **WHEN** a signed-in learner whose device has no profile follows a course card from `/en`
-- **THEN** they land on `/en/start` carrying that course path as `next`
-
-#### Scenario: A learner with a profile stays on the course route
-- **WHEN** a signed-in learner whose device has a saved profile opens `/en/courses/c`
-- **THEN** the course overview stays open
-
-#### Scenario: A visitor without a session is sent to sign in first
-- **WHEN** `/en/courses/c` is requested without a session
-- **THEN** the response redirects to `/en/sign-in?next=%2Fcourses%2Fc` and contains no course content
-
-### Requirement: Only internal course paths are accepted as the onboarding return
-
-The onboarding SHALL treat `next` as valid only when it is a path that starts with `/courses/`, has
-no scheme, no host, no `//` sequence, no backslash and no `..` segment. An invalid or missing `next`
-SHALL be ignored, and the onboarding SHALL behave as though none was given.
-
-#### Scenario: An external URL is ignored
-- **WHEN** `/en/start?next=https%3A%2F%2Fevil.example` is completed
-- **THEN** finishing step 2 opens `/en/learning`
-
-#### Scenario: A protocol-relative path is ignored
-- **WHEN** `next` is `//evil.example/courses/c`
-- **THEN** it is ignored
-
-#### Scenario: A non-course internal path is ignored
-- **WHEN** `next` is `/profile`
-- **THEN** it is ignored
-
