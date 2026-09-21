@@ -2,6 +2,7 @@ import { withThemeByClassName } from "@storybook/addon-themes";
 import type { Preview } from "@storybook/nextjs-vite";
 
 import { withNextIntl } from "./i18n.tsx";
+import { withNuqs } from "./nuqs.tsx";
 import { globalTypes, initialGlobals } from "./toolbar";
 
 import "../src/app/globals.css";
@@ -17,6 +18,8 @@ const preview: Preview = {
       defaultTheme: "light",
     }),
     withNextIntl,
+    // Innermost: the closest provider to the component that reads URL state.
+    withNuqs,
   ],
   globalTypes,
   initialGlobals,

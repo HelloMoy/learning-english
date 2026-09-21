@@ -3,6 +3,8 @@ import { fileURLToPath } from "node:url";
 
 import { defineMain } from "@storybook/nextjs-vite/node";
 
+import { stubServerActions } from "./stub-server-actions";
+
 const storybookDir = path.dirname(fileURLToPath(import.meta.url));
 
 /**
@@ -35,6 +37,21 @@ export default defineMain({
     reactDocgen: "react-docgen-typescript",
   },
   viteFinal: async (config) => {
+    // `actions.ts` is imported as "./actions" by the module beside it, so an
+    // alias on its "@/" spelling never fires. Matching the resolved file does.
+    // See `.storybook/actions-stub.ts` for what the preview cannot bundle.
+    config.plugins = [
+      stubServerActions(
+        new Map([
+          [
+            path.resolve(storybookDir, "../src/app/[locale]/actions.ts"),
+            path.resolve(storybookDir, "actions-stub.ts"),
+          ],
+        ]),
+      ),
+      ...(config.plugins ?? []),
+    ];
+
     config.resolve = config.resolve ?? {};
     config.resolve.alias = {
       // Before "@", which would otherwise claim the specifier first. See
