@@ -516,3 +516,37 @@ describe("SiteHeader session", () => {
     expect(screen.getByRole("button", { name: "signOut" })).toBeInTheDocument();
   });
 });
+
+describe("SiteHeader wordmark destination", () => {
+  const wordmark = () => screen.getByRole("link", { name: /english.*course/i });
+
+  beforeEach(() => {
+    mockUsePathname.mockReturnValue("/");
+  });
+
+  test("GIVEN no session WHEN rendered THEN the wordmark links to the locale home", () => {
+    render(<SiteHeader />);
+
+    expect(wordmark()).toHaveAttribute("href", "/");
+  });
+
+  test("GIVEN a session WHEN rendered THEN the wordmark links to My learning", () => {
+    mockUseLearnerProfile.mockReturnValue({
+      status: "present",
+      profile: LearnerProfile.parse({ name: "Ana García", avatar: { kind: "initials" } }),
+      save: vi.fn(),
+    });
+
+    render(<SiteHeader signedIn />);
+
+    expect(wordmark()).toHaveAttribute("href", "/learning");
+  });
+
+  test("GIVEN a session but no card WHEN rendered THEN the wordmark still links to My learning", () => {
+    // The destination follows the session, which the server decided, not the
+    // card, which this device may never have been given.
+    render(<SiteHeader signedIn />);
+
+    expect(wordmark()).toHaveAttribute("href", "/learning");
+  });
+});

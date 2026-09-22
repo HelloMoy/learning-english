@@ -56,7 +56,8 @@ export function sectionKey(
  *                 claimed; a route that cannot resolve the catalog marks nothing
  * @param signedIn - Whether the request carries a session, decided on the
  *                   server by the locale layout. Without one the header offers
- *                   Sign in instead of the learner's menu.
+ *                   Sign in instead of the learner's menu, and the wordmark
+ *                   goes to the locale home rather than My learning.
  */
 export function SiteHeader({
   levels = [],
@@ -88,7 +89,7 @@ export function SiteHeader({
             phone. `overflow-hidden` bounds the worst case to a clipped
             wordmark rather than a sideways-scrolling page. */}
         <div className="flex min-w-0 shrink items-baseline gap-4 overflow-hidden">
-          <Brand />
+          <Brand href={signedIn ? "/learning" : "/"} />
           <span className="hidden text-[10px] tracking-[0.24em] text-muted-foreground uppercase sm:inline">
             {t("tagline")} · {section}
           </span>
