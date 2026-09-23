@@ -4,6 +4,7 @@ import { finishThresholdSeconds } from "@/lib/watch-progress/watch-progress";
 
 import { type Page } from "@playwright/test";
 
+import { skipOnCi } from "./ci-unavailable";
 import { modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
 import type { LearnerState } from "./learner-state-fixture";
@@ -68,6 +69,15 @@ async function seedPositions(learnerState: LearnerState) {
 const rowFor = (page: Page, title: string) => page.getByRole("listitem").filter({ hasText: title });
 
 test.describe("watch progress", () => {
+  // Deliberately NOT quarantined. The rest of this file's advanced-course
+  // dependence is an environment limit, but "a lesson watched to its end reads
+  // full" fails locally too, with the content present and the schema migrated —
+  // so labelling it as missing content would hide a real failure behind a false
+  // excuse. It predates this work and appeared in every measurement. The shape
+  // of the error, `progressbar` element(s) not found, suggests the expectation
+  // may be stale rather than the product broken: a completed lesson may now
+  // carry the completion mark in place of a bar. That needs confirming, not
+  // assuming, and it is its own change.
   test.beforeEach(async ({ learnerState }) => {
     await seedPositions(learnerState);
   });

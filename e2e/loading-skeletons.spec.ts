@@ -2,6 +2,7 @@ import { contentCatalog } from "@/adapters/persistence/content-manifest/content-
 
 import { type Page } from "@playwright/test";
 
+import { skipOnCi } from "./ci-unavailable";
 import { modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
 
@@ -80,6 +81,7 @@ const lessonLink = (page: Page) =>
 const FIRST_COMPILE_MS = 20_000;
 
 test.describe("Loading skeletons — the lesson video frame", () => {
+  skipOnCi("self-hosted-content");
   test("WHEN the player cannot boot THEN the frame carries a placeholder rather than a black box", async ({
     page,
   }) => {
@@ -120,6 +122,7 @@ test.describe("Loading skeletons — the lesson video frame", () => {
 });
 
 test.describe("Loading skeletons — route shells", () => {
+  skipOnCi("self-hosted-content");
   test("WHEN a lesson is opened from its module THEN the shell replaces the previous page", async ({
     page,
   }) => {

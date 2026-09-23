@@ -2,6 +2,7 @@ import { contentCatalog } from "@/adapters/persistence/content-manifest/content-
 
 import { Page, test as visitor } from "@playwright/test";
 
+import { skipOnCi } from "./ci-unavailable";
 import { moduleOfCourse, modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
 
@@ -279,6 +280,7 @@ test.describe("Mobile viewport fit — header with a learner card at 320px", () 
 });
 
 test.describe("Mobile viewport fit — module list titles at 320px", () => {
+  skipOnCi("self-hosted-content");
   test.use({ viewport: { width: 320, height: 720 } });
 
   test("WHEN titles share a long prefix THEN adjacent rows stay distinguishable", async ({
