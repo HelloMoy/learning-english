@@ -55,28 +55,29 @@ jobs:
       - run: pnpm verify
 
   e2e:
-    # Sharded because the suite does not fit one 45-minute job serially, and
-    # eight rather than four because four still did not: every shard timed out
-    # at 45m17s. Measured on that run — setup is 2 minutes (build alone is 57s)
-    # and 66 tests took 43, about 39 seconds each, with only 4 of them failing.
-    # The tests are not failing their way to the wall; they are slow, because
-    # `learner-account-fixture` is `{ auto: true }` and registers a fresh
-    # verified learner — sign-up, mailpit round trip, verification, sign-in —
-    # before every single test. Eight shards is ~32 tests each, comfortably
-    # inside the budget; making that fixture cheaper is the real fix and its
-    # own change.
+    # Four shards, which is now generous. The job used to exhaust its 45
+    # minutes at any shard count, and the cause turned out not to be the
+    # suite's length at all: Playwright hung at teardown, because the stop
+    # signal reached pnpm rather than the `next-server` it spawned. Measured on
+    # the eight-shard run — 33 tests finished in about four minutes, then
+    # forty-one minutes of silence. `gracefulShutdown` in playwright.config.ts
+    # is what fixes that.
+    #
+    # At roughly eight tests a minute, the whole suite is about half an hour
+    # serially; four shards keep each one near ten minutes, which leaves room
+    # for the suite to grow.
     #
     # Each shard is its own runner with its own libsql and mailpit, so raising
     # throughput costs no test isolation — in-process workers would have shared
     # one database and one inbox, which is what `AUTH_RATE_LIMIT` already hints
     # at.
-    name: End-to-end ${{ matrix.shard }}/8 (Chromium, production build)
+    name: End-to-end ${{ matrix.shard }}/4 (Chromium, production build)
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+        shard: [1, 2, 3, 4]
     services:
       libsql:
         image: ghcr.io/tursodatabase/libsql-server:v0.24.32
@@ -102,7 +103,7 @@ jobs:
       - run: pnpm db:migrate
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:e2e --project=chromium --shard=${{ matrix.shard }}/8
+      - run: pnpm test:e2e --project=chromium --shard=${{ matrix.shard }}/4
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

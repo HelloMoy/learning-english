@@ -3,6 +3,7 @@ import type { VideoLesson } from "@/domain/entities/lesson/lesson";
 
 import { devices, type Locator, type Page } from "@playwright/test";
 
+import { skipOnCi } from "./ci-unavailable";
 import { modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-account-fixture";
 import { seedLearnerProfile } from "./learner-profile-fixture";
@@ -150,6 +151,8 @@ const currentTime = (page: Page) =>
   videoElement(page).evaluate((el) => (el as HTMLVideoElement).currentTime);
 
 test.describe("Lesson playback-position resume cycle", () => {
+  skipOnCi("self-hosted-content");
+
   test.describe("GIVEN a resumable position is stored", () => {
     test.beforeEach(async ({ learnerState }) => {
       await prepareLearner(learnerState);
@@ -370,6 +373,8 @@ const percentWatched = (page: Page): Promise<number> =>
     .evaluate((element) => Number.parseFloat(element.getAttribute("aria-valuenow") ?? "0"));
 
 test.describe("Lesson playback-position resume cycle, on a YouTube lesson", () => {
+  skipOnCi("youtube");
+
   test("WHEN the learner resumes THEN the video plays on past the saved position", async ({
     page,
     learnerState,

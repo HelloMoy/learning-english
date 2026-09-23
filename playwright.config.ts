@@ -33,6 +33,14 @@ export default defineConfig({
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    // Without this the suite hangs at teardown until the job is killed. The
+    // command runs through pnpm, so Playwright's stop signal reaches pnpm and
+    // not the `next-server` it spawned; Playwright then waits for a port that
+    // nobody is going to release. Measured on CI: every shard finished its
+    // tests in about four minutes and then sat silent for forty-one, until the
+    // runner terminated `next-server` as an orphan process. That silence, not
+    // the suite's length, is what had been exhausting the job's time limit.
+    gracefulShutdown: { signal: "SIGTERM", timeout: 10_000 },
     stdout: "ignore",
     stderr: "pipe",
   },

@@ -7,6 +7,7 @@ import messages from "@/messages/en.json";
 
 import { devices, type Locator, type Page } from "@playwright/test";
 
+import { skipOnCi } from "./ci-unavailable";
 import { modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
 
@@ -337,6 +338,8 @@ async function stepShownAsChosen(page: Page, seconds: number) {
 }
 
 test.describe("GIVEN a YouTube-sourced lesson", () => {
+  skipOnCi("youtube");
+
   test("WHEN the provider builds its embed frame THEN that frame is out of the layout flow", async ({
     page,
   }) => {
@@ -441,6 +444,8 @@ test.describe("GIVEN a YouTube-sourced lesson", () => {
 });
 
 test.describe("GIVEN a browser that can take the player fullscreen", () => {
+  skipOnCi("youtube");
+
   test("WHEN the chrome renders THEN the browser's own control is what is offered", async ({
     page,
   }) => {
