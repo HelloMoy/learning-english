@@ -23,3 +23,8 @@
 - [ ] 4.2 Open the PR and confirm from the run that both jobs are green — the first time the workflow has passed.
 - [x] 4.3 Four shards still timed out — all of them, at 45m17s. Measured from that run: setup is 2 minutes (build alone 57s) and 66 tests took 43, about 39 seconds each, with only 4 failing. The tests are slow, not failing: `learner-account-fixture` is `{ auto: true }` and registers a fresh verified learner — sign-up, mailpit round trip, verification, sign-in — before **every** test. Raised to 8 shards (~32 tests each) to fit today.
 - [ ] 4.4 Follow-up change: make that fixture cheaper. Worker-scoped reuse or seeding the account directly instead of driving the HTTP sign-up and the inbox. That is the real fix; sharding is buying time with machines.
+
+## 5. The one test deliberately left red
+
+- [x] 5.1 Diagnosed rather than quarantined: "a lesson watched to its end reads full and carries the completion mark" failed locally too, with content present, so it was never the environment. Two things were stale at once — the unscoped `listitem` locator predates the route view, and the full-bar expectation contradicts `cinema-module-overview`, which is explicit that a non-current step renders no progress bar.
+- [x] 5.2 (TDD: the red was the failure itself, reproduced locally and in CI) Rewrote it against the surface that exists: the step inside the module overview's list, asserting `data-state="finished"` and the absence of a bar, mirroring `module-route.spec.ts`'s established locators. 5/5 locally against the production build.

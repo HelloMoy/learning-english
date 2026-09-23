@@ -82,14 +82,27 @@ test.describe("watch progress", () => {
     await seedPositions(learnerState);
   });
 
-  test("a lesson watched to its end reads full and carries the completion mark", async ({
-    page,
-  }) => {
+  test("a lesson watched to its end reads finished on the route, with no bar", async ({ page }) => {
+    // This asserted a full progress bar and the completion mark until the
+    // module overview became the route view. Two things were stale at once:
+    // the locator — the steps live in the module overview's own list, and an
+    // unscoped `listitem` matched something else entirely — and the
+    // expectation, because `cinema-module-overview` now governs this surface
+    // and is explicit that a step which is not the current one renders no
+    // progress bar. A finished lesson says so through its step state. The
+    // full-bar rendering the `watch-progress` capability describes belongs to
+    // the surfaces that list a bar per lesson, such as the lesson view's
+    // outline.
     await page.goto(moduleUrl("en"));
 
-    const row = rowFor(page, FINISHED_LESSON.title).first();
-    await expect(row.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "100");
-    await expect(row.getByTestId("lesson-completion-mark")).toBeVisible();
+    const step = page
+      .getByTestId("module-overview")
+      .getByRole("listitem")
+      .filter({ hasText: FINISHED_LESSON.title })
+      .first();
+
+    await expect(step.locator('[data-state="finished"]')).toBeVisible();
+    await expect(step.getByRole("progressbar")).toHaveCount(0);
   });
 
   test("a lesson watched partway shows how far the learner got, without a mark", async ({
