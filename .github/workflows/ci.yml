@@ -31,6 +31,10 @@ env:
   # The e2e job serves a production build, where auth is rate-limited by
   # default; its hundreds of sign-ins share one IP.
   AUTH_RATE_LIMIT: "false"
+  # A production build withholds draft courses, and most e2e specs navigate one.
+  # `.env.example` documents this variable for exactly this case: "run e2e
+  # against `pnpm build && pnpm start`".
+  SHOW_DRAFT_COURSES: "1"
 
 jobs:
   verify:

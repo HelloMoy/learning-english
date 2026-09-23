@@ -14,7 +14,20 @@ import { useCallback, useRef, useState } from "react";
  * spies. The wrapper builds one of these from its `MediaPlayerInstance` ref.
  */
 export type ResumablePlayer = {
+  /**
+   * Commands are fire-and-forget: an implementation MUST observe whatever
+   * promise the underlying player returns and discard its rejection.
+   *
+   * The player's embed providers reject every pending promise when their
+   * provider is destroyed — on unmount, which is a learner navigating away or
+   * a test finishing. An implementation written as `() => ref.current?.pause()`
+   * type-checks against this `void` return and leaks that rejection on every
+   * call, which fails a whole test run and, in the browser, reaches error
+   * reporting as noise. `resumablePlayerFrom` is the implementation that gets
+   * this right; see its remarks.
+   */
   pause: () => void;
+  /** Fire-and-forget; see `pause`. */
   play: () => void;
   seekTo: (seconds: number) => void;
 };
