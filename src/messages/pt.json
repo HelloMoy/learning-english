@@ -412,6 +412,11 @@
       "description": "Você juntou {count, plural, one {o único ticket} other {os # tickets}} de {module}.",
       "goClaim": "Ir resgatar o prêmio",
       "keepLearning": "Continuar aprendendo"
+    },
+    "SiteFooter": {
+      "navLabel": "Legal",
+      "privacy": "Privacidade",
+      "terms": "Termos"
     }
   },
   "CourseCatalog": {
@@ -543,5 +548,90 @@
     "saved": "Cartão atualizado",
     "previewLabel": "Seu cartão de aluno",
     "previewNote": "As mudanças aparecem no seu cartão enquanto você edita."
+  },
+  "Legal": {
+    "lastUpdated": "Última atualização: {date}",
+    "privacy": {
+      "title": "Privacidade",
+      "description": "O que o English Course recolhe, porquê, e que outras empresas o tratam.",
+      "intro": "Esta política explica o que o English Course recolhe quando cria uma conta e avança pelo curso, porque é recolhido, e que outras empresas o tratam em nosso nome. Cada uma é nomeada abaixo.",
+      "sections": {
+        "whatThisCovers": {
+          "heading": "O que isto abrange",
+          "body": "Esta política cobre o site do English Course e a conta que cria nele. Pode ver o site sem conta; tudo o que se descreve a seguir aplica-se a partir do momento em que se regista."
+        },
+        "account": {
+          "heading": "A sua conta",
+          "body": "Ao registar-se guardamos o seu nome, o seu endereço de e-mail, se esse endereço foi verificado, e o avatar que escolhe para o seu cartão de aluno. A palavra-passe é guardada apenas como hash — nunca guardamos a palavra-passe em si nem a conseguimos ler. Se entrar com o Google, guardamos a ligação a essa conta Google e o endereço que o Google declara verificado; nunca recebemos a sua palavra-passe do Google. Cada sessão ativa é registada com a sua validade, o endereço IP a partir do qual foi criada e o agente de utilizador do navegador, para que possa terminar sessão em segurança e para que um abuso possa ser rastreado."
+        },
+        "learning": {
+          "heading": "O que faz no curso",
+          "body": "À medida que avança guardamos que lições concluiu, até que ponto de cada vídeo chegou, por que lição deve continuar, e as recompensas que ganhou e resgatou. É isso que lhe permite retomar onde parou noutro dispositivo. Pertence à sua conta, e a única empresa que o vê é a Turso, que aloja a base de dados em nosso nome."
+        },
+        "email": {
+          "heading": "O e-mail que lhe enviamos",
+          "body": "Enviamos apenas e-mail transacional: a mensagem que verifica o seu endereço, uma reposição de palavra-passe quando a pede, um aviso quando a sua palavra-passe muda, uma confirmação quando pede para mudar de endereço, e uma confirmação quando pede para eliminar a sua conta. São entregues através da Resend, que envia em nosso nome e portanto trata o seu endereço e o conteúdo dessas mensagens. Não enviamos e-mail de marketing, por isso não há subscrição para cancelar."
+        },
+        "botProtection": {
+          "heading": "Proteção contra bots",
+          "body": "Os formulários de início de sessão, registo e reposição de palavra-passe são protegidos pelo Cloudflare Turnstile, que avalia se um pedido parece automatizado. A Cloudflare recebe os sinais de que precisa para essa avaliação, incluindo o seu endereço IP. Existe para travar registos automatizados e ataques com palavras-passe roubadas, não para o perfilar."
+        },
+        "errorReports": {
+          "heading": "Relatórios de erro",
+          "body": "Quando algo falha enviamos um relatório de erro para o Sentry para que possa ser corrigido. Os relatórios levam erros e mais nada — sem rastreio de desempenho e sem gravação de sessão — e o SDK está configurado para não anexar dados pessoais. Antes de um erro tratado sair do servidor, o corpo das mensagens é descartado por completo e qualquer endereço de e-mail no contexto é substituído pelo texto literal [email]."
+        },
+        "cookies": {
+          "heading": "Cookies",
+          "body": "Usamos dois cookies e mais nenhum. Um recorda o idioma que escolheu, para que o site abra nele da próxima vez. O outro é a sua sessão, que é o que o mantém com sessão iniciada. Não há cookies de análise, nem de publicidade, nem rastreadores de terceiros neste site."
+        },
+        "yourChoices": {
+          "heading": "As suas opções",
+          "body": "A partir do seu perfil pode mudar o nome do seu cartão de aluno, mudar o seu endereço de e-mail — que é confirmado primeiro no endereço registado e depois no novo — e mudar a sua palavra-passe. Pode eliminar a sua conta no mesmo sítio quando quiser, sem dar explicações; a eliminação é confirmada por um link enviado por e-mail que só funciona na sua própria sessão."
+        },
+        "contact": {
+          "heading": "Como falar connosco",
+          "body": "Escreva para privacy@english-course.online com qualquer dúvida sobre esta política ou sobre os dados guardados na sua conta."
+        }
+      }
+    },
+    "terms": {
+      "title": "Termos",
+      "description": "Os termos que aceita ao usar o English Course.",
+      "intro": "Estes termos aplicam-se a todos os que usam o English Course. Ao criar uma conta, aceita-os.",
+      "sections": {
+        "whatThisCovers": {
+          "heading": "O que isto abrange",
+          "body": "O English Course é um curso de inglês online. Estes termos regem o seu uso do site e da conta que cria nele, e acompanham a política de privacidade, que explica o que acontece aos seus dados."
+        },
+        "yourAccount": {
+          "heading": "A sua conta",
+          "body": "Uma conta é para uma pessoa. Indique um endereço onde consiga realmente receber correio: não pode iniciar sessão sem o ter verificado, e é a única forma de recuperar o acesso. Guarde a sua palavra-passe para si — tudo o que for feito a partir de uma sessão iniciada é tratado como feito por si."
+        },
+        "courseContent": {
+          "heading": "O material do curso",
+          "body": "As lições, notas e material de prática são fornecidos para a sua própria aprendizagem. Não os pode redistribuir, revender nem republicar, nem usá-los para treinar um sistema automatizado. Os vídeos são reproduzidos a partir do YouTube, cujos próprios termos regem essa reprodução."
+        },
+        "acceptableUse": {
+          "heading": "Uso aceitável",
+          "body": "Não tente aceder a contas que não são suas, contornar a proteção contra bots dos formulários, recolher o site com ferramentas automatizadas, nem interferir no seu funcionamento. Podemos suspender uma conta que faça qualquer uma destas coisas."
+        },
+        "availability": {
+          "heading": "Disponibilidade",
+          "body": "O serviço é fornecido tal como está. Podemos alterar, interromper ou retirar partes dele, e não prometemos que esteja disponível sem interrupções nem livre de falhas. O seu progresso é guardado, mas não deixe aqui nada que não pudesse perder."
+        },
+        "endingYourAccount": {
+          "heading": "Terminar a sua conta",
+          "body": "Pode eliminar a sua conta a partir do seu perfil quando quiser, sem dar explicações. Podemos suspender ou encerrar uma conta que infrinja estes termos."
+        },
+        "changes": {
+          "heading": "Alterações a estes termos",
+          "body": "Podemos rever estes termos. A data abaixo diz-lhe que versão está a ler; continuar a usar o serviço após uma alteração significa que aceita os termos revistos."
+        },
+        "contact": {
+          "heading": "Como falar connosco",
+          "body": "Escreva para privacy@english-course.online com qualquer dúvida sobre estes termos."
+        }
+      }
+    }
   }
 }
