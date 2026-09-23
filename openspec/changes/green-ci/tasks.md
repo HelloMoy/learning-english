@@ -21,4 +21,5 @@
 
 - [ ] 4.1 Run `pnpm verify`.
 - [ ] 4.2 Open the PR and confirm from the run that both jobs are green — the first time the workflow has passed.
-- [ ] 4.3 If a shard still overruns, raise the shard count rather than the time limit, and record the measured suite length.
+- [x] 4.3 Four shards still timed out — all of them, at 45m17s. Measured from that run: setup is 2 minutes (build alone 57s) and 66 tests took 43, about 39 seconds each, with only 4 failing. The tests are slow, not failing: `learner-account-fixture` is `{ auto: true }` and registers a fresh verified learner — sign-up, mailpit round trip, verification, sign-in — before **every** test. Raised to 8 shards (~32 tests each) to fit today.
+- [ ] 4.4 Follow-up change: make that fixture cheaper. Worker-scoped reuse or seeding the account directly instead of driving the HTTP sign-up and the inbox. That is the real fix; sharding is buying time with machines.
