@@ -412,6 +412,11 @@
       "description": "You collected all {count, plural, one {# ticket} other {# tickets}} of {module}.",
       "goClaim": "Go and claim the prize",
       "keepLearning": "Keep learning"
+    },
+    "SiteFooter": {
+      "navLabel": "Legal",
+      "privacy": "Privacy",
+      "terms": "Terms"
     }
   },
   "CourseCatalog": {
@@ -543,5 +548,90 @@
     "saved": "Card updated",
     "previewLabel": "Your learner card",
     "previewNote": "Changes show on your card as you edit."
+  },
+  "Legal": {
+    "lastUpdated": "Last updated {date}",
+    "privacy": {
+      "title": "Privacy",
+      "description": "What English Course collects, why, and which other companies process it.",
+      "intro": "This policy explains what English Course collects when you create an account and work through the course, why it is collected, and which other companies process it on our behalf. Each one is named below.",
+      "sections": {
+        "whatThisCovers": {
+          "heading": "What this covers",
+          "body": "This policy covers the English Course website and the account you create on it. You can look around without an account; everything described below applies from the moment you sign up."
+        },
+        "account": {
+          "heading": "Your account",
+          "body": "When you sign up we store your name, your email address, whether that address has been verified, and the avatar you pick for your learner card. A password is stored only as a hash — we never hold the password itself and cannot read it. If you sign in with Google instead, we store the link to that Google account and the address Google reports as verified; we never receive your Google password. Each active session is recorded with its expiry, the IP address it was created from and the browser’s user agent, so that you can be signed out safely and abuse can be traced."
+        },
+        "learning": {
+          "heading": "What you do in the course",
+          "body": "As you work through the course we store which lessons you have completed, how far into each video you watched, which lesson you should continue from, and the rewards you have earned and claimed. That is what lets you pick up where you left off on another device. It belongs to your account, and the only company that sees it is Turso, which hosts the database on our behalf."
+        },
+        "email": {
+          "heading": "Email we send you",
+          "body": "We send transactional email only: the message that verifies your address, a password reset when you ask for one, a notice when your password changes, a confirmation when you ask to change your address, and a confirmation when you ask to delete your account. These are delivered through Resend, which sends on our behalf and therefore processes your address and the contents of those messages. We send no marketing email, so there is nothing to unsubscribe from."
+        },
+        "botProtection": {
+          "heading": "Bot protection",
+          "body": "The sign-in, sign-up and password-reset forms are protected by Cloudflare Turnstile, which judges whether a request looks automated. Cloudflare receives the signals it needs for that judgement, including your IP address. It is there to stop automated sign-up attempts and stolen-password attacks, not to profile you."
+        },
+        "errorReports": {
+          "heading": "Error reports",
+          "body": "When something fails we send an error report to Sentry so that it can be fixed. The reports carry errors only — no performance tracing and no session recording — and the SDK is configured not to attach personal data. Before a handled error leaves the server, message bodies are dropped entirely and any email address in the surrounding context is replaced with the literal text [email]."
+        },
+        "cookies": {
+          "heading": "Cookies",
+          "body": "We set two cookies and no others. One remembers the language you chose, so the site opens in it next time. The other is your session, which is what keeps you signed in. There are no analytics cookies, no advertising cookies and no third-party trackers on this site."
+        },
+        "yourChoices": {
+          "heading": "Your choices",
+          "body": "From your profile you can change the name on your learner card, change your email address — which is confirmed first at the address on file and then at the new one — and change your password. You can delete your account from the same place at any time, without giving a reason; deletion is confirmed by an emailed link that works only in your own session."
+        },
+        "contact": {
+          "heading": "Getting in touch",
+          "body": "Write to privacy@english-course.online with any question about this policy or about the data held for your account."
+        }
+      }
+    },
+    "terms": {
+      "title": "Terms",
+      "description": "The terms you accept when you use English Course.",
+      "intro": "These terms apply to everyone who uses English Course. By creating an account you accept them.",
+      "sections": {
+        "whatThisCovers": {
+          "heading": "What this covers",
+          "body": "English Course is an online English course. These terms govern your use of the site and of the account you create on it, and sit alongside the privacy policy, which explains what happens to your data."
+        },
+        "yourAccount": {
+          "heading": "Your account",
+          "body": "An account is for one person. Give an address you can actually receive mail at: you cannot sign in until you have verified it, and it is the only way to recover access. Keep your password to yourself — anything done from a signed-in session is treated as done by you."
+        },
+        "courseContent": {
+          "heading": "The course material",
+          "body": "The lessons, notes and practice material are provided for your own learning. You may not redistribute, resell or republish them, nor use them to train an automated system. Videos are played from YouTube, whose own terms govern that playback."
+        },
+        "acceptableUse": {
+          "heading": "Acceptable use",
+          "body": "Do not try to reach accounts that are not yours, get around the bot protection on the forms, collect the site with automated tools, or interfere with how it runs. We may suspend an account that does any of these."
+        },
+        "availability": {
+          "heading": "Availability",
+          "body": "The service is provided as it is. We may change, interrupt or withdraw parts of it, and we do not promise that it will be available without interruption or free of faults. Your progress is stored, but keep nothing here that you could not stand to lose."
+        },
+        "endingYourAccount": {
+          "heading": "Ending your account",
+          "body": "You can delete your account from your profile at any time, without giving a reason. We may suspend or close an account that breaks these terms."
+        },
+        "changes": {
+          "heading": "Changes to these terms",
+          "body": "We may revise these terms. The date below tells you which version you are reading; using the service after a change means you accept the revised terms."
+        },
+        "contact": {
+          "heading": "Getting in touch",
+          "body": "Write to privacy@english-course.online with any question about these terms."
+        }
+      }
+    }
   }
 }

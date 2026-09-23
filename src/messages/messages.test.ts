@@ -1,4 +1,5 @@
 import { INSTALL_STEPS } from "@/components/add-to-home-screen-guide/install-steps/install-steps";
+import { PRIVACY_SECTION_KEYS, TERMS_SECTION_KEYS } from "@/lib/legal-sections/legal-sections";
 
 import en from "./en.json";
 import es from "./es.json";
@@ -115,6 +116,33 @@ describe("message catalogues", () => {
     const required = INSTALL_STEPS.flatMap((step) => [step.messageKey, step.targetKey]);
 
     const unwritten = required.filter((key) => !guide[key]);
+
+    expect(unwritten).toEqual([]);
+  });
+
+  /**
+   * Guards both legal documents against a passage nobody wrote.
+   *
+   * Key parity above only says the locales agree with each other; three
+   * catalogues can agree perfectly on a section no document names, or miss one
+   * that every document renders. The pages walk the key tuples and call
+   * `t(`sections.${key}.heading`)`, so reading the expectation from those
+   * tuples is what makes this survive the next section someone adds.
+   */
+  it.each(Object.entries(CATALOGUES))("%s writes every legal passage", (_locale, m) => {
+    const legal = (m as typeof en).Legal;
+    const documents = [
+      { sections: legal.privacy.sections, keys: PRIVACY_SECTION_KEYS },
+      { sections: legal.terms.sections, keys: TERMS_SECTION_KEYS },
+    ] as const;
+
+    const unwritten = documents.flatMap(({ sections, keys }) =>
+      keys
+        .map((key) => (sections as Record<string, { heading?: string; body?: string }>)[key])
+        .flatMap((section, index) =>
+          section?.heading && section.body ? [] : [`${index}: missing heading or body`],
+        ),
+    );
 
     expect(unwritten).toEqual([]);
   });
