@@ -55,9 +55,18 @@ jobs:
       - run: pnpm verify
 
   e2e:
-    name: End-to-end (Chromium, production build)
+    # Sharded because the suite does not fit one 45-minute job serially: 254
+    # tests at `workers: 1`, and the unsharded job was killed mid-run having
+    # never reached its summary. Each shard is its own runner with its own
+    # libsql and mailpit, so raising throughput costs no test isolation —
+    # in-process workers would have shared one database and one inbox.
+    name: End-to-end ${{ matrix.shard }}/4 (Chromium, production build)
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     services:
       libsql:
         image: ghcr.io/tursodatabase/libsql-server:v0.24.32
@@ -83,11 +92,11 @@ jobs:
       - run: pnpm db:migrate
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:e2e --project=chromium
+      - run: pnpm test:e2e --project=chromium --shard=${{ matrix.shard }}/4
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report
+          name: playwright-report-shard-${{ matrix.shard }}
           path: |
             playwright-report/
             test-results/

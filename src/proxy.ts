@@ -2,6 +2,7 @@ import createMiddleware from "next-intl/middleware";
 import type { NextRequest } from "next/server";
 
 import { routing } from "./i18n/routing";
+import { missingPage } from "./lib/missing-page/missing-page";
 import { sessionGate } from "./lib/session-gate/session-gate";
 
 const localize = createMiddleware(routing);
@@ -14,7 +15,7 @@ const localize = createMiddleware(routing);
  * by next-intl unchanged.
  */
 export default function proxy(request: NextRequest) {
-  return sessionGate(request) ?? localize(request);
+  return sessionGate(request) ?? missingPage(request) ?? localize(request);
 }
 
 /**
