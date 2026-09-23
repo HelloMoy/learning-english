@@ -76,3 +76,10 @@ public/local-filesystem-lesson/**/*.mp4
 public/local-filesystem-lesson/**/*.mov
 public/local-filesystem-lesson/**/*.webm
 public/local-filesystem-lesson/**/*.mkv
+
+# Local copies of the database pulled out of the libSQL container
+# (`docker compose cp`), e.g. to open them in a SQLite viewer. The real data
+# lives in the container's volume; these are throwaway snapshots.
+*.db
+*.db-wal
+*.db-shm

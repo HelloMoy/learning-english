@@ -1,8 +1,8 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
-import { expect, test, type Page } from "@playwright/test";
-
+import { skipOnCi } from "./ci-unavailable";
 import { lessonsOfModule, modulesOfCourse } from "./content-seed-fixtures";
+import { expect, test } from "./learner-account-fixture";
 
 /**
  * E2E coverage for the landing, the learner onboarding, My learning and the
@@ -25,20 +25,10 @@ const FIRST_COURSE = COURSES[0]!;
 /** Compiling a route on a cold `pnpm dev` overruns the default 5s timeout. */
 const COLD_ROUTE = { timeout: 60_000 };
 
-const PROFILE_KEY = "learning-english:learner-profile";
-
 const FIRST_MODULE = modulesOfCourse(FIRST_COURSE.slug)[0]!;
 const FIRST_MODULE_LESSONS = lessonsOfModule(FIRST_MODULE.id);
 const FIRST_LESSON = FIRST_MODULE_LESSONS[0]!;
 const FIRST_LESSON_URL = `/en/courses/${FIRST_COURSE.slug}/modules/${FIRST_MODULE.slug}/lessons/${FIRST_LESSON.id}`;
-
-/** Puts a learner card on the device before any page script runs. */
-const withProfile = async (page: Page, name = "Ana García") => {
-  await page.addInitScript(([key, value]) => window.localStorage.setItem(key, value), [
-    PROFILE_KEY,
-    JSON.stringify({ name, avatar: { kind: "initials" } }),
-  ] as const);
-};
 
 test.describe("Landing", () => {
   test("WHEN a first-time visitor lands THEN Start course leads to the onboarding", async ({
@@ -53,8 +43,9 @@ test.describe("Landing", () => {
 
   test("WHEN a learner who opened a lesson returns THEN the landing is still the landing", async ({
     page,
+    learnerState,
   }) => {
-    await withProfile(page);
+    await learnerState.profile({ name: "Ana García", avatar: { kind: "initials" } });
     await page.goto(FIRST_LESSON_URL);
     await expect(page.getByRole("heading", { name: FIRST_LESSON.title })).toBeVisible(COLD_ROUTE);
 
@@ -142,8 +133,9 @@ test.describe("Onboarding", () => {
 
   test("WHEN a learner with a card lands THEN the action reads Continue and skips the onboarding", async ({
     page,
+    learnerState,
   }) => {
-    await withProfile(page);
+    await learnerState.profile({ name: "Ana García", avatar: { kind: "initials" } });
     await page.goto("/en");
 
     await expect(page.getByRole("link", { name: "Continue" }).first()).toHaveAttribute(
@@ -161,8 +153,9 @@ test.describe("Onboarding", () => {
 
   test("WHEN a device with a card opens the onboarding THEN it is forwarded to My learning", async ({
     page,
+    learnerState,
   }) => {
-    await withProfile(page);
+    await learnerState.profile({ name: "Ana García", avatar: { kind: "initials" } });
     await page.goto("/en/start");
 
     await page.waitForURL(/\/en\/learning$/, COLD_ROUTE);
@@ -179,10 +172,12 @@ test.describe("Onboarding", () => {
 });
 
 test.describe("My learning", () => {
+  skipOnCi("self-hosted-content");
   test("WHEN a lesson has been opened THEN My learning offers to resume it and marks its course", async ({
     page,
+    learnerState,
   }) => {
-    await withProfile(page);
+    await learnerState.profile({ name: "Ana García", avatar: { kind: "initials" } });
     await page.goto(FIRST_LESSON_URL);
     await expect(page.getByRole("heading", { name: FIRST_LESSON.title })).toBeVisible(COLD_ROUTE);
 
@@ -207,17 +202,15 @@ test.describe("My learning", () => {
 
   test("WHEN the opened lesson is finished THEN My learning AND the course overview both continue with the next video", async ({
     page,
+    learnerState,
   }) => {
     const nextLesson = modulesOfCourse(FIRST_COURSE.slug)
       .flatMap((module) => lessonsOfModule(module.id))
       .find((lesson) => lesson.id !== FIRST_LESSON.id)!;
-    await withProfile(page);
+    await learnerState.profile({ name: "Ana García", avatar: { kind: "initials" } });
     await page.goto(FIRST_LESSON_URL);
     await expect(page.getByRole("heading", { name: FIRST_LESSON.title })).toBeVisible(COLD_ROUTE);
-    await page.evaluate(
-      (id) => window.localStorage.setItem(`learning-english:completed:${id}`, "1"),
-      FIRST_LESSON.id,
-    );
+    await learnerState.completed([FIRST_LESSON.id]);
 
     await page.goto("/en/learning");
     await expect(page.getByRole("link", { name: "Resume" })).toHaveAttribute(
@@ -238,8 +231,9 @@ test.describe("My learning", () => {
 test.describe("Profile", () => {
   test("WHEN the learner saves a new avatar THEN the header shows it without a reload", async ({
     page,
+    learnerState,
   }) => {
-    await withProfile(page);
+    await learnerState.profile({ name: "Ana García", avatar: { kind: "initials" } });
     await page.goto("/en/learning");
 
     await page.getByRole("button", { name: "Learner menu for Ana García" }).click(COLD_ROUTE);

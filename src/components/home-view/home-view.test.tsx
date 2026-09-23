@@ -1,7 +1,9 @@
+import { ContinueWatchingLocation } from "@/domain/entities/continue-watching-location/continue-watching-location";
 import { Course } from "@/domain/entities/course/course";
 import { LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
 import { Module } from "@/domain/entities/module/module";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 import { renderInLocale } from "@/test-setup/render-in-locale";
 import { makeStubLearnerProfileRepository } from "@/test-setup/stubs/domain-repos";
 
@@ -189,9 +191,8 @@ describe("HomeView", () => {
 
   describe("GIVEN a device holding a continue-watching record", () => {
     test("WHEN rendered THEN the landing stays and no returning-learner content appears", async () => {
-      window.localStorage.setItem(
-        "learning-english:continue-watching",
-        JSON.stringify({
+      givenLearner.continueWatching(
+        ContinueWatchingLocation.parse({
           courseSlug: basic.slug,
           moduleSlug: vowels.slug,
           lessonId: faker.string.uuid(),

@@ -1,8 +1,9 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
-import { expect, test, type Page } from "@playwright/test";
+import { test as anonymous, type Page } from "@playwright/test";
 
 import { lessonsOfModule, modulesOfCourse } from "./content-seed-fixtures";
+import { expect, test } from "./learner-account-fixture";
 import { ONBOARDED_LEARNER, seedLearnerProfile } from "./learner-profile-fixture";
 
 /**
@@ -12,6 +13,10 @@ import { ONBOARDED_LEARNER, seedLearnerProfile } from "./learner-profile-fixture
  * Only a browser shows the whole round trip: storage read after hydration, the
  * locale-aware replace to the onboarding, `next` surviving both steps, and the
  * learner landing back on the route they first asked for.
+ *
+ * The gate comes second: course routes require a session first (capability
+ * `learner-account`), so these tests run signed in, without a card, unless
+ * they say otherwise.
  */
 const COURSE = contentCatalog.courses[0]!;
 const MODULE = modulesOfCourse(COURSE.slug)[0]!;
@@ -42,11 +47,11 @@ test.describe("Course routes require a learner card", () => {
     await expect(page.getByRole("heading", { name: LESSON.title })).toBeVisible(COLD_ROUTE);
   });
 
-  test("WHEN a device with a card opens a lesson link THEN the lesson stays open", async ({
-    context,
+  test("WHEN a learner with a card opens a lesson link THEN the lesson stays open", async ({
+    learnerState,
     page,
   }) => {
-    await seedLearnerProfile(context);
+    await seedLearnerProfile(learnerState);
 
     await page.goto(`/en${LESSON_PATH}`);
 
@@ -78,11 +83,25 @@ test.describe("Course routes require a learner card", () => {
     await expect(page).toHaveURL("/en/learning", COLD_ROUTE);
   });
 
-  test("WHEN the server renders a course route THEN the course content is in the HTML", async ({
-    request,
+  test("WHEN a signed-in request renders a course route THEN the course content is in the HTML", async ({
+    context,
   }) => {
-    const response = await request.get(`/en/courses/${COURSE.slug}`);
+    const response = await context.request.get(`/en/courses/${COURSE.slug}`);
 
     expect(await response.text()).toContain(COURSE.title);
   });
+});
+
+anonymous.describe("Course routes require a session before a card", () => {
+  anonymous(
+    "WHEN a lesson link is opened without a session THEN sign-in comes first, with no course content served",
+    async ({ page, request }) => {
+      const response = await request.get(`/en${LESSON_PATH}`, { maxRedirects: 0 });
+      expect(response.status()).toBe(307);
+      expect(await response.text()).not.toContain(LESSON.title);
+
+      await page.goto(`/en${LESSON_PATH}`);
+      await expect(page).toHaveURL(`/en/sign-in${NEXT_QUERY}`, COLD_ROUTE);
+    },
+  );
 });

@@ -1,8 +1,18 @@
 "use client";
 
+import { AccountSection } from "@/components/account-section/account-section";
 import { AvatarPicker } from "@/components/avatar-picker/avatar-picker";
+import { DeleteAccountSection } from "@/components/delete-account-section/delete-account-section";
 import { Eyebrow } from "@/components/eyebrow/eyebrow";
-import { LearnerCard, type LearnerCardLevel } from "@/components/learner-card/learner-card";
+import type { LearnerCardLevel } from "@/components/learner-card/learner-card";
+import { LocaleSwitcher } from "@/components/locale-switcher/locale-switcher";
+import { ProfileCardBand } from "@/components/profile-card-band/profile-card-band";
+import {
+  ProfileSaveBar,
+  type ProfileSaveState,
+} from "@/components/profile-save-bar/profile-save-bar";
+import { ProfileSection } from "@/components/profile-section/profile-section";
+import { ThemeToggle } from "@/components/theme-toggle/theme-toggle";
 import { Skeleton } from "@/components/ui/skeleton/skeleton";
 import {
   LEARNER_NAME_MAX_LENGTH,
@@ -11,43 +21,54 @@ import {
 } from "@/domain/entities/learner-profile/learner-profile";
 import type { LearnerProfileRepository } from "@/domain/ports/learner-profile-repository/learner-profile-repository";
 import type { LessonProgressSlice } from "@/domain/use-cases/find-course-catalog/find-course-catalog";
-import { useCourseWatchProgress } from "@/hooks/use-course-watch-progress/use-course-watch-progress";
-import { useIsHydrated } from "@/hooks/use-is-hydrated/use-is-hydrated";
 import {
   useLearnerProfile,
   type LearnerProfileHandle,
 } from "@/hooks/use-learner-profile/use-learner-profile";
 import { useLearnerRedirect } from "@/hooks/use-learner-redirect/use-learner-redirect";
+import type { LearnerAccountIdentity } from "@/lib/account-identity/account-identity";
+import type { AchievementLevel } from "@/lib/learner-achievements/learner-achievements";
 
-import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 /**
- * The Profile page: edit the name and avatar on the learner card, with the card
- * itself as a live preview.
+ * The Profile page: the learner's card and progress, then the sections that
+ * edit the card, hold the account settings, set the preferences, and delete
+ * the account.
  *
  * @remarks
- * Edits are drafts until **Save**: the preview follows every keystroke and
- * every pick, and storage only changes when the learner commits. Save waits for
- * a real change and a non-blank name; **Discard** returns the form to the
- * stored card.
+ * Edits are drafts until **Save**: the card at the top of the page follows
+ * every keystroke and every pick, and storage only changes when the learner
+ * commits from {@link ProfileSaveBar}, which exists only while there is
+ * something to save.
+ *
+ * The page's `h1` is the learner's *stored* name, so a page a learner is
+ * half-way through renaming does not rename itself under them; only the card
+ * previews the draft.
  *
  * The page edits an existing card, so a device without one is sent to the
  * onboarding to make it.
  *
  * @param profiles - Overrides the profile storage adapter; tests inject a stub
- * @param level - The level line the card shows
+ * @param level - The level the card names
  * @param lessonRuntimes - The level's lessons, for the card's progress line
+ * @param levels - Every catalog course, for the tickets and prizes counts
+ * @param account - Who the learner is to their account; `null` leaves the
+ *   settings out, which is what a session that ended mid-render looks like
  */
 export function ProfileView({
   profiles,
   level,
   lessonRuntimes,
+  levels,
+  account,
 }: {
   profiles?: LearnerProfileRepository;
   level: LearnerCardLevel;
   lessonRuntimes: ReadonlyArray<LessonProgressSlice>;
+  levels: ReadonlyArray<AchievementLevel>;
+  account: LearnerAccountIdentity | null;
 }) {
   const learner = useLearnerProfile(profiles);
   useLearnerRedirect(learner.status, { when: "absent", to: "/start" });
@@ -61,6 +82,8 @@ export function ProfileView({
       save={learner.save}
       level={level}
       lessonRuntimes={lessonRuntimes}
+      levels={levels}
+      account={account}
     />
   );
 }
@@ -75,11 +98,15 @@ function ProfileEditor({
   save,
   level,
   lessonRuntimes,
+  levels,
+  account,
 }: {
   profile: LearnerProfile;
   save: LearnerProfileHandle["save"];
   level: LearnerCardLevel;
   lessonRuntimes: ReadonlyArray<LessonProgressSlice>;
+  levels: ReadonlyArray<AchievementLevel>;
+  account: LearnerAccountIdentity | null;
 }) {
   const t = useTranslations("Profile");
   const [name, setName] = useState(profile.name);
@@ -101,6 +128,7 @@ function ProfileEditor({
   const discard = () => {
     setName(profile.name);
     setAvatar(profile.avatar);
+    setIsSaved(false);
   };
   const handleSave = async () => {
     setIsSaving(true);
@@ -112,110 +140,111 @@ function ProfileEditor({
   };
 
   return (
-    <div className="grid grid-cols-1 items-start gap-7 lg:grid-cols-12 lg:gap-14">
-      <div className="flex flex-col gap-6 lg:col-span-7">
-        <div className="flex flex-col gap-2">
-          <Eyebrow>{t("eyebrow")}</Eyebrow>
-          <h1 className="font-sans text-[1.875rem] leading-[1.05] font-extrabold tracking-tight text-foreground sm:text-[2.625rem]">
-            {t("heading")}
-          </h1>
-          <p className="text-[0.9375rem] text-muted-foreground">{t("intro")}</p>
-        </div>
-        <label className="flex flex-col gap-2">
-          <span className="text-[13px] font-semibold text-muted-foreground">{t("nameLabel")}</span>
-          <input
-            type="text"
-            value={name}
-            onChange={(event) => editName(event.target.value)}
-            autoComplete="name"
-            maxLength={LEARNER_NAME_MAX_LENGTH}
-            className="min-h-14 w-full rounded-xl border border-border bg-card px-[1.125rem] text-lg text-foreground focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none"
-          />
-        </label>
-        <div className="flex flex-col gap-2.5">
-          <span className="text-[13px] font-semibold text-muted-foreground">
-            {t("avatarLabel")}
-          </span>
-          <AvatarPicker
-            name={name}
-            value={avatar}
-            onChange={editAvatar}
-            className="sm:grid-cols-5"
-          />
-        </div>
-        <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            onClick={discard}
-            disabled={!isDirty}
-            className="inline-flex min-h-[3.25rem] cursor-pointer items-center justify-center rounded-[0.625rem] border border-border bg-foreground/5 px-[1.375rem] text-[0.9375rem] font-bold text-foreground transition-colors hover:bg-foreground/10 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {t("discard")}
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!isDirty || !hasName || isSaving}
-            className="inline-flex min-h-[3.25rem] cursor-pointer items-center justify-center rounded-[0.625rem] bg-primary px-[1.625rem] text-[0.9375rem] font-bold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-secondary disabled:text-muted-foreground"
-          >
-            {t("save")}
-          </button>
-        </div>
-        {isSaved ? (
-          <p
-            role="status"
-            className="flex items-center gap-2.5 rounded-xl border border-gold/45 bg-card px-4 py-3 text-sm font-semibold text-foreground motion-safe:animate-in motion-safe:fade-in-0"
-          >
-            <Check
-              aria-hidden="true"
-              className="size-4 text-gold"
-              strokeWidth={2.75}
-            />
-            {t("saved")}
-          </p>
-        ) : null}
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 sm:gap-10">
+      <div className="flex flex-col gap-2">
+        <Eyebrow>{t("eyebrow")}</Eyebrow>
+        <h1 className="font-sans text-[1.875rem] leading-[1.05] font-extrabold tracking-tight text-foreground sm:text-[2.625rem]">
+          {profile.name}
+        </h1>
+        <p className="text-[0.9375rem] text-muted-foreground">{t("intro")}</p>
       </div>
-      <CardPreview
+
+      <ProfileCardBand
         name={name}
         avatar={avatar}
         level={level}
         lessonRuntimes={lessonRuntimes}
+        levels={levels}
+      />
+
+      <div className="flex flex-col">
+        <ProfileSection
+          title={t("sections.identity")}
+          note={t("sections.identityNote")}
+        >
+          <label className="flex max-w-xl flex-col gap-2">
+            <span className="text-[13px] font-semibold text-muted-foreground">
+              {t("nameLabel")}
+            </span>
+            <input
+              type="text"
+              value={name}
+              onChange={(event) => editName(event.target.value)}
+              autoComplete="name"
+              maxLength={LEARNER_NAME_MAX_LENGTH}
+              className="min-h-14 w-full rounded-xl border border-border bg-card px-[1.125rem] text-lg text-foreground focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none"
+            />
+          </label>
+          <div className="flex flex-col gap-2.5">
+            <span className="text-[13px] font-semibold text-muted-foreground">
+              {t("avatarLabel")}
+            </span>
+            <AvatarPicker
+              name={name}
+              value={avatar}
+              onChange={editAvatar}
+              className="sm:grid-cols-9"
+            />
+          </div>
+        </ProfileSection>
+
+        {account ? (
+          <ProfileSection title={t("account.heading")}>
+            <AccountSection account={account} />
+          </ProfileSection>
+        ) : null}
+
+        <ProfileSection title={t("sections.preferences")}>
+          <div className="flex flex-col">
+            <PreferenceRow label={t("preferences.languageLabel")}>
+              <LocaleSwitcher />
+            </PreferenceRow>
+            <PreferenceRow label={t("preferences.themeLabel")}>
+              <ThemeToggle />
+            </PreferenceRow>
+          </div>
+        </ProfileSection>
+
+        <ProfileSection
+          title={t("deleteAccount.heading")}
+          note={t("deleteAccount.description")}
+          className="[&>div>h2]:text-base"
+        >
+          <DeleteAccountSection />
+        </ProfileSection>
+      </div>
+
+      <ProfileSaveBar
+        state={saveState({ isDirty, isSaving, isSaved })}
+        canSave={hasName}
+        onSave={handleSave}
+        onDiscard={discard}
       />
     </div>
   );
 }
 
-function CardPreview({
-  name,
-  avatar,
-  level,
-  lessonRuntimes,
+/** What the save bar draws, from where the edited card stands. */
+function saveState({
+  isDirty,
+  isSaving,
+  isSaved,
 }: {
-  name: string;
-  avatar: LearnerAvatar;
-  level: LearnerCardLevel;
-  lessonRuntimes: ReadonlyArray<LessonProgressSlice>;
-}) {
-  const t = useTranslations("Profile");
-  const isHydrated = useIsHydrated();
-  const progress = useCourseWatchProgress(lessonRuntimes);
+  isDirty: boolean;
+  isSaving: boolean;
+  isSaved: boolean;
+}): ProfileSaveState {
+  if (isSaving) return "saving";
+  if (isDirty) return "unsaved";
+  return isSaved ? "saved" : "clean";
+}
 
+/** One preference: what it changes on the left, the control on the right. */
+function PreferenceRow({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="order-first flex flex-col gap-3.5 lg:sticky lg:top-24 lg:order-none lg:col-span-5 lg:pt-8">
-      <p className="text-[11px] font-bold tracking-[0.3em] text-muted-foreground uppercase">
-        {t("previewLabel")}
-      </p>
-      <LearnerCard
-        name={name}
-        avatar={avatar}
-        level={level}
-        size="large"
-        progress={{
-          completed: isHydrated ? progress.completedCount : 0,
-          total: progress.lessonCount,
-        }}
-      />
-      <p className="text-[13px] text-muted-foreground">{t("previewNote")}</p>
+    <div className="flex min-h-14 items-center justify-between gap-4 border-b border-border/60 py-2 last:border-b-0">
+      <span className="text-[0.9375rem] font-semibold text-foreground">{label}</span>
+      {children}
     </div>
   );
 }
@@ -226,15 +255,21 @@ function ProfileShell() {
     <div
       data-testid="profile-shell"
       aria-hidden="true"
-      className="grid grid-cols-1 gap-7 lg:grid-cols-12 lg:gap-14"
+      className="mx-auto flex w-full max-w-5xl flex-col gap-8 sm:gap-10"
     >
-      <div className="flex flex-col gap-6 lg:col-span-7">
+      <div className="flex flex-col gap-2">
         <Skeleton className="h-3 w-24" />
-        <Skeleton className="h-10 w-full max-w-md" />
-        <Skeleton className="h-14 w-full rounded-xl" />
-        <Skeleton className="h-64 w-full rounded-[1.125rem]" />
+        <Skeleton className="h-10 w-full max-w-sm" />
       </div>
-      <Skeleton className="order-first h-56 w-full rounded-[1.25rem] lg:order-none lg:col-span-5" />
+      <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
+        <Skeleton className="h-56 w-full rounded-[1.25rem] lg:w-[26rem] lg:flex-none" />
+        <Skeleton className="h-56 w-full rounded-[1.125rem]" />
+      </div>
+      <div className="flex flex-col gap-5 border-t border-border pt-8">
+        <Skeleton className="h-6 w-32" />
+        <Skeleton className="h-14 w-full max-w-xl rounded-xl" />
+        <Skeleton className="h-40 w-full rounded-[1.125rem]" />
+      </div>
     </div>
   );
 }

@@ -2,7 +2,6 @@
 
 import { Eyebrow } from "@/components/eyebrow/eyebrow";
 import { TicketToast } from "@/components/ticket-toast/ticket-toast";
-import type { LessonId } from "@/domain/entities/ids/ids";
 import type { Lesson, VideoLesson } from "@/domain/entities/lesson/lesson";
 import type { Resource } from "@/domain/entities/resource/resource";
 import type { LessonView as LessonViewData } from "@/domain/use-cases/find-lesson-for-view/find-lesson-for-view";
@@ -57,18 +56,10 @@ export function LessonView({
   view,
   notes,
   notesResource,
-  markComplete,
-  unmarkComplete,
 }: {
   view: LessonViewData;
   notes: string | null;
   notesResource: Resource | null;
-  markComplete: (input: {
-    lessonId: LessonId;
-  }) => Promise<{ data?: { completed: boolean } } | undefined>;
-  unmarkComplete: (input: {
-    lessonId: LessonId;
-  }) => Promise<{ data?: { unmarked: boolean } } | undefined>;
 }) {
   // A one-way latch: set on the first `play`, never reset. Pausing or
   // seeking must NOT bring the cover back — once playback has begun the
@@ -176,11 +167,7 @@ export function LessonView({
           nextLesson={nextLesson}
           nextLessonModule={nextLessonModule}
         >
-          <LessonCompletionToggle
-            lessonId={lesson.id}
-            markComplete={markComplete}
-            unmarkComplete={unmarkComplete}
-          />
+          <LessonCompletionToggle lessonId={lesson.id} />
         </LessonCloseCard>
       </aside>
     </div>

@@ -1,5 +1,6 @@
 import { StructuredData } from "@/components/structured-data/structured-data";
 import { requireSupportedLocale } from "@/i18n/require-supported-locale/require-supported-locale";
+import { currentLearnerSnapshot } from "@/lib/auth/current-learner-snapshot/current-learner-snapshot";
 import { websiteSchema } from "@/lib/course-schema/course-schema";
 import { siteUrl } from "@/lib/site-url/site-url";
 
@@ -14,6 +15,7 @@ import "../globals.css";
 
 import { CinemaBackground } from "@/components/cinema-background/cinema-background";
 import { GlobalProviders } from "@/components/global-providers";
+import { LearnerStateSeed } from "@/components/learner-state-seed/learner-state-seed";
 import { SiteFooter } from "@/components/site-footer/site-footer";
 import { SiteHeader } from "@/components/site-header/site-header";
 import { SkipLink } from "@/components/skip-link/skip-link";
@@ -100,6 +102,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   // Resolved once per request and shared by both: the header counts the prizes
   // waiting to be claimed, and the providers decide where a won prize stands.
   const levels = catalogLevels(await loadCatalogEntries());
+  const learnerSnapshot = await currentLearnerSnapshot();
 
   return (
     // `suppressHydrationWarning` is required on <html> when using next-themes:
@@ -127,9 +130,13 @@ export default async function LocaleLayout({ children, params }: Props) {
             disableTransitionOnChange
           >
             <StructuredData data={websiteSchema({ siteUrl: siteUrl(), locale })} />
+            <LearnerStateSeed snapshot={learnerSnapshot} />
             <SkipLink />
             <CinemaBackground />
-            <SiteHeader levels={levels} />
+            <SiteHeader
+              levels={levels}
+              signedIn={learnerSnapshot !== null}
+            />
             <GlobalProviders levels={levels}>
               <div className="flex-1">{children}</div>
             </GlobalProviders>

@@ -12,6 +12,7 @@ import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { LessonVideoPlayer } from "../lesson-video-player/lesson-video-player";
 import { LessonVideoResumeOverlay } from "../lesson-video-resume-overlay/lesson-video-resume-overlay";
 import { LessonVideoSkeleton } from "../lesson-video-skeleton/lesson-video-skeleton";
+import { fireAndForget } from "./fire-and-forget/fire-and-forget";
 
 /**
  * The lesson player with its memory: it remembers where the learner stopped,
@@ -118,8 +119,8 @@ export function PlaybackPositionedVideoPlayer({
       get duration() {
         return playerRef.current?.duration ?? 0;
       },
-      pause: () => playerRef.current?.pause(),
-      play: () => void playerRef.current?.play()?.catch(() => {}),
+      pause: () => fireAndForget(playerRef.current?.pause()),
+      play: () => fireAndForget(playerRef.current?.play()),
       seekTo: (seconds: number) => {
         if (playerRef.current !== null) playerRef.current.currentTime = seconds;
       },

@@ -2,6 +2,7 @@ import { type Page } from "@playwright/test";
 
 import { lessonsOfModule, moduleOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
+import type { LearnerState } from "./learner-state-fixture";
 
 /**
  * E2E coverage for the module overview's route (capability:
@@ -25,21 +26,10 @@ const MIN_READABLE_TITLE_WIDTH = 150;
 
 const MODULE_URL = `/en/courses/${COURSE_SLUG}/modules/${MODULE.slug}`;
 
-async function seedReturningLearner(page: Page): Promise<void> {
-  const finishedIds = LESSONS.slice(0, FINISHED_COUNT).map((lesson) => lesson.id);
+async function seedReturningLearner(learnerState: LearnerState): Promise<void> {
   const currentDuration = CURRENT_LESSON.kind === "video" ? CURRENT_LESSON.durationSeconds : 0;
-  await page.addInitScript(
-    ({ finishedIds, currentId, currentSeconds }) => {
-      for (const id of finishedIds)
-        window.localStorage.setItem(`learning-english:completed:${id}`, "1");
-      window.localStorage.setItem(`learning-english:playback:${currentId}`, String(currentSeconds));
-    },
-    {
-      finishedIds,
-      currentId: CURRENT_LESSON.id,
-      currentSeconds: currentDuration * CURRENT_FRACTION,
-    },
-  );
+  await learnerState.completed(LESSONS.slice(0, FINISHED_COUNT).map((lesson) => lesson.id));
+  await learnerState.position(CURRENT_LESSON.id, currentDuration * CURRENT_FRACTION);
 }
 
 /**
@@ -47,27 +37,23 @@ async function seedReturningLearner(page: Page): Promise<void> {
  * finished videos 1–2. The lesson page records the lesson opened last, so the
  * record points at video 2.
  */
-async function seedLearnerWhoReturnedToTheStart(page: Page): Promise<void> {
-  const finishedIds = [...LESSONS.slice(11, 14), ...LESSONS.slice(0, 2)].map((lesson) => lesson.id);
-  await page.addInitScript(
-    ({ finishedIds, record }) => {
-      for (const id of finishedIds)
-        window.localStorage.setItem(`learning-english:completed:${id}`, "1");
-      window.localStorage.setItem("learning-english:continue-watching", JSON.stringify(record));
-    },
-    {
-      finishedIds,
-      record: { courseSlug: COURSE_SLUG, moduleSlug: MODULE.slug, lessonId: LESSONS[1]!.id },
-    },
+async function seedLearnerWhoReturnedToTheStart(learnerState: LearnerState): Promise<void> {
+  await learnerState.completed(
+    [...LESSONS.slice(11, 14), ...LESSONS.slice(0, 2)].map((lesson) => lesson.id),
   );
+  await learnerState.continueWatching({
+    courseSlug: COURSE_SLUG,
+    moduleSlug: MODULE.slug,
+    lessonId: LESSONS[1]!.id,
+  });
 }
 
 const route = (page: Page) => page.getByTestId("module-overview").getByRole("list");
 const panelHeading = (page: Page) => page.getByRole("heading", { name: "Your progress" });
 
 test.describe("Module overview route", () => {
-  test.beforeEach(async ({ page }) => {
-    await seedReturningLearner(page);
+  test.beforeEach(async ({ learnerState }) => {
+    await seedReturningLearner(learnerState);
   });
 
   test("WHEN a returning learner opens the module THEN the first unfinished video is featured and the rest are placed on the route", async ({
@@ -169,8 +155,9 @@ test.describe("Module overview route", () => {
 test.describe("Module overview route — a learner who returned to the start", () => {
   test("WHEN they finished 12–14, went back and finished 1–2 THEN video 3 is featured, not video 15", async ({
     page,
+    learnerState,
   }) => {
-    await seedLearnerWhoReturnedToTheStart(page);
+    await seedLearnerWhoReturnedToTheStart(learnerState);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(MODULE_URL);
 
@@ -182,18 +169,11 @@ test.describe("Module overview route — a learner who returned to the start", (
 
 /** Every Vowels video finished, and — when `isClaimed` — its prize claimed on the counter. */
 async function seedFinishedModule(
-  page: Page,
+  learnerState: LearnerState,
   { isClaimed }: { isClaimed: boolean },
 ): Promise<void> {
-  await page.addInitScript(
-    ({ lessonIds, moduleSlug, isClaimed }) => {
-      for (const id of lessonIds)
-        window.localStorage.setItem(`learning-english:completed:${id}`, "1");
-      if (isClaimed)
-        window.localStorage.setItem(`learning-english:prize-claimed:${moduleSlug}`, "1");
-    },
-    { lessonIds: LESSONS.map((lesson) => lesson.id), moduleSlug: MODULE.slug, isClaimed },
-  );
+  await learnerState.completed(LESSONS.map((lesson) => lesson.id));
+  if (isClaimed) await learnerState.claimedPrizes([MODULE.slug]);
 }
 
 const prizePanel = (page: Page) => page.getByRole("region", { name: "Your progress" });
@@ -203,8 +183,9 @@ const claimLinks = (page: Page) => page.getByRole("link", { name: "Claim the Vow
 test.describe("Module overview prize", () => {
   test("WHEN a returning learner opens the module THEN the panel and the end of the route show the hidden prize with its tickets", async ({
     page,
+    learnerState,
   }) => {
-    await seedReturningLearner(page);
+    await seedReturningLearner(learnerState);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(MODULE_URL);
 
@@ -218,8 +199,9 @@ test.describe("Module overview prize", () => {
 
   test("WHEN every ticket is collected THEN Claim prize opens the counter asking for the Vowels prize", async ({
     page,
+    learnerState,
   }) => {
-    await seedFinishedModule(page, { isClaimed: false });
+    await seedFinishedModule(learnerState, { isClaimed: false });
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(MODULE_URL);
 
@@ -229,8 +211,11 @@ test.describe("Module overview prize", () => {
     await page.waitForURL(`**/en/achievements?claim=${MODULE.slug}`, COLD_ROUTE);
   });
 
-  test("WHEN every ticket is collected THEN Start Lesson 03 opens Consonants", async ({ page }) => {
-    await seedFinishedModule(page, { isClaimed: false });
+  test("WHEN every ticket is collected THEN Start Lesson 03 opens Consonants", async ({
+    page,
+    learnerState,
+  }) => {
+    await seedFinishedModule(learnerState, { isClaimed: false });
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(MODULE_URL);
 
@@ -241,8 +226,9 @@ test.describe("Module overview prize", () => {
 
   test("WHEN the prize was claimed THEN the end of the route still hands on to Start Lesson 03", async ({
     page,
+    learnerState,
   }) => {
-    await seedFinishedModule(page, { isClaimed: true });
+    await seedFinishedModule(learnerState, { isClaimed: true });
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(MODULE_URL);
 
@@ -253,8 +239,9 @@ test.describe("Module overview prize", () => {
 
   test("WHEN the prize was claimed on the counter THEN the module page reveals the harmonica and offers nothing to claim", async ({
     page,
+    learnerState,
   }) => {
-    await seedFinishedModule(page, { isClaimed: true });
+    await seedFinishedModule(learnerState, { isClaimed: true });
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(MODULE_URL);
 
@@ -265,8 +252,9 @@ test.describe("Module overview prize", () => {
 
   test("WHEN every ticket is collected on a 390px phone THEN the finale and its Claim prize link fit without sideways scrolling", async ({
     page,
+    learnerState,
   }) => {
-    await seedFinishedModule(page, { isClaimed: false });
+    await seedFinishedModule(learnerState, { isClaimed: false });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(MODULE_URL);
 

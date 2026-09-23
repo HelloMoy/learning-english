@@ -17,10 +17,7 @@ const meta = {
   title: "LessonView/LessonCompletionToggle",
   component: LessonCompletionToggle,
   parameters: { viewport: { defaultViewport: "mobile1" } },
-  args: {
-    markComplete: () => Promise.resolve({ data: { completed: true } }),
-    unmarkComplete: () => Promise.resolve({ data: { unmarked: true } }),
-  },
+  args: {},
   decorators: [
     (Story) => (
       <NiceModal.Provider>

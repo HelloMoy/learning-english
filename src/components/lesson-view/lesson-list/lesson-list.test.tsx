@@ -2,8 +2,8 @@ import { Course } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
 import { finishThresholdSeconds } from "@/lib/watch-progress/watch-progress";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
 import { act, render, screen, within } from "@testing-library/react";
@@ -114,13 +114,10 @@ describe("LessonList", () => {
 });
 
 describe("LessonList — completion indicator", () => {
-  const STORAGE_KEY_PREFIX = "learning-english:completed:";
-
   beforeEach(() => {
     mockUseTranslations.mockReturnValue(((key: string) => key) as never);
     window.localStorage.clear();
     act(() => {
-      refreshSavedPlaybackPositions();
       window.dispatchEvent(new StorageEvent("storage", { key: null }));
     });
   });
@@ -128,7 +125,7 @@ describe("LessonList — completion indicator", () => {
   test("WHEN a lesson has been completed THEN its row shows the indicator", () => {
     // Arrange
     const lessons = [makeLesson(1, "First"), makeLesson(2, "Second")];
-    window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessons[1]!.id}`, "1");
+    givenLearner.completed([lessons[1]!.id]);
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
 
     // Act
@@ -152,13 +149,8 @@ describe("LessonList — completion indicator", () => {
     // The outline reads the same completion rule as the module overview: a
     // lesson finished by watching is done, button or no button.
     const lessons = [makeVideoLesson(1, "First"), makeVideoLesson(2, "Second")];
-    window.localStorage.setItem(
-      `learning-english:playback:${lessons[1]!.id}`,
-      String(finishThresholdSeconds(VIDEO_DURATION_SECONDS)),
-    );
-    act(() => {
-      refreshSavedPlaybackPositions();
-    });
+    givenLearner.positions({ [lessons[1]!.id]: finishThresholdSeconds(VIDEO_DURATION_SECONDS) });
+    act(() => {});
 
     const { container } = render(
       <LessonList
@@ -196,7 +188,7 @@ describe("LessonList — completion indicator", () => {
   test("WHEN the current lesson is also complete THEN both markers coexist", () => {
     // Arrange
     const lessons = [makeLesson(1, "First"), makeLesson(2, "Second")];
-    window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessons[0]!.id}`, "1");
+    givenLearner.completed([lessons[0]!.id]);
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
 
     // Act
@@ -219,7 +211,7 @@ describe("LessonList — completion indicator", () => {
   test("WHEN the indicator renders THEN it carries a localized accessible name", () => {
     // Arrange
     const lessons = [makeLesson(1, "First")];
-    window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessons[0]!.id}`, "1");
+    givenLearner.completed([lessons[0]!.id]);
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
 
     // Act
@@ -240,11 +232,8 @@ describe("LessonList — completion indicator", () => {
 });
 
 describe("LessonList — watch progress", () => {
-  const PLAYBACK_KEY_PREFIX = "learning-english:playback:";
-
   const announceStorageChange = () => {
     act(() => {
-      refreshSavedPlaybackPositions();
       window.dispatchEvent(new StorageEvent("storage", { key: null }));
     });
   };
@@ -257,10 +246,7 @@ describe("LessonList — watch progress", () => {
 
   test("WHEN a lesson has been partly watched THEN its row shows how far the learner got", () => {
     const lessons = [makeVideoLesson(1, "First"), makeVideoLesson(2, "Second")];
-    window.localStorage.setItem(
-      `${PLAYBACK_KEY_PREFIX}${lessons[1]!.id}`,
-      String(VIDEO_DURATION_SECONDS * 0.4),
-    );
+    givenLearner.positions({ [lessons[1]!.id]: VIDEO_DURATION_SECONDS * 0.4 });
     announceStorageChange();
 
     const { container } = render(
@@ -279,10 +265,7 @@ describe("LessonList — watch progress", () => {
 
   test("WHEN a lesson is complete THEN its row's bar reads full", () => {
     const lessons = [makeVideoLesson(1, "First")];
-    window.localStorage.setItem(
-      `${PLAYBACK_KEY_PREFIX}${lessons[0]!.id}`,
-      String(finishThresholdSeconds(VIDEO_DURATION_SECONDS)),
-    );
+    givenLearner.positions({ [lessons[0]!.id]: finishThresholdSeconds(VIDEO_DURATION_SECONDS) });
     announceStorageChange();
 
     const { container } = render(
@@ -316,7 +299,7 @@ describe("LessonList — watch progress", () => {
 
   test("WHEN the lesson is a reading lesson THEN its row carries no bar", () => {
     const lessons = [makeLesson(1, "Reading")];
-    window.localStorage.setItem(`${PLAYBACK_KEY_PREFIX}${lessons[0]!.id}`, "120");
+    givenLearner.positions({ [lessons[0]!.id]: 120 });
     announceStorageChange();
 
     const { container } = render(
@@ -335,7 +318,7 @@ describe("LessonList — watch progress", () => {
     // 214 rows on the largest module: a bar folded into the link would rename
     // every one of them and a focusable bar would double the tab stops.
     const lessons = [makeVideoLesson(1, "First")];
-    window.localStorage.setItem(`${PLAYBACK_KEY_PREFIX}${lessons[0]!.id}`, "120");
+    givenLearner.positions({ [lessons[0]!.id]: 120 });
     announceStorageChange();
 
     const { container } = render(

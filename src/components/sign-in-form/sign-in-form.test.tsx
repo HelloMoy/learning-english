@@ -1,0 +1,193 @@
+import { useRouter } from "@/i18n/navigation";
+import { authClient } from "@/lib/auth-client/auth-client";
+import { renderInLocale } from "@/test-setup/render-in-locale";
+import { spokenRegions } from "@/test-setup/spoken-regions/spoken-regions";
+import { localizeGetPathname } from "@/test-setup/stubs/localized-pathname";
+import { PASSED_CHALLENGE_TOKEN } from "@/test-setup/stubs/turnstile-challenge";
+
+import { faker } from "@faker-js/faker";
+import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, test, vi } from "vitest";
+
+import { SignInForm } from "./sign-in-form";
+
+vi.mock("@/lib/auth-client/auth-client", () => ({
+  authClient: { signIn: { email: vi.fn(), social: vi.fn() } },
+}));
+vi.mock(
+  "@/components/turnstile-challenge/turnstile-challenge",
+  () => import("@/test-setup/stubs/turnstile-challenge"),
+);
+
+const signIn = vi.mocked(authClient.signIn.email);
+const router = { replace: vi.fn(), refresh: vi.fn(), push: vi.fn() };
+
+beforeEach(() => {
+  signIn.mockReset();
+  signIn.mockResolvedValue({ data: {}, error: null } as never);
+  router.replace.mockClear();
+  router.refresh.mockClear();
+  vi.mocked(useRouter).mockReturnValue(router as never);
+  localizeGetPathname();
+});
+
+async function signInWith(email: string, password: string, submitName = "Sign in") {
+  await userEvent.type(screen.getByLabelText(/^(Email|Correo|E-mail)$/), email);
+  await userEvent.type(screen.getByLabelText(/^(Password|Contraseña|Senha)$/), password);
+  await userEvent.click(screen.getByRole("button", { name: "pass challenge" }));
+  await userEvent.click(screen.getByRole("button", { name: submitName }));
+}
+
+const pausedRegions = () => screen.queryAllByTestId("account-wait-paused");
+
+describe("SignInForm", () => {
+  test("WHEN the challenge has not passed THEN the form cannot be submitted", () => {
+    renderInLocale(<SignInForm returnPath="/learning" />);
+
+    expect(screen.getByRole("button", { name: "Sign in" })).toBeDisabled();
+  });
+
+  test("WHEN the credentials are accepted THEN the learner is sent to the return path with a fresh render", async () => {
+    const email = faker.internet.email();
+    renderInLocale(<SignInForm returnPath="/courses/basics" />, "es");
+
+    await signInWith(email, "long-enough-1", "Iniciar sesión");
+
+    expect(signIn).toHaveBeenCalledWith(
+      { email, password: "long-enough-1", callbackURL: "/es/courses/basics" },
+      { headers: { "x-captcha-response": PASSED_CHALLENGE_TOKEN, "x-app-locale": "es" } },
+    );
+    expect(router.replace).toHaveBeenCalledWith("/courses/basics");
+    expect(router.refresh).toHaveBeenCalled();
+  });
+
+  test("WHEN the credentials are wrong THEN one message says so without naming which part", async () => {
+    signIn.mockResolvedValue({
+      data: null,
+      error: { code: "INVALID_EMAIL_OR_PASSWORD", status: 401 },
+    } as never);
+    renderInLocale(<SignInForm returnPath="/learning" />);
+
+    await signInWith(faker.internet.email(), "long-enough-1");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "The email or password is incorrect.",
+    );
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  test("WHEN the address is not verified yet THEN the learner is told to open the link first", async () => {
+    signIn.mockResolvedValue({
+      data: null,
+      error: { code: "EMAIL_NOT_VERIFIED", status: 403 },
+    } as never);
+    renderInLocale(<SignInForm returnPath="/learning" />);
+
+    await signInWith(faker.internet.email(), "long-enough-1");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Confirm your email first: open the link we sent you, then sign in.",
+    );
+  });
+
+  test("WHEN arriving from a password reset THEN a confirmation is shown", () => {
+    renderInLocale(
+      <SignInForm
+        returnPath="/learning"
+        passwordUpdated
+      />,
+    );
+
+    // The wait's own live region is also mounted, and empty until a request
+    // starts — this asserts the notice, not whichever region comes first
+    expect(spokenRegions()).toEqual(["Your password was updated. Sign in with the new one."]);
+  });
+
+  test("WHEN the request is in flight THEN the form is dimmed and inert rather than replaced", async () => {
+    let acceptSignIn = () => {};
+    signIn.mockReturnValue(
+      new Promise((resolve) => {
+        acceptSignIn = () => resolve({ data: {}, error: null } as never);
+      }) as never,
+    );
+    const email = faker.internet.email();
+    renderInLocale(<SignInForm returnPath="/learning" />);
+
+    await signInWith(email, "long-enough-1");
+
+    expect(screen.getByLabelText(/^Email$/)).toHaveValue(email);
+    expect(pausedRegions().every((region) => region.hasAttribute("inert"))).toBe(true);
+    expect(screen.getByRole("button", { name: "Signing in…" })).toBeDisabled();
+    expect(screen.getByTestId("account-wait-beam")).toBeInTheDocument();
+    acceptSignIn();
+  });
+
+  test("WHEN the request is in flight THEN the wait names itself once", async () => {
+    signIn.mockReturnValue(new Promise(() => {}) as never);
+    renderInLocale(
+      <SignInForm
+        returnPath="/learning"
+        passwordUpdated
+      />,
+    );
+
+    await signInWith(faker.internet.email(), "long-enough-1");
+
+    expect(spokenRegions()).toEqual(["Checking your details…"]);
+  });
+
+  test("WHEN the credentials are accepted THEN the form does not flash back before the navigation", async () => {
+    renderInLocale(<SignInForm returnPath="/learning" />);
+
+    await signInWith(faker.internet.email(), "long-enough-1");
+
+    expect(router.replace).toHaveBeenCalledWith("/learning");
+    expect(pausedRegions().every((region) => region.hasAttribute("inert"))).toBe(true);
+    expect(screen.getByRole("button", { name: "Signing in…" })).toBeDisabled();
+  });
+
+  test("WHEN the credentials are refused THEN the form comes back holding what was typed", async () => {
+    signIn.mockResolvedValue({
+      data: null,
+      error: { code: "INVALID_EMAIL_OR_PASSWORD", status: 401 },
+    } as never);
+    const email = faker.internet.email();
+    renderInLocale(<SignInForm returnPath="/learning" />);
+
+    await signInWith(email, "long-enough-1");
+
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    expect(pausedRegions().some((region) => region.hasAttribute("inert"))).toBe(false);
+    expect(screen.getByLabelText(/^Email$/)).toHaveValue(email);
+    expect(screen.getByLabelText(/^Password$/)).toHaveValue("long-enough-1");
+    expect(screen.queryByTestId("account-wait-beam")).not.toBeInTheDocument();
+  });
+
+  test.each([
+    ["es", "Comprobando tus datos…", "Iniciando sesión…", "Iniciar sesión"],
+    ["pt", "Conferindo seus dados…", "Entrando…", "Entrar"],
+  ] as const)(
+    "WHEN the wait runs in %s THEN every word of it is in that locale",
+    async (locale, sentence, pendingLabel, submitLabel) => {
+      signIn.mockReturnValue(new Promise(() => {}) as never);
+      renderInLocale(<SignInForm returnPath="/learning" />, locale);
+
+      await signInWith(faker.internet.email(), "long-enough-1", submitLabel);
+
+      expect(spokenRegions()).toEqual([sentence]);
+      expect(screen.getByTestId("account-wait-status")).toHaveTextContent(sentence);
+      expect(screen.getByRole("button", { name: pendingLabel })).toBeInTheDocument();
+    },
+  );
+
+  test("WHEN it renders THEN it links to the forgot-password page and offers Google", () => {
+    renderInLocale(<SignInForm returnPath="/learning" />);
+
+    expect(screen.getByRole("link", { name: "Forgot your password?" })).toHaveAttribute(
+      "href",
+      "/forgot-password",
+    );
+    expect(screen.getByRole("button", { name: "Continue with Google" })).toBeInTheDocument();
+  });
+});

@@ -3,8 +3,10 @@ import { cn } from "@/lib/utils/utils";
 
 /**
  * The Immersion Cinema wordmark: `ENGLISH·COURSE`, letter-spaced, with the
- * middle dot in the gold accent. Links home (locale-aware). The visible
- * text carries the accessible name, so no extra `aria-label` is needed.
+ * middle dot in the gold accent. Links wherever the caller points it
+ * (locale-aware), defaulting to the locale home — the header sends a signed-in
+ * learner to My learning instead. The visible text carries the accessible
+ * name, so no extra `aria-label` is needed.
  *
  * The mark is not localized. It names the product the site publishes to the
  * outside world, so it reads the same in every locale and matches what the

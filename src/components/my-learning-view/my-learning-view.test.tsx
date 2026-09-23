@@ -8,6 +8,7 @@ import { Module } from "@/domain/entities/module/module";
 import type { ContinueWatchingRepository } from "@/domain/ports/continue-watching-repository/continue-watching-repository";
 import type { PlaybackPositionRepository } from "@/domain/ports/playback-position-repository/playback-position-repository";
 import { useRouter } from "@/i18n/navigation";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 import { renderInLocale } from "@/test-setup/render-in-locale";
 import { makeStubLearnerProfileRepository } from "@/test-setup/stubs/domain-repos";
 
@@ -245,7 +246,7 @@ describe("MyLearningView", () => {
     });
 
     test("WHEN the recorded video is already finished THEN Resume AND the lead card open the next video instead", async () => {
-      window.localStorage.setItem(`learning-english:completed:${continuedLesson.id}`, "1");
+      givenLearner.completed([continuedLesson.id]);
       const nextVideo = vowelLessons[1]!;
       const nextPanel: ContinueWatchingPanel = {
         ...panel,

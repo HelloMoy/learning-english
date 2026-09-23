@@ -1,18 +1,15 @@
-import { act, renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, test } from "vitest";
+import { earnTicketsAction } from "@/app/[locale]/learner-actions";
+import { learnerStore } from "@/lib/learner-store/learner-store";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
-import { earnTickets, useEarnedTickets } from "./use-earned-tickets";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 
-const ticketKey = (lessonId: string) => `learning-english:ticket-earned:${lessonId}`;
-
-const announceStorageChange = (key: string | null) => {
-  act(() => {
-    window.dispatchEvent(new StorageEvent("storage", { key }));
-  });
-};
+import { earnedTicketsServerSnapshot, earnTickets, useEarnedTickets } from "./use-earned-tickets";
 
 beforeEach(() => {
-  window.localStorage.clear();
+  vi.mocked(earnTicketsAction).mockClear();
+  vi.mocked(earnTicketsAction).mockResolvedValue({ data: { earned: true } } as never);
 });
 
 describe("useEarnedTickets", () => {
@@ -22,32 +19,33 @@ describe("useEarnedTickets", () => {
     expect(result.current.size).toBe(0);
   });
 
-  test("WHEN a ticket is earned THEN the snapshot holds it AND it is stored on the device", () => {
+  test("WHEN a ticket is earned THEN the snapshot holds it AND it is saved for the learner", () => {
     const { result } = renderHook(() => useEarnedTickets());
 
     act(() => earnTickets(["lesson-1"]));
 
     expect(result.current.has("lesson-1")).toBe(true);
-    expect(window.localStorage.getItem(ticketKey("lesson-1"))).not.toBeNull();
+    expect(earnTicketsAction).toHaveBeenCalledWith({ lessonIds: ["lesson-1"] });
   });
 
-  test("WHEN several tickets are earned at once THEN every one is stored", () => {
+  test("WHEN several tickets are earned at once THEN one save carries them all", () => {
     const { result } = renderHook(() => useEarnedTickets());
 
     act(() => earnTickets(["lesson-1", "lesson-2", "lesson-3"]));
 
     expect([...result.current].sort()).toEqual(["lesson-1", "lesson-2", "lesson-3"]);
+    expect(earnTicketsAction).toHaveBeenCalledTimes(1);
   });
 
-  test("WHEN a ticket was earned on an earlier visit THEN it is read on mount", () => {
-    window.localStorage.setItem(ticketKey("lesson-9"), "1");
+  test("WHEN the learner's snapshot carries tickets THEN they are read", () => {
+    givenLearner.earnedTickets(["lesson-9"]);
 
     const { result } = renderHook(() => useEarnedTickets());
 
     expect(result.current.has("lesson-9")).toBe(true);
   });
 
-  test("WHEN nothing new is earned THEN the snapshot keeps its identity", () => {
+  test("WHEN nothing new is earned THEN nothing is sent and the snapshot keeps its identity", () => {
     // The caller hands the whole catalog over on every render, so a write that
     // changes nothing must not notify — or the render that called it loops.
     const { result } = renderHook(() => useEarnedTickets());
@@ -58,15 +56,15 @@ describe("useEarnedTickets", () => {
     act(() => earnTickets([]));
 
     expect(result.current).toBe(afterFirstEarn);
+    expect(earnTicketsAction).toHaveBeenCalledTimes(1);
   });
 
-  test("WHEN another tab earns a ticket THEN the snapshot catches up", () => {
-    const { result } = renderHook(() => useEarnedTickets());
+  test("WHEN the server refuses THEN the tickets are withdrawn", async () => {
+    vi.mocked(earnTicketsAction).mockResolvedValue({ serverError: "x" } as never);
 
-    window.localStorage.setItem(ticketKey("lesson-7"), "1");
-    announceStorageChange(ticketKey("lesson-7"));
+    act(() => earnTickets(["lesson-5"]));
 
-    expect(result.current.has("lesson-7")).toBe(true);
+    await waitFor(() => expect(learnerStore.getState().earnedTickets.has("lesson-5")).toBe(false));
   });
 
   test("WHEN two surfaces read the tickets THEN they share one snapshot", () => {
@@ -76,5 +74,10 @@ describe("useEarnedTickets", () => {
     act(() => earnTickets(["lesson-4"]));
 
     expect(first.result.current).toBe(second.result.current);
+  });
+
+  test("WHEN rendering on the server THEN the snapshot is empty and stable", () => {
+    expect(earnedTicketsServerSnapshot().size).toBe(0);
+    expect(earnedTicketsServerSnapshot()).toBe(earnedTicketsServerSnapshot());
   });
 });

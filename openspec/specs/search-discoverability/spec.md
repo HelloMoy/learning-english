@@ -19,21 +19,31 @@ This is decided by the environment and not by a flag someone must remember to fl
 
 ### Requirement: The sitemap lists every servable URL with its locale alternates
 
-The application SHALL publish a sitemap listing the home, every course, every module and every lesson, in every supported locale. Each entry SHALL declare the equivalent URL in each other locale, so the locale relations are stated where a crawler reads them first rather than only in each page's head.
+The application SHALL publish a sitemap that lists, in every supported locale, the home and the two legal routes — the privacy policy and the terms — and nothing else. Those three are the application's only pages an anonymous visitor can read. Course, module and lesson routes SHALL NOT appear in it, because they require a session and answer an anonymous crawler with the sign-in page. Each entry SHALL declare the equivalent URL in each other locale, so the locale relations are stated where a crawler reads them first rather than only in each page's head.
 
-The sitemap SHALL be built from the same catalog the pages are served from. A course withheld from the served catalog SHALL NOT appear in it, nor SHALL its modules or lessons — a sitemap that lists a URL rendering a not-found state is worse than one that omits it.
-
-#### Scenario: Every lesson is reachable without walking the navigation
+#### Scenario: The sitemap lists the home in every locale
 - **WHEN** the sitemap is requested
-- **THEN** it contains an entry for every lesson of every served course, in each supported locale
+- **THEN** it contains exactly one entry per supported locale, each pointing at that locale's home
 
-#### Scenario: A withheld course is absent from the sitemap
-- **WHEN** the catalog withholds a course
-- **THEN** neither that course, nor any of its modules or lessons, appears in the sitemap
+#### Scenario: The sitemap lists the legal routes in every locale
+- **WHEN** the sitemap is requested
+- **THEN** it contains one entry per supported locale for `/privacy`, and one per supported locale for `/terms`
+
+#### Scenario: No course URL is listed
+- **WHEN** the sitemap is requested
+- **THEN** no entry's URL contains `/courses/`
 
 #### Scenario: Entries carry their locale alternates
-- **WHEN** a course entry is read
-- **THEN** it declares the `en`, `es` and `pt` URLs for that same course
+- **WHEN** the `en` home entry is read
+- **THEN** it declares the `en`, `es` and `pt` home URLs
+
+#### Scenario: Legal entries carry their locale alternates
+- **WHEN** the `en` privacy entry is read
+- **THEN** it declares the `en`, `es` and `pt` privacy URLs
+
+#### Scenario: Nothing beyond the three public paths is listed
+- **WHEN** the sitemap is requested
+- **THEN** it contains exactly three entries per supported locale
 
 ### Requirement: The catalog is described as structured data
 
@@ -61,9 +71,7 @@ Structured data SHALL state only what the catalog actually knows. Ratings, revie
 
 ### Requirement: Personal learner routes are kept out of search
 
-The onboarding, My learning, Achievements and Profile routes SHALL declare `robots` metadata that asks
-search engines not to index them while still following their links, in every locale and on every
-deployment. The sitemap SHALL NOT list them.
+The onboarding, My learning, Achievements and Profile routes and the account pages SHALL declare `robots` metadata that asks search engines not to index them while still following their links, in every locale and on every deployment. The account pages are sign-in, sign-up, forgot-password and reset-password. The sitemap SHALL NOT list any of them.
 
 #### Scenario: My learning is not indexable
 - **WHEN** the metadata for `/en/learning` is generated
@@ -73,7 +81,11 @@ deployment. The sitemap SHALL NOT list them.
 - **WHEN** the metadata for `/en/achievements` is generated
 - **THEN** it declares `index: false` and `follow: true`
 
+#### Scenario: Sign-in is not indexable
+- **WHEN** the metadata for `/en/sign-in` is generated
+- **THEN** it declares `index: false` and `follow: true`
+
 #### Scenario: The sitemap omits personal routes
 - **WHEN** the sitemap is requested
-- **THEN** no entry's URL ends in `/start`, `/start/avatar`, `/learning`, `/achievements` or `/profile`
+- **THEN** no entry's URL ends in `/start`, `/start/avatar`, `/learning`, `/achievements`, `/profile`, `/sign-in`, `/sign-up`, `/forgot-password` or `/reset-password`
 

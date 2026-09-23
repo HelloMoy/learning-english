@@ -1,17 +1,13 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 import type { VideoLesson } from "@/domain/entities/lesson/lesson";
 
-import {
-  devices,
-  expect,
-  test,
-  type BrowserContext,
-  type Locator,
-  type Page,
-} from "@playwright/test";
+import { devices, type Locator, type Page } from "@playwright/test";
 
+import { skipOnCi } from "./ci-unavailable";
 import { modulesOfCourse } from "./content-seed-fixtures";
+import { expect, test } from "./learner-account-fixture";
 import { seedLearnerProfile } from "./learner-profile-fixture";
+import type { LearnerState } from "./learner-state-fixture";
 
 /**
  * Device emulation minus `defaultBrowserType`, which Playwright refuses inside
@@ -36,9 +32,9 @@ function deviceWithoutEngine(device: (typeof devices)[string]) {
  * duration is read off the entity rather than hardcoded — a regenerated
  * seed keeps the assertions honest.
  *
- * Persistence is `localStorage` (per the v1 design); each test starts from
- * a clean storage via an `addInitScript` that clears it. The storage key is
- * `learning-english:playback:{lessonId}`.
+ * Positions belong to the signed-in learner (capability `learner-state`);
+ * each test runs as a fresh learner, seeds the rows it needs before opening
+ * the page, and reads back what the app saved from the database.
  *
  * **This is the only layer that can prove the feature.** The player is
  * Vidstack, and jsdom loads no media provider — component tests can deliver
@@ -66,7 +62,6 @@ const LESSON = contentCatalog.lessonRows
   .sort((a, b) => b.durationSeconds - a.durationSeconds)[0]!;
 const LESSON_ID = LESSON.id;
 const DURATION_SECONDS = LESSON.durationSeconds;
-const STORAGE_KEY = `learning-english:playback:${LESSON_ID}`;
 
 const RESUMABLE_SECONDS = 30;
 
@@ -75,49 +70,19 @@ function lessonUrl(locale: string): string {
 }
 
 /**
- * Wipes `localStorage` on the **first** load of the context only.
- *
- * `addInitScript` runs on every navigation, so an unconditional clear would
- * also fire on `page.reload()` — erasing the very position the test just
- * saved. The `sessionStorage` flag survives a reload within the same tab,
- * which is exactly the "only the first load" scope needed here.
+ * Gives the fixture learner their card; a fresh account has nothing else to
+ * clear.
  */
-async function clearStorageFor(context: BrowserContext) {
-  await context.addInitScript(() => {
-    const ALREADY_CLEARED = "__e2e_storage_cleared__";
-    try {
-      if (window.sessionStorage.getItem(ALREADY_CLEARED) === null) {
-        window.localStorage.clear();
-        window.sessionStorage.setItem(ALREADY_CLEARED, "1");
-      }
-    } catch {
-      // localStorage might not be available; ignore.
-    }
-  });
-  // After the clear, so the wipe does not take the learner card with it.
-  await seedLearnerProfile(context);
+async function prepareLearner(learnerState: LearnerState) {
+  await seedLearnerProfile(learnerState);
 }
 
-async function seedSavedPosition(context: BrowserContext, seconds: number) {
-  await context.addInitScript(
-    ([key, value]) => {
-      try {
-        window.localStorage.setItem(key, value);
-      } catch {
-        // ignore
-      }
-    },
-    [STORAGE_KEY, String(seconds)],
-  );
+async function seedSavedPosition(learnerState: LearnerState, seconds: number) {
+  await learnerState.position(LESSON_ID, seconds);
 }
 
-async function readSavedPosition(page: Page): Promise<number | null> {
-  return page.evaluate((key) => {
-    const raw = window.localStorage.getItem(key);
-    if (raw === null) return null;
-    const parsed = Number.parseFloat(raw);
-    return Number.isFinite(parsed) ? parsed : null;
-  }, STORAGE_KEY);
+async function readSavedPosition(learnerState: LearnerState): Promise<number | null> {
+  return learnerState.savedPosition(LESSON_ID);
 }
 
 const playerRegion = (page: Page): Locator => page.getByRole("region", { name: /video player/i });
@@ -186,10 +151,12 @@ const currentTime = (page: Page) =>
   videoElement(page).evaluate((el) => (el as HTMLVideoElement).currentTime);
 
 test.describe("Lesson playback-position resume cycle", () => {
+  skipOnCi("self-hosted-content");
+
   test.describe("GIVEN a resumable position is stored", () => {
-    test.beforeEach(async ({ context }) => {
-      await clearStorageFor(context);
-      await seedSavedPosition(context, RESUMABLE_SECONDS);
+    test.beforeEach(async ({ learnerState }) => {
+      await prepareLearner(learnerState);
+      await seedSavedPosition(learnerState, RESUMABLE_SECONDS);
     });
 
     test("WHEN the learner lands on the lesson THEN no resume surface appears anywhere", async ({
@@ -304,11 +271,12 @@ test.describe("Lesson playback-position resume cycle", () => {
 
     test("WHEN the page cold-loads THEN the stored position is not overwritten with 0", async ({
       page,
+      learnerState,
     }) => {
       await openLesson(page);
       await page.waitForTimeout(500);
 
-      expect(await readSavedPosition(page)).toBe(RESUMABLE_SECONDS);
+      expect(await readSavedPosition(learnerState)).toBe(RESUMABLE_SECONDS);
     });
   });
 
@@ -322,10 +290,10 @@ test.describe("Lesson playback-position resume cycle", () => {
     for (const [name, seconds] of cases) {
       test(`WHEN ${name} THEN pressing play starts the video with no overlay`, async ({
         page,
-        context,
+        learnerState,
       }) => {
-        await clearStorageFor(context);
-        if (seconds !== null) await seedSavedPosition(context, seconds);
+        await prepareLearner(learnerState);
+        if (seconds !== null) await seedSavedPosition(learnerState, seconds);
 
         await openLesson(page);
         await pressPlay(page);
@@ -339,9 +307,9 @@ test.describe("Lesson playback-position resume cycle", () => {
   test.describe("GIVEN the learner watches and leaves", () => {
     test("WHEN they play then pause THEN the position is written for the next visit", async ({
       page,
-      context,
+      learnerState,
     }) => {
-      await clearStorageFor(context);
+      await prepareLearner(learnerState);
       await openLesson(page);
 
       await pressPlay(page);
@@ -349,7 +317,7 @@ test.describe("Lesson playback-position resume cycle", () => {
       await expect.poll(() => currentTime(page), { timeout: 10_000 }).toBeGreaterThan(0);
       await pressPause(page);
 
-      await expect.poll(async () => await readSavedPosition(page)).not.toBeNull();
+      await expect.poll(async () => await readSavedPosition(learnerState)).not.toBeNull();
     });
   });
 });
@@ -382,8 +350,6 @@ const YOUTUBE_MODULE = modulesOfCourse(YOUTUBE_COURSE_SLUG).find(
   (courseModule) => courseModule.id === YOUTUBE_LESSON.moduleId,
 )!;
 
-const YOUTUBE_STORAGE_KEY = `learning-english:playback:${YOUTUBE_LESSON.id}`;
-
 /** Comfortably past the 30s floor, and far from the end of any lecture. */
 const YOUTUBE_RESUMABLE_SECONDS = 60;
 
@@ -407,21 +373,14 @@ const percentWatched = (page: Page): Promise<number> =>
     .evaluate((element) => Number.parseFloat(element.getAttribute("aria-valuenow") ?? "0"));
 
 test.describe("Lesson playback-position resume cycle, on a YouTube lesson", () => {
+  skipOnCi("youtube");
+
   test("WHEN the learner resumes THEN the video plays on past the saved position", async ({
     page,
-    context,
+    learnerState,
   }) => {
-    await clearStorageFor(context);
-    await context.addInitScript(
-      ([key, value]) => {
-        try {
-          window.localStorage.setItem(key, value);
-        } catch {
-          // ignore
-        }
-      },
-      [YOUTUBE_STORAGE_KEY, String(YOUTUBE_RESUMABLE_SECONDS)],
-    );
+    await prepareLearner(learnerState);
+    await learnerState.position(YOUTUBE_LESSON.id, YOUTUBE_RESUMABLE_SECONDS);
 
     await page.goto(
       `/en/courses/${YOUTUBE_COURSE_SLUG}/modules/${YOUTUBE_MODULE.slug}/lessons/${YOUTUBE_LESSON.id}`,
@@ -462,11 +421,11 @@ test.describe("The resume overlay on a phone", () => {
   for (const width of [390, 320]) {
     test(`WHEN the overlay opens at ${width}px THEN the card lies inside the player`, async ({
       page,
-      context,
+      learnerState,
     }) => {
       await page.setViewportSize({ width, height: 664 });
-      await clearStorageFor(context);
-      await seedSavedPosition(context, RESUMABLE_SECONDS);
+      await prepareLearner(learnerState);
+      await seedSavedPosition(learnerState, RESUMABLE_SECONDS);
 
       await page.goto(lessonUrl("en"));
       await expect(playerRegion(page)).toBeVisible();

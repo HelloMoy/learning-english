@@ -1,12 +1,10 @@
 import { LessonId } from "@/domain/entities/ids/ids";
 import type { LessonRuntime } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { ModuleWatchProgress } from "./module-watch-progress";
-
-const COMPLETED_KEY_PREFIX = "learning-english:completed:";
 
 const DURATION_SECONDS = 600;
 
@@ -21,18 +19,16 @@ const SHORT_MODULE = lessonRuntimes(3);
 
 /**
  * Seeds browser storage so each story has something to count. The
- * component's whole input is `localStorage`, so a story cannot show a meter
+ * component's whole input is the learner store, so a story cannot show a meter
  * without writing there first.
  */
 function seedCompletions(completed: ReadonlyArray<LessonRuntime>) {
   for (const lesson of [...MODULE, ...SHORT_MODULE]) {
-    window.localStorage.removeItem(`${COMPLETED_KEY_PREFIX}${lesson.id}`);
+    givenLearner.notCompleted([lesson.id]);
   }
   for (const lesson of completed) {
-    window.localStorage.setItem(`${COMPLETED_KEY_PREFIX}${lesson.id}`, "1");
+    givenLearner.completed([lesson.id]);
   }
-  refreshSavedPlaybackPositions();
-  window.dispatchEvent(new StorageEvent("storage", { key: null }));
 }
 
 const meta: Meta<typeof ModuleWatchProgress> = {
@@ -74,8 +70,8 @@ export const FullyCompleted: Story = {
 
 /**
  * A module the learner has not started renders **nothing** — deliberately,
- * not by oversight. Progress lives in `localStorage`, which the server cannot
- * read, so the first frame of any page necessarily shows no meters.
+ * not by oversight. Progress arrives with the learner's snapshot after
+ * hydration, so the first frame of any page necessarily shows no meters.
  *
  * This preview is empty on purpose.
  */

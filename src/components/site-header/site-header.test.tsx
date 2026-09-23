@@ -4,11 +4,11 @@ import { LearnerProfile } from "@/domain/entities/learner-profile/learner-profil
 import { Module } from "@/domain/entities/module/module";
 import type { LessonProgressSlice } from "@/domain/use-cases/find-course-catalog/find-course-catalog";
 import { useCanInstallToHomeScreen } from "@/hooks/use-can-install-to-home-screen/use-can-install-to-home-screen";
-import { refreshEarnedTickets } from "@/hooks/use-earned-tickets/use-earned-tickets";
 import { useLearnerProfile } from "@/hooks/use-learner-profile/use-learner-profile";
-import { refreshPrizeClaims } from "@/hooks/use-prize-claims/use-prize-claims";
-import { usePathname } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
+import { authClient } from "@/lib/auth-client/auth-client";
 import type { AchievementLevel } from "@/lib/learner-achievements/learner-achievements";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
 import { render, screen, waitFor, within } from "@testing-library/react";
@@ -38,6 +38,10 @@ vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
   useLocale: vi.fn(() => "en"),
   useFormatter: vi.fn(() => ({ number: (value: number) => String(value) })),
+}));
+
+vi.mock("@/lib/auth-client/auth-client", () => ({
+  authClient: { signOut: vi.fn(async () => ({ data: { success: true }, error: null })) },
 }));
 
 vi.mock("@/hooks/use-learner-profile/use-learner-profile", () => ({
@@ -198,7 +202,7 @@ describe("SiteHeader learner menu", () => {
   });
 
   test("GIVEN no learner profile WHEN rendered THEN no avatar trigger is offered", () => {
-    render(<SiteHeader />);
+    render(<SiteHeader signedIn />);
 
     expect(screen.queryByRole("button", { name: "learnerMenuLabel" })).not.toBeInTheDocument();
   });
@@ -206,9 +210,21 @@ describe("SiteHeader learner menu", () => {
   test("GIVEN the profile is not known yet WHEN rendered THEN no avatar trigger is offered", () => {
     mockUseLearnerProfile.mockReturnValue({ status: "unknown", save: vi.fn() });
 
-    render(<SiteHeader />);
+    render(<SiteHeader signedIn />);
 
     expect(screen.queryByRole("button", { name: "learnerMenuLabel" })).not.toBeInTheDocument();
+  });
+
+  test("GIVEN a session whose card is not known yet WHEN rendered THEN the avatar's place is held AND the phone layout is the menu's", () => {
+    // Showing Sign out and the theme toggle for the moment before the card
+    // arrives widens the row past a 320px phone, then snaps back.
+    mockUseLearnerProfile.mockReturnValue({ status: "unknown", save: vi.fn() });
+
+    render(<SiteHeader signedIn />);
+
+    expect(screen.queryByRole("button", { name: "signOut" })).not.toBeInTheDocument();
+    expect(screen.getByTestId("learner-menu-placeholder")).toBeInTheDocument();
+    expect(screen.getByTestId("header-theme-toggle")).toHaveClass("hidden", "sm:inline-flex");
   });
 
   test("GIVEN a learner profile WHEN the avatar is opened THEN it offers My learning, Achievements and Profile in order", async () => {
@@ -219,7 +235,7 @@ describe("SiteHeader learner menu", () => {
       save: vi.fn(),
     });
 
-    render(<SiteHeader />);
+    render(<SiteHeader signedIn />);
     await user.click(screen.getByRole("button", { name: "learnerMenuLabel" }));
 
     await screen.findByRole("menuitem", { name: "myLearning" });
@@ -248,14 +264,14 @@ describe("SiteHeader learner menu", () => {
     });
 
     test("WHEN rendered THEN the row's theme toggle is hidden below sm", () => {
-      render(<SiteHeader />);
+      render(<SiteHeader signedIn />);
 
       expect(screen.getByTestId("header-theme-toggle")).toHaveClass("hidden", "sm:inline-flex");
     });
 
     test("WHEN the avatar menu is opened THEN a phone-only theme item toggles the theme", async () => {
       const user = userEvent.setup();
-      render(<SiteHeader />);
+      render(<SiteHeader signedIn />);
 
       await user.click(screen.getByRole("button", { name: "learnerMenuLabel" }));
       const themeItem = await screen.findByRole("menuitem", { name: "label: light" });
@@ -267,7 +283,7 @@ describe("SiteHeader learner menu", () => {
 
     test("WHEN the theme item is chosen THEN the menu stays open so the switch's slide is seen", async () => {
       const user = userEvent.setup();
-      render(<SiteHeader />);
+      render(<SiteHeader signedIn />);
 
       await user.click(screen.getByRole("button", { name: "learnerMenuLabel" }));
       await user.click(await screen.findByRole("menuitem", { name: "label: light" }));
@@ -281,7 +297,7 @@ describe("SiteHeader learner menu", () => {
       // renders both names in one cell and only hides the inactive one, which
       // is what pins its width to the longer name.
       const user = userEvent.setup();
-      render(<SiteHeader />);
+      render(<SiteHeader signedIn />);
 
       await user.click(screen.getByRole("button", { name: "learnerMenuLabel" }));
       const themeItem = await screen.findByRole("menuitem", { name: "label: light" });
@@ -298,7 +314,7 @@ describe("SiteHeader learner menu", () => {
   });
 
   test("GIVEN no learner profile WHEN rendered THEN the row's theme toggle shows at every width", () => {
-    render(<SiteHeader />);
+    render(<SiteHeader signedIn />);
 
     expect(screen.getByTestId("header-theme-toggle")).not.toHaveClass("hidden");
   });
@@ -340,15 +356,12 @@ describe("SiteHeader prize mark", () => {
   /** Every ticket of the module earned, so its prize is ready to claim. */
   const earnEveryTicket = () => {
     for (const lesson of lessons) {
-      window.localStorage.setItem(`learning-english:ticket-earned:${lesson.id}`, "1");
+      givenLearner.earnedTickets([lesson.id]);
     }
-    refreshEarnedTickets();
   };
 
   beforeEach(() => {
     window.localStorage.clear();
-    refreshEarnedTickets();
-    refreshPrizeClaims();
     mockUsePathname.mockReturnValue("/");
     mockUseLearnerProfile.mockReturnValue({
       status: "present",
@@ -360,7 +373,12 @@ describe("SiteHeader prize mark", () => {
   test("GIVEN a prize is ready to claim WHEN rendered THEN the avatar is marked with how many", () => {
     earnEveryTicket();
 
-    render(<SiteHeader levels={levels} />);
+    render(
+      <SiteHeader
+        signedIn
+        levels={levels}
+      />,
+    );
 
     expect(screen.getByTestId("prize-mark")).toHaveTextContent("1");
   });
@@ -369,13 +387,23 @@ describe("SiteHeader prize mark", () => {
     // The mark itself is decoration; the trigger's name is what is heard.
     earnEveryTicket();
 
-    render(<SiteHeader levels={levels} />);
+    render(
+      <SiteHeader
+        signedIn
+        levels={levels}
+      />,
+    );
 
     expect(screen.getByRole("button", { name: "learnerMenuLabelWithPrizes" })).toBeInTheDocument();
   });
 
   test("GIVEN no prize is ready WHEN rendered THEN nothing is marked", () => {
-    render(<SiteHeader levels={levels} />);
+    render(
+      <SiteHeader
+        signedIn
+        levels={levels}
+      />,
+    );
 
     expect(screen.queryByTestId("prize-mark")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "learnerMenuLabel" })).toBeInTheDocument();
@@ -383,10 +411,14 @@ describe("SiteHeader prize mark", () => {
 
   test("GIVEN the prize has been claimed WHEN rendered THEN the mark is gone", () => {
     earnEveryTicket();
-    window.localStorage.setItem(`learning-english:prize-claimed:${vowels.slug}`, "1");
-    refreshPrizeClaims();
+    givenLearner.claimedPrizes([vowels.slug]);
 
-    render(<SiteHeader levels={levels} />);
+    render(
+      <SiteHeader
+        signedIn
+        levels={levels}
+      />,
+    );
 
     expect(screen.queryByTestId("prize-mark")).not.toBeInTheDocument();
   });
@@ -395,7 +427,12 @@ describe("SiteHeader prize mark", () => {
     const user = userEvent.setup();
     earnEveryTicket();
 
-    render(<SiteHeader levels={levels} />);
+    render(
+      <SiteHeader
+        signedIn
+        levels={levels}
+      />,
+    );
     await user.click(screen.getByRole("button", { name: "learnerMenuLabelWithPrizes" }));
 
     const achievements = await screen.findByRole("menuitem", { name: /achievements/ });
@@ -407,7 +444,12 @@ describe("SiteHeader prize mark", () => {
     earnEveryTicket();
     mockUseLearnerProfile.mockReturnValue(withoutProfile);
 
-    render(<SiteHeader levels={levels} />);
+    render(
+      <SiteHeader
+        signedIn
+        levels={levels}
+      />,
+    );
 
     expect(screen.queryByTestId("prize-mark")).not.toBeInTheDocument();
   });
@@ -422,5 +464,89 @@ describe("SiteHeader control order", () => {
     const labels = screen.getAllByRole("button").map((c) => c.getAttribute("aria-label"));
 
     expect(labels.indexOf("openGuide")).toBe(0);
+  });
+});
+
+describe("SiteHeader session", () => {
+  const withProfile = {
+    status: "present",
+    profile: LearnerProfile.parse({ name: "Ana García", avatar: { kind: "initials" } }),
+    save: vi.fn(),
+  } as const;
+
+  beforeEach(() => {
+    mockUsePathname.mockReturnValue("/");
+  });
+
+  test("GIVEN no session WHEN rendered THEN it offers Sign in and no avatar, even if this device knows a card", () => {
+    mockUseLearnerProfile.mockReturnValue(withProfile);
+
+    render(<SiteHeader />);
+
+    expect(screen.getByRole("link", { name: "signIn" })).toHaveAttribute("href", "/sign-in");
+    expect(screen.queryByRole("button", { name: "learnerMenuLabel" })).not.toBeInTheDocument();
+  });
+
+  test("GIVEN a session WHEN rendered THEN Sign in is not offered", () => {
+    mockUseLearnerProfile.mockReturnValue(withProfile);
+
+    render(<SiteHeader signedIn />);
+
+    expect(screen.queryByRole("link", { name: "signIn" })).not.toBeInTheDocument();
+  });
+
+  test("GIVEN a session and a card WHEN Sign out is chosen from the avatar menu THEN the session ends and the home opens fresh", async () => {
+    const router = { replace: vi.fn(), push: vi.fn(), refresh: vi.fn() };
+    vi.mocked(useRouter).mockReturnValue(router as never);
+    mockUseLearnerProfile.mockReturnValue(withProfile);
+    const user = userEvent.setup();
+
+    render(<SiteHeader signedIn />);
+    await user.click(screen.getByRole("button", { name: "learnerMenuLabel" }));
+    await user.click(await screen.findByRole("menuitem", { name: "signOut" }));
+
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/"));
+    expect(authClient.signOut).toHaveBeenCalled();
+    expect(router.refresh).toHaveBeenCalled();
+  });
+
+  test("GIVEN a session but no card yet WHEN rendered THEN signing out is still offered", () => {
+    render(<SiteHeader signedIn />);
+
+    expect(screen.getByRole("button", { name: "signOut" })).toBeInTheDocument();
+  });
+});
+
+describe("SiteHeader wordmark destination", () => {
+  const wordmark = () => screen.getByRole("link", { name: /english.*course/i });
+
+  beforeEach(() => {
+    mockUsePathname.mockReturnValue("/");
+  });
+
+  test("GIVEN no session WHEN rendered THEN the wordmark links to the locale home", () => {
+    render(<SiteHeader />);
+
+    expect(wordmark()).toHaveAttribute("href", "/");
+  });
+
+  test("GIVEN a session WHEN rendered THEN the wordmark links to My learning", () => {
+    mockUseLearnerProfile.mockReturnValue({
+      status: "present",
+      profile: LearnerProfile.parse({ name: "Ana García", avatar: { kind: "initials" } }),
+      save: vi.fn(),
+    });
+
+    render(<SiteHeader signedIn />);
+
+    expect(wordmark()).toHaveAttribute("href", "/learning");
+  });
+
+  test("GIVEN a session but no card WHEN rendered THEN the wordmark still links to My learning", () => {
+    // The destination follows the session, which the server decided, not the
+    // card, which this device may never have been given.
+    render(<SiteHeader signedIn />);
+
+    expect(wordmark()).toHaveAttribute("href", "/learning");
   });
 });

@@ -1,5 +1,7 @@
 import { LessonCompletionMark } from "@/components/lesson-completion-mark/lesson-completion-mark";
 import { LessonId } from "@/domain/entities/ids/ids";
+import { EMPTY_LEARNER_SNAPSHOT } from "@/lib/learner-snapshot/learner-snapshot";
+import { learnerStore, seedLearnerStore } from "@/lib/learner-store/learner-store";
 
 import NiceModal from "@ebay/nice-modal-react";
 import { faker } from "@faker-js/faker";
@@ -14,6 +16,17 @@ const celebrate = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/celebrate-completion/celebrate-completion", () => ({
   celebrateLessonCompletion: celebrate,
+}));
+
+/**
+ * The completion Server Actions the composition root writes through. Each test
+ * shapes their answers; the toggle itself never sees them.
+ */
+const actions = vi.hoisted(() => ({ mark: vi.fn(), unmark: vi.fn() }));
+
+vi.mock("@/app/[locale]/learner-actions", () => ({
+  markLessonCompleteAction: (input: unknown) => actions.mark(input),
+  unmarkLessonCompleteAction: (input: unknown) => actions.unmark(input),
 }));
 
 vi.mock("next-intl", () => ({
@@ -45,7 +58,16 @@ vi.mock("@/hooks/use-is-hydrated/use-is-hydrated", () => ({
 // the others reading whichever value the previous test happened to set.
 beforeEach(() => {
   isHydrated = true;
+  actions.mark.mockReset().mockResolvedValue({ data: { completed: true } });
+  actions.unmark.mockReset().mockResolvedValue({ data: { unmarked: true } });
 });
+
+/** The signed-in learner has completed `lessonId`. */
+const givenCompleted = (lessonId: LessonId) =>
+  seedLearnerStore({ ...EMPTY_LEARNER_SNAPSHOT, completedLessonIds: [lessonId] });
+
+/** Whether the learner store holds the mark. */
+const isMarked = (lessonId: LessonId) => learnerStore.getState().completed.has(lessonId);
 
 describe("LessonCompletionToggle", () => {
   beforeEach(() => {
@@ -55,16 +77,9 @@ describe("LessonCompletionToggle", () => {
   test("WHEN the lesson is incomplete THEN it invites the learner to finish it", () => {
     // Arrange — the invitation belongs to the control that owns the state,
     // not to the card around it: only one of them knows which state it is in.
-    const markComplete = vi.fn().mockResolvedValue({ data: { completed: true } });
 
     // Act
-    render(
-      <LessonCompletionToggle
-        lessonId={LessonId.parse(faker.string.uuid())}
-        markComplete={markComplete}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
-      />,
-    );
+    render(<LessonCompletionToggle lessonId={LessonId.parse(faker.string.uuid())} />);
 
     // Assert
     expect(screen.getByText("prompt")).toBeInTheDocument();
@@ -72,16 +87,9 @@ describe("LessonCompletionToggle", () => {
 
   test("WHEN rendered THEN it shows the 'Mark as complete' label", () => {
     // Arrange
-    const markComplete = vi.fn().mockResolvedValue({ data: { completed: true } });
 
     // Act
-    render(
-      <LessonCompletionToggle
-        lessonId={LessonId.parse(faker.string.uuid())}
-        markComplete={markComplete}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
-      />,
-    );
+    render(<LessonCompletionToggle lessonId={LessonId.parse(faker.string.uuid())} />);
 
     // Assert
     expect(screen.getByRole("button", { name: "markComplete" })).toBeInTheDocument();
@@ -90,17 +98,11 @@ describe("LessonCompletionToggle", () => {
   test("WHEN clicked THEN it calls markComplete and swaps to the completed state", async () => {
     // Arrange
     const lessonId = LessonId.parse(faker.string.uuid());
-    const markComplete = vi.fn().mockResolvedValue({ data: { completed: true } });
+    const markComplete = actions.mark.mockResolvedValue({ data: { completed: true } });
     const user = userEvent.setup();
 
     // Act
-    render(
-      <LessonCompletionToggle
-        lessonId={lessonId}
-        markComplete={markComplete}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
-      />,
-    );
+    render(<LessonCompletionToggle lessonId={lessonId} />);
     await user.click(screen.getByRole("button"));
 
     // Assert
@@ -113,16 +115,9 @@ describe("LessonCompletionToggle", () => {
     // Arrange — the closing card is the page's only completion control at
     // every width, so nothing in the incomplete state may switch on a
     // breakpoint: the desktop used to collapse this to a lone button.
-    const markComplete = vi.fn().mockResolvedValue({ data: { completed: true } });
 
     // Act
-    render(
-      <LessonCompletionToggle
-        lessonId={LessonId.parse(faker.string.uuid())}
-        markComplete={markComplete}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
-      />,
-    );
+    render(<LessonCompletionToggle lessonId={LessonId.parse(faker.string.uuid())} />);
 
     // Assert
     const button = screen.getByRole("button");
@@ -137,17 +132,10 @@ describe("LessonCompletionToggle", () => {
     // Arrange — the learner complained about reading "completed" twice: in
     // the button and again in the status line below it. It is said once now,
     // and the statement is the live region that announces the change.
-    const markComplete = vi.fn().mockResolvedValue({ data: { completed: true } });
     const user = userEvent.setup();
 
     // Act
-    render(
-      <LessonCompletionToggle
-        lessonId={LessonId.parse(faker.string.uuid())}
-        markComplete={markComplete}
-        unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
-      />,
-    );
+    render(<LessonCompletionToggle lessonId={LessonId.parse(faker.string.uuid())} />);
     await user.click(screen.getByRole("button"));
     const statement = await screen.findByText("completed");
 
@@ -162,29 +150,19 @@ describe("LessonCompletionToggle", () => {
 });
 
 describe("LessonCompletionToggle — durable completion", () => {
-  const STORAGE_KEY_PREFIX = "learning-english:completed:";
   const lessonId = LessonId.parse("77777777-7777-4777-8777-777777777777");
 
   beforeEach(() => {
     mockUseTranslations.mockReturnValue(((key: string) => key) as never);
-    window.localStorage.clear();
-    window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 
   test("WHEN the lesson was already completed THEN the button mounts as completed", () => {
     // Arrange — the regression this fixes: the button used to start at
     // useState(false) and forget across reloads.
-    window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessonId}`, "1");
-    window.dispatchEvent(new StorageEvent("storage", { key: null }));
+    givenCompleted(lessonId);
 
     // Act
-    render(
-      <LessonCompletionToggle
-        lessonId={lessonId}
-        markComplete={async () => ({ data: { completed: true } })}
-        unmarkComplete={async () => ({ data: { unmarked: true } })}
-      />,
-    );
+    render(<LessonCompletionToggle lessonId={lessonId} />);
 
     // Assert
     expect(screen.getByText("completed")).toBeInTheDocument();
@@ -194,19 +172,14 @@ describe("LessonCompletionToggle — durable completion", () => {
   test("WHEN clicked THEN the lesson is recorded in the durable browser store", async () => {
     // Arrange
     const user = userEvent.setup();
-    render(
-      <LessonCompletionToggle
-        lessonId={lessonId}
-        markComplete={async () => ({ data: { completed: true } })}
-        unmarkComplete={async () => ({ data: { unmarked: true } })}
-      />,
-    );
+    render(<LessonCompletionToggle lessonId={lessonId} />);
 
     // Act
     await user.click(screen.getByRole("button"));
 
-    // Assert — the mark survives a reload because it is in storage, not state.
-    expect(window.localStorage.getItem(`${STORAGE_KEY_PREFIX}${lessonId}`)).not.toBeNull();
+    // Assert — the mark is in the learner store every surface reads, and was
+    // saved through the completion action.
+    expect(isMarked(lessonId)).toBe(true);
   });
 
   test("WHEN clicked THEN an indicator rendered alongside observes it without a reload", async () => {
@@ -214,11 +187,7 @@ describe("LessonCompletionToggle — durable completion", () => {
     const user = userEvent.setup();
     render(
       <>
-        <LessonCompletionToggle
-          lessonId={lessonId}
-          markComplete={async () => ({ data: { completed: true } })}
-          unmarkComplete={async () => ({ data: { unmarked: true } })}
-        />
+        <LessonCompletionToggle lessonId={lessonId} />
         <LessonCompletionMark lessonId={lessonId} />
       </>,
     );
@@ -233,29 +202,22 @@ describe("LessonCompletionToggle — durable completion", () => {
 });
 
 describe("LessonCompletionToggle — undoing a completion", () => {
-  const STORAGE_KEY_PREFIX = "learning-english:completed:";
   const lessonId = LessonId.parse("88888888-8888-4888-8888-888888888888");
 
   const renderCompleted = (
     unmarkComplete: (input: { lessonId: LessonId }) => Promise<{ data?: { unmarked: boolean } }>,
   ) => {
-    window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessonId}`, "1");
-    window.dispatchEvent(new StorageEvent("storage", { key: null }));
+    givenCompleted(lessonId);
+    actions.unmark.mockImplementation(unmarkComplete);
     return render(
       <NiceModal.Provider>
-        <LessonCompletionToggle
-          lessonId={lessonId}
-          markComplete={async () => ({ data: { completed: true } })}
-          unmarkComplete={unmarkComplete}
-        />
+        <LessonCompletionToggle lessonId={lessonId} />
       </NiceModal.Provider>,
     );
   };
 
   beforeEach(() => {
     mockUseTranslations.mockReturnValue(((key: string) => key) as never);
-    window.localStorage.clear();
-    window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 
   test("WHEN the lesson is complete THEN the statement and the undo share one row", () => {
@@ -295,37 +257,30 @@ describe("LessonCompletionToggle — undoing a completion", () => {
     // Assert — the dialog is open and the lesson is still complete.
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
     expect(unmarkComplete).not.toHaveBeenCalled();
-    expect(window.localStorage.getItem(`${STORAGE_KEY_PREFIX}${lessonId}`)).not.toBeNull();
+    expect(isMarked(lessonId)).toBe(true);
   });
 });
 
 describe("LessonCompletionToggle — the outcome of the confirmation", () => {
-  const STORAGE_KEY_PREFIX = "learning-english:completed:";
   const lessonId = LessonId.parse("99999999-9999-4999-8999-999999999999");
-  const storedMark = () => window.localStorage.getItem(`${STORAGE_KEY_PREFIX}${lessonId}`);
+  const storedMark = () => isMarked(lessonId);
 
   const renderCompleted = (
     unmarkComplete: (input: {
       lessonId: LessonId;
     }) => Promise<{ data?: { unmarked: boolean } } | undefined>,
   ) => {
-    window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessonId}`, "1");
-    window.dispatchEvent(new StorageEvent("storage", { key: null }));
+    givenCompleted(lessonId);
+    actions.unmark.mockImplementation(unmarkComplete);
     return render(
       <NiceModal.Provider>
-        <LessonCompletionToggle
-          lessonId={lessonId}
-          markComplete={async () => ({ data: { completed: true } })}
-          unmarkComplete={unmarkComplete}
-        />
+        <LessonCompletionToggle lessonId={lessonId} />
       </NiceModal.Provider>,
     );
   };
 
   beforeEach(() => {
     mockUseTranslations.mockReturnValue(((key: string) => key) as never);
-    window.localStorage.clear();
-    window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 
   test("WHEN the learner confirms THEN both trackers are cleared and the invitation returns", async () => {
@@ -342,7 +297,7 @@ describe("LessonCompletionToggle — the outcome of the confirmation", () => {
     // is back to offering the lesson.
     expect(unmarkComplete).toHaveBeenCalledWith({ lessonId });
     expect(await screen.findByRole("button", { name: "markComplete" })).toBeInTheDocument();
-    expect(storedMark()).toBeNull();
+    expect(storedMark()).toBe(false);
   });
 
   test("WHEN the learner cancels THEN the lesson stays complete", async () => {
@@ -358,7 +313,7 @@ describe("LessonCompletionToggle — the outcome of the confirmation", () => {
     // Assert
     expect(unmarkComplete).not.toHaveBeenCalled();
     expect(screen.getByText("completed")).toBeInTheDocument();
-    expect(storedMark()).not.toBeNull();
+    expect(storedMark()).toBe(true);
   });
 
   test("WHEN the Server Action rejects the input THEN the mark is left alone", async () => {
@@ -374,32 +329,23 @@ describe("LessonCompletionToggle — the outcome of the confirmation", () => {
 
     // Assert
     expect(unmarkComplete).toHaveBeenCalled();
-    expect(storedMark()).not.toBeNull();
+    expect(storedMark()).toBe(true);
     expect(screen.getByText("completed")).toBeInTheDocument();
   });
 });
 
 describe("LessonCompletionToggle — celebrating the finish", () => {
-  const STORAGE_KEY_PREFIX = "learning-english:completed:";
   const lessonId = LessonId.parse("12121212-1212-4121-8121-121212121212");
 
   beforeEach(() => {
     mockUseTranslations.mockReturnValue(((key: string) => key) as never);
     celebrate.mockReset();
-    window.localStorage.clear();
-    window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 
   test("WHEN the lesson is marked complete THEN it is celebrated", async () => {
     // Arrange
     const user = userEvent.setup();
-    render(
-      <LessonCompletionToggle
-        lessonId={lessonId}
-        markComplete={async () => ({ data: { completed: true } })}
-        unmarkComplete={async () => ({ data: { unmarked: true } })}
-      />,
-    );
+    render(<LessonCompletionToggle lessonId={lessonId} />);
 
     // Act
     await user.click(screen.getByRole("button", { name: "markComplete" }));
@@ -411,14 +357,9 @@ describe("LessonCompletionToggle — celebrating the finish", () => {
 
   test("WHEN the Server Action rejects the input THEN nothing is celebrated", async () => {
     // Arrange — nothing was recorded, so there is nothing to celebrate.
+    actions.mark.mockResolvedValue({});
     const user = userEvent.setup();
-    render(
-      <LessonCompletionToggle
-        lessonId={lessonId}
-        markComplete={async () => ({})}
-        unmarkComplete={async () => ({ data: { unmarked: true } })}
-      />,
-    );
+    render(<LessonCompletionToggle lessonId={lessonId} />);
 
     // Act
     await user.click(screen.getByRole("button", { name: "markComplete" }));
@@ -430,15 +371,10 @@ describe("LessonCompletionToggle — celebrating the finish", () => {
   test("WHEN the learner un-marks a lesson THEN nothing is celebrated", async () => {
     // Arrange
     const user = userEvent.setup();
-    window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${lessonId}`, "1");
-    window.dispatchEvent(new StorageEvent("storage", { key: null }));
+    givenCompleted(lessonId);
     render(
       <NiceModal.Provider>
-        <LessonCompletionToggle
-          lessonId={lessonId}
-          markComplete={async () => ({ data: { completed: true } })}
-          unmarkComplete={async () => ({ data: { unmarked: true } })}
-        />
+        <LessonCompletionToggle lessonId={lessonId} />
       </NiceModal.Provider>,
     );
 
@@ -452,13 +388,7 @@ describe("LessonCompletionToggle — celebrating the finish", () => {
   });
   describe("GIVEN completion cannot be known yet", () => {
     const renderToggle = (lessonId = LessonId.parse(faker.string.uuid())) =>
-      render(
-        <LessonCompletionToggle
-          lessonId={lessonId}
-          markComplete={vi.fn().mockResolvedValue({ data: { completed: true } })}
-          unmarkComplete={vi.fn().mockResolvedValue({ data: { unmarked: true } })}
-        />,
-      );
+      render(<LessonCompletionToggle lessonId={lessonId} />);
 
     test("WHEN the control renders before hydration THEN it asserts neither state", () => {
       isHydrated = false;

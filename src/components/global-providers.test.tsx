@@ -3,10 +3,9 @@ import { Course } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Module } from "@/domain/entities/module/module";
 import type { LessonProgressSlice } from "@/domain/use-cases/find-course-catalog/find-course-catalog";
-import { refreshEarnedTickets } from "@/hooks/use-earned-tickets/use-earned-tickets";
 import { refreshPendingPrizeAnnouncement } from "@/hooks/use-pending-prize-announcement/use-pending-prize-announcement";
-import { refreshPrizeClaims } from "@/hooks/use-prize-claims/use-prize-claims";
 import type { AchievementLevel } from "@/lib/learner-achievements/learner-achievements";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 import { renderInLocale } from "@/test-setup/render-in-locale";
 
 import NiceModal from "@ebay/nice-modal-react";
@@ -53,8 +52,6 @@ const levels: AchievementLevel[] = [{ course, modules: [vowels], lessonRuntimes:
 
 const announceStorageChange = () => {
   act(() => {
-    refreshEarnedTickets();
-    refreshPrizeClaims();
     refreshPendingPrizeAnnouncement();
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
@@ -80,7 +77,7 @@ describe("GlobalProviders", () => {
 
   test("WHEN a prize was left unannounced THEN whatever page the learner opens announces it", async () => {
     // Mounted above the pages, so leaving the lesson cannot lose the news.
-    window.localStorage.setItem(`learning-english:ticket-earned:${lesson.id}`, "1");
+    givenLearner.earnedTickets([lesson.id]);
     window.localStorage.setItem("learning-english:prize-announce", "2-vowels");
     announceStorageChange();
 

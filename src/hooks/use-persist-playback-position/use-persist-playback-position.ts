@@ -43,7 +43,8 @@ export type PlaybackPositionPersistence = {
  * {@link TIME_UPDATE_DEBOUNCE_MS}. `pause`, `seeking`, and `ended` write
  * immediately — they are the moments a learner is most likely to leave, and
  * losing a debounce window of progress there is exactly what they would
- * notice. The pending write is also flushed on unmount and on `beforeunload`,
+ * notice; those three also skip the server write window. The pending write is
+ * flushed on unmount, and on `pagehide` it leaves by `navigator.sendBeacon`,
  * so a route change or a closed tab costs nothing.
  *
  * Nothing is written before {@link PlaybackPositionPersistence.openWriteGate}
@@ -92,6 +93,16 @@ export function usePersistPlaybackPosition({
     [position],
   );
 
+  // A pause, a seek, the end of the video: the moments a learner is most
+  // likely to leave, so the position also skips its server write window.
+  const writeAndFlush = useCallback(
+    async (seconds: number) => {
+      await writeIfAllowed(seconds);
+      await position.flush();
+    },
+    [writeIfAllowed, position],
+  );
+
   // `maxWait` matters as much as the wait itself. `time-update` fires several
   // times a second for as long as playback continues, so a plain debounce
   // resets forever and writes nothing until the video stops — a learner who
@@ -108,20 +119,28 @@ export function usePersistPlaybackPosition({
 
   const handleImmediateWrite = useCallback(() => {
     debouncedWrite.cancel();
-    void writeIfAllowed(playerRef.current.currentTime);
-  }, [debouncedWrite, writeIfAllowed]);
+    void writeAndFlush(playerRef.current.currentTime);
+  }, [debouncedWrite, writeAndFlush]);
 
   const openWriteGate = useCallback(() => {
     isWriteGateOpenRef.current = true;
   }, []);
 
+  // `pagehide`, not `beforeunload`: it also fires when iOS Safari or the
+  // back-forward cache puts the page away, and a closing page may still
+  // finish a beacon, which is how the last position leaves.
   useEffect(() => {
-    window.addEventListener("beforeunload", handleImmediateWrite);
-    return () => {
-      window.removeEventListener("beforeunload", handleImmediateWrite);
-      debouncedWrite.flush();
+    const handlePageHide = () => {
+      debouncedWrite.cancel();
+      void writeIfAllowed(playerRef.current.currentTime).then(() => position.flushWithBeacon());
     };
-  }, [handleImmediateWrite, debouncedWrite]);
+    window.addEventListener("pagehide", handlePageHide);
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide);
+      debouncedWrite.flush();
+      void position.flush();
+    };
+  }, [debouncedWrite, writeIfAllowed, position]);
 
   return { handleTimeUpdate, handleImmediateWrite, openWriteGate };
 }

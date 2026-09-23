@@ -27,10 +27,12 @@ const renderStep = ({
   profiles = makeStubLearnerProfileRepository(),
   locale,
   searchParams = "",
+  accountName = "",
 }: {
   profiles?: ReturnType<typeof makeStubLearnerProfileRepository>;
   locale?: TestLocale;
   searchParams?: string;
+  accountName?: string;
 } = {}) =>
   renderInLocale(
     <NuqsTestingAdapter searchParams={searchParams}>
@@ -38,6 +40,7 @@ const renderStep = ({
         profiles={profiles}
         level={level}
         videoCount={48}
+        accountName={accountName}
       />
     </NuqsTestingAdapter>,
     locale,
@@ -112,6 +115,35 @@ describe("OnboardingNameStep", () => {
 
     // Enter continuing the step is covered in `e2e/home.spec.ts`: jsdom does not
     // perform a form's implicit submission, so here it would test the test.
+
+    test("WHEN the account carries a name THEN the card opens holding it, ready to continue", async () => {
+      // The learner typed it on sign-up minutes ago; asking again wastes the answer.
+      renderStep({ accountName: "Ana García" });
+
+      expect(await screen.findByRole("textbox", { name: "Your name" })).toHaveValue("Ana García");
+      expect(screen.getByRole("img", { name: "Avatar: Ana García" })).toHaveTextContent("AG");
+      expect(screen.getByRole("button", { name: "Continue" })).toBeEnabled();
+    });
+
+    test("WHEN the account carries only spaces for a name THEN the field opens empty", async () => {
+      renderStep({ accountName: "   " });
+
+      expect(await screen.findByRole("textbox", { name: "Your name" })).toHaveValue("");
+      expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
+    });
+
+    test("WHEN the learner rewrites the account's name THEN what the field holds is what is saved", async () => {
+      const user = userEvent.setup();
+      const profiles = makeStubLearnerProfileRepository();
+      renderStep({ profiles, accountName: "Ana García" });
+
+      await user.clear(await screen.findByRole("textbox", { name: "Your name" }));
+      await user.type(screen.getByRole("textbox", { name: "Your name" }), "Ana");
+      await user.click(screen.getByRole("button", { name: "Continue" }));
+
+      await waitFor(() => expect(router.push).toHaveBeenCalledWith("/start/avatar"));
+      expect(await profiles.get()).toEqual({ name: "Ana", avatar: { kind: "initials" } });
+    });
 
     test("WHEN the learner types a name THEN the card carries it and its initials", async () => {
       const user = userEvent.setup();

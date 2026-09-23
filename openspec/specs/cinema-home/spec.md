@@ -8,6 +8,10 @@ Define the Immersion Cinema presentation of the locale layout and home route. Th
 
 The locale layout SHALL render an Immersion Cinema header containing the `ENGLISH·COURSE` wordmark, a section eyebrow of the form `IMMERSION CINEMA · <SECTION>` where `<SECTION>` derives from the current route (`HOME`, `COURSE`, `MODULE`, `LESSON`, `START`, `MY LEARNING`, `ACHIEVEMENTS`, `PROFILE`), and the existing locale switcher and theme toggle re-styled as chips. The header SHALL remain a landmark, keep locale switching and theme toggling functional, and be localized.
 
+The wordmark SHALL be a link whose destination depends on the session the request carries, because "back to the start" means a different page either side of signing in. Without a session it SHALL link to the locale home (`/[locale]`), which is where a visitor is being sold the course. With a session it SHALL link to My learning (`/[locale]/learning`), the signed-in learner's own first page; the marketing home has nothing left to tell them. Both destinations SHALL be resolved through the locale-aware navigation wrappers, so the active locale is preserved.
+
+The destination SHALL follow the same server-decided session flag that chooses between the **Sign in** link and the learner's menu, so the wordmark and the account control never disagree about whether there is a session.
+
 When the device holds a learner profile, the header SHALL additionally render the learner's avatar as a menu trigger whose accessible name includes the learner's name, opening a menu with **My learning**, **Achievements** and **Profile** links, in that order, for the active locale. Without a profile, and before the profile is known, the trigger SHALL NOT render.
 
 On phone-class viewports (below `sm`) with a learner profile, the wordmark, the locale control and three 44px controls cannot share the width, so the theme control SHALL move out of the header row and into the avatar menu as an item that toggles the theme and names the current theme in its accessible name. From `sm` up, and whenever there is no profile, the theme toggle SHALL stay in the header row and the menu SHALL NOT repeat it.
@@ -18,7 +22,7 @@ The header SHALL fit within the viewport at every phone-class viewport width in 
 
 1. The section eyebrow is the first to go — it restates information the page's own heading already carries.
 2. The controls' supporting text goes next: the locale control shows the active locale's short code (`EN`, `ES`, `PT`) in place of its full name, and the theme toggle drops its theme-name text and keeps its icon. Whatever visible text a control drops SHALL NOT change what assistive technology announces — each control's accessible name SHALL name the full concept (`Language: English`, `Theme: Dark`) at every width, and SHALL NOT be derived from the abbreviated visible text.
-3. The wordmark is never dropped; it is the header's identity and its link home.
+3. The wordmark is never dropped; it is the header's identity and its way back to the learner's starting page.
 
 The locale control SHALL present the active locale as visible text at every width, so a learner can always see which language they are in without opening anything. Its width SHALL be governed by the label it currently displays rather than by the longest label it could display — a native `<select>`, whose rendered width is set by its widest `<option>`, cannot satisfy this and SHALL NOT be used.
 
@@ -35,6 +39,18 @@ At every width the locale control, the theme control (in the header row, or in t
 #### Scenario: Locale and theme controls remain functional
 - **WHEN** the header renders with the chip-styled controls
 - **THEN** changing the locale and toggling the theme behave exactly as before the re-skin
+
+#### Scenario: A visitor without a session is sent to the locale home
+- **WHEN** the header renders for a request that carries no session
+- **THEN** the wordmark links to the locale home for the active locale — `/es/` under `es`
+
+#### Scenario: A signed-in learner is sent to My learning
+- **WHEN** the header renders for a request that carries a session
+- **THEN** the wordmark links to `/[locale]/learning` for the active locale — `/es/learning` under `es`
+
+#### Scenario: The wordmark agrees with the account control
+- **WHEN** the header renders with a session but before the learner's card is known
+- **THEN** the wordmark already links to My learning, because it follows the same session flag the account control follows, not the profile
 
 #### Scenario: The avatar menu appears with a profile
 - **WHEN** the header renders on a device with a saved learner profile
@@ -82,7 +98,7 @@ At every width the locale control, the theme control (in the header row, or in t
 
 #### Scenario: The wordmark survives the narrowest width
 - **WHEN** the header renders at a 320px viewport width
-- **THEN** the `ENGLISH·COURSE` wordmark is still present, is not clipped, and still links to the locale home
+- **THEN** the `ENGLISH·COURSE` wordmark is still present, is not clipped, and still links to its session-dependent destination
 
 #### Scenario: The wordmark reads the same in every locale
 - **WHEN** the header renders under `en`, `es` or `pt`

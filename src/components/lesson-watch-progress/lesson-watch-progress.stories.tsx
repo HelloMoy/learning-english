@@ -1,11 +1,9 @@
 import { LessonId } from "@/domain/entities/ids/ids";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { LessonWatchProgress } from "./lesson-watch-progress";
-
-const PLAYBACK_KEY_PREFIX = "learning-english:playback:";
 
 const DURATION_SECONDS = 600;
 
@@ -16,15 +14,13 @@ const UNTOUCHED = LessonId.parse("44444444-4444-4444-8444-444444444444");
 
 /**
  * Seeds browser storage so each story has something to read. The component's
- * whole input is `localStorage`, so a story cannot show a bar without
+ * whole input is the learner store, so a story cannot show a bar without
  * writing there first.
  */
 function seedPositions() {
-  window.localStorage.setItem(`${PLAYBACK_KEY_PREFIX}${BARELY_STARTED}`, "18");
-  window.localStorage.setItem(`${PLAYBACK_KEY_PREFIX}${PARTLY_WATCHED}`, "240");
-  window.localStorage.setItem(`${PLAYBACK_KEY_PREFIX}${FINISHED}`, String(DURATION_SECONDS));
-  window.localStorage.removeItem(`${PLAYBACK_KEY_PREFIX}${UNTOUCHED}`);
-  refreshSavedPlaybackPositions();
+  givenLearner.positions({ [BARELY_STARTED]: 18 });
+  givenLearner.positions({ [PARTLY_WATCHED]: 240 });
+  givenLearner.positions({ [FINISHED]: DURATION_SECONDS });
 }
 
 const meta: Meta<typeof LessonWatchProgress> = {
@@ -62,8 +58,8 @@ export const Finished: Story = {
 
 /**
  * A lesson the learner has never opened renders **nothing** — deliberately,
- * not by oversight. Progress lives in `localStorage`, which the server cannot
- * read, so the first frame of any page necessarily shows no bars. A bar drawn
+ * not by oversight. Progress arrives with the learner's snapshot after
+ * hydration, so the first frame of any page necessarily shows no bars. A bar drawn
  * at zero in that frame would assert the learner has watched nothing, which
  * may be false.
  *

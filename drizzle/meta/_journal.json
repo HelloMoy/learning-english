@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1789794608312,
+      "tag": "0000_auth_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1789799463790,
+      "tag": "0001_learner_progress",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1789805365829,
+      "tag": "0002_learner_rewards",
+      "breakpoints": true
+    }
+  ]
+}

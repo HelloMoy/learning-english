@@ -7,7 +7,8 @@ import {
   unmarkLessonComplete,
 } from "@/hooks/use-lesson-completion/use-lesson-completion";
 import { useIsPrizeAnnouncementHeld } from "@/hooks/use-pending-prize-announcement/use-pending-prize-announcement";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { learnerStore } from "@/lib/learner-store/learner-store";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import NiceModal from "@ebay/nice-modal-react";
 import { faker } from "@faker-js/faker";
@@ -51,11 +52,9 @@ const vowelsLessons = [schwa, soundI, weakMerger];
 
 const storeCompletion = (...lessons: ReadonlyArray<Lesson>) => {
   for (const lesson of lessons) {
-    window.localStorage.setItem(`learning-english:completed:${lesson.id}`, "1");
+    givenLearner.completed([lesson.id]);
   }
 };
-
-const ticketKey = (lesson: Lesson) => `learning-english:ticket-earned:${lesson.id}`;
 
 /** Lets the mount-time storage read settle, as it would before a learner can act. */
 const settle = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
@@ -79,7 +78,6 @@ const renderMoment = async (lesson: Lesson) => {
 beforeEach(async () => {
   window.localStorage.clear();
   await Promise.all(vowelsLessons.map((lesson) => unmarkLessonComplete(lesson.id)));
-  refreshSavedPlaybackPositions();
   vi.spyOn(NiceModal, "show").mockResolvedValue(undefined);
   vi.mocked(NiceModal.show).mockClear();
   Object.defineProperty(document, "fullscreenElement", { configurable: true, value: null });
@@ -133,7 +131,7 @@ describe("useLessonRewardMoment", () => {
 
     await act(() => markLessonComplete(soundI.id));
 
-    expect(window.localStorage.getItem(ticketKey(soundI))).not.toBeNull();
+    expect(learnerStore.getState().earnedTickets.has(soundI.id)).toBe(true);
     expect(result.current.ticket?.ticketsEarned).toBe(1);
   });
 
@@ -149,8 +147,7 @@ describe("useLessonRewardMoment", () => {
     const { result } = await renderMoment(soundI);
 
     act(() => {
-      window.localStorage.setItem(`learning-english:playback:${soundI.id}`, "299");
-      refreshSavedPlaybackPositions();
+      givenLearner.positions({ [soundI.id]: 299 });
     });
 
     expect(result.current.ticket?.lessonTitle).toBe("The vowel sound /i/");

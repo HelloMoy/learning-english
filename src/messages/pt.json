@@ -58,7 +58,9 @@
     "learnerMenuLabelWithPrizes": "Menu de aluno de {name} — {count, plural, one {# prêmio para resgatar} other {# prêmios para resgatar}}",
     "myLearning": "Meu aprendizado",
     "achievements": "Conquistas",
-    "profile": "Perfil"
+    "profile": "Perfil",
+    "signIn": "Entrar",
+    "signOut": "Sair"
   },
   "LocaleSwitcher": {
     "label": "Idioma",
@@ -297,7 +299,7 @@
     },
     "AchievementsGuideModal": {
       "title": "Como funcionam os tickets e os prêmios?",
-      "description": "Tudo aqui é conquistado concluindo aulas neste dispositivo.",
+      "description": "Tudo aqui é conquistado concluindo aulas.",
       "ticketTitle": "Tickets",
       "ticketBody": "Conclua uma aula para ganhar o ticket dela. Ele traz o som da aula.",
       "prizeTitle": "Prêmios",
@@ -502,9 +504,9 @@
     "startTitle": "Crie seu cartão de aluno",
     "startDescription": "Adicione seu nome e escolha um avatar para começar o curso.",
     "learningTitle": "Meu aprendizado",
-    "learningDescription": "Retome sua última lição e veja seu progresso neste dispositivo.",
+    "learningDescription": "Retome sua última lição e veja seu progresso.",
     "achievementsTitle": "Conquistas",
-    "achievementsDescription": "Os tickets, prêmios e a distinção que você conquistou neste dispositivo.",
+    "achievementsDescription": "Os tickets, prêmios e a distinção que você conquistou.",
     "profileTitle": "Perfil",
     "profileDescription": "Mude o nome e o avatar do seu cartão de aluno."
   },
@@ -539,15 +541,209 @@
   },
   "Profile": {
     "eyebrow": "Perfil",
-    "heading": "Edite seu cartão de aluno",
-    "intro": "Seu nome e seu avatar ficam salvos neste dispositivo.",
+    "intro": "Seu cartão, sua conta e suas preferências.",
+    "sections": {
+      "identity": "Identidade",
+      "identityNote": "As mudanças aparecem no seu cartão enquanto você edita.",
+      "preferences": "Preferências"
+    },
+    "progress": {
+      "heading": "Seu progresso em {course}",
+      "videos": "{completed} de {total, plural, one {# vídeo} other {# vídeos}}",
+      "percent": "{percent, number, percent}",
+      "ticketsLabel": "Tickets ganhos",
+      "prizesLabel": "Prêmios resgatados"
+    },
     "nameLabel": "Nome",
     "avatarLabel": "Avatar",
+    "preferences": {
+      "languageLabel": "Idioma da interface",
+      "themeLabel": "Tema"
+    },
     "discard": "Descartar",
     "save": "Salvar alterações",
     "saved": "Cartão atualizado",
-    "previewLabel": "Seu cartão de aluno",
-    "previewNote": "As mudanças aparecem no seu cartão enquanto você edita."
+    "saveBar": {
+      "unsaved": "Você tem alterações não salvas"
+    },
+    "account": {
+      "heading": "Conta",
+      "emailLabel": "E-mail",
+      "methodsLabel": "Como você entra",
+      "methodPassword": "E-mail e senha",
+      "methodGoogle": "Google",
+      "googleManaged": "Seu e-mail vem do Google, então ele é trocado por lá e esta conta não tem senha."
+    },
+    "password": {
+      "heading": "Trocar sua senha",
+      "description": "Ao trocá-la, sua sessão é encerrada em todos os outros dispositivos.",
+      "currentLabel": "Senha atual",
+      "newLabel": "Nova senha",
+      "hint": "Entre 8 e 128 caracteres.",
+      "submit": "Trocar senha",
+      "submitting": "Trocando…",
+      "changed": "Senha trocada. Encerramos sua sessão nos outros dispositivos."
+    },
+    "email": {
+      "heading": "Trocar seu e-mail",
+      "description": "Primeiro enviamos um link para {email}. Seu e-mail só muda depois que você abrir esse link e confirmar no novo endereço.",
+      "newLabel": "Novo e-mail",
+      "submit": "Trocar e-mail",
+      "submitting": "Enviando…",
+      "sent": "Enviamos um link para {email}. Abra-o e depois confirme no novo endereço: nada muda até você seguir os dois links."
+    },
+    "deleteAccount": {
+      "heading": "Excluir conta",
+      "description": "Exclui sua conta e tudo o que foi salvo nela. Não pode ser desfeito.",
+      "button": "Excluir conta",
+      "dialogTitle": "Excluir sua conta?",
+      "dialogConsequence": "Seu progresso, seus tickets, seus prêmios e seu cartão de estudante serão excluídos.",
+      "dialogIrreversible": "Não pode ser desfeito.",
+      "dialogEmail": "Enviaremos um link de confirmação por e-mail. Nada é excluído até você abri-lo com a sessão iniciada.",
+      "cancel": "Cancelar",
+      "confirm": "Enviar e-mail de confirmação",
+      "sending": "Enviando…",
+      "waiting": "Enviando seu e-mail de confirmação…",
+      "sent": "Enviamos um link de confirmação para o seu e-mail. Abra-o com a sessão iniciada para excluir sua conta.",
+      "error": "Não conseguimos enviar o e-mail de confirmação. Tente de novo em instantes."
+    }
+  },
+  "Emails": {
+    "VerifyEmail": {
+      "subject": "Confirme seu e-mail no English Course",
+      "preview": "Um clique e sua conta está pronta.",
+      "heading": "Confirme seu e-mail",
+      "body": "Você se cadastrou no English Course com este endereço. Confirme-o para começar a aprender.",
+      "button": "Confirmar meu e-mail",
+      "linkIntro": "Ou cole este link no seu navegador:",
+      "ignore": "Se você não se cadastrou, pode ignorar este e-mail."
+    },
+    "ResetPassword": {
+      "subject": "Redefina sua senha do English Course",
+      "preview": "Escolha uma nova senha para sua conta.",
+      "heading": "Redefina sua senha",
+      "body": "Alguém pediu para redefinir a senha desta conta. Escolha uma nova com o botão abaixo.",
+      "button": "Escolher uma nova senha",
+      "linkIntro": "Ou cole este link no seu navegador:",
+      "ignore": "Se você não pediu isso, ignore este e-mail: sua senha continua a mesma."
+    },
+    "DeleteAccount": {
+      "subject": "Confirme a exclusão da sua conta do English Course",
+      "preview": "Isso exclui sua conta e seu progresso para sempre.",
+      "heading": "Excluir sua conta?",
+      "body": "Ao seguir este link, sua conta do English Course e todo o seu progresso, tickets e prêmios são excluídos para sempre. Você precisa estar com a sessão iniciada ao abri-lo.",
+      "button": "Excluir minha conta",
+      "linkIntro": "Ou cole este link no seu navegador:",
+      "ignore": "Se você não pediu isso, ignore este e-mail: nada será excluído."
+    },
+    "ChangeEmail": {
+      "subject": "Aprove o novo e-mail da sua conta do English Course",
+      "preview": "Seu e-mail continua o mesmo até você aprovar.",
+      "heading": "Aprove seu novo e-mail",
+      "body": "Alguém pediu para mover esta conta do English Course para {newEmail}. Aprove com o botão abaixo e enviaremos um link de confirmação para esse novo endereço. A troca só acontece quando você abrir esse segundo link.",
+      "button": "Aprovar a troca",
+      "linkIntro": "Ou cole este link no seu navegador:",
+      "ignore": "Se você não pediu isso, ignore este e-mail: seu endereço continua o mesmo."
+    },
+    "PasswordChanged": {
+      "subject": "Sua senha do English Course foi trocada",
+      "preview": "Se não foi você, recupere sua conta agora.",
+      "heading": "Sua senha foi trocada",
+      "body": "A senha da sua conta do English Course acabou de ser trocada, e a sessão foi encerrada em todos os outros dispositivos. Se foi você, não precisa fazer nada.",
+      "button": "Não fui eu",
+      "linkIntro": "Ou cole este link no seu navegador:",
+      "ignore": "Se não foi você, outra pessoa está com a sua senha. Use o botão acima para escolher uma nova agora mesmo."
+    }
+  },
+  "Account": {
+    "shell": {
+      "brand": "English Course"
+    },
+    "fields": {
+      "name": "Seu nome",
+      "email": "E-mail",
+      "password": "Senha",
+      "newPassword": "Nova senha",
+      "passwordHint": "Entre 8 e 128 caracteres."
+    },
+    "divider": "ou",
+    "google": "Continuar com o Google",
+    "challenge": "Verificação de segurança",
+    "signIn": {
+      "metaTitle": "Entrar",
+      "title": "Que bom te ver de novo",
+      "subtitle": "Entre para continuar de onde parou.",
+      "submit": "Entrar",
+      "submitting": "Entrando…",
+      "waiting": "Conferindo seus dados…",
+      "forgot": "Esqueceu sua senha?",
+      "noAccount": "É novo por aqui?",
+      "signUpLink": "Crie uma conta",
+      "passwordUpdated": "Sua senha foi atualizada. Entre com a nova."
+    },
+    "signUp": {
+      "metaTitle": "Crie sua conta",
+      "title": "Crie sua conta",
+      "subtitle": "Seu progresso, tickets e prêmios acompanham você em todos os dispositivos.",
+      "submit": "Criar conta",
+      "submitting": "Criando conta…",
+      "waiting": "Preparando sua conta…",
+      "haveAccount": "Já tem uma conta?",
+      "signInLink": "Entrar",
+      "checkInboxTitle": "Confira seu e-mail",
+      "checkInboxBody": "Enviamos um link para {email}. Abra-o para confirmar seu endereço e começar a aprender."
+    },
+    "forgotPassword": {
+      "metaTitle": "Redefina sua senha",
+      "title": "Esqueceu sua senha?",
+      "subtitle": "Digite seu e-mail e enviaremos um link para escolher uma nova.",
+      "submit": "Enviar link",
+      "submitting": "Enviando…",
+      "waiting": "Preparando seu link…",
+      "sentTitle": "Confira seu e-mail",
+      "sentBody": "Se existir uma conta para {email}, enviamos a ela um link para redefinir a senha.",
+      "backToSignIn": "Voltar para entrar"
+    },
+    "resetPassword": {
+      "metaTitle": "Escolha uma nova senha",
+      "title": "Escolha uma nova senha",
+      "subtitle": "Ao salvá-la, você sairá da conta nos outros dispositivos.",
+      "submit": "Salvar nova senha",
+      "submitting": "Salvando…",
+      "waiting": "Salvando sua nova senha…",
+      "invalidTitle": "Este link não funciona mais",
+      "invalidBody": "Links de redefinição valem uma única vez e expiram. Peça um novo.",
+      "requestNew": "Enviar um novo link"
+    },
+    "validation": {
+      "nameRequired": "Digite seu nome.",
+      "nameTooLong": "Use até 40 caracteres.",
+      "emailInvalid": "Digite um e-mail válido.",
+      "emailUnchanged": "Esse já é o seu e-mail. Digite um diferente.",
+      "passwordLength": "Use entre 8 e 128 caracteres."
+    },
+    "errors": {
+      "invalidCredentials": "O e-mail ou a senha estão incorretos.",
+      "emailNotVerified": "Confirme seu e-mail primeiro: abra o link que enviamos e depois entre.",
+      "captchaFailed": "A verificação de segurança não passou. Tente de novo.",
+      "tooManyRequests": "Tentativas demais. Espere um minuto e tente de novo.",
+      "invalidToken": "Este link não funciona mais. Peça um novo.",
+      "passwordLength": "Use entre 8 e 128 caracteres.",
+      "invalidPassword": "Essa não é a sua senha atual.",
+      "noPassword": "Esta conta entra com o Google, então não tem senha para trocar.",
+      "generic": "Algo deu errado. Tente de novo em instantes."
+    },
+    "accountDeleted": {
+      "metaTitle": "Conta excluída",
+      "title": "Sua conta foi excluída",
+      "subtitle": "Sua conta e todo o seu progresso, tickets e prêmios foram excluídos para sempre.",
+      "homeLink": "Voltar ao início"
+    }
+  },
+  "GlobalError": {
+    "title": "Algo deu errado",
+    "body": "A página não pôde carregar. Tente de novo ou volte daqui a pouco.",
+    "retry": "Tentar de novo"
   },
   "Legal": {
     "lastUpdated": "Última atualização: {date}",

@@ -1,5 +1,8 @@
+import { recordPlaybackPositionAction } from "@/app/[locale]/learner-actions";
 import { LessonId } from "@/domain/entities/ids/ids";
 import type { PlaybackPositionRepository } from "@/domain/ports/playback-position-repository/playback-position-repository";
+import { learnerStore } from "@/lib/learner-store/learner-store";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
 import { act, renderHook } from "@testing-library/react";
@@ -7,87 +10,68 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { usePlaybackPosition } from "./use-playback-position";
 
-vi.mock("@/hooks/use-saved-playback-positions/use-saved-playback-positions", () => ({
-  refreshSavedPlaybackPositions: vi.fn(),
+vi.mock("@/app/[locale]/learner-actions", () => ({
+  recordPlaybackPositionAction: vi.fn(),
 }));
 
-const { refreshSavedPlaybackPositions } =
-  await import("@/hooks/use-saved-playback-positions/use-saved-playback-positions");
-
-const mockStorage = new Map<string, string>();
+const aLesson = () => LessonId.parse(faker.string.uuid());
 
 beforeEach(() => {
-  vi.mocked(refreshSavedPlaybackPositions).mockClear();
-  mockStorage.clear();
-  // jsdom provides window.localStorage, but we replace getItem/setItem with
-  // a plain Map to isolate each test.
-  const stub = {
-    getItem: (key: string) => mockStorage.get(key) ?? null,
-    setItem: (key: string, value: string) => {
-      mockStorage.set(key, value);
-    },
-    removeItem: (key: string) => {
-      mockStorage.delete(key);
-    },
-    clear: () => mockStorage.clear(),
-    key: () => null,
-    length: 0,
-  };
-  // Inject stub onto the jsdom window directly so the adapter sees it.
-  Object.defineProperty(window, "localStorage", {
-    configurable: true,
-    writable: true,
-    value: stub,
-  });
+  vi.mocked(recordPlaybackPositionAction).mockReset();
+  vi.mocked(recordPlaybackPositionAction).mockResolvedValue({ data: { recorded: true } } as never);
 });
 
+async function getOf(hook: { current: ReturnType<typeof usePlaybackPosition> }) {
+  let value: number | null | undefined;
+  await act(async () => {
+    value = await hook.current.get();
+  });
+  return value;
+}
+
 describe("usePlaybackPosition", () => {
-  test("WHEN get() is called on a fresh lessonId THEN it returns null", async () => {
-    const lessonId = LessonId.parse(faker.string.uuid());
-    const { result } = renderHook(() => usePlaybackPosition(lessonId));
+  test("WHEN get() is called on a lesson with no saved position THEN it returns null", async () => {
+    const { result } = renderHook(() => usePlaybackPosition(aLesson()));
 
-    let value: number | null | undefined;
-    await act(async () => {
-      value = await result.current.get();
-    });
-
-    expect(value).toBeNull();
+    expect(await getOf(result)).toBeNull();
   });
 
-  test("WHEN set(42) is called THEN a subsequent get() returns 42", async () => {
-    const lessonId = LessonId.parse(faker.string.uuid());
+  test("WHEN the learner's snapshot holds a position THEN get() returns it", async () => {
+    const lessonId = aLesson();
+    givenLearner.positions({ [lessonId]: 180 });
+
+    const { result } = renderHook(() => usePlaybackPosition(lessonId));
+
+    expect(await getOf(result)).toBe(180);
+  });
+
+  test("WHEN set(42) is called THEN get() returns 42 and the position is saved for the learner", async () => {
+    const lessonId = aLesson();
     const { result } = renderHook(() => usePlaybackPosition(lessonId));
 
     await act(async () => {
       await result.current.set(42);
     });
 
-    let value: number | null | undefined;
-    await act(async () => {
-      value = await result.current.get();
-    });
-    expect(value).toBe(42);
+    expect(await getOf(result)).toBe(42);
+    expect(recordPlaybackPositionAction).toHaveBeenCalledWith({ lessonId, seconds: 42 });
   });
 
-  test("WHEN a position is stored before mount and get() is called THEN it returns the seeded value", async () => {
-    const lessonId = LessonId.parse(faker.string.uuid());
-    mockStorage.set(`learning-english:playback:${lessonId}`, "180");
-
+  test("WHEN a position is written THEN every surface reading saved positions sees it", async () => {
+    const lessonId = aLesson();
     const { result } = renderHook(() => usePlaybackPosition(lessonId));
 
-    let value: number | null | undefined;
     await act(async () => {
-      value = await result.current.get();
+      await result.current.set(64);
     });
 
-    expect(value).toBe(180);
+    expect(learnerStore.getState().positions.get(lessonId)).toBe(64);
   });
 
   describe("GIVEN an injected repository", () => {
-    test("WHEN the hook runs THEN it uses that port instead of localStorage", async () => {
-      // Arrange — the injection seam exists so a test never has to reach for
-      // window.localStorage to control the hook.
-      const lessonId = LessonId.parse(faker.string.uuid());
+    test("WHEN the hook runs THEN it uses that port and never the learner's server", async () => {
+      // The injection seam exists so a test never has to reach the network.
+      const lessonId = aLesson();
       const positions = new Map<string, number>([[lessonId, 321]]);
       const fake: PlaybackPositionRepository = {
         getPosition: async (id) => positions.get(id) ?? null,
@@ -97,15 +81,13 @@ describe("usePlaybackPosition", () => {
       };
       const { result } = renderHook(() => usePlaybackPosition(lessonId, fake));
 
-      // Act
-      let value: number | null | undefined;
+      expect(await getOf(result)).toBe(321);
       await act(async () => {
-        value = await result.current.get();
+        await result.current.set(5);
+        await result.current.flush();
+        result.current.flushWithBeacon();
       });
-
-      // Assert
-      expect(value).toBe(321);
-      expect(mockStorage.size).toBe(0);
+      expect(recordPlaybackPositionAction).not.toHaveBeenCalled();
     });
   });
 
@@ -115,70 +97,37 @@ describe("usePlaybackPosition", () => {
       ["Infinity", Number.POSITIVE_INFINITY],
       ["a negative", -1],
     ])("WHEN set(%s) is called THEN it reports failure and writes nothing", async (_label, bad) => {
-      // Arrange — a detached <video> reports NaN for currentTime, so this is
-      // the realistic path, not a hypothetical.
-      const lessonId = LessonId.parse(faker.string.uuid());
+      // A detached <video> reports NaN for currentTime, so this is the
+      // realistic path, not a hypothetical.
+      const lessonId = aLesson();
       const { result } = renderHook(() => usePlaybackPosition(lessonId));
 
-      // Act
       let persisted: boolean | undefined;
       await act(async () => {
         persisted = await result.current.set(bad);
       });
 
-      // Assert
       expect(persisted).toBe(false);
-      expect(mockStorage.size).toBe(0);
+      expect(learnerStore.getState().positions.has(lessonId)).toBe(false);
+      expect(recordPlaybackPositionAction).not.toHaveBeenCalled();
     });
 
     test("WHEN a valid value follows a rejected one THEN it still persists", async () => {
-      // Arrange
-      const lessonId = LessonId.parse(faker.string.uuid());
+      const lessonId = aLesson();
       const { result } = renderHook(() => usePlaybackPosition(lessonId));
 
-      // Act
       await act(async () => {
         await result.current.set(Number.NaN);
         await result.current.set(55);
       });
 
-      // Assert — a rejected write must not leave the hook wedged.
-      let value: number | null | undefined;
-      await act(async () => {
-        value = await result.current.get();
-      });
-      expect(value).toBe(55);
+      // A rejected write must not leave the hook wedged.
+      expect(await getOf(result)).toBe(55);
     });
   });
 
-  describe("GIVEN surfaces elsewhere on the page are showing progress", () => {
-    test("WHEN a position is written THEN the readers of every saved position are told to re-read", async () => {
-      // The `storage` event only fires for *other* tabs, so a write made
-      // here has to announce itself or a mounted progress bar goes stale.
-      const lessonId = LessonId.parse(faker.string.uuid());
-      const { result } = renderHook(() => usePlaybackPosition(lessonId));
-
-      await act(async () => {
-        await result.current.set(42);
-      });
-
-      expect(refreshSavedPlaybackPositions).toHaveBeenCalled();
-    });
-
-    test("WHEN a write is rejected by validation THEN no re-read is announced", async () => {
-      const lessonId = LessonId.parse(faker.string.uuid());
-      const { result } = renderHook(() => usePlaybackPosition(lessonId));
-
-      await act(async () => {
-        await result.current.set(Number.NaN);
-      });
-
-      expect(refreshSavedPlaybackPositions).not.toHaveBeenCalled();
-    });
-  });
-
-  test("WHEN a position is set, the hook remounts, and get() is called THEN it returns the persisted value", async () => {
-    const lessonId = LessonId.parse(faker.string.uuid());
+  test("WHEN a position is set, the hook remounts, and get() is called THEN it returns the value", async () => {
+    const lessonId = aLesson();
     const first = renderHook(() => usePlaybackPosition(lessonId));
     await act(async () => {
       await first.result.current.set(99);
@@ -186,11 +135,7 @@ describe("usePlaybackPosition", () => {
     first.unmount();
 
     const second = renderHook(() => usePlaybackPosition(lessonId));
-    let value: number | null | undefined;
-    await act(async () => {
-      value = await second.result.current.get();
-    });
 
-    expect(value).toBe(99);
+    expect(await getOf(second.result)).toBe(99);
   });
 });

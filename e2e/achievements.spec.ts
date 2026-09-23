@@ -1,7 +1,5 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
-import type { BrowserContext } from "@playwright/test";
-
 import { lessonsOfModule, modulesOfCourse } from "./content-seed-fixtures";
 import { expect, ONBOARDED_LEARNER, test } from "./learner-profile-fixture";
 
@@ -21,13 +19,6 @@ const VOWELS_LESSON_COUNT = lessonsOfModule(VOWELS!.id).length;
 /** Compiling a route on a cold `pnpm dev` overruns the default 5s timeout. */
 const COLD_ROUTE = { timeout: 60_000 };
 
-const storeCompletion = async (context: BrowserContext, lessonId: string) => {
-  await context.addInitScript(
-    (key) => window.localStorage.setItem(key, "1"),
-    `learning-english:completed:${lessonId}`,
-  );
-};
-
 test.describe("The Achievements page", () => {
   test("WHEN the learner opens Achievements from the avatar menu THEN the page opens", async ({
     page,
@@ -46,10 +37,10 @@ test.describe("The Achievements page", () => {
   });
 
   test("WHEN a module holds every ticket THEN its ticket is counted AND its prize waits to be claimed", async ({
-    context,
     page,
+    learnerState,
   }) => {
-    await storeCompletion(context, INTRODUCTION_LESSON.id);
+    await learnerState.completed([INTRODUCTION_LESSON.id]);
 
     await page.goto("/es/achievements");
 
@@ -70,10 +61,10 @@ test.describe("The Achievements page", () => {
   });
 
   test("WHEN the learner claims that prize THEN it is revealed AND stays claimed on the next visit", async ({
-    context,
     page,
+    learnerState,
   }) => {
-    await storeCompletion(context, INTRODUCTION_LESSON.id);
+    await learnerState.completed([INTRODUCTION_LESSON.id]);
     await page.goto("/es/achievements");
 
     await page
@@ -112,10 +103,10 @@ test.describe("The Achievements page", () => {
   });
 
   test("WHEN the learner continues the course from the reveal THEN a lesson opens", async ({
-    context,
     page,
+    learnerState,
   }) => {
-    await storeCompletion(context, INTRODUCTION_LESSON.id);
+    await learnerState.completed([INTRODUCTION_LESSON.id]);
     await page.goto("/es/achievements");
 
     await page

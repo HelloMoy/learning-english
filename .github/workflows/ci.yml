@@ -1,0 +1,114 @@
+# The checks developers run locally, on every push and pull request.
+#
+# Nothing here is a secret: the Turnstile keys are Cloudflare's always-pass
+# test keys, the auth secret is throwaway, and the Google pair is a
+# placeholder (no test signs in with Google). The service images must match
+# compose.yaml; src/deployment/deployment.test.ts keeps them equal.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TURSO_DATABASE_URL: http://127.0.0.1:8081
+  BETTER_AUTH_SECRET: ci-only-secret-that-is-at-least-32-characters
+  BETTER_AUTH_URL: http://localhost:3000
+  GOOGLE_CLIENT_ID: ci-placeholder.apps.googleusercontent.com
+  GOOGLE_CLIENT_SECRET: ci-placeholder
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+  TURNSTILE_SECRET_KEY: 1x0000000000000000000000000000000AA
+  SMTP_HOST: 127.0.0.1
+  SMTP_PORT: "1025"
+  SMTP_SECURE: "false"
+  EMAIL_FROM: English Course <no-reply@english-course.online>
+  MAILPIT_URL: http://localhost:8025
+  # The e2e job serves a production build, where auth is rate-limited by
+  # default; its hundreds of sign-ins share one IP.
+  AUTH_RATE_LIMIT: "false"
+  # A production build withholds draft courses, and most e2e specs navigate one.
+  # `.env.example` documents this variable for exactly this case: "run e2e
+  # against `pnpm build && pnpm start`".
+  SHOW_DRAFT_COURSES: "1"
+
+jobs:
+  verify:
+    name: Typecheck, format, lint and unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The testcontainers suites start their own containers on the runner's Docker.
+      - run: pnpm verify
+
+  e2e:
+    # Four shards, which is now generous. The job used to exhaust its 45
+    # minutes at any shard count, and the cause turned out not to be the
+    # suite's length at all: Playwright hung at teardown, because the stop
+    # signal reached pnpm rather than the `next-server` it spawned. Measured on
+    # the eight-shard run — 33 tests finished in about four minutes, then
+    # forty-one minutes of silence. `gracefulShutdown` in playwright.config.ts
+    # is what fixes that.
+    #
+    # At roughly eight tests a minute, the whole suite is about half an hour
+    # serially; four shards keep each one near ten minutes, which leaves room
+    # for the suite to grow.
+    #
+    # Each shard is its own runner with its own libsql and mailpit, so raising
+    # throughput costs no test isolation — in-process workers would have shared
+    # one database and one inbox, which is what `AUTH_RATE_LIMIT` already hints
+    # at.
+    name: End-to-end ${{ matrix.shard }}/4 (Chromium, production build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    services:
+      libsql:
+        image: ghcr.io/tursodatabase/libsql-server:v0.24.32
+        ports:
+          - 8081:8080
+      mailpit:
+        image: axllent/mailpit:v1.31.1
+        ports:
+          - 1025:1025
+          - 8025:8025
+    env:
+      E2E_SERVER_COMMAND: pnpm start
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:migrate
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e --project=chromium --shard=${{ matrix.shard }}/4
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-shard-${{ matrix.shard }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

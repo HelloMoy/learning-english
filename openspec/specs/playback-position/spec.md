@@ -92,36 +92,6 @@ cases.
 - **THEN** execution returns a `Result`; no exception escapes the use case
   boundary
 
-### Requirement: `BrowserLocalStoragePlaybackPositionRepository` persists positions in `localStorage`
-
-The `BrowserLocalStoragePlaybackPositionRepository` adapter SHALL implement
-`PlaybackPositionRepository` by reading and writing `window.localStorage`
-under the key namespace `learning-english:playback:{lessonId}`, where
-`{lessonId}` is the lesson identifier verbatim. The adapter SHALL guard
-against `window.localStorage` being `undefined` (SSR / test environment) by
-treating any read or write as a no-op.
-
-#### Scenario: A previously saved position round-trips
-- **WHEN** `setPosition(lessonId, 123)` is called and the same browser session
-  then invokes `getPosition(lessonId)`
-- **THEN** `getPosition(lessonId)` returns `123`
-
-#### Scenario: An unsaved lesson returns `null`
-- **WHEN** `getPosition(lessonId)` is called for a lesson with no saved key
-- **THEN** it returns `null`
-
-#### Scenario: Different lessons are isolated
-- **WHEN** `setPosition(lessonA, 60)` is called and then `getPosition(lessonB)`
-  is called for a different `lessonB`
-- **THEN** `getPosition(lessonB)` returns `null`
-
-#### Scenario: The adapter no-ops when `window.localStorage` is undefined
-- **WHEN** the adapter is instantiated in an environment where `window` or
-  `window.localStorage` is `undefined`
-- **THEN** both methods return as if no key exists — specifically,
-  `getPosition` returns `null` and `setPosition` resolves to `void` — and no
-  exception is thrown
-
 ### Requirement: The Lesson Page persists playback position on a debounced cadence and on lifecycle events
 
 The component responsible for wrapping the player SHALL persist the playback position
@@ -375,4 +345,22 @@ the fact that it is not a modal.
 - **WHEN** the overlay is open at a desktop viewport
 - **THEN** the heading, the description, the timestamped action and the restart
   alternative are all painted, exactly as before
+
+### Requirement: Driving the player never leaks an unhandled rejection
+
+The facade the resume flow drives the video player through SHALL treat `play` and `pause` as fire-and-forget: each SHALL observe the promise the player returns and discard its rejection, so that a command still in flight when the player is torn down cannot surface as an unhandled rejection.
+
+The player's embed providers reject every pending promise when their provider is destroyed, which happens whenever the component unmounts — a learner navigating away mid-command, or a test finishing. Such a rejection is not actionable: the provider is gone because the page is. Left unobserved it fails the whole test run and, in the browser, reaches error reporting as noise.
+
+#### Scenario: A pause still in flight when the provider is destroyed
+- **WHEN** the player's `pause` rejects after the facade has called it
+- **THEN** no unhandled rejection reaches the process
+
+#### Scenario: A play still in flight when the provider is destroyed
+- **WHEN** the player's `play` rejects after the facade has called it
+- **THEN** no unhandled rejection reaches the process
+
+#### Scenario: The facade reports nothing for a discarded rejection
+- **WHEN** either command rejects
+- **THEN** nothing is sent to error reporting, because the failure describes the page having gone rather than playback having broken
 

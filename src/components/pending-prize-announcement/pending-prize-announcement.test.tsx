@@ -3,14 +3,13 @@ import { Course } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Module } from "@/domain/entities/module/module";
 import type { LessonProgressSlice } from "@/domain/use-cases/find-course-catalog/find-course-catalog";
-import { refreshEarnedTickets } from "@/hooks/use-earned-tickets/use-earned-tickets";
 import {
   holdPrizeAnnouncement,
   refreshPendingPrizeAnnouncement,
 } from "@/hooks/use-pending-prize-announcement/use-pending-prize-announcement";
-import { refreshPrizeClaims } from "@/hooks/use-prize-claims/use-prize-claims";
 import { usePathname } from "@/i18n/navigation";
 import type { AchievementLevel } from "@/lib/learner-achievements/learner-achievements";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 import { renderInLocale } from "@/test-setup/render-in-locale";
 
 import NiceModal from "@ebay/nice-modal-react";
@@ -75,8 +74,6 @@ const levels: AchievementLevel[] = [
 
 const announceStorageChange = () => {
   act(() => {
-    refreshEarnedTickets();
-    refreshPrizeClaims();
     refreshPendingPrizeAnnouncement();
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
@@ -85,7 +82,7 @@ const announceStorageChange = () => {
 /** Every ticket of the module earned, so its prize is ready to claim. */
 const readyToClaim = () => {
   for (const lesson of lessonRuntimes) {
-    window.localStorage.setItem(`learning-english:ticket-earned:${lesson.id}`, "1");
+    givenLearner.earnedTickets([lesson.id]);
   }
 };
 
@@ -131,7 +128,7 @@ describe("PendingPrizeAnnouncement", () => {
 
   test("WHEN the prize was already claimed THEN the record is dropped without a dialog", async () => {
     readyToClaim();
-    window.localStorage.setItem(`learning-english:prize-claimed:${vowels.slug}`, "1");
+    givenLearner.claimedPrizes([vowels.slug]);
     window.localStorage.setItem(ANNOUNCE_KEY, "2-vowels");
     announceStorageChange();
 
@@ -187,7 +184,7 @@ describe("PendingPrizeAnnouncement", () => {
     renderAnnouncement();
     await waitFor(() => expect(NiceModal.show).toHaveBeenCalledTimes(1));
 
-    window.localStorage.setItem(`learning-english:ticket-earned:${introductionLesson.id}`, "1");
+    givenLearner.earnedTickets([introductionLesson.id]);
     window.localStorage.setItem(ANNOUNCE_KEY, "1-introduction");
     announceStorageChange();
 

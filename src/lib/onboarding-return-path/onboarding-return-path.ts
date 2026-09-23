@@ -1,9 +1,6 @@
-const COURSE_ROUTE_PREFIX = "/courses/";
+import { isSafeInternalPath } from "@/lib/safe-internal-path/safe-internal-path";
 
-// Anything that could make the browser leave the site or climb out of the
-// course routes: a scheme, a protocol-relative or doubled slash, a backslash
-// (read as a slash by browsers), or a `..` segment.
-const UNSAFE_PATH_PATTERN = /:|\/\/|\\|(^|\/)\.\.(\/|$)/;
+const COURSE_ROUTE_PREFIX = "/courses/";
 
 /**
  * Tells whether a value may be used as the course route a learner returns to
@@ -26,9 +23,7 @@ const UNSAFE_PATH_PATTERN = /:|\/\/|\\|(^|\/)\.\.(\/|$)/;
  */
 export function isCourseReturnPath(value: string): boolean {
   const hasCourseSegment = value.length > COURSE_ROUTE_PREFIX.length;
-  return (
-    value.startsWith(COURSE_ROUTE_PREFIX) && hasCourseSegment && !UNSAFE_PATH_PATTERN.test(value)
-  );
+  return value.startsWith(COURSE_ROUTE_PREFIX) && hasCourseSegment && isSafeInternalPath(value);
 }
 
 /**

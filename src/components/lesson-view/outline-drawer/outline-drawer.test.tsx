@@ -1,5 +1,5 @@
 import type { LessonId } from "@/domain/entities/ids/ids";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 import { stubElementGeometry, type ElementGeometryStub } from "@/test-setup/stubs/element-geometry";
 
 import { act, render, screen, within } from "@testing-library/react";
@@ -23,13 +23,12 @@ vi.mock("@/hooks/use-is-hydrated/use-is-hydrated", () => ({
 }));
 
 const markCompleteInStorage = (lessonId: LessonId): void => {
-  window.localStorage.setItem(`learning-english:completed:${lessonId}`, "1");
+  givenLearner.completed([lessonId]);
 };
 
 /** Both stores cache their snapshot, so seeded storage has to be announced. */
 const announceStorageChange = (): void => {
   act(() => {
-    refreshSavedPlaybackPositions();
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 };

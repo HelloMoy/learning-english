@@ -1,5 +1,6 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
+import { skipOnCi } from "./ci-unavailable";
 import { courseBySlug, modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
 
@@ -45,6 +46,7 @@ function lessonUrl(
 }
 
 test.describe("Course catalog navigation", () => {
+  skipOnCi("self-hosted-content");
   test("WHEN the home is visited THEN the levels table links to the course overview", async ({
     page,
   }) => {
@@ -144,6 +146,7 @@ test.describe("Course catalog — locale awareness", () => {
 });
 
 test.describe("Course catalog — video asset", () => {
+  skipOnCi("self-hosted-content");
   test("WHEN a video lesson is rendered THEN the source URL points to the content-seeded asset", async ({
     page,
     request,

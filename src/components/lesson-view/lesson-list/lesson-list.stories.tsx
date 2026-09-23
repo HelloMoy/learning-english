@@ -2,8 +2,8 @@ import { Course } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
 import { finishThresholdSeconds } from "@/lib/watch-progress/watch-progress";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -69,20 +69,13 @@ const videoLessons = [1, 2, 3].map((sequence) =>
 /**
  * Seeds browser storage so the progress stories have something to read: one
  * lesson finished, one partway, one never opened. The bar's whole input is
- * `localStorage`, so a story cannot show it without writing there first.
+ * the learner store, so a story cannot show it without seeding it first.
  */
 function seedWatchProgress() {
   const [finished, partly, untouched] = videoLessons;
-  window.localStorage.setItem(
-    `learning-english:playback:${finished!.id}`,
-    String(finishThresholdSeconds(VIDEO_DURATION_SECONDS)),
-  );
-  window.localStorage.setItem(
-    `learning-english:playback:${partly!.id}`,
-    String(VIDEO_DURATION_SECONDS * 0.4),
-  );
-  window.localStorage.removeItem(`learning-english:playback:${untouched!.id}`);
-  refreshSavedPlaybackPositions();
+  givenLearner.positions({ [finished!.id]: finishThresholdSeconds(VIDEO_DURATION_SECONDS) });
+  givenLearner.positions({ [partly!.id]: VIDEO_DURATION_SECONDS * 0.4 });
+  givenLearner.withoutPositions([untouched!.id]);
 }
 
 const meta = {
@@ -107,7 +100,7 @@ export const LastIsCurrent: Story = {
 
 /**
  * The three states side by side: finished, partway, and never opened. The
- * last renders no bar at all — progress lives in `localStorage`, which the
+ * last renders no bar at all — progress arrives after hydration, which the
  * server cannot read, so a bar drawn at zero would assert in the first frame
  * that the learner has watched nothing.
  *

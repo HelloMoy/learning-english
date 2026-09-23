@@ -17,7 +17,8 @@ import { useCanInstallToHomeScreen } from "@/hooks/use-can-install-to-home-scree
 import { useLearnerAchievements } from "@/hooks/use-learner-achievements/use-learner-achievements";
 import { useLearnerProfile } from "@/hooks/use-learner-profile/use-learner-profile";
 import { useThemeChoice } from "@/hooks/use-theme-choice/use-theme-choice";
-import { Link, usePathname } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { authClient } from "@/lib/auth-client/auth-client";
 import type { AchievementLevel } from "@/lib/learner-achievements/learner-achievements";
 import { cn } from "@/lib/utils/utils";
 
@@ -53,14 +54,27 @@ export function sectionKey(
 /**
  * @param levels - Every catalog course, for counting the prizes waiting to be
  *                 claimed; a route that cannot resolve the catalog marks nothing
+ * @param signedIn - Whether the request carries a session, decided on the
+ *                   server by the locale layout. Without one the header offers
+ *                   Sign in instead of the learner's menu, and the wordmark
+ *                   goes to the locale home rather than My learning.
  */
-export function SiteHeader({ levels = [] }: { levels?: ReadonlyArray<AchievementLevel> }) {
+export function SiteHeader({
+  levels = [],
+  signedIn = false,
+}: {
+  levels?: ReadonlyArray<AchievementLevel>;
+  signedIn?: boolean;
+}) {
   const t = useTranslations("SiteHeader");
   const pathname = usePathname();
   const canInstall = useCanInstallToHomeScreen();
   const learner = useLearnerProfile();
   const section = t(sectionKey(pathname));
   const prizesReady = usePrizesReady(levels);
+  // Until the card is known, a signed-in learner is laid out as if it will
+  // arrive: most sessions have one, and guessing wrong costs one late toggle.
+  const hasMenu = signedIn && learner.status !== "absent";
 
   return (
     <header
@@ -75,7 +89,7 @@ export function SiteHeader({ levels = [] }: { levels?: ReadonlyArray<Achievement
             phone. `overflow-hidden` bounds the worst case to a clipped
             wordmark rather than a sideways-scrolling page. */}
         <div className="flex min-w-0 shrink items-baseline gap-4 overflow-hidden">
-          <Brand />
+          <Brand href={signedIn ? "/learning" : "/"} />
           <span className="hidden text-[10px] tracking-[0.24em] text-muted-foreground uppercase sm:inline">
             {t("tagline")} · {section}
           </span>
@@ -90,20 +104,89 @@ export function SiteHeader({ levels = [] }: { levels?: ReadonlyArray<Achievement
               profile the theme control moves into the avatar menu below `sm`. */}
           <span
             data-testid="header-theme-toggle"
-            className={cn("inline-flex", learner.status === "present" && "hidden sm:inline-flex")}
+            className={cn("inline-flex", hasMenu && "hidden sm:inline-flex")}
           >
             <ThemeToggle />
           </span>
-          {learner.status === "present" ? (
-            <LearnerMenu
-              profile={learner.profile}
-              prizesReady={prizesReady}
-            />
-          ) : null}
+          <SessionControl
+            signedIn={signedIn}
+            learner={learner}
+            prizesReady={prizesReady}
+          />
         </div>
       </div>
     </header>
   );
+}
+
+/**
+ * The header's account control: Sign in without a session; the learner's menu
+ * with one, its place held while the card loads; and, for a learner signed in
+ * before making their card, a plain Sign out, so no signed-in state is ever
+ * without a way out.
+ */
+function SessionControl({
+  signedIn,
+  learner,
+  prizesReady,
+}: {
+  signedIn: boolean;
+  learner: ReturnType<typeof useLearnerProfile>;
+  prizesReady: number;
+}) {
+  const t = useTranslations("SiteHeader");
+  const signOut = useSignOut();
+
+  if (!signedIn) {
+    return (
+      <Link
+        href="/sign-in"
+        className="inline-flex min-h-11 items-center rounded-full px-3 text-sm font-semibold text-foreground underline-offset-4 hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+      >
+        {t("signIn")}
+      </Link>
+    );
+  }
+  if (learner.status === "present") {
+    return (
+      <LearnerMenu
+        profile={learner.profile}
+        prizesReady={prizesReady}
+        onSignOut={signOut}
+      />
+    );
+  }
+  if (learner.status === "unknown") {
+    return (
+      <span
+        data-testid="learner-menu-placeholder"
+        aria-hidden="true"
+        className="inline-flex size-11 shrink-0"
+      />
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={signOut}
+      className="inline-flex min-h-11 cursor-pointer items-center rounded-full px-3 text-sm font-semibold text-foreground underline-offset-4 hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+    >
+      {t("signOut")}
+    </button>
+  );
+}
+
+/**
+ * Ends the session, then opens the home and refreshes the server tree so the
+ * layout renders as signed out.
+ */
+function useSignOut(): () => Promise<void> {
+  const router = useRouter();
+  return async () => {
+    await authClient.signOut();
+    router.replace("/");
+    router.refresh();
+  };
 }
 
 /**
@@ -131,7 +214,15 @@ function usePrizesReady(levels: ReadonlyArray<AchievementLevel>): number {
  * mark is pointing. Both marks are decoration; the count reaches assistive
  * technology as a sentence on the menu's own name, so it is heard once.
  */
-function LearnerMenu({ profile, prizesReady }: { profile: LearnerProfile; prizesReady: number }) {
+function LearnerMenu({
+  profile,
+  prizesReady,
+  onSignOut,
+}: {
+  profile: LearnerProfile;
+  prizesReady: number;
+  onSignOut: () => Promise<void>;
+}) {
   const t = useTranslations("SiteHeader");
   const { name, avatar } = profile;
   const hasPrizesReady = prizesReady > 0;
@@ -181,6 +272,7 @@ function LearnerMenu({ profile, prizesReady }: { profile: LearnerProfile; prizes
           <Link href="/profile">{t("profile")}</Link>
         </DropdownMenuItem>
         <PhoneThemeItem />
+        <DropdownMenuItem onSelect={() => void onSignOut()}>{t("signOut")}</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

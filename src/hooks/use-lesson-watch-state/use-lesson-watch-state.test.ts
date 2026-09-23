@@ -1,6 +1,7 @@
 import { LessonId } from "@/domain/entities/ids/ids";
-import { refreshSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { learnerStore } from "@/lib/learner-store/learner-store";
 import { finishThresholdSeconds } from "@/lib/watch-progress/watch-progress";
+import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
 import { act, renderHook } from "@testing-library/react";
@@ -11,17 +12,16 @@ import { useLessonWatchState } from "./use-lesson-watch-state";
 const LESSON_DURATION_SECONDS = 600;
 
 const markCompleteInStorage = (lessonId: LessonId): void => {
-  window.localStorage.setItem(`learning-english:completed:${lessonId}`, "1");
+  givenLearner.completed([lessonId]);
 };
 
 const storePosition = (lessonId: LessonId, seconds: number): void => {
-  window.localStorage.setItem(`learning-english:playback:${lessonId}`, seconds.toString());
+  givenLearner.positions({ [lessonId]: seconds });
 };
 
 /** Both stores cache their snapshot, so seeded storage has to be announced. */
 const announceStorageChange = (): void => {
   act(() => {
-    refreshSavedPlaybackPositions();
     window.dispatchEvent(new StorageEvent("storage", { key: null }));
   });
 };
@@ -71,7 +71,7 @@ describe("useLessonWatchState", () => {
       );
 
       expect(result.current).toEqual({ watchedFraction: 1, isComplete: true });
-      expect(window.localStorage.getItem(`learning-english:completed:${lessonId}`)).toBeNull();
+      expect(learnerStore.getState().completed.has(lessonId)).toBe(false);
     });
   });
 
