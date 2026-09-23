@@ -2,6 +2,7 @@ import { contentCatalog } from "@/adapters/persistence/content-manifest/content-
 
 import { Page, test as visitor } from "@playwright/test";
 
+import { skipOnCi } from "./ci-unavailable";
 import { moduleOfCourse, modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
 
@@ -145,6 +146,12 @@ for (const viewport of PHONE_WIDTHS) {
         test(`WHEN the ${route.name} renders in '${locale}' THEN the document does not scroll horizontally`, async ({
           page,
         }) => {
+          // Only the three routes that open the Advanced Intermediate Course
+          // need its content; `home` and `not found` do not, and keep their
+          // coverage at every width and locale. Skipping the whole sweep would
+          // have thrown those away for a reason that does not apply to them.
+          if (route.path.includes(COURSE_SLUG)) skipOnCi("self-hosted-content");
+
           // Against a dev server under three browser projects, the heavier
           // routes stall (see `gotoRendered`). The generous budget is for
           // server throughput, not for the app.
@@ -279,6 +286,7 @@ test.describe("Mobile viewport fit — header with a learner card at 320px", () 
 });
 
 test.describe("Mobile viewport fit — module list titles at 320px", () => {
+  skipOnCi("self-hosted-content");
   test.use({ viewport: { width: 320, height: 720 } });
 
   test("WHEN titles share a long prefix THEN adjacent rows stay distinguishable", async ({

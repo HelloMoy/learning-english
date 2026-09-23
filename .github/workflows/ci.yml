@@ -55,9 +55,29 @@ jobs:
       - run: pnpm verify
 
   e2e:
-    name: End-to-end (Chromium, production build)
+    # Four shards, which is now generous. The job used to exhaust its 45
+    # minutes at any shard count, and the cause turned out not to be the
+    # suite's length at all: Playwright hung at teardown, because the stop
+    # signal reached pnpm rather than the `next-server` it spawned. Measured on
+    # the eight-shard run — 33 tests finished in about four minutes, then
+    # forty-one minutes of silence. `gracefulShutdown` in playwright.config.ts
+    # is what fixes that.
+    #
+    # At roughly eight tests a minute, the whole suite is about half an hour
+    # serially; four shards keep each one near ten minutes, which leaves room
+    # for the suite to grow.
+    #
+    # Each shard is its own runner with its own libsql and mailpit, so raising
+    # throughput costs no test isolation — in-process workers would have shared
+    # one database and one inbox, which is what `AUTH_RATE_LIMIT` already hints
+    # at.
+    name: End-to-end ${{ matrix.shard }}/4 (Chromium, production build)
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     services:
       libsql:
         image: ghcr.io/tursodatabase/libsql-server:v0.24.32
@@ -83,11 +103,11 @@ jobs:
       - run: pnpm db:migrate
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:e2e --project=chromium
+      - run: pnpm test:e2e --project=chromium --shard=${{ matrix.shard }}/4
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report
+          name: playwright-report-shard-${{ matrix.shard }}
           path: |
             playwright-report/
             test-results/

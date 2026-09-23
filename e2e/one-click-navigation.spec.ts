@@ -1,5 +1,6 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
+import { skipOnCi } from "./ci-unavailable";
 import { lessonsOfModule, modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
 
@@ -44,6 +45,11 @@ const lessonUrl = (courseSlug: string, moduleSlug: string, lessonId: string) =>
 const COLD_ROUTE = { timeout: 60_000 };
 
 test.describe("Home and My learning — one click to the course, one to the lesson", () => {
+  // Reaches its courses through `contentCatalog.courses[0]` and `[1]`
+  // rather than by slug, which is why the earlier sweep for the course
+  // slug missed it: one of those two is the Advanced Intermediate
+  // Course, whose video a CI checkout does not have.
+  skipOnCi("self-hosted-content");
   test("WHEN a level row's link is pressed THEN the course overview opens", async ({ page }) => {
     await page.goto("/en");
 
@@ -120,6 +126,11 @@ test.describe("Lesson tile — one click from the course overview to the module"
 });
 
 test.describe("Video row — one click anywhere to the lesson", () => {
+  // Reaches its courses through `contentCatalog.courses[0]` and `[1]`
+  // rather than by slug, which is why the earlier sweep for the course
+  // slug missed it: one of those two is the Advanced Intermediate
+  // Course, whose video a CI checkout does not have.
+  skipOnCi("self-hosted-content");
   test("WHEN the row's body is clicked THEN the lesson page opens", async ({ page }) => {
     const module_ = modulesOfCourse(FIRST_COURSE.slug)[0]!;
     const lesson = lessonsOfModule(module_.id)[0]!;

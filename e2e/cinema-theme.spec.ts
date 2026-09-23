@@ -1,5 +1,6 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
+import { skipOnCi } from "./ci-unavailable";
 import { moduleOfCourse, modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
 
@@ -65,6 +66,7 @@ test.describe("Immersion Cinema — chrome", () => {
 });
 
 test.describe("Immersion Cinema — lesson notes tabs", () => {
+  skipOnCi("self-hosted-content");
   test("WHEN a lesson renders THEN the Transcript tab is disabled and Mark-as-complete is reachable", async ({
     page,
   }) => {

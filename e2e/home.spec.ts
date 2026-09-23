@@ -1,5 +1,6 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
+import { skipOnCi } from "./ci-unavailable";
 import { lessonsOfModule, modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-account-fixture";
 
@@ -171,6 +172,7 @@ test.describe("Onboarding", () => {
 });
 
 test.describe("My learning", () => {
+  skipOnCi("self-hosted-content");
   test("WHEN a lesson has been opened THEN My learning offers to resume it and marks its course", async ({
     page,
     learnerState,

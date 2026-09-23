@@ -3,6 +3,7 @@ import type { VideoLesson } from "@/domain/entities/lesson/lesson";
 
 import type { Browser, BrowserContext, Page } from "@playwright/test";
 
+import { skipOnCi } from "./ci-unavailable";
 import { lessonsOfModule, modulesOfCourse } from "./content-seed-fixtures";
 import { expect, signInAs, test, type LearnerAccount } from "./learner-account-fixture";
 import { ONBOARDED_LEARNER, seedLearnerProfile } from "./learner-profile-fixture";
@@ -60,6 +61,7 @@ async function playFor(page: Page, milliseconds: number): Promise<void> {
 }
 
 test.describe("Progress follows the learner", () => {
+  skipOnCi("self-hosted-content");
   test("WHEN a lesson is marked on one device THEN another device shows it complete", async ({
     page,
     browser,
