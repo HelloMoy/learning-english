@@ -414,6 +414,11 @@
       "description": "Juntaste {count, plural, one {el único ticket} other {los # tickets}} de {module}.",
       "goClaim": "Ir a reclamar premio",
       "keepLearning": "Seguir aprendiendo"
+    },
+    "SiteFooter": {
+      "navLabel": "Legal",
+      "privacy": "Privacidad",
+      "terms": "Términos"
     }
   },
   "CourseCatalog": {
@@ -739,5 +744,90 @@
     "title": "Algo salió mal",
     "body": "La página no pudo cargarse. Inténtalo de nuevo o vuelve en un momento.",
     "retry": "Reintentar"
+  },
+  "Legal": {
+    "lastUpdated": "Última actualización: {date}",
+    "privacy": {
+      "title": "Privacidad",
+      "description": "Qué recoge English Course, por qué, y qué otras empresas lo tratan.",
+      "intro": "Esta política explica qué recoge English Course cuando creas una cuenta y avanzas por el curso, por qué se recoge, y qué otras empresas lo tratan por encargo nuestro. Cada una aparece nombrada más abajo.",
+      "sections": {
+        "whatThisCovers": {
+          "heading": "Qué abarca",
+          "body": "Esta política cubre el sitio de English Course y la cuenta que creas en él. Puedes mirar sin cuenta; todo lo que se describe a continuación se aplica desde el momento en que te registras."
+        },
+        "account": {
+          "heading": "Tu cuenta",
+          "body": "Al registrarte guardamos tu nombre, tu dirección de correo, si esa dirección ha sido verificada, y el avatar que eliges para tu tarjeta de aprendiz. La contraseña se guarda solo como hash — nunca conservamos la contraseña en sí ni podemos leerla. Si en vez de eso entras con Google, guardamos el vínculo con esa cuenta de Google y la dirección que Google declara verificada; nunca recibimos tu contraseña de Google. Cada sesión activa queda registrada con su caducidad, la dirección IP desde la que se creó y el agente de usuario del navegador, para poder cerrarte la sesión de forma segura y para poder rastrear un abuso."
+        },
+        "learning": {
+          "heading": "Lo que haces en el curso",
+          "body": "A medida que avanzas guardamos qué lecciones has completado, hasta qué punto de cada vídeo llegaste, por qué lección deberías continuar, y las recompensas que has ganado y reclamado. Eso es lo que te permite retomar donde lo dejaste en otro dispositivo. Pertenece a tu cuenta, y la única empresa que lo ve es Turso, que aloja la base de datos por encargo nuestro."
+        },
+        "email": {
+          "heading": "El correo que te enviamos",
+          "body": "Enviamos únicamente correo transaccional: el mensaje que verifica tu dirección, un restablecimiento de contraseña cuando lo pides, un aviso cuando tu contraseña cambia, una confirmación cuando pides cambiar de dirección, y una confirmación cuando pides eliminar tu cuenta. Se entregan a través de Resend, que envía por encargo nuestro y por tanto trata tu dirección y el contenido de esos mensajes. No enviamos correo comercial, así que no hay nada de lo que darse de baja."
+        },
+        "botProtection": {
+          "heading": "Protección contra bots",
+          "body": "Los formularios de inicio de sesión, registro y restablecimiento de contraseña están protegidos por Cloudflare Turnstile, que juzga si una petición parece automatizada. Cloudflare recibe las señales que necesita para ese juicio, incluida tu dirección IP. Está para frenar registros automatizados y ataques con contraseñas robadas, no para perfilarte."
+        },
+        "errorReports": {
+          "heading": "Informes de error",
+          "body": "Cuando algo falla enviamos un informe de error a Sentry para poder arreglarlo. Los informes llevan errores y nada más — sin trazas de rendimiento ni grabación de sesión — y el SDK está configurado para no adjuntar datos personales. Antes de que un error controlado salga del servidor, el cuerpo de los mensajes se descarta por completo y cualquier dirección de correo del contexto se sustituye por el texto literal [email]."
+        },
+        "cookies": {
+          "heading": "Cookies",
+          "body": "Ponemos dos cookies y ninguna más. Una recuerda el idioma que elegiste, para que el sitio abra en él la próxima vez. La otra es tu sesión, que es lo que te mantiene dentro. No hay cookies de analítica, ni de publicidad, ni rastreadores de terceros en este sitio."
+        },
+        "yourChoices": {
+          "heading": "Tus opciones",
+          "body": "Desde tu perfil puedes cambiar el nombre de tu tarjeta de aprendiz, cambiar tu dirección de correo — que se confirma primero en la dirección registrada y después en la nueva — y cambiar tu contraseña. Puedes eliminar tu cuenta desde el mismo sitio cuando quieras, sin dar explicaciones; la eliminación se confirma con un enlace enviado por correo que solo funciona en tu propia sesión."
+        },
+        "contact": {
+          "heading": "Cómo contactarnos",
+          "body": "Escribe a privacy@english-course.online con cualquier duda sobre esta política o sobre los datos que guardamos de tu cuenta."
+        }
+      }
+    },
+    "terms": {
+      "title": "Términos",
+      "description": "Los términos que aceptas al usar English Course.",
+      "intro": "Estos términos se aplican a todo el que usa English Course. Al crear una cuenta, los aceptas.",
+      "sections": {
+        "whatThisCovers": {
+          "heading": "Qué abarca",
+          "body": "English Course es un curso de inglés en línea. Estos términos rigen tu uso del sitio y de la cuenta que creas en él, y acompañan a la política de privacidad, que explica qué ocurre con tus datos."
+        },
+        "yourAccount": {
+          "heading": "Tu cuenta",
+          "body": "Una cuenta es para una persona. Da una dirección en la que realmente puedas recibir correo: no puedes iniciar sesión hasta haberla verificado, y es la única vía para recuperar el acceso. Guarda tu contraseña para ti — todo lo que se haga desde una sesión iniciada se considera hecho por ti."
+        },
+        "courseContent": {
+          "heading": "El material del curso",
+          "body": "Las lecciones, notas y material de práctica se proporcionan para tu propio aprendizaje. No puedes redistribuirlos, revenderlos ni republicarlos, ni usarlos para entrenar un sistema automatizado. Los vídeos se reproducen desde YouTube, cuyos propios términos rigen esa reproducción."
+        },
+        "acceptableUse": {
+          "heading": "Uso aceptable",
+          "body": "No intentes acceder a cuentas que no son tuyas, sortear la protección contra bots de los formularios, recolectar el sitio con herramientas automatizadas, ni interferir en su funcionamiento. Podemos suspender una cuenta que haga cualquiera de estas cosas."
+        },
+        "availability": {
+          "heading": "Disponibilidad",
+          "body": "El servicio se ofrece tal como está. Podemos cambiar, interrumpir o retirar partes de él, y no prometemos que esté disponible sin interrupciones ni libre de fallos. Tu progreso se guarda, pero no dejes aquí nada que no pudieras permitirte perder."
+        },
+        "endingYourAccount": {
+          "heading": "Terminar tu cuenta",
+          "body": "Puedes eliminar tu cuenta desde tu perfil cuando quieras, sin dar explicaciones. Podemos suspender o cerrar una cuenta que incumpla estos términos."
+        },
+        "changes": {
+          "heading": "Cambios en estos términos",
+          "body": "Podemos revisar estos términos. La fecha de abajo te dice qué versión estás leyendo; seguir usando el servicio tras un cambio significa que aceptas los términos revisados."
+        },
+        "contact": {
+          "heading": "Cómo contactarnos",
+          "body": "Escribe a privacy@english-course.online con cualquier duda sobre estos términos."
+        }
+      }
+    }
   }
 }
