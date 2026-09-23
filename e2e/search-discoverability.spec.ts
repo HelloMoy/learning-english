@@ -44,7 +44,7 @@ test.describe("robots", () => {
 });
 
 test.describe("sitemap", () => {
-  test("WHEN the sitemap is requested THEN it lists the home of every locale and nothing else", async ({
+  test("WHEN the sitemap is requested THEN it lists the three public paths of every locale and nothing else", async ({
     request,
   }) => {
     const response = await request.get("/sitemap.xml");
@@ -55,7 +55,12 @@ test.describe("sitemap", () => {
     const listed = [...body.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
       ([, url]) => new URL(url).pathname,
     );
-    expect(listed.sort()).toEqual(["/en", "/es", "/pt"]);
+    // The home and the two legal documents: everything else needs a session.
+    expect(listed.sort()).toEqual(
+      ["", "/privacy", "/terms"]
+        .flatMap((path) => ["en", "es", "pt"].map((locale) => `/${locale}${path}`))
+        .sort(),
+    );
   });
 
   test("WHEN an entry is read THEN it declares its locale alternates", async ({ request }) => {

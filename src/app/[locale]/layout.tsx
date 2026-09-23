@@ -16,6 +16,7 @@ import "../globals.css";
 import { CinemaBackground } from "@/components/cinema-background/cinema-background";
 import { GlobalProviders } from "@/components/global-providers";
 import { LearnerStateSeed } from "@/components/learner-state-seed/learner-state-seed";
+import { SiteFooter } from "@/components/site-footer/site-footer";
 import { SiteHeader } from "@/components/site-header/site-header";
 import { SkipLink } from "@/components/skip-link/skip-link";
 import { routing } from "@/i18n/routing";
@@ -139,6 +140,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             <GlobalProviders levels={levels}>
               <div className="flex-1">{children}</div>
             </GlobalProviders>
+            <SiteFooter />
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>
