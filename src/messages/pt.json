@@ -60,6 +60,7 @@
     "profile": "Perfil",
     "accountMenuLabel": "Menu da conta",
     "signIn": "Entrar",
+    "signUp": "Criar conta",
     "signOut": "Sair"
   },
   "LocaleSwitcher": {
@@ -92,7 +93,50 @@
       "result": "Pronto: o curso fica na sua tela de início, como qualquer outro app.",
       "openGuide": "Como adicionar este curso à sua tela de início",
       "dialogTitle": "Adicionar à tela de início",
+      "macAddToDock": "Adicionar ao Dock",
       "dismiss": "Fechar o guia"
+    },
+    "SafariInstallGuide": {
+      "progress": "Passo {current} de {total}",
+      "dismiss": "Fechar o guia",
+      "ipadLabel": "Tenha o curso a um toque",
+      "ipadPayoff": "Adicione à sua tela de início e ele abre como um app, sem procurar a aba.",
+      "ipadDialogTitle": "Adicionar à tela de início",
+      "openGuideIpad": "Como adicionar este curso à sua tela de início",
+      "ipadStepShare": "Toque no botão de compartilhar na barra de cima, à direita do endereço.",
+      "ipadStepViewMore": "O painel abre pela metade. Toque em «Ver mais», no fim da linha, para expandi-lo.",
+      "ipadStepAddToHomeScreen": "Na lista que aparece, escolha «Adicionar à Tela de Início».",
+      "ipadStepAdd": "Toque em «Adicionar». Deixe «Abrir como app da web» ativado.",
+      "ipadResult": "Pronto: o curso fica na sua tela de início, como qualquer outro app.",
+      "macLabel": "Tenha o curso a um clique",
+      "macPayoff": "Adicione ao Dock e ele abre na própria janela, sem abas em volta.",
+      "macDialogTitle": "Adicionar ao Dock",
+      "openGuideMac": "Como adicionar este curso ao seu Dock",
+      "macStepShare": "Clique no botão de compartilhar na barra, no canto superior direito.",
+      "macStepAddToDock": "Escolha «Adicionar ao Dock» na lista que abre.",
+      "macStepAdd": "Clique em «Adicionar». Antes, você pode renomear se quiser.",
+      "macResult": "Pronto: o curso fica no seu Dock, como qualquer outro app."
+    },
+    "GuidePlaybackRail": {
+      "previous": "Passo anterior",
+      "next": "Próximo passo",
+      "goToStep": "Ir para o passo {number}",
+      "goToResult": "Ir para o resultado"
+    },
+    "InstallPrompt": {
+      "dialogTitle": "Instalar o curso",
+      "openPrompt": "Instalar este curso no seu dispositivo",
+      "dismiss": "Agora não",
+      "handheld": {
+        "title": "Tenha o curso na sua tela de início",
+        "body": "Abre em tela cheia, sem a barra do navegador em volta, e fica junto dos seus outros apps.",
+        "confirm": "Adicionar à tela de início"
+      },
+      "desktop": {
+        "title": "Instale o curso como app",
+        "body": "Fica entre os seus aplicativos e você alterna para ele como qualquer outro, sem procurar a aba.",
+        "confirm": "Instalar"
+      }
     },
     "CourseNavigator": {
       "loading": "Carregando próxima aula…",

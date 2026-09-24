@@ -1,4 +1,8 @@
 import { INSTALL_STEPS } from "@/components/add-to-home-screen-guide/install-steps/install-steps";
+import {
+  SAFARI_INSTALL_RESULT,
+  SAFARI_INSTALL_STEPS,
+} from "@/components/safari-install-guide/safari-install-steps/safari-install-steps";
 import { PRIVACY_SECTION_KEYS, TERMS_SECTION_KEYS } from "@/lib/legal-sections/legal-sections";
 
 import en from "./en.json";
@@ -118,6 +122,137 @@ describe("message catalogues", () => {
     const unwritten = required.filter((key) => !guide[key]);
 
     expect(unwritten).toEqual([]);
+  });
+
+  /**
+   * Guards the iPad and macOS guides against a step whose copy nobody wrote.
+   *
+   * Key parity above only says the locales agree with each other; three
+   * catalogues can agree perfectly on a key that no step names, or miss one that
+   * every step does. The guides render `t(messageKey)` for whatever
+   * {@link SAFARI_INSTALL_STEPS} holds, so reading the expectation from that
+   * table is what makes this survive the next tap Apple adds.
+   */
+  it.each(Object.entries(CATALOGUES))("%s names every Safari install step", (_locale, m) => {
+    const guide = (m as typeof en).Components.SafariInstallGuide as Record<string, string>;
+    const controls = (m as typeof en).Components.AddToHomeScreenGuide as Record<string, string>;
+    const platforms = ["ipad", "mac"] as const;
+
+    const unwritten = platforms.flatMap((platform) => [
+      ...SAFARI_INSTALL_STEPS[platform].flatMap((step) => [
+        guide[step.messageKey] ? [] : [`${platform}: ${step.messageKey}`],
+        controls[step.targetKey] ? [] : [`${platform}: ${step.targetKey}`],
+      ]),
+      guide[SAFARI_INSTALL_RESULT[platform].messageKey]
+        ? []
+        : [`${platform}: ${SAFARI_INSTALL_RESULT[platform].messageKey}`],
+    ]);
+
+    expect(unwritten.flat()).toEqual([]);
+  });
+
+  /**
+   * Guards the macOS guide against the home screen a Mac does not have.
+   *
+   * A Mac has a Dock. Telling that learner the course will sit on their "home
+   * screen" names a place they cannot go and look at — the same failure as
+   * naming a control that is not on their screen, and the one part of the guide
+   * a translator can get wrong without seeing the platform.
+   */
+  it.each(Object.entries(CATALOGUES))("%s keeps the home screen off the Mac", (_locale, m) => {
+    const withoutDiacritics = (value: string) =>
+      value.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+    const homeScreen = /\b(home screen|pantalla de inicio|tela de inicio|ecra de inicio)\b/i;
+
+    const guide = (m as typeof en).Components.SafariInstallGuide as Record<string, string>;
+    const macCopy = Object.entries(guide)
+      .filter(([key]) => key.startsWith("mac"))
+      .map(([, value]) => value);
+
+    const offenders = macCopy.filter((line) => homeScreen.test(withoutDiacritics(line)));
+
+    expect(offenders).toEqual([]);
+  });
+
+  /**
+   * Guards the desktop prompt's claim against its own picture.
+   *
+   * The prompt draws the application switcher, which argues from **presence**:
+   * the course among the learner's other applications. Copy that argues from the
+   * absence of tabs describes a different drawing — and an absence the learner
+   * cannot check until after they have decided.
+   */
+  it.each(Object.entries(CATALOGUES))("%s argues the desktop prompt from presence", (_l, m) => {
+    const withoutDiacritics = (value: string) =>
+      value.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+    const switching = /\b(applications?|aplicacion|aplicac|aplicativ)/i;
+
+    const body = (m as typeof en).Components.InstallPrompt.desktop.body;
+
+    expect(switching.test(withoutDiacritics(body))).toBe(true);
+  });
+
+  /**
+   * Guards the guide's control rail, which all three guides share.
+   *
+   * It is the only way to move a guide that does not require discovering a
+   * gesture first, so a missing name here leaves a learner with an unlabelled
+   * button and no other route.
+   */
+  it.each(Object.entries(CATALOGUES))("%s names every guide control", (_locale, m) => {
+    const rail = (m as typeof en).Components.GuidePlaybackRail as Record<string, string>;
+    const required = ["previous", "next", "goToStep", "goToResult"];
+
+    const unwritten = required.filter((key) => !rail[key]);
+
+    expect(unwritten).toEqual([]);
+  });
+
+  /**
+   * Guards the install prompt's two wordings.
+   *
+   * The prompt says "add to your home screen" on a handheld and "install" on a
+   * desktop, because those are the words each platform's own browser uses. Key
+   * parity above only says the locales agree with each other, so all three can
+   * agree on half a namespace.
+   */
+  it.each(Object.entries(CATALOGUES))("%s writes both install-prompt wordings", (_locale, m) => {
+    const prompt = (m as typeof en).Components.InstallPrompt;
+    const required = [
+      "dialogTitle",
+      "dismiss",
+      "handheld.title",
+      "handheld.body",
+      "handheld.confirm",
+      "desktop.title",
+      "desktop.body",
+      "desktop.confirm",
+    ];
+
+    const unwritten = required.filter((key) => !keyPaths(prompt).includes(key));
+
+    expect(unwritten).toEqual([]);
+  });
+
+  /**
+   * Guards the desktop wording against the home screen it does not have.
+   *
+   * A desktop has a dock or a taskbar. Telling that learner the course will sit
+   * on their "home screen" names a place they cannot go and look at — the same
+   * failure as the guide naming an iOS control that is not on the phone. The
+   * words are the one part a translator can change without seeing the platform.
+   */
+  it.each(Object.entries(CATALOGUES))("%s keeps the home screen off the desktop", (_locale, m) => {
+    const withoutDiacritics = (value: string) =>
+      value.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+    const homeScreen = /\b(home screen|pantalla de inicio|tela de inicio|ecra de inicio)\b/i;
+
+    const desktop = (m as typeof en).Components.InstallPrompt.desktop;
+    const offenders = stringValues(desktop).filter((line) =>
+      homeScreen.test(withoutDiacritics(line)),
+    );
+
+    expect(offenders).toEqual([]);
   });
 
   /**

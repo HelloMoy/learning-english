@@ -95,6 +95,22 @@ describe("GlobalProviders", () => {
     );
   });
 
+  test("WHEN a page renders THEN the install-enabling worker is registered", () => {
+    // It has to be mounted above the pages: the browser decides whether to
+    // offer an install once per visit, not once per route the learner reaches.
+    const register = vi.fn().mockResolvedValue({});
+    vi.stubGlobal("navigator", { ...navigator, serviceWorker: { register } });
+
+    renderInLocale(
+      <GlobalProviders levels={levels}>
+        <p>A lesson</p>
+      </GlobalProviders>,
+    );
+
+    expect(register).toHaveBeenCalledWith("/sw.js");
+    vi.unstubAllGlobals();
+  });
+
   test("WHEN nothing is waiting THEN no dialog interrupts the page", async () => {
     renderInLocale(
       <GlobalProviders levels={levels}>

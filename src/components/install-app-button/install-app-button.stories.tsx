@@ -5,16 +5,20 @@ import { ThemeToggle } from "../theme-toggle/theme-toggle";
 import { InstallAppButton } from "./install-app-button";
 
 /**
- * The header chip that opens the install guide.
+ * The header chip that gets the course onto the learner's home screen.
  *
  * The control itself is presentational, so it renders here on any browser.
- * Whether it exists at all is `SiteHeader`'s decision — iPhone Safari, not yet
- * installed — which is why that condition is tested there and not visible in
- * these stories.
+ * Whether it exists at all is `SiteHeader`'s decision — some install path, and
+ * the app not already installed — which is why that condition is tested there
+ * and not visible in these stories.
  *
- * Click it: it opens the guide's modal. The `NiceModal.Provider` below is what
- * makes that work, because the app mounts its own in `global-providers` and the
- * Storybook preview has none.
+ * It has two destinations, and the `path` arg picks between them. The glyph is
+ * the same either way; the difference is the accessible name, which says
+ * whether the chip is about to teach the flow or perform it. Inspect the
+ * control to read it, or click: `guide` opens the five-step guide, `prompt`
+ * opens the confirmation. The `NiceModal.Provider` below is what makes that
+ * work, because the app mounts its own in `global-providers` and the Storybook
+ * preview has none.
  *
  * It is shown next to the theme chip so the two can be compared at a glance;
  * that is where it sits in the real header.
@@ -23,6 +27,17 @@ const meta = {
   title: "Components/InstallAppButton",
   component: InstallAppButton,
   parameters: { layout: "centered" },
+  args: { path: { kind: "guide" } },
+  argTypes: {
+    path: {
+      control: { type: "inline-radio" },
+      options: ["guide", "prompt"],
+      mapping: {
+        guide: { kind: "guide" },
+        prompt: { kind: "prompt", accept: () => {} },
+      },
+    },
+  },
   decorators: [
     (Story) => (
       <NiceModal.Provider>
@@ -38,8 +53,13 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** As an English learner on an iPhone sees it. */
-export const Default: Story = {};
+/** On iPhone Safari, where the flow can only be taught. */
+export const OpensTheGuide: Story = {};
+
+/** On Android or a desktop, where the browser offered to do the install. */
+export const OpensThePrompt: Story = {
+  args: { path: { kind: "prompt", accept: () => {} } },
+};
 
 /** The same control in Spanish — the difference is its accessible name. */
 export const InSpanish: Story = {

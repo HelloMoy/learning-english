@@ -1,5 +1,7 @@
 "use client";
 
+import { isRunningStandalone } from "@/lib/is-running-standalone/is-running-standalone";
+
 import { useIsHydrated } from "../use-is-hydrated/use-is-hydrated";
 
 /**
@@ -18,15 +20,6 @@ const OTHER_IOS_BROWSERS = /CriOS|FxiOS|EdgiOS|OPiOS|GSA/;
 
 const isIPhoneSafari = (userAgent: string) =>
   IPHONE.test(userAgent) && !OTHER_IOS_BROWSERS.test(userAgent);
-
-/**
- * True once the app is already running from the home screen. Safari's own
- * `navigator.standalone` predates the standard media query and is still the
- * reliable signal on iOS, so both are consulted.
- */
-const isAlreadyInstalled = () =>
-  window.matchMedia?.("(display-mode: standalone)").matches === true ||
-  (navigator as Navigator & { standalone?: boolean }).standalone === true;
 
 /**
  * Client hook: whether this learner can still add the app to their home screen.
@@ -57,11 +50,12 @@ const isAlreadyInstalled = () =>
  *
  * @returns `false` until hydration commits, then whether the flow is available
  * @see useIsHydrated
+ * @see isRunningStandalone
  */
 export function useCanInstallToHomeScreen(): boolean {
   const isHydrated = useIsHydrated();
 
   if (!isHydrated) return false;
 
-  return isIPhoneSafari(navigator.userAgent) && !isAlreadyInstalled();
+  return isIPhoneSafari(navigator.userAgent) && !isRunningStandalone();
 }

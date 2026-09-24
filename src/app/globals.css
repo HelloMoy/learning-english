@@ -283,6 +283,84 @@
   animation: guide-tap 1900ms ease-out infinite;
 }
 
+/*
+ * The guide's countdown: the active frame control fills over exactly one step
+ * interval, so a learner reading an instruction can see how long it has left.
+ * The duration comes from the component, which reads the same constant the
+ * timer does — there is no second clock here to drift from it.
+ *
+ * The project's `prefers-reduced-motion` rule would collapse this to a filled
+ * bar, which is why the component does not render it at all there: the timer
+ * is not running either, and a full bar that never empties describes nothing.
+ */
+@keyframes guide-countdown {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.guide-countdown {
+  animation-name: guide-countdown;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+
+/*
+ * Safari's popover scales out of the control it hangs from, rather than rising
+ * from an edge the way an iPhone sheet does. Its confirmations keep the
+ * transform that centres them, which is why each has its own keyframe instead
+ * of sharing one: an animation that only scales would drop the translate and
+ * fling the card into the corner.
+ */
+@keyframes guide-popover-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes guide-confirm-pop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes guide-sheet-drop {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.guide-popover-pop {
+  transform-origin: top right;
+  animation: guide-popover-pop 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.guide-confirm-pop {
+  animation: guide-confirm-pop 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.guide-sheet-drop {
+  animation: guide-sheet-drop 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 .guide-point {
   animation: guide-point 1900ms ease-in-out infinite;
 }

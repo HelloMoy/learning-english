@@ -34,6 +34,10 @@ const MESSAGES: Record<string, string> = {
   progress: "Paso {current} de {total}",
   result: "Listo: el curso queda en tu pantalla de inicio, como cualquier otra app.",
   dismiss: "Cerrar la guía",
+  previous: "Paso anterior",
+  next: "Paso siguiente",
+  goToStep: "Ir al paso {number}",
+  goToResult: "Ir al resultado",
 };
 
 const translate = (key: string, values?: Record<string, unknown>) =>
@@ -173,13 +177,22 @@ describe("GuideAutoplay", () => {
       expect(onDismiss).toHaveBeenCalledTimes(1);
     });
 
-    test("WHEN rendered THEN dismissing is the only control it offers", () => {
+    test("WHEN rendered THEN every control either closes it or moves it", () => {
+      // Dismissal used to be the only control. It is not any more: the guide now
+      // shows the learner that it can be moved, which a silent gesture never
+      // could. What the rule actually protects is unchanged — nothing here acts
+      // on the device, and nothing claims anything was installed.
       render(<GuideAutoplay onDismiss={vi.fn()} />);
 
-      const controls = screen.getAllByRole("button");
+      const names = screen
+        .getAllByRole("button")
+        .map((control) => control.getAttribute("aria-label"));
+      const moves = names.filter(
+        (name) => name === MESSAGES.previous || name === MESSAGES.next || name?.startsWith("Ir al"),
+      );
 
-      expect(controls).toHaveLength(1);
-      expect(controls[0]).toHaveAttribute("aria-label", MESSAGES.dismiss);
+      expect(names).toContain(MESSAGES.dismiss);
+      expect(moves.length).toBe(names.length - 1);
     });
   });
 });

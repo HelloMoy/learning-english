@@ -60,6 +60,7 @@
     "profile": "Profile",
     "accountMenuLabel": "Account menu",
     "signIn": "Sign in",
+    "signUp": "Create account",
     "signOut": "Sign out"
   },
   "LocaleSwitcher": {
@@ -92,7 +93,50 @@
       "result": "Done — the course now sits on your home screen, like any other app.",
       "openGuide": "How to add this course to your home screen",
       "dialogTitle": "Add to home screen",
+      "macAddToDock": "Add to Dock",
       "dismiss": "Dismiss the guide"
+    },
+    "SafariInstallGuide": {
+      "progress": "Step {current} of {total}",
+      "dismiss": "Dismiss the guide",
+      "ipadLabel": "Keep the course one tap away",
+      "ipadPayoff": "Add it to your home screen and it opens like an app — no hunting for the tab.",
+      "ipadDialogTitle": "Add to home screen",
+      "openGuideIpad": "How to add this course to your home screen",
+      "ipadStepShare": "Tap the share button in the top bar, to the right of the address.",
+      "ipadStepViewMore": "The panel opens half-way. Tap “View More”, at the end of the row, to open it out.",
+      "ipadStepAddToHomeScreen": "In the list that appears, choose “Add to Home Screen”.",
+      "ipadStepAdd": "Tap “Add”. Leave “Open as Web App” switched on.",
+      "ipadResult": "Done — the course now sits on your home screen, like any other app.",
+      "macLabel": "Keep the course one click away",
+      "macPayoff": "Add it to your Dock and it opens in its own window, with no tabs around it.",
+      "macDialogTitle": "Add to Dock",
+      "openGuideMac": "How to add this course to your Dock",
+      "macStepShare": "Click the share button in the toolbar, near the top right.",
+      "macStepAddToDock": "Choose “Add to Dock” from the list that opens.",
+      "macStepAdd": "Click “Add”. You can rename it first if you like.",
+      "macResult": "Done — the course now sits in your Dock, like any other app."
+    },
+    "GuidePlaybackRail": {
+      "previous": "Previous step",
+      "next": "Next step",
+      "goToStep": "Go to step {number}",
+      "goToResult": "Go to the result"
+    },
+    "InstallPrompt": {
+      "dialogTitle": "Install the course",
+      "openPrompt": "Install this course on your device",
+      "dismiss": "Not now",
+      "handheld": {
+        "title": "Keep the course on your home screen",
+        "body": "It opens full screen, without the browser's bar around it, and sits with your other apps.",
+        "confirm": "Add to home screen"
+      },
+      "desktop": {
+        "title": "Install the course as an app",
+        "body": "It sits among your applications and you switch to it like any other one — no hunting for the tab.",
+        "confirm": "Install"
+      }
     },
     "CourseNavigator": {
       "loading": "Loading next lesson…",
