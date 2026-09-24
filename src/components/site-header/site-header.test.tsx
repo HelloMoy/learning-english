@@ -530,13 +530,25 @@ describe("SiteHeader account control on a phone", () => {
     );
   });
 
-  test("GIVEN a session whose device has no card WHEN the account trigger is opened THEN its menu offers Sign out", async () => {
+  test("GIVEN no session WHEN the account trigger is opened THEN its menu offers Sign in, then Create account", async () => {
+    const user = userEvent.setup();
+
+    render(<SiteHeader />);
+    await user.click(screen.getByRole("button", { name: "accountMenuLabel" }));
+
+    const items = await screen.findAllByRole("menuitem");
+    expect(items.map((item) => item.textContent)).toEqual(["signIn", "signUp"]);
+    expect(screen.getByRole("menuitem", { name: "signUp" })).toHaveAttribute("href", "/sign-up");
+  });
+
+  test("GIVEN a session whose device has no card WHEN the account trigger is opened THEN its menu offers Sign out alone", async () => {
     const user = userEvent.setup();
 
     render(<SiteHeader signedIn />);
     await user.click(screen.getByRole("button", { name: "accountMenuLabel" }));
 
-    expect(await screen.findByRole("menuitem", { name: "signOut" })).toBeInTheDocument();
+    const items = await screen.findAllByRole("menuitem");
+    expect(items.map((item) => item.textContent)).toEqual(["signOut"]);
   });
 
   test("GIVEN a session whose device has no card WHEN rendered THEN the Sign out button is the desktop half", () => {

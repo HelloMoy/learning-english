@@ -128,6 +128,8 @@ const ACCOUNT_LABEL_CLASSES =
  * The first and last of those are a word, and on a phone the row has no width
  * for one — the wordmark loses letters to pay for it. So each renders twice:
  * spelled out from `sm` up, and below that folded into {@link AccountMenu}.
+ * Folded, the signed-out menu also offers Create account: a second item costs
+ * the row no width, and it is the newcomer's only way to an account from here.
  */
 function SessionControl({
   signedIn,
@@ -153,6 +155,9 @@ function SessionControl({
         <AccountMenu>
           <DropdownMenuItem asChild>
             <Link href="/sign-in">{t("signIn")}</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/sign-up">{t("signUp")}</Link>
           </DropdownMenuItem>
         </AccountMenu>
       </>
@@ -208,7 +213,7 @@ function SessionControl({
  * row of glyph chips. `px-3` around a 16px glyph comes to 40px, which
  * `min-w-11` floors to the same 44px the row's widths were measured against.
  *
- * @param children - The menu's items: one account action
+ * @param children - The menu's items: the account actions for this state
  */
 function AccountMenu({ children }: { children: ReactNode }) {
   const t = useTranslations("SiteHeader");

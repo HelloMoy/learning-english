@@ -60,6 +60,7 @@
     "profile": "Profile",
     "accountMenuLabel": "Account menu",
     "signIn": "Sign in",
+    "signUp": "Create account",
     "signOut": "Sign out"
   },
   "LocaleSwitcher": {
