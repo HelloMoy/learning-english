@@ -4,8 +4,6 @@ import { Brand } from "@/components/brand/brand";
 import { InstallAppButton } from "@/components/install-app-button/install-app-button";
 import { LearnerAvatar } from "@/components/learner-avatar/learner-avatar";
 import { LocaleSwitcher } from "@/components/locale-switcher/locale-switcher";
-import { ThemeSwitchTrack } from "@/components/theme-switch-track/theme-switch-track";
-import { ThemeToggle } from "@/components/theme-toggle/theme-toggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,19 +14,21 @@ import type { LearnerProfile } from "@/domain/entities/learner-profile/learner-p
 import { useCanInstallToHomeScreen } from "@/hooks/use-can-install-to-home-screen/use-can-install-to-home-screen";
 import { useLearnerAchievements } from "@/hooks/use-learner-achievements/use-learner-achievements";
 import { useLearnerProfile } from "@/hooks/use-learner-profile/use-learner-profile";
-import { useThemeChoice } from "@/hooks/use-theme-choice/use-theme-choice";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { authClient } from "@/lib/auth-client/auth-client";
 import type { AchievementLevel } from "@/lib/learner-achievements/learner-achievements";
 import { cn } from "@/lib/utils/utils";
 
+import { CircleUser } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 
 /**
  * The Immersion Cinema top bar: the `ENGLISH·COURSE` wordmark, a section
  * eyebrow ("IMMERSION CINEMA · <SECTION>") derived from the current route,
- * and the locale + theme chips. Client-side because the section label reads
- * the pathname; the locale/theme controls were already client components.
+ * and the locale chip. The theme is not set here — its only control lives in
+ * the Profile page's Preferences section. Client-side because the section
+ * label reads the pathname; the locale control was already a client component.
  */
 export function sectionKey(
   path: string,
@@ -72,16 +72,16 @@ export function SiteHeader({
   const learner = useLearnerProfile();
   const section = t(sectionKey(pathname));
   const prizesReady = usePrizesReady(levels);
-  // Until the card is known, a signed-in learner is laid out as if it will
-  // arrive: most sessions have one, and guessing wrong costs one late toggle.
-  const hasMenu = signedIn && learner.status !== "absent";
 
   return (
     <header
       className="sticky top-0 z-30 backdrop-blur-sm"
       aria-label={t("navLabel")}
     >
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-11">
+      {/* The gaps are minimums under `justify-between`: they only bind once the
+          row runs out of width, which is exactly when the wordmark would start
+          losing letters, so they step down on a phone and nowhere else. */}
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-1 px-4 py-4 sm:gap-4 sm:px-11">
         {/* `min-w-0` is what lets flex-shrink engage at all: a flex item's
             default `min-width: auto` floors it at its intrinsic content width,
             and the wordmark has no spaces to wrap at. Without it the row's
@@ -94,20 +94,12 @@ export function SiteHeader({
             {t("tagline")} · {section}
           </span>
         </div>
-        <div className="flex min-w-0 shrink-0 items-center gap-2.5">
+        <div className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-2.5">
           {/* Only ever present on iPhone Safari, and only before the app has been
               installed, so it is decided after hydration and appears a moment
               after load — which does nudge the chips after it one step right. */}
           {canInstall ? <InstallAppButton /> : null}
           <LocaleSwitcher />
-          {/* A phone cannot fit the wordmark and three 44px controls, so with a
-              profile the theme control moves into the avatar menu below `sm`. */}
-          <span
-            data-testid="header-theme-toggle"
-            className={cn("inline-flex", hasMenu && "hidden sm:inline-flex")}
-          >
-            <ThemeToggle />
-          </span>
           <SessionControl
             signedIn={signedIn}
             learner={learner}
@@ -120,10 +112,22 @@ export function SiteHeader({
 }
 
 /**
+ * The account control's spelled-out half, worn by both the Sign in link and the
+ * Sign out button. Hidden below `sm`, where {@link AccountMenu} takes over.
+ */
+const ACCOUNT_LABEL_CLASSES =
+  "hidden min-h-11 items-center rounded-full px-3 text-sm font-semibold text-foreground underline-offset-4 hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none sm:inline-flex";
+
+/**
  * The header's account control: Sign in without a session; the learner's menu
  * with one, its place held while the card loads; and, for a learner signed in
  * before making their card, a plain Sign out, so no signed-in state is ever
  * without a way out.
+ *
+ * @remarks
+ * The first and last of those are a word, and on a phone the row has no width
+ * for one — the wordmark loses letters to pay for it. So each renders twice:
+ * spelled out from `sm` up, and below that folded into {@link AccountMenu}.
  */
 function SessionControl({
   signedIn,
@@ -139,12 +143,19 @@ function SessionControl({
 
   if (!signedIn) {
     return (
-      <Link
-        href="/sign-in"
-        className="inline-flex min-h-11 items-center rounded-full px-3 text-sm font-semibold text-foreground underline-offset-4 hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-      >
-        {t("signIn")}
-      </Link>
+      <>
+        <Link
+          href="/sign-in"
+          className={ACCOUNT_LABEL_CLASSES}
+        >
+          {t("signIn")}
+        </Link>
+        <AccountMenu>
+          <DropdownMenuItem asChild>
+            <Link href="/sign-in">{t("signIn")}</Link>
+          </DropdownMenuItem>
+        </AccountMenu>
+      </>
     );
   }
   if (learner.status === "present") {
@@ -166,13 +177,55 @@ function SessionControl({
     );
   }
   return (
-    <button
-      type="button"
-      onClick={signOut}
-      className="inline-flex min-h-11 cursor-pointer items-center rounded-full px-3 text-sm font-semibold text-foreground underline-offset-4 hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-    >
-      {t("signOut")}
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={signOut}
+        className={cn(ACCOUNT_LABEL_CLASSES, "cursor-pointer")}
+      >
+        {t("signOut")}
+      </button>
+      <AccountMenu>
+        <DropdownMenuItem onSelect={() => void signOut()}>{t("signOut")}</DropdownMenuItem>
+      </AccountMenu>
+    </>
+  );
+}
+
+/**
+ * The account action on a phone: the round trigger the learner's avatar already
+ * occupies in this corner, wearing the generic account mark because there is no
+ * card to draw, and holding the action itself as a menu item.
+ *
+ * @remarks
+ * The trigger names itself as the menu rather than as the action inside it — a
+ * button called "Sign in" that opens a menu instead of signing in would
+ * misdescribe itself. The action keeps its own name on the item, where it is
+ * also the visible text.
+ *
+ * It wears the chip its neighbours wear rather than the avatar's round frame:
+ * the avatar is round because it is a portrait, and this holds a glyph, in a
+ * row of glyph chips. `px-3` around a 16px glyph comes to 40px, which
+ * `min-w-11` floors to the same 44px the row's widths were measured against.
+ *
+ * @param children - The menu's items: one account action
+ */
+function AccountMenu({ children }: { children: ReactNode }) {
+  const t = useTranslations("SiteHeader");
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label={t("accountMenuLabel")}
+        className="inline-flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center rounded-md border border-border bg-foreground/5 px-3 text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none sm:hidden"
+      >
+        <CircleUser
+          aria-hidden="true"
+          className="size-4"
+        />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">{children}</DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -205,8 +258,7 @@ function usePrizesReady(levels: ReadonlyArray<AchievementLevel>): number {
 }
 
 /**
- * The learner's avatar as a menu of their own pages. On a phone it also holds
- * the theme control, which the header row has no room for there.
+ * The learner's avatar as a menu of their own pages.
  *
  * @remarks
  * A prize waiting to be claimed is marked on the avatar, which is what a learner
@@ -271,7 +323,6 @@ function LearnerMenu({
         <DropdownMenuItem asChild>
           <Link href="/profile">{t("profile")}</Link>
         </DropdownMenuItem>
-        <PhoneThemeItem />
         <DropdownMenuItem onSelect={() => void onSignOut()}>{t("signOut")}</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -308,42 +359,5 @@ function PrizeMark({
     >
       {format.number(count)}
     </span>
-  );
-}
-
-/**
- * The theme switch as a menu item, shown only below `sm`.
- *
- * Choosing it does not close the menu: the learner is looking at the switch,
- * and closing on select would hide the slide they just asked for. Both theme
- * names share one grid cell with the inactive one invisible, so the item keeps
- * the width of the longer name and the open menu never resizes as it toggles.
- */
-function PhoneThemeItem() {
-  const t = useTranslations("ThemeToggle");
-  const choice = useThemeChoice();
-  if (!choice) return null;
-
-  const isDark = choice.currentTheme === "dark";
-  const handleSelect = (event: Event) => {
-    event.preventDefault();
-    choice.toggle();
-  };
-
-  return (
-    <DropdownMenuItem
-      onSelect={handleSelect}
-      aria-label={`${t("label")}: ${t(choice.currentTheme)}`}
-      className="justify-between gap-6 sm:hidden"
-    >
-      <span
-        aria-hidden="true"
-        className="grid grid-cols-1 grid-rows-1"
-      >
-        <span className={cn("col-start-1 row-start-1", !isDark && "invisible")}>{t("dark")}</span>
-        <span className={cn("col-start-1 row-start-1", isDark && "invisible")}>{t("light")}</span>
-      </span>
-      <ThemeSwitchTrack isDark={isDark} />
-    </DropdownMenuItem>
   );
 }

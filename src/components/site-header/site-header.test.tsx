@@ -14,7 +14,6 @@ import { faker } from "@faker-js/faker";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { sectionKey, SiteHeader } from "./site-header";
@@ -25,10 +24,10 @@ import { sectionKey, SiteHeader } from "./site-header";
  * about. Returning the key as the label keeps assertions decoupled from
  * translated copy.
  *
- * The header composes `LocaleSwitcher` and `ThemeToggle`, so their hooks
- * (`useLocale`, `useRouter`, `useTheme`) have to be stubbed too. Rendering
- * the real children rather than stubbing the components keeps the test
- * honest about what the header actually mounts.
+ * The header composes `LocaleSwitcher`, so its hooks (`useLocale`,
+ * `useRouter`) have to be stubbed too. Rendering the real children rather
+ * than stubbing the components keeps the test honest about what the header
+ * actually mounts.
  */
 vi.mock("@/hooks/use-can-install-to-home-screen/use-can-install-to-home-screen", () => ({
   useCanInstallToHomeScreen: vi.fn(),
@@ -46,10 +45,6 @@ vi.mock("@/lib/auth-client/auth-client", () => ({
 
 vi.mock("@/hooks/use-learner-profile/use-learner-profile", () => ({
   useLearnerProfile: vi.fn(),
-}));
-
-vi.mock("next-themes", () => ({
-  useTheme: vi.fn(() => ({ theme: "light", setTheme: vi.fn() })),
 }));
 
 vi.mock("@/i18n/navigation", () => ({
@@ -215,16 +210,15 @@ describe("SiteHeader learner menu", () => {
     expect(screen.queryByRole("button", { name: "learnerMenuLabel" })).not.toBeInTheDocument();
   });
 
-  test("GIVEN a session whose card is not known yet WHEN rendered THEN the avatar's place is held AND the phone layout is the menu's", () => {
-    // Showing Sign out and the theme toggle for the moment before the card
-    // arrives widens the row past a 320px phone, then snaps back.
+  test("GIVEN a session whose card is not known yet WHEN rendered THEN the avatar's place is held", () => {
+    // Showing Sign out for the moment before the card arrives widens the row
+    // past a 320px phone, then snaps back.
     mockUseLearnerProfile.mockReturnValue({ status: "unknown", save: vi.fn() });
 
     render(<SiteHeader signedIn />);
 
     expect(screen.queryByRole("button", { name: "signOut" })).not.toBeInTheDocument();
     expect(screen.getByTestId("learner-menu-placeholder")).toBeInTheDocument();
-    expect(screen.getByTestId("header-theme-toggle")).toHaveClass("hidden", "sm:inline-flex");
   });
 
   test("GIVEN a learner profile WHEN the avatar is opened THEN it offers My learning, Achievements and Profile in order", async () => {
@@ -250,12 +244,8 @@ describe("SiteHeader learner menu", () => {
     ]);
   });
 
-  describe("GIVEN a phone-width header with a learner profile", () => {
-    const setTheme = vi.fn();
-
+  describe("GIVEN the theme is changed only from the Profile page", () => {
     beforeEach(() => {
-      setTheme.mockClear();
-      vi.mocked(useTheme).mockReturnValue({ theme: "light", setTheme } as never);
       mockUseLearnerProfile.mockReturnValue({
         status: "present",
         profile: LearnerProfile.parse({ name: "Ana García", avatar: { kind: "initials" } }),
@@ -263,60 +253,30 @@ describe("SiteHeader learner menu", () => {
       });
     });
 
-    test("WHEN rendered THEN the row's theme toggle is hidden below sm", () => {
+    test("WHEN rendered with a learner profile THEN the header offers no theme control", () => {
       render(<SiteHeader signedIn />);
 
-      expect(screen.getByTestId("header-theme-toggle")).toHaveClass("hidden", "sm:inline-flex");
+      expect(screen.queryByTestId("header-theme-toggle")).not.toBeInTheDocument();
+      expect(screen.queryByRole("switch")).not.toBeInTheDocument();
     });
 
-    test("WHEN the avatar menu is opened THEN a phone-only theme item toggles the theme", async () => {
+    test("WHEN the avatar menu is opened THEN it offers no theme item", async () => {
       const user = userEvent.setup();
       render(<SiteHeader signedIn />);
 
       await user.click(screen.getByRole("button", { name: "learnerMenuLabel" }));
-      const themeItem = await screen.findByRole("menuitem", { name: "label: light" });
-      expect(themeItem).toHaveClass("sm:hidden");
-      await user.click(themeItem);
+      await screen.findByRole("menu");
 
-      await waitFor(() => expect(setTheme).toHaveBeenCalledWith("dark"));
-    });
-
-    test("WHEN the theme item is chosen THEN the menu stays open so the switch's slide is seen", async () => {
-      const user = userEvent.setup();
-      render(<SiteHeader signedIn />);
-
-      await user.click(screen.getByRole("button", { name: "learnerMenuLabel" }));
-      await user.click(await screen.findByRole("menuitem", { name: "label: light" }));
-
-      expect(screen.getByRole("menu")).toBeInTheDocument();
-      expect(screen.getByRole("menuitem", { name: "label: dark" })).toBeInTheDocument();
-    });
-
-    test("WHEN the theme item switches THEN both theme names stay laid out so the menu keeps its width", async () => {
-      // jsdom has no layout, so the guard is structural: the item always
-      // renders both names in one cell and only hides the inactive one, which
-      // is what pins its width to the longer name.
-      const user = userEvent.setup();
-      render(<SiteHeader signedIn />);
-
-      await user.click(screen.getByRole("button", { name: "learnerMenuLabel" }));
-      const themeItem = await screen.findByRole("menuitem", { name: "label: light" });
-      const nameOf = (theme: string) => within(themeItem).getByText(theme);
-
-      expect(nameOf("light")).not.toHaveClass("invisible");
-      expect(nameOf("dark")).toHaveClass("invisible");
-
-      await user.click(themeItem);
-
-      expect(nameOf("dark")).not.toHaveClass("invisible");
-      expect(nameOf("light")).toHaveClass("invisible");
+      const items = screen.getAllByRole("menuitem").map((item) => item.textContent);
+      expect(items).toEqual(["myLearning", "achievements", "profile", "signOut"]);
     });
   });
 
-  test("GIVEN no learner profile WHEN rendered THEN the row's theme toggle shows at every width", () => {
+  test("GIVEN no learner profile WHEN rendered THEN the header offers no theme control either", () => {
     render(<SiteHeader signedIn />);
 
-    expect(screen.getByTestId("header-theme-toggle")).not.toHaveClass("hidden");
+    expect(screen.queryByTestId("header-theme-toggle")).not.toBeInTheDocument();
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
   });
 });
 
@@ -514,6 +474,74 @@ describe("SiteHeader session", () => {
     render(<SiteHeader signedIn />);
 
     expect(screen.getByRole("button", { name: "signOut" })).toBeInTheDocument();
+  });
+});
+
+describe("SiteHeader account control on a phone", () => {
+  beforeEach(() => {
+    mockUsePathname.mockReturnValue("/");
+  });
+
+  test("GIVEN no session WHEN rendered THEN the text link gives way to an account trigger below sm", () => {
+    // The word is what the wordmark cannot afford to share the row with, so
+    // below `sm` the action moves behind the same round trigger the avatar uses.
+    render(<SiteHeader />);
+
+    expect(screen.getByRole("link", { name: "signIn" })).toHaveClass("hidden", "sm:inline-flex");
+    expect(screen.getByRole("button", { name: "accountMenuLabel" })).toHaveClass("sm:hidden");
+  });
+
+  test("GIVEN no session WHEN rendered THEN the account trigger wears the header's chip, not the avatar's round frame", () => {
+    // It stands in a row of chips, not in place of a portrait: the avatar is
+    // round because it holds a face, and this one holds a glyph.
+    render(<SiteHeader />);
+
+    expect(screen.getByRole("button", { name: "accountMenuLabel" })).toHaveClass(
+      "rounded-md",
+      "border",
+      "border-border",
+      "bg-foreground/5",
+    );
+  });
+
+  test("GIVEN no session WHEN the account trigger is opened THEN its menu offers Sign in", async () => {
+    const user = userEvent.setup();
+
+    render(<SiteHeader />);
+    await user.click(screen.getByRole("button", { name: "accountMenuLabel" }));
+
+    expect(await screen.findByRole("menuitem", { name: "signIn" })).toHaveAttribute(
+      "href",
+      "/sign-in",
+    );
+  });
+
+  test("GIVEN a session whose device has no card WHEN the account trigger is opened THEN its menu offers Sign out", async () => {
+    const user = userEvent.setup();
+
+    render(<SiteHeader signedIn />);
+    await user.click(screen.getByRole("button", { name: "accountMenuLabel" }));
+
+    expect(await screen.findByRole("menuitem", { name: "signOut" })).toBeInTheDocument();
+  });
+
+  test("GIVEN a session whose device has no card WHEN rendered THEN the Sign out button is the desktop half", () => {
+    render(<SiteHeader signedIn />);
+
+    expect(screen.getByRole("button", { name: "signOut" })).toHaveClass("hidden", "sm:inline-flex");
+  });
+
+  test("GIVEN a learner card WHEN rendered THEN the avatar menu is the account control, with no second trigger", () => {
+    mockUseLearnerProfile.mockReturnValue({
+      status: "present",
+      profile: LearnerProfile.parse({ name: "Ana García", avatar: { kind: "initials" } }),
+      save: vi.fn(),
+    });
+
+    render(<SiteHeader signedIn />);
+
+    expect(screen.queryByRole("button", { name: "accountMenuLabel" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "learnerMenuLabel" })).toBeInTheDocument();
   });
 });
 
