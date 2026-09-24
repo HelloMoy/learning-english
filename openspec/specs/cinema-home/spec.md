@@ -21,7 +21,7 @@ The wordmark SHALL read `ENGLISH·COURSE` in every supported locale. It is a bra
 The header SHALL fit within the viewport at every phone-class viewport width in every supported locale, rather than forcing the document to scroll horizontally. Its contents are not all equally load-bearing, so it sheds them in a fixed order as width runs out:
 
 1. The section eyebrow is the first to go — it restates information the page's own heading already carries.
-2. The controls' visible text goes next. The locale control shows the active locale's short code (`EN`, `ES`, `PT`) in place of its full name. The account control — the **Sign in** link without a session, the **Sign out** button with a session but no learner card — gives up its text entirely below `sm`: it renders as a 44×44 icon trigger that opens a menu holding that same action, written out in full, in the shape the learner's avatar menu already uses. From `sm` up both controls render their full text as before. Whatever a control drops SHALL NOT change what assistive technology announces — each control's accessible name SHALL name the full concept (`Language: English`; an account menu that names itself as such) at every width, and SHALL NOT be derived from abbreviated visible text.
+2. The controls' visible text goes next. The locale control shows the active locale's short code (`EN`, `ES`, `PT`) in place of its full name. The account control — the **Sign in** link without a session, the **Sign out** button with a session but no learner card — gives up its text entirely below `sm`: it renders as a 44×44 icon trigger that opens a menu holding that same action, written out in full, in the shape the learner's avatar menu already uses. Without a session that menu SHALL also offer **Create account**, after **Sign in**, which navigates to the sign-up route for the active locale: the menu costs the row no width for a second item, and a newcomer on a phone otherwise has no path to an account from the header. From `sm` up both controls render their full text as before. Whatever a control drops SHALL NOT change what assistive technology announces — each control's accessible name SHALL name the full concept (`Language: English`; an account menu that names itself as such) at every width, and SHALL NOT be derived from abbreviated visible text.
 3. The wordmark is never dropped or clipped; it is the header's identity and its way back to the learner's starting page.
 
 The locale control SHALL present the active locale as visible text at every width, so a learner can always see which language they are in without opening anything. Its width SHALL be governed by the label it currently displays rather than by the longest label it could display — a native `<select>`, whose rendered width is set by its widest `<option>`, cannot satisfy this and SHALL NOT be used.
@@ -76,13 +76,17 @@ At every width the locale control, the account control and the avatar trigger SH
 - **WHEN** the header renders at a phone-class width for a visitor without a session
 - **THEN** no Sign in text renders in the header row; an account icon trigger of at least 44×44 CSS pixels renders in its place, and activating it opens a menu offering **Sign in**, which navigates to the sign-in route for the active locale
 
+#### Scenario: On a phone the signed-out account menu also offers Create account
+- **WHEN** a visitor without a session opens the phone account trigger
+- **THEN** the menu offers exactly two items, **Sign in** then **Create account**, and **Create account** navigates to the sign-up route for the active locale — `/es/sign-up` under `es`
+
 #### Scenario: The same trigger serves a session with no learner card
 - **WHEN** the header renders at a phone-class width for a request that carries a session on a device with no learner card
-- **THEN** the same account icon trigger renders, and its menu offers **Sign out** rather than Sign in
+- **THEN** the same account icon trigger renders, and its menu offers **Sign out** alone, with neither Sign in nor Create account
 
 #### Scenario: The account control keeps its desktop form
 - **WHEN** the header renders from `sm` up for a visitor without a session
-- **THEN** the **Sign in** link renders with its full label, exactly as it did before the phone trigger existed, and the icon trigger is not shown
+- **THEN** the **Sign in** link renders with its full label, exactly as it did before the phone trigger existed, and neither the icon trigger nor a Create account link is shown
 
 #### Scenario: The trigger names itself as a menu, not as the action
 - **WHEN** assistive technology reads the phone account trigger
