@@ -3,7 +3,7 @@ import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
 import { Module } from "@/domain/entities/module/module";
 import type { LessonProgressSlice } from "@/domain/use-cases/find-course-catalog/find-course-catalog";
-import { useCanInstallToHomeScreen } from "@/hooks/use-can-install-to-home-screen/use-can-install-to-home-screen";
+import { useInstallPath } from "@/hooks/use-install-path/use-install-path";
 import { useLearnerProfile } from "@/hooks/use-learner-profile/use-learner-profile";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { authClient } from "@/lib/auth-client/auth-client";
@@ -29,8 +29,8 @@ import { sectionKey, SiteHeader } from "./site-header";
  * than stubbing the components keeps the test honest about what the header
  * actually mounts.
  */
-vi.mock("@/hooks/use-can-install-to-home-screen/use-can-install-to-home-screen", () => ({
-  useCanInstallToHomeScreen: vi.fn(),
+vi.mock("@/hooks/use-install-path/use-install-path", () => ({
+  useInstallPath: vi.fn(),
 }));
 
 vi.mock("next-intl", () => ({
@@ -74,6 +74,9 @@ const withoutProfile = { status: "absent", save: vi.fn() } as const;
 beforeEach(() => {
   mockUseTranslations.mockReturnValue(((key: string) => key) as never);
   mockUseLearnerProfile.mockReturnValue(withoutProfile);
+  // The common case: a browser with no way to install. Tests about the chip
+  // say so for themselves.
+  vi.mocked(useInstallPath).mockReturnValue({ kind: "none" });
 });
 
 describe("sectionKey", () => {
@@ -172,23 +175,52 @@ describe("SiteHeader", () => {
 });
 
 describe("SiteHeader install control", () => {
-  describe("GIVEN the flow only exists on an uninstalled iPhone Safari", () => {
-    test("WHEN the app can be installed THEN the control is offered", () => {
-      vi.mocked(useCanInstallToHomeScreen).mockReturnValue(true);
+  describe("GIVEN a browser that can only be taught the flow", () => {
+    test("WHEN the flow exists THEN the control offers the guide", () => {
+      vi.mocked(useInstallPath).mockReturnValue({ kind: "guide" });
 
       render(<SiteHeader />);
 
       expect(screen.getByRole("button", { name: "openGuide" })).toBeInTheDocument();
     });
+  });
 
-    test("WHEN it cannot THEN no control is offered", () => {
-      // Desktop, another iOS browser, or an app already launched from the home
-      // screen — in all three the guide would be noise.
-      vi.mocked(useCanInstallToHomeScreen).mockReturnValue(false);
+  describe("GIVEN a Safari whose taps are not the iPhone's", () => {
+    test.each([
+      ["an iPad", "ipad-guide", "openGuideIpad"],
+      ["a Mac", "mac-guide", "openGuideMac"],
+    ] as const)("WHEN it is %s THEN the control names that platform's guide", (_n, kind, name) => {
+      vi.mocked(useInstallPath).mockReturnValue({ kind });
 
       render(<SiteHeader />);
 
-      expect(screen.queryByRole("button", { name: "openGuide" })).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name })).toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN a browser that offered to do the install itself", () => {
+    test("WHEN the offer stands THEN the control offers the prompt", () => {
+      vi.mocked(useInstallPath).mockReturnValue({ kind: "prompt", accept: vi.fn() });
+
+      render(<SiteHeader />);
+
+      expect(screen.getByRole("button", { name: "openPrompt" })).toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN a browser with no way in", () => {
+    test("WHEN there is no path THEN no control is offered", () => {
+      // Firefox, desktop Safari, or an app already launched from the home
+      // screen — in all of them the control would lead nowhere.
+      vi.mocked(useInstallPath).mockReturnValue({ kind: "none" });
+
+      render(<SiteHeader />);
+
+      const chips = screen.queryAllByRole("button", {
+        name: /openGuide|openGuideIpad|openGuideMac|openPrompt/,
+      });
+
+      expect(chips).toEqual([]);
     });
   });
 });
@@ -431,7 +463,7 @@ describe("SiteHeader prize mark", () => {
 
 describe("SiteHeader control order", () => {
   test("GIVEN the install control is present WHEN rendered THEN it leads the chips", () => {
-    vi.mocked(useCanInstallToHomeScreen).mockReturnValue(true);
+    vi.mocked(useInstallPath).mockReturnValue({ kind: "guide" });
 
     render(<SiteHeader />);
 
@@ -530,13 +562,25 @@ describe("SiteHeader account control on a phone", () => {
     );
   });
 
-  test("GIVEN a session whose device has no card WHEN the account trigger is opened THEN its menu offers Sign out", async () => {
+  test("GIVEN no session WHEN the account trigger is opened THEN its menu offers Sign in, then Create account", async () => {
+    const user = userEvent.setup();
+
+    render(<SiteHeader />);
+    await user.click(screen.getByRole("button", { name: "accountMenuLabel" }));
+
+    const items = await screen.findAllByRole("menuitem");
+    expect(items.map((item) => item.textContent)).toEqual(["signIn", "signUp"]);
+    expect(screen.getByRole("menuitem", { name: "signUp" })).toHaveAttribute("href", "/sign-up");
+  });
+
+  test("GIVEN a session whose device has no card WHEN the account trigger is opened THEN its menu offers Sign out alone", async () => {
     const user = userEvent.setup();
 
     render(<SiteHeader signedIn />);
     await user.click(screen.getByRole("button", { name: "accountMenuLabel" }));
 
-    expect(await screen.findByRole("menuitem", { name: "signOut" })).toBeInTheDocument();
+    const items = await screen.findAllByRole("menuitem");
+    expect(items.map((item) => item.textContent)).toEqual(["signOut"]);
   });
 
   test("GIVEN a session whose device has no card WHEN rendered THEN the Sign out button is the desktop half", () => {

@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu/dropdown-menu";
 import type { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
-import { useCanInstallToHomeScreen } from "@/hooks/use-can-install-to-home-screen/use-can-install-to-home-screen";
+import { useInstallPath } from "@/hooks/use-install-path/use-install-path";
 import { useLearnerAchievements } from "@/hooks/use-learner-achievements/use-learner-achievements";
 import { useLearnerProfile } from "@/hooks/use-learner-profile/use-learner-profile";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -68,7 +68,7 @@ export function SiteHeader({
 }) {
   const t = useTranslations("SiteHeader");
   const pathname = usePathname();
-  const canInstall = useCanInstallToHomeScreen();
+  const installPath = useInstallPath();
   const learner = useLearnerProfile();
   const section = t(sectionKey(pathname));
   const prizesReady = usePrizesReady(levels);
@@ -95,10 +95,11 @@ export function SiteHeader({
           </span>
         </div>
         <div className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-2.5">
-          {/* Only ever present on iPhone Safari, and only before the app has been
-              installed, so it is decided after hydration and appears a moment
-              after load — which does nudge the chips after it one step right. */}
-          {canInstall ? <InstallAppButton /> : null}
+          {/* Present only where some install path exists and the app is not
+              already on the home screen, so it is decided after hydration and
+              appears a moment after load — which does nudge the chips after it
+              one step right. What it opens is the button's call. */}
+          {installPath.kind === "none" ? null : <InstallAppButton path={installPath} />}
           <LocaleSwitcher />
           <SessionControl
             signedIn={signedIn}
@@ -128,6 +129,8 @@ const ACCOUNT_LABEL_CLASSES =
  * The first and last of those are a word, and on a phone the row has no width
  * for one — the wordmark loses letters to pay for it. So each renders twice:
  * spelled out from `sm` up, and below that folded into {@link AccountMenu}.
+ * Folded, the signed-out menu also offers Create account: a second item costs
+ * the row no width, and it is the newcomer's only way to an account from here.
  */
 function SessionControl({
   signedIn,
@@ -153,6 +156,9 @@ function SessionControl({
         <AccountMenu>
           <DropdownMenuItem asChild>
             <Link href="/sign-in">{t("signIn")}</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/sign-up">{t("signUp")}</Link>
           </DropdownMenuItem>
         </AccountMenu>
       </>
@@ -208,7 +214,7 @@ function SessionControl({
  * row of glyph chips. `px-3` around a 16px glyph comes to 40px, which
  * `min-w-11` floors to the same 44px the row's widths were measured against.
  *
- * @param children - The menu's items: one account action
+ * @param children - The menu's items: the account actions for this state
  */
 function AccountMenu({ children }: { children: ReactNode }) {
   const t = useTranslations("SiteHeader");

@@ -89,30 +89,34 @@ SHALL remain followable from its text alone.
 
 ### Requirement: The depiction moves the way the surface it depicts moves
 
-The depiction SHALL animate the way iOS itself does, because a step that is merely swapped
-for the next reads as a slideshow of screenshots and leaves the learner to work out what
-changed:
+The iPhone guide's depiction SHALL animate the way iOS itself does, because a step that is
+merely swapped for the next reads as a slideshow of screenshots and leaves the learner to work
+out what changed:
 
 - sheets SHALL rise from the bottom of the screen rather than appear in place;
 - the menu SHALL open out of the corner the «···» control sits in;
-- the step's target SHALL carry a repeating tap indication, so the learner sees *where* the
-  tap lands and not merely which control is outlined.
+- the step's target SHALL carry a repeating tap indication, so the learner sees *where* the tap
+  lands and not merely which control is outlined.
 
-Changing step SHALL replay these entry animations, so every step arrives rather than
-appearing.
+Changing step SHALL replay these entry animations, so every step arrives rather than appearing.
 
-Motion SHALL be expressed in CSS, so that the project's existing `prefers-reduced-motion`
-rule neutralises all of it for a viewer who has asked for stillness, with no per-component
-handling.
+These motions describe iOS on an iPhone. Safari on an iPad and on a Mac moves differently — its
+share popover is anchored to a toolbar control and grows in place rather than rising — so those
+guides SHALL follow their own motion rules and SHALL NOT be held to the rising-sheet rule above.
+What every guide SHALL share is the principle: the depiction moves the way the real surface
+moves, and the target always shows where the tap lands.
+
+Motion SHALL be expressed in CSS, so that the project's existing `prefers-reduced-motion` rule
+neutralises all of it for a viewer who has asked for stillness, with no per-component handling.
 
 #### Scenario: The step's target shows where the tap lands
 
-- **WHEN** a step is depicted
+- **WHEN** a step of any guide is depicted
 - **THEN** its target carries both a pointer outline and a repeating tap indication
 
 #### Scenario: Sheets arrive from the bottom edge
 
-- **WHEN** a step whose surface is a sheet is depicted
+- **WHEN** a step of the iPhone guide whose surface is a sheet is depicted
 - **THEN** that sheet carries the rising entry animation
 
 #### Scenario: Moving to another step replays the arrival
@@ -136,27 +140,35 @@ and only the movement SHALL be conditional.
 
 It SHALL stop its timer when it leaves the screen.
 
-**The learner SHALL be able to move the guide themselves, with a horizontal gesture.** A
-gesture travelling right-to-left SHALL show the next frame and one travelling left-to-right
-the previous frame, matching the axis the position dots are laid out on. The guide offers no
-other way to move: this is a nudge on top of a guide that plays itself, not a mode the
-learner switches into.
+**The learner SHALL be able to move the guide themselves, and SHALL be able to see that they
+can.** The guide SHALL offer visible controls: one that shows the previous frame, one that
+shows the next, and one per frame that goes straight to it. Every one of them SHALL carry a
+localized accessible name saying where it leads, and SHALL be reachable by keyboard.
 
-**Both ends SHALL wrap**, in both directions. Moving forward from the result SHALL show the
-first tap, as the timer already does, and moving back from the first tap SHALL show the
-result. A learner who overshoots the frame they wanted SHALL reach it by reversing, and SHALL
-NOT have to travel the whole loop.
+**A horizontal gesture SHALL keep working**, unannounced, as a shortcut for the same moves. A
+gesture travelling right-to-left SHALL show the next frame and one travelling left-to-right the
+previous frame, matching the axis the frame controls are laid out on. It is no longer the only
+way in: a learner who never discovers it loses nothing, which is what the visible controls buy.
 
-**A gesture SHALL NOT stop the guide playing itself.** After a manual move the guide SHALL
+**The guide SHALL show how long the frame on screen has left** before it advances, so a learner
+reading an instruction can tell whether there is time to finish. That indication is motion
+describing a timer, so where the timer does not run — under a reduced-motion preference — the
+indication SHALL be absent rather than frozen, which would show a countdown that never counts.
+
+**Both ends SHALL wrap**, in both directions, however the learner moves. Moving forward from the
+result SHALL show the first tap, as the timer already does, and moving back from the first tap
+SHALL show the result. A learner who overshoots the frame they wanted SHALL reach it by
+reversing, and SHALL NOT have to travel the whole loop.
+
+**Moving by hand SHALL NOT stop the guide playing itself.** After a manual move the guide SHALL
 keep advancing on the same timer, and the frame the learner moved to SHALL be given a full
-interval before the guide advances again. A frame that is taken away early punishes the
-learner for the moment their gesture happened to land in, rather than for what they asked
-for.
+interval before the guide advances again. A frame that is taken away early punishes the learner
+for the moment their move happened to land in, rather than for what they asked for.
 
-**The gesture SHALL work under a reduced-motion preference**, which is the one case where it
-is not an enhancement: the timer does not run there, so without it every frame but the first
-is unreachable. The preference suppresses movement the learner did not ask for, and a gesture
-is the opposite of that.
+**Every way of moving SHALL work under a reduced-motion preference**, which is the one case
+where they are not an enhancement: the timer does not run there, so without them every frame but
+the first is unreachable. The preference suppresses movement the learner did not ask for, and a
+move they made is the opposite of that.
 
 **A gesture that travels further vertically than horizontally SHALL NOT move the guide.** The
 guide is a tall panel, and a gesture aimed at scrolling — the page's, or the guide's own,
@@ -189,6 +201,28 @@ in today happens to lock the page's scroll, and the guide SHALL NOT depend on th
 - **WHEN** the guide is taken off screen
 - **THEN** its timer is stopped
 
+#### Scenario: The learner can see that the guide can be moved
+
+- **WHEN** the guide is rendered
+- **THEN** it offers a control for the previous frame, one for the next, and one per frame, each
+  carrying a localized accessible name
+
+#### Scenario: A frame control goes straight to its frame
+
+- **WHEN** the learner activates the control for a given frame
+- **THEN** that frame is shown
+
+#### Scenario: The frame on screen shows how long it has left
+
+- **WHEN** the guide is playing
+- **THEN** the control for the frame on screen indicates the time remaining before the guide
+  advances
+
+#### Scenario: No countdown is shown where the timer does not run
+
+- **WHEN** the viewer prefers reduced motion
+- **THEN** no time-remaining indication is shown
+
 #### Scenario: A gesture towards the left advances the guide
 
 - **WHEN** the learner drags across the guide from right to left, far enough to be a gesture
@@ -201,18 +235,18 @@ in today happens to lock the page's scroll, and the guide SHALL NOT depend on th
 
 #### Scenario: Going back from the first frame reaches the last
 
-- **WHEN** the first step is shown and the learner gestures backwards
+- **WHEN** the first step is shown and the learner moves backwards, by any means
 - **THEN** the result is shown
 
 #### Scenario: The chosen frame is given its full time
 
-- **WHEN** the learner moves the guide by a gesture
+- **WHEN** the learner moves the guide by hand, by any means
 - **THEN** the frame they moved to remains until a full interval has elapsed, and the guide
   then advances on its own as before
 
 #### Scenario: A learner who asked for stillness can still move it
 
-- **WHEN** the viewer prefers reduced motion and gestures across the guide
+- **WHEN** the viewer prefers reduced motion and moves the guide by any means
 - **THEN** the guide moves one frame, and still does not advance on its own
 
 #### Scenario: A gesture along the page's axis is not a frame change
@@ -226,14 +260,16 @@ iOS exposes no API by which a page can add itself to the home screen. The guide 
 present a control that suggests it can perform the install, and SHALL NOT be built on
 `beforeinstallprompt`, which Safari does not fire.
 
-The only control the guide SHALL offer is the one that dismisses it. The gesture specified by
-*The guide plays itself* is not a control: it adds no element to the guide, nothing announces
-it, and every frame it reaches is reached anyway by a learner who does nothing.
+Every control the guide offers SHALL do one of two things: dismiss the guide, or move it to
+another frame. No control SHALL act on the learner's device, and none SHALL report that anything
+was installed. The horizontal gesture specified by *The guide plays itself* adds no element and
+nothing announces it, so it is not a control for this purpose.
 
 #### Scenario: Nothing offers to install the app
 
 - **WHEN** the guide is rendered
-- **THEN** the only control it exposes dismisses the guide
+- **THEN** every control it exposes either dismisses the guide or moves it to another frame, and
+  none of them offers to install anything
 
 ### Requirement: Dismissal is the caller's to interpret
 
@@ -267,31 +303,57 @@ it would misstate how much work the flow takes.
 
 ### Requirement: The guide is reached from a header control, in a modal
 
-The site header SHALL carry a control that opens the guide in a modal dialog, alongside the
-locale and theme chips. The guide is a reference a learner returns to, not a one-shot prompt,
-so it SHALL remain reachable rather than appearing once and being gone.
+The site header SHALL carry a control that opens a modal dialog, alongside the locale and theme
+chips. Where the guide is the applicable path — see *The control exists only where the flow is
+possible and useful* — that dialog SHALL contain the guide. The guide is a reference a learner
+returns to, not a one-shot prompt, so it SHALL remain reachable rather than appearing once and
+being gone.
 
-The control SHALL NOT use a download glyph. Nothing is downloaded, and iOS marks this flow
-with the add-to-home-screen glyph, so the control SHALL use that one and thereby teach the
-learner the icon they are about to hunt for.
+The control SHALL NOT use a download glyph. Nothing is downloaded, and iOS marks this flow with
+the add-to-home-screen glyph, so the control SHALL use that one and thereby teach the learner
+the icon they are about to hunt for. It SHALL carry the same glyph on every platform: the
+control means the same thing everywhere, and only what it opens differs.
+
+The control's accessible name SHALL describe what activating it does on that platform, so that
+a learner routed to the prompt is not told they are about to be shown instructions.
 
 The dialog SHALL carry an accessible name and SHALL be dismissible by the dialog's own means;
 closing it SHALL NOT be reported to anything as a decision to never show the guide again.
 
 #### Scenario: The header control opens the guide
 
-- **WHEN** the learner activates the header control
+- **WHEN** the learner activates the header control on iPhone Safari
 - **THEN** a modal dialog containing the guide is shown
 
 #### Scenario: The control is named and glyph-marked
 
 - **WHEN** the control is rendered
-- **THEN** it carries a localized accessible name and the add-to-home-screen glyph
+- **THEN** it carries a localized accessible name describing what it opens on that platform,
+  and the add-to-home-screen glyph
 
 ### Requirement: The control exists only where the flow is possible and useful
 
-The header control SHALL be rendered only when all of the following hold: the browser is
-Safari, on an iPhone, and the app is not already running from the home screen.
+The header control SHALL be rendered when the app is not already running from the home screen
+and the browser offers **some** way to get it there. There are four such ways, and the control
+SHALL route to the one that applies:
+
+- **Safari on an iPhone**, which exposes no install API, SHALL reach the iPhone guide.
+- **Safari on an iPad** SHALL reach the iPad guide.
+- **Safari on macOS** SHALL reach the macOS guide, which ends at the Dock rather than a home
+  screen.
+- **A browser that has offered an install** — one that has fired `beforeinstallprompt` and whose
+  event has not been spent — SHALL reach the install prompt, which confirms intent and hands off
+  to the browser's own dialog.
+
+The three guides are separate destinations because the three platforms require different taps on
+differently shaped surfaces — see the `safari-install-guides` capability.
+
+Where more than one holds the install prompt SHALL win, because performing the install beats
+describing it. In practice they do not overlap: Safari fires no such event.
+
+Where none holds — Firefox on any platform, Chrome on an iPad, any browser whose event has not
+arrived — **no control SHALL be rendered**. A control that opens a guide for a flow the
+application has not verified would teach a menu the learner may not have.
 
 Every one of those is a property of the browser, unknowable while rendering on the server, so
 the control SHALL be decided after hydration and SHALL render nothing until then. It SHALL NOT
@@ -300,15 +362,31 @@ cause the header's other controls to move when it appears.
 An app already launched from the home screen SHALL NOT offer the control: the learner has
 already done it.
 
-#### Scenario: An iPhone Safari learner who has not installed sees it
+#### Scenario: An iPhone Safari learner who has not installed sees the iPhone guide
 
 - **WHEN** the browser is Safari on an iPhone and the app is not running standalone
-- **THEN** the control is rendered
+- **THEN** the control is rendered, and activating it opens the iPhone guide
+
+#### Scenario: An iPad Safari learner who has not installed sees the iPad guide
+
+- **WHEN** the browser is Safari on an iPad and the app is not running standalone
+- **THEN** the control is rendered, and activating it opens the iPad guide
+
+#### Scenario: A macOS Safari learner who has not installed sees the macOS guide
+
+- **WHEN** the browser is Safari on macOS and the app is not running standalone
+- **THEN** the control is rendered, and activating it opens the macOS guide
+
+#### Scenario: A browser that offered an install reaches the prompt
+
+- **WHEN** the browser has fired `beforeinstallprompt`, its event is unspent, and the app is not
+  running standalone
+- **THEN** the control is rendered, and activating it opens the install prompt
 
 #### Scenario: Everyone else does not
 
-- **WHEN** the browser is not Safari, or not an iPhone, or the app is already running from the
-  home screen
+- **WHEN** the browser is none of iPhone Safari, iPad Safari, macOS Safari, or one that has
+  offered an install, or the app is already running from the home screen
 - **THEN** no control is rendered
 
 #### Scenario: It is not decided during hydration
