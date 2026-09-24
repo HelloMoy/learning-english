@@ -27,7 +27,7 @@ test.describe("Immersion Cinema — chrome", () => {
   }) => {
     await page.goto("/en");
     await expect(page.getByRole("link", { name: /english.*course/i })).toBeVisible();
-    await expect(page.getByText(/immersion cinema · home/i)).toBeVisible();
+    await expect(page.getByRole("banner").getByText(/^home$/i)).toBeVisible();
   });
 
   /**
@@ -61,7 +61,7 @@ test.describe("Immersion Cinema — chrome", () => {
     await page.goto(
       `/en/courses/${COURSE_SLUG}/modules/${FIRST_MODULE.slug}/lessons/${FIRST_LESSON.id}`,
     );
-    await expect(page.getByText(/immersion cinema · lesson/i)).toBeVisible();
+    await expect(page.getByRole("banner").getByText(/^lesson$/i)).toBeVisible();
   });
 });
 
