@@ -117,6 +117,28 @@ const gotoInteractive = async (page: Page, path: string) => {
   await expect(page.getByRole("button", { name: /idioma/i })).toBeEnabled();
 };
 
+/**
+ * Whether the whole wordmark is on screen.
+ *
+ * The mark cannot wrap, so when the row runs out of width it is not the link
+ * that shrinks — `min-width: auto` floors a flex item at its content width —
+ * but its wrapper, which carries `overflow-hidden` and simply cuts the mark in
+ * half. That makes the link's own `scrollWidth` equal to its `clientWidth`
+ * however much of it is actually visible, so comparing those two answers
+ * "is it clipped?" with a confident no every time. The clipping ancestor is
+ * what has to be measured.
+ */
+const wordmarkIsWhole = (page: Page) =>
+  page
+    .getByRole("banner")
+    .getByRole("link")
+    .first()
+    .evaluate((mark) => {
+      const clip = mark.parentElement!;
+      // One pixel of tolerance: the mark's width is fractional at this size.
+      return clip.clientWidth >= mark.scrollWidth - 1;
+    });
+
 for (const viewport of PHONE_WIDTHS) {
   test.describe(`Mobile viewport fit — ${viewport.name}`, () => {
     test.use({ viewport: { width: viewport.width, height: viewport.height } });
@@ -171,50 +193,47 @@ for (const viewport of PHONE_WIDTHS) {
   });
 }
 
-// A visitor without a session or card: the header shows the locale and theme
-// controls themselves, not the learner menu that absorbs the theme.
+// A visitor without a session or card: the header shows the locale control
+// itself, not the learner menu.
 visitor.describe("Mobile viewport fit — header controls at 320px", () => {
   visitor.use({ viewport: { width: 320, height: 720 } });
 
-  /** Worst case for label length: Spanish "Idioma"/"Oscuro" run longer than English. */
+  /** Worst case for label length: Spanish "Idioma" runs longer than English. */
   const HOME = "/es";
 
-  /**
-   * The header's locale and theme controls. The theme control is a disabled
-   * placeholder button until hydration and a switch afterwards; `gotoRendered`
-   * does not wait for hydration, so either may be on screen. Both keep the same
-   * box, so the measurement holds for whichever one is found.
-   */
-  const headerControls = (page: Page) => [
-    page.getByRole("button", { name: /idioma/i }),
-    page.getByRole("switch", { name: /tema/i }).or(page.getByRole("button", { name: /tema/i })),
-  ];
+  const localeControl = (page: Page) => page.getByRole("button", { name: /idioma/i });
 
   visitor(
-    "WHEN the header renders THEN both controls are fully within the viewport",
+    "WHEN the header renders THEN the locale control is fully within the viewport",
     async ({ page }) => {
       await gotoRendered(page, HOME);
 
       const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
 
-      for (const control of headerControls(page)) {
-        const box = (await control.boundingBox())!;
-        expect(box.x).toBeGreaterThanOrEqual(0);
-        expect(box.x + box.width).toBeLessThanOrEqual(clientWidth);
-      }
+      const box = (await localeControl(page).boundingBox())!;
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(clientWidth);
     },
   );
 
-  visitor("WHEN the header renders THEN both controls offer a 44x44 hit area", async ({ page }) => {
-    await gotoRendered(page, HOME);
+  visitor(
+    "WHEN the header renders THEN the locale control offers a 44x44 hit area",
+    async ({ page }) => {
+      await gotoRendered(page, HOME);
 
-    const controls = headerControls(page);
-
-    for (const control of controls) {
-      const box = (await control.boundingBox())!;
+      const box = (await localeControl(page).boundingBox())!;
       expect(box.width).toBeGreaterThanOrEqual(44);
       expect(box.height).toBeGreaterThanOrEqual(44);
-    }
+    },
+  );
+
+  visitor("WHEN the header renders THEN it offers no theme control", async ({ page }) => {
+    // The theme is changed only from the Profile page's Preferences section.
+    await gotoRendered(page, HOME);
+
+    const banner = page.getByRole("banner");
+    await expect(banner.getByRole("switch")).toHaveCount(0);
+    await expect(banner.getByRole("button", { name: /tema/i })).toHaveCount(0);
   });
 
   visitor(
@@ -253,13 +272,36 @@ visitor.describe("Mobile viewport fit — header controls at 320px", () => {
   );
 });
 
+// The reported failure was an iPhone SE (375px) showing `ENGLISH·C`, with the
+// add-to-home-screen chip present. No Playwright project can render that chip —
+// it is iPhone-Safari-only — so this guards the same budget at a width that is
+// reproducible and marginally stricter: the chip costs 54px, and 375 − 54 = 321.
+visitor.describe("Mobile viewport fit — the signed-out header keeps its wordmark at 320px", () => {
+  visitor.use({ viewport: { width: 320, height: 720 } });
+
+  for (const locale of LOCALES) {
+    visitor(
+      `WHEN a visitor with no session opens '${locale}' THEN the wordmark is whole, not clipped`,
+      async ({ page }) => {
+        await gotoRendered(page, `/${locale}`);
+
+        await expect(page.getByRole("banner").getByRole("link").first()).toContainText("ENGLISH");
+        expect(await wordmarkIsWhole(page), "the wordmark is clipped").toBe(true);
+
+        const { scrollWidth, clientWidth } = await documentOverflow(page);
+        expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+      },
+    );
+  }
+});
+
 test.describe("Mobile viewport fit — header with a learner card at 320px", () => {
   test.use({ viewport: { width: 320, height: 720 } });
 
   const LEARNER_NAME = "Ana García";
 
   for (const locale of LOCALES) {
-    test(`WHEN the header renders in '${locale}' with a learner card THEN the avatar fits, the theme moves into its menu and the wordmark is not clipped`, async ({
+    test(`WHEN the header renders in '${locale}' with a learner card THEN the avatar fits, no theme control renders and the wordmark is not clipped`, async ({
       page,
     }) => {
       await gotoRendered(page, `/${locale}`);
@@ -270,14 +312,17 @@ test.describe("Mobile viewport fit — header with a learner card at 320px", () 
       const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
       const avatarBox = (await avatar.boundingBox())!;
       expect(avatarBox.x + avatarBox.width).toBeLessThanOrEqual(clientWidth);
-      await expect(page.getByTestId("header-theme-toggle")).toBeHidden();
+      // The theme lives only on the Profile page: no control in the header
+      // row, no item in the avatar menu.
+      await expect(banner.getByRole("switch")).toHaveCount(0);
+      await avatar.click();
+      const menu = page.getByRole("menu");
+      await expect(menu).toBeVisible();
+      await expect(menu.getByRole("menuitem", { name: /tema|theme/i })).toHaveCount(0);
+      await page.keyboard.press("Escape");
 
-      const wordmark = banner.getByRole("link").first();
-      await expect(wordmark).toContainText("ENGLISH");
-      const wordmarkFits = await wordmark.evaluate(
-        (element) => element.scrollWidth <= element.clientWidth,
-      );
-      expect(wordmarkFits, "the wordmark is clipped").toBe(true);
+      await expect(banner.getByRole("link").first()).toContainText("ENGLISH");
+      expect(await wordmarkIsWhole(page), "the wordmark is clipped").toBe(true);
 
       const { scrollWidth } = await documentOverflow(page);
       expect(scrollWidth).toBeLessThanOrEqual(clientWidth);

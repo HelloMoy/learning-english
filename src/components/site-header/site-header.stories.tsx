@@ -130,9 +130,9 @@ export const LessonSection: Story = {
 /**
  * The narrowest supported viewport. Below `sm` the wordmark steps down a type
  * scale, the section eyebrow drops, the locale control shows its ISO code, and
- * the theme toggle goes icon-only — together they fit the 288px of usable width
- * a 320px screen leaves. Anything wider than that and the whole document
- * scrolls sideways, which is what this set exists to catch.
+ * the account control trades its word for an icon that opens a menu — together
+ * they fit the 288px of usable width a 320px screen leaves. Any wider and the
+ * wordmark starts losing letters, which is what this set exists to catch.
  */
 export const NarrowPhone: Story = {
   parameters: {
@@ -154,6 +154,28 @@ export const NarrowPhoneSpanish: Story = {
     },
   },
   globals: { viewport: { value: "phone320" } },
+};
+
+/**
+ * The account menu a visitor without a session gets on a phone, where the row
+ * has no width for the words `Iniciar sesión` beside the wordmark. Spanish,
+ * because its label is the one that forced the trade.
+ */
+export const NarrowPhoneAccountMenu: Story = {
+  parameters: {
+    locale: "es",
+    nextjs: { navigation: { pathname: "/" } },
+    viewport: {
+      options: { phone320: { name: "320px", styles: { width: "320px", height: "720px" } } },
+    },
+  },
+  globals: { viewport: { value: "phone320" } },
+  play: async () => {
+    const body = within(document.body);
+    await userEvent.click(await body.findByRole("button", { name: /cuenta/i }));
+
+    await expect(await body.findByRole("menuitem", { name: /Iniciar sesión/ })).toBeVisible();
+  },
 };
 
 /** iPhone-class width — the common case, one step up from the floor. */
