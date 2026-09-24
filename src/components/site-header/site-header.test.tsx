@@ -160,6 +160,20 @@ describe("SiteHeader", () => {
       expect(screen.getByText(/sectionHome/)).toBeInTheDocument();
     });
   });
+
+  describe("GIVEN any route", () => {
+    test("WHEN rendered THEN the eyebrow is the section alone, with no tagline", () => {
+      // Arrange
+      mockUsePathname.mockReturnValue("/profile");
+
+      // Act
+      render(<SiteHeader />);
+
+      // Assert
+      expect(screen.getByText("sectionProfile")).toHaveTextContent(/^sectionProfile$/);
+      expect(screen.queryByText(/tagline/)).not.toBeInTheDocument();
+    });
+  });
 });
 
 describe("SiteHeader install control", () => {
