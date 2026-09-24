@@ -25,7 +25,7 @@ import type { ReactNode } from "react";
 
 /**
  * The Immersion Cinema top bar: the `ENGLISH·COURSE` wordmark, a section
- * eyebrow ("IMMERSION CINEMA · <SECTION>") derived from the current route,
+ * eyebrow naming only the current section ("PROFILE") derived from the route,
  * and the locale chip. The theme is not set here — its only control lives in
  * the Profile page's Preferences section. Client-side because the section
  * label reads the pathname; the locale control was already a client component.
@@ -91,7 +91,7 @@ export function SiteHeader({
         <div className="flex min-w-0 shrink items-baseline gap-4 overflow-hidden">
           <Brand href={signedIn ? "/learning" : "/"} />
           <span className="hidden text-[10px] tracking-[0.24em] text-muted-foreground uppercase sm:inline">
-            {t("tagline")} · {section}
+            {section}
           </span>
         </div>
         <div className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-2.5">

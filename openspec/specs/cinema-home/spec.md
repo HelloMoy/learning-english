@@ -6,7 +6,7 @@ Define the Immersion Cinema presentation of the locale layout and home route. Th
 ## Requirements
 ### Requirement: Global header shows brand and section chrome
 
-The locale layout SHALL render an Immersion Cinema header containing the `ENGLISH·COURSE` wordmark, a section eyebrow of the form `IMMERSION CINEMA · <SECTION>` where `<SECTION>` derives from the current route (`HOME`, `COURSE`, `MODULE`, `LESSON`, `START`, `MY LEARNING`, `ACHIEVEMENTS`, `PROFILE`), and the existing locale switcher re-styled as a chip. The header SHALL remain a landmark, keep locale switching functional, and be localized.
+The locale layout SHALL render an Immersion Cinema header containing the `ENGLISH·COURSE` wordmark, a section eyebrow that reads the current section alone — `HOME`, `COURSE`, `MODULE`, `LESSON`, `START`, `MY LEARNING`, `ACHIEVEMENTS` or `PROFILE`, derived from the current route — and the existing locale switcher re-styled as a chip. The eyebrow SHALL NOT carry a brand tagline or any prefix before the section: the wordmark already names the product, and the eyebrow's only job is to say where the learner is. The header SHALL remain a landmark, keep locale switching functional, and be localized.
 
 The header SHALL NOT render a theme control at any viewport width or session state, and the avatar menu SHALL NOT offer a theme item. The theme is changed only from the Profile page's Preferences section (see the `profile-page` capability); the header offers a path there through the avatar menu's **Profile** link.
 
@@ -30,11 +30,15 @@ At every width the locale control, the account control and the avatar trigger SH
 
 #### Scenario: Section label reflects the route
 - **WHEN** the user is on the locale home
-- **THEN** the header eyebrow reads `IMMERSION CINEMA · HOME`; on a lesson route it reads `IMMERSION CINEMA · LESSON`; on `/learning` it reads `IMMERSION CINEMA · MY LEARNING`
+- **THEN** the header eyebrow reads `HOME`; on a lesson route it reads `LESSON`; on `/learning` it reads `MY LEARNING`
 
 #### Scenario: Section label names the Achievements route
 - **WHEN** the user is on `/en/achievements`
-- **THEN** the header eyebrow reads `IMMERSION CINEMA · ACHIEVEMENTS`
+- **THEN** the header eyebrow reads `ACHIEVEMENTS`
+
+#### Scenario: Eyebrow carries no tagline
+- **WHEN** the header renders on any route in any locale
+- **THEN** the eyebrow text is exactly the localized section name, with no brand tagline and no `·` separator before it
 
 #### Scenario: The locale control remains functional
 - **WHEN** the header renders with the chip-styled locale control
