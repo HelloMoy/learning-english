@@ -1,5 +1,6 @@
 "use client";
 
+import { AccountChallenge } from "@/components/account-challenge/account-challenge";
 import { AccountField } from "@/components/account-field/account-field";
 import { AccountSubmitArea } from "@/components/account-submit-area/account-submit-area";
 import { AccountWait } from "@/components/account-wait/account-wait";
@@ -110,7 +111,6 @@ export function SignInForm({ returnPath, passwordUpdated = false }: SignInFormPr
           </AccountWait.Paused>
           <AccountSubmitArea
             submission={submission}
-            challenged
             label={t("signIn.submit")}
             pendingLabel={t("signIn.submitting")}
           />
@@ -121,6 +121,7 @@ export function SignInForm({ returnPath, passwordUpdated = false }: SignInFormPr
           </p>
           <GoogleSignInButton returnPath={returnPath} />
         </AccountWait.Paused>
+        <AccountChallenge submission={submission} />
         <AccountWait.Status>{t("signIn.waiting")}</AccountWait.Status>
       </AccountWait>
     </div>

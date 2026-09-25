@@ -1,5 +1,6 @@
 "use client";
 
+import { AccountChallenge } from "@/components/account-challenge/account-challenge";
 import { AccountConfirmation } from "@/components/account-confirmation/account-confirmation";
 import { AccountField } from "@/components/account-field/account-field";
 import { AccountSubmitArea } from "@/components/account-submit-area/account-submit-area";
@@ -70,10 +71,10 @@ export function ForgotPasswordForm() {
         </AccountWait.Paused>
         <AccountSubmitArea
           submission={submission}
-          challenged
           label={t("forgotPassword.submit")}
           pendingLabel={t("forgotPassword.submitting")}
         />
+        <AccountChallenge submission={submission} />
         <AccountWait.Status>{t("forgotPassword.waiting")}</AccountWait.Status>
       </AccountWait>
     </form>

@@ -118,6 +118,15 @@ describe("SignUpForm", () => {
     expect(submit.compareDocumentPosition(google)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
+  test("WHEN it renders THEN the security check comes last, after Google", () => {
+    renderInLocale(<SignUpForm returnPath="/learning" />);
+
+    const google = screen.getByRole("button", { name: "Continue with Google" });
+    const challenge = screen.getByRole("button", { name: "pass challenge" });
+
+    expect(google.compareDocumentPosition(challenge)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
   test("WHEN the request is in flight THEN the form is covered rather than replaced", async () => {
     signUp.mockReturnValue(new Promise(() => {}) as never);
     const email = faker.internet.email();

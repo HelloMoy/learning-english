@@ -199,4 +199,13 @@ describe("SignInForm", () => {
 
     expect(submit.compareDocumentPosition(google)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
+
+  test("WHEN it renders THEN the security check comes last, after Google", () => {
+    renderInLocale(<SignInForm returnPath="/learning" />);
+
+    const google = screen.getByRole("button", { name: "Continue with Google" });
+    const challenge = screen.getByRole("button", { name: "pass challenge" });
+
+    expect(google.compareDocumentPosition(challenge)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
 });

@@ -88,7 +88,6 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         </AccountWait.Paused>
         <AccountSubmitArea
           submission={submission}
-          challenged={false}
           label={t("resetPassword.submit")}
           pendingLabel={t("resetPassword.submitting")}
         />
