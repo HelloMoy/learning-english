@@ -75,6 +75,11 @@ event — Firefox, Safari on any platform — SHALL therefore never reach the pr
 - **WHEN** the application renders on the server or during the hydration pass
 - **THEN** the install prompt is not available, so the server and client markup agree
 
+#### Scenario: Rendering on the server does not fail
+
+- **WHEN** a page that can offer the install is rendered where no browser exists — on the server, with no `window`
+- **THEN** the render completes, the install prompt is not available, and nothing throws
+
 ### Requirement: The prompt confirms intent and then hands off
 
 The prompt SHALL present **a picture of where the app will come to rest**, one statement of what
