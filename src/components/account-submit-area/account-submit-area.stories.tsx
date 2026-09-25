@@ -6,7 +6,7 @@ import { fn } from "storybook/test";
 
 import { AccountSubmitArea } from "./account-submit-area";
 
-type Args = { state: "ready" | "pending" | "refused"; challenged: boolean };
+type Args = { state: "ready" | "pending" | "refused" };
 
 const SUBMISSIONS: Record<Args["state"], Partial<AccountSubmission>> = {
   ready: { isReady: true },
@@ -15,7 +15,7 @@ const SUBMISSIONS: Record<Args["state"], Partial<AccountSubmission>> = {
 };
 
 /** The sign-in form's submit area in one of its states, with real copy. */
-function SignInSubmitArea({ state, challenged }: Args) {
+function SignInSubmitArea({ state }: Args) {
   const t = useTranslations("Account.signIn");
   const submission: AccountSubmission = {
     isReady: false,
@@ -30,7 +30,6 @@ function SignInSubmitArea({ state, challenged }: Args) {
     <form className="flex w-80 flex-col gap-4">
       <AccountSubmitArea
         submission={submission}
-        challenged={challenged}
         label={t("submit")}
         pendingLabel={t("submitting")}
       />
@@ -41,14 +40,14 @@ function SignInSubmitArea({ state, challenged }: Args) {
 const meta = {
   title: "Components/AccountSubmitArea",
   component: SignInSubmitArea,
-  args: { state: "ready", challenged: true },
+  args: { state: "ready" },
   argTypes: { state: { control: { type: "select" }, options: ["ready", "pending", "refused"] } },
 } satisfies Meta<typeof SignInSubmitArea>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Challenge and an enabled button. */
+/** An enabled button. */
 export const Ready: Story = {};
 
 /** In flight: the button says so and is disabled. */
@@ -56,6 +55,3 @@ export const Pending: Story = { args: { state: "pending" } };
 
 /** A refused attempt: the error is announced above the button. */
 export const Refused: Story = { args: { state: "refused" } };
-
-/** An unchallenged form, such as reset-password. */
-export const WithoutChallenge: Story = { args: { challenged: false } };
