@@ -24,6 +24,17 @@ export const globalTypes: NonNullable<Preview["globalTypes"]> = {
   },
 };
 
+/**
+ * The canvas themes the toolbar switches between, as `withThemeByClassName`
+ * options: each maps to the class it puts on `<html>`, and `.dark` is what
+ * re-declares the Immersion Cinema tokens. Dark is the default because it is
+ * the app's default (see the `cinema-theme-tokens` spec).
+ */
+export const canvasThemes = {
+  themes: { light: "", dark: "dark" },
+  defaultTheme: "dark",
+} as const;
+
 /** Initial values for the toolbar globals. */
 export const initialGlobals: NonNullable<Preview["initialGlobals"]> = {
   locale: routing.defaultLocale,

@@ -22,6 +22,96 @@
     "LessonVideoSkeleton": {
       "before": "Antes — parece quebrado",
       "after": "Depois — parece carregando"
+    },
+    "Docs": {
+      "Welcome": {
+        "eyebrow": "Em cartaz · Immersion Cinema",
+        "headline": "O <accent>sistema de design</accent> do English Course.",
+        "lead": "Os pôsteres, ingressos, anéis e formulários que quem aprende vê, cada um isolado para ser revisado em inglês, espanhol e português, no escuro e no claro, antes de chegar a uma lição.",
+        "chips": {
+          "system": "Immersion Cinema",
+          "locales": "en · es · pt",
+          "themes": "Escuro · Claro"
+        },
+        "browse": {
+          "eyebrow": "Navegue por grupo",
+          "heading": "Comece pela barra lateral",
+          "note": "A barra lateral agrupa cada componente pelo que ele é, não por onde o arquivo fica."
+        },
+        "groups": {
+          "cinema": {
+            "name": "Primitivas Cinema",
+            "holds": "Marca, pôster, botão de play, selos e barras de progresso."
+          },
+          "lessonView": {
+            "name": "Visualização da lição",
+            "holds": "O player, a gaveta do roteiro, as notas e tudo o que cerca uma lição."
+          },
+          "components": {
+            "name": "Componentes do produto",
+            "holds": "Formulários de conta, prêmios, ingressos, onboarding e Meu aprendizado."
+          },
+          "ui": {
+            "name": "Primitivas do shadcn",
+            "holds": "Botão, diálogo, menu suspenso, tooltip e os demais controles básicos."
+          }
+        },
+        "ships": {
+          "heading": "Antes de publicar um componente",
+          "story": {
+            "rule": "Uma história ao lado do arquivo",
+            "detail": "<code>poster-card.stories.tsx</code> ao lado de <code>poster-card.tsx</code>."
+          },
+          "locales": {
+            "rule": "Textos em todos os idiomas",
+            "detail": "Strings em <code>Components.PosterCard</code> nos arquivos de mensagens en, es e pt."
+          },
+          "test": {
+            "rule": "Um teste ao lado do arquivo",
+            "detail": "Vitest e Testing Library em <code>poster-card.test.tsx</code>."
+          },
+          "jsdoc": {
+            "rule": "JSDoc no contrato",
+            "detail": "Um resumo, as props e as variantes, para que o TypeDoc possa exibi-los."
+          }
+        },
+        "review": {
+          "heading": "Revisar uma história",
+          "locales": {
+            "rule": "Confira os três idiomas",
+            "detail": "Troque o globo da barra de ferramentas entre English, Español e Português. Os textos em espanhol e português são mais longos."
+          },
+          "themes": {
+            "rule": "Confira os dois temas",
+            "detail": "As histórias abrem no escuro, como o app. Mude para o claro antes de dar um componente por concluído."
+          },
+          "a11y": {
+            "rule": "Leia o painel de acessibilidade",
+            "detail": "As violações aparecem por história. Corrija-as no componente, não na história."
+          },
+          "closing": "A paleta e a tipografia estão em Docs: Color tokens e Typography."
+        }
+      },
+      "ColorTokens": {
+        "title": "Tokens de cor",
+        "intro": "Cada cor que o app pinta é uma propriedade personalizada de CSS em <code>src/app/globals.css</code>: a variante clara em <code>:root</code> e a escura em <code>.dark</code>. Esta página lê esse arquivo ao gerar o Storybook, então as amostras abaixo são os valores que o app publica, não uma cópia.",
+        "usage": "Os componentes nunca usam um valor hexadecimal. Eles usam o utilitário do Tailwind que aponta para o token (<code>bg-card</code>, <code>text-muted-foreground</code>, <code>text-gold</code>), e a troca de tema faz o resto.",
+        "exceptions": "Alguns pares não são uma simples troca entre variantes. <code>--gold</code> é um bronze escurecido no claro, porque o âmbar brilhante não atende ao WCAG AA como texto sobre marfim; o âmbar brilhante fica em <code>--amber</code> para preenchimentos grandes e brilhos. <code>--ticket</code> continua creme nas duas variantes, para que um ingresso nunca pareça um prêmio.",
+        "light": "Claro",
+        "dark": "Escuro",
+        "same": "Igual nas duas variantes"
+      },
+      "Typography": {
+        "title": "Tipografia",
+        "intro": "O app compõe tudo em duas famílias, carregadas com <code>next/font</code> no layout de idioma e expostas como <code>--font-geist-sans</code> e <code>--font-geist-mono</code>. O Storybook carrega as mesmas duas do Google Fonts em <code>preview-head.html</code> e <code>manager-head.html</code>.",
+        "sansUse": "Títulos, o logotipo, os números dos pôsteres e todo o texto da interface. Os títulos grandes usam peso 800 com o espaçamento um pouco mais fechado; o texto corrido, 400.",
+        "displaySample": "Vogais: curtas vs. longas",
+        "bodySample": "Ouça a diferença entre ship e sheep antes de ler as notas.",
+        "monoUse": "Código, marcas de tempo e qualquer lugar onde os dígitos precisem se alinhar.",
+        "eyebrowHeading": "O rótulo de seção",
+        "eyebrowUse": "Os rótulos de seção usam Geist a 12px, em negrito, maiúsculas e com espaçamento de <code>0.32em</code>, em dourado. Use o componente <code>Eyebrow</code> em vez de refazer o estilo.",
+        "eyebrowSample": "Módulo 2 · Vogais"
+      }
     }
   }
 }

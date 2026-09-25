@@ -22,6 +22,96 @@
     "LessonVideoSkeleton": {
       "before": "Before — reads as broken",
       "after": "After — reads as loading"
+    },
+    "Docs": {
+      "Welcome": {
+        "eyebrow": "Now showing · Immersion Cinema",
+        "headline": "The <accent>design system</accent> for English Course.",
+        "lead": "The posters, tickets, rings and forms a learner sees, each one on its own so it can be reviewed in English, Spanish and Portuguese, in dark and light, before it reaches a lesson.",
+        "chips": {
+          "system": "Immersion Cinema",
+          "locales": "en · es · pt",
+          "themes": "Dark · Light"
+        },
+        "browse": {
+          "eyebrow": "Browse by group",
+          "heading": "Start from the sidebar",
+          "note": "The sidebar groups a component by what it is, not by where its file sits."
+        },
+        "groups": {
+          "cinema": {
+            "name": "Cinema primitives",
+            "holds": "Brand, poster, play button, badges and progress bars."
+          },
+          "lessonView": {
+            "name": "Lesson view",
+            "holds": "The player, the outline drawer, notes and everything around a lesson."
+          },
+          "components": {
+            "name": "Product components",
+            "holds": "Account forms, prizes, tickets, onboarding and My learning."
+          },
+          "ui": {
+            "name": "shadcn primitives",
+            "holds": "Button, dialog, dropdown menu, tooltip and the other base controls."
+          }
+        },
+        "ships": {
+          "heading": "Before a component ships",
+          "story": {
+            "rule": "A story beside the file",
+            "detail": "<code>poster-card.stories.tsx</code> next to <code>poster-card.tsx</code>."
+          },
+          "locales": {
+            "rule": "Copy in every locale",
+            "detail": "Strings under <code>Components.PosterCard</code> in the en, es and pt message files."
+          },
+          "test": {
+            "rule": "A test beside the file",
+            "detail": "Vitest and Testing Library in <code>poster-card.test.tsx</code>."
+          },
+          "jsdoc": {
+            "rule": "JSDoc on the contract",
+            "detail": "A summary, the props and the variants, so TypeDoc can render them."
+          }
+        },
+        "review": {
+          "heading": "Reviewing a story",
+          "locales": {
+            "rule": "Check all three locales",
+            "detail": "Switch the globe in the toolbar between English, Español and Português. Spanish and Portuguese copy runs longer."
+          },
+          "themes": {
+            "rule": "Check both themes",
+            "detail": "Stories open in dark, like the app. Switch to light before calling a component done."
+          },
+          "a11y": {
+            "rule": "Read the Accessibility panel",
+            "detail": "Violations are listed per story. Fix them in the component, not in the story."
+          },
+          "closing": "The palette and the type scale are documented under Docs: Color tokens and Typography."
+        }
+      },
+      "ColorTokens": {
+        "title": "Color tokens",
+        "intro": "Every colour the app paints with is a CSS custom property in <code>src/app/globals.css</code>: the light variant on <code>:root</code>, the dark variant on <code>.dark</code>. This page reads that file when Storybook builds, so the swatches below are the values the app ships, not a copy.",
+        "usage": "Components never reach for a hex value. They use the Tailwind utility that points at the token (<code>bg-card</code>, <code>text-muted-foreground</code>, <code>text-gold</code>), and the theme switch does the rest.",
+        "exceptions": "A few pairs are not a straight swap between variants. <code>--gold</code> is a darkened bronze on light, because bright amber fails WCAG AA as text on ivory; bright amber lives in <code>--amber</code> for large fills and glows. <code>--ticket</code> stays cream in both variants, so a ticket never reads as a prize.",
+        "light": "Light",
+        "dark": "Dark",
+        "same": "Same in both variants"
+      },
+      "Typography": {
+        "title": "Typography",
+        "intro": "The app sets everything in two faces, loaded through <code>next/font</code> in the locale layout and exposed as <code>--font-geist-sans</code> and <code>--font-geist-mono</code>. Storybook loads the same two from Google Fonts in <code>preview-head.html</code> and <code>manager-head.html</code>.",
+        "sansUse": "Headings, the wordmark, poster numbers and all interface copy. Display text is set at weight 800 with slightly tightened tracking; body copy at 400.",
+        "displaySample": "Vowels: short vs. long",
+        "bodySample": "Listen for the difference between ship and sheep before you read the notes.",
+        "monoUse": "Code, timecodes and anywhere digits need to line up.",
+        "eyebrowHeading": "The eyebrow",
+        "eyebrowUse": "Section labels are Geist at 12px, bold, uppercase and spaced at <code>0.32em</code>, in gold. Use the <code>Eyebrow</code> component rather than rebuilding the style.",
+        "eyebrowSample": "Module 2 · Vowels"
+      }
     }
   }
 }

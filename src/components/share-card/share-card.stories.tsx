@@ -19,7 +19,6 @@ const meta = {
   title: "Cinema/ShareCard",
   component: ShareCard,
   parameters: {
-    backgrounds: { default: "dark" },
     layout: "fullscreen",
   },
   argTypes: {
