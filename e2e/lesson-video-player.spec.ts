@@ -10,6 +10,7 @@ import { devices, type Locator, type Page } from "@playwright/test";
 import { skipOnCi } from "./ci-unavailable";
 import { modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
+import { currentTimeOf, playbackRateOf } from "./media-player-state";
 
 /**
  * iPhone emulation minus `defaultBrowserType`, which Playwright refuses inside
@@ -208,39 +209,6 @@ async function startPlayback(page: Page, player: Locator) {
   await page.locator(".vds-play-button").click();
   await expect(player).toHaveAttribute("data-playing", "", { timeout: 15_000 });
 }
-
-/**
- * A number the player reports about itself, read from the
- * `MediaPlayerInstance` that owns the element. Vidstack answers a
- * `find-media-player` event by calling the function in its detail, which is
- * the supported way to reach the instance from outside React — and the only
- * way to see what a YouTube-sourced video is really doing, since the embed's
- * own readouts are behind a cross-origin frame.
- */
-async function playerReports(
-  player: Locator,
-  key: "currentTime" | "playbackRate",
-): Promise<number> {
-  return player.evaluate((element, stateKey) => {
-    let value = Number.NaN;
-    element.dispatchEvent(
-      new CustomEvent("find-media-player", {
-        detail: (found: { state: Record<string, number> }) => {
-          value = found.state[stateKey]!;
-        },
-        bubbles: true,
-        composed: true,
-      }),
-    );
-    return value;
-  }, key);
-}
-
-/** Where the video really is. */
-const currentTimeOf = (player: Locator) => playerReports(player, "currentTime");
-
-/** The rate it is really running at. */
-const playbackRateOf = (player: Locator) => playerReports(player, "playbackRate");
 
 /** The speed indicator's pill, whichever locale it renders in. */
 const RATE_LABEL = new RegExp(`${HOLD_PLAYBACK_RATE}\u00d7`);

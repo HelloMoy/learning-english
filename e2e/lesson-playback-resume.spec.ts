@@ -8,6 +8,7 @@ import { modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-account-fixture";
 import { seedLearnerProfile } from "./learner-profile-fixture";
 import type { LearnerState } from "./learner-state-fixture";
+import { currentTimeOf, isPausedOf } from "./media-player-state";
 
 /**
  * Device emulation minus `defaultBrowserType`, which Playwright refuses inside
@@ -38,7 +39,9 @@ function deviceWithoutEngine(device: (typeof devices)[string]) {
  *
  * **This is the only layer that can prove the feature.** The player is
  * Vidstack, and jsdom loads no media provider — component tests can deliver
- * events but never observe a seek or a play. So the assertions that matter
+ * events but never observe a seek or a play. Every lesson is served by
+ * YouTube, so playback is read from the player's own state rather than from a
+ * `<video>` element, and the suite cannot run where YouTube does not play. So the assertions that matter
  * live here: that the overlay waits for a play, that it sits inside the
  * player, that every answer leaves the video playing from the right second,
  * and that the page behind it stays usable.
@@ -90,8 +93,8 @@ const playerRegion = (page: Page): Locator => page.getByRole("region", { name: /
 const resumeOverlay = (page: Page): Locator =>
   page.getByRole("dialog", { name: /resume playback/i });
 
-/** The `<video>` the provider renders, for reading `currentTime` and `paused`. */
-const videoElement = (page: Page): Locator => playerRegion(page).locator("video");
+/** The YouTube embed answers over the network, well past the 5s default. */
+const PROVIDER = { timeout: 30_000 };
 
 /**
  * Opens the lesson and waits until the player is ready to accept a play.
@@ -104,10 +107,8 @@ async function openLesson(page: Page, locale = "en") {
   await page.goto(lessonUrl(locale));
   await expect(playerRegion(page)).toBeVisible();
   await expect
-    .poll(async () => videoElement(page).evaluate((el) => (el as HTMLVideoElement).readyState), {
-      timeout: 15_000,
-    })
-    .toBeGreaterThan(0);
+    .poll(async () => playerRegion(page).getAttribute("data-can-play"), PROVIDER)
+    .not.toBeNull();
 }
 
 /**
@@ -144,14 +145,12 @@ async function pressPause(page: Page) {
  */
 const ariaHiddenCount = (page: Page) => page.locator("body > [aria-hidden='true']").count();
 
-const isPaused = (page: Page) =>
-  videoElement(page).evaluate((el) => (el as HTMLVideoElement).paused);
+const isPaused = (page: Page) => isPausedOf(playerRegion(page));
 
-const currentTime = (page: Page) =>
-  videoElement(page).evaluate((el) => (el as HTMLVideoElement).currentTime);
+const currentTime = (page: Page) => currentTimeOf(playerRegion(page));
 
 test.describe("Lesson playback-position resume cycle", () => {
-  skipOnCi("self-hosted-content");
+  skipOnCi("youtube");
 
   test.describe("GIVEN a resumable position is stored", () => {
     test.beforeEach(async ({ learnerState }) => {
@@ -177,9 +176,9 @@ test.describe("Lesson playback-position resume cycle", () => {
       await pressPlay(page);
 
       const overlay = resumeOverlay(page);
-      await expect(overlay).toBeVisible();
+      await expect(overlay).toBeVisible(PROVIDER);
       await expect(overlay).toContainText("00:30");
-      await expect.poll(() => isPaused(page)).toBe(true);
+      await expect.poll(() => isPaused(page), PROVIDER).toBe(true);
 
       // The overlay is bounded by the player, not by the viewport — that is
       // the whole point of moving it out of a modal.
@@ -200,7 +199,7 @@ test.describe("Lesson playback-position resume cycle", () => {
       const hiddenBefore = await ariaHiddenCount(page);
 
       await pressPlay(page);
-      await expect(resumeOverlay(page)).toBeVisible();
+      await expect(resumeOverlay(page)).toBeVisible(PROVIDER);
 
       // A modal would hide the page behind it and cover it with a backdrop.
       // This one hides nothing new and leaves the page reachable.
@@ -214,24 +213,26 @@ test.describe("Lesson playback-position resume cycle", () => {
     }) => {
       await openLesson(page);
       await pressPlay(page);
-      await expect(resumeOverlay(page)).toBeVisible();
+      await expect(resumeOverlay(page)).toBeVisible(PROVIDER);
 
       await page.getByRole("button", { name: /^resume$/i }).click();
 
       await expect(resumeOverlay(page)).toHaveCount(0);
-      await expect.poll(() => currentTime(page)).toBeGreaterThanOrEqual(RESUMABLE_SECONDS);
-      await expect.poll(() => isPaused(page)).toBe(false);
+      await expect
+        .poll(() => currentTime(page), PROVIDER)
+        .toBeGreaterThanOrEqual(RESUMABLE_SECONDS);
+      await expect.poll(() => isPaused(page), PROVIDER).toBe(false);
     });
 
     test("WHEN the learner chooses Restart THEN the video plays from the top", async ({ page }) => {
       await openLesson(page);
       await pressPlay(page);
-      await expect(resumeOverlay(page)).toBeVisible();
+      await expect(resumeOverlay(page)).toBeVisible(PROVIDER);
 
       await page.getByRole("button", { name: /restart from beginning/i }).click();
 
       await expect(resumeOverlay(page)).toHaveCount(0);
-      await expect.poll(() => isPaused(page)).toBe(false);
+      await expect.poll(() => isPaused(page), PROVIDER).toBe(false);
       expect(await currentTime(page)).toBeLessThan(RESUMABLE_SECONDS);
     });
 
@@ -240,7 +241,7 @@ test.describe("Lesson playback-position resume cycle", () => {
     }) => {
       await openLesson(page);
       await pressPlay(page);
-      await expect(resumeOverlay(page)).toBeVisible();
+      await expect(resumeOverlay(page)).toBeVisible(PROVIDER);
 
       await page.keyboard.press("Escape");
 
@@ -249,7 +250,7 @@ test.describe("Lesson playback-position resume cycle", () => {
       // the ordinary write cadence, because the top of the lesson is now
       // genuinely where they are.
       await expect(resumeOverlay(page)).toHaveCount(0);
-      await expect.poll(() => isPaused(page)).toBe(false);
+      await expect.poll(() => isPaused(page), PROVIDER).toBe(false);
       expect(await currentTime(page)).toBeLessThan(RESUMABLE_SECONDS);
     });
 
@@ -262,10 +263,10 @@ test.describe("Lesson playback-position resume cycle", () => {
       await expect(resumeOverlay(page)).toHaveCount(0);
 
       await pressPause(page);
-      await expect.poll(() => isPaused(page)).toBe(true);
+      await expect.poll(() => isPaused(page), PROVIDER).toBe(true);
       await pressPlay(page);
 
-      await expect.poll(() => isPaused(page)).toBe(false);
+      await expect.poll(() => isPaused(page), PROVIDER).toBe(false);
       await expect(resumeOverlay(page)).toHaveCount(0);
     });
 
@@ -298,7 +299,7 @@ test.describe("Lesson playback-position resume cycle", () => {
         await openLesson(page);
         await pressPlay(page);
 
-        await expect.poll(() => isPaused(page)).toBe(false);
+        await expect.poll(() => isPaused(page), PROVIDER).toBe(false);
         await expect(resumeOverlay(page)).toHaveCount(0);
       });
     }
@@ -313,8 +314,8 @@ test.describe("Lesson playback-position resume cycle", () => {
       await openLesson(page);
 
       await pressPlay(page);
-      await expect.poll(() => isPaused(page)).toBe(false);
-      await expect.poll(() => currentTime(page), { timeout: 10_000 }).toBeGreaterThan(0);
+      await expect.poll(() => isPaused(page), PROVIDER).toBe(false);
+      await expect.poll(() => currentTime(page), PROVIDER).toBeGreaterThan(0);
       await pressPause(page);
 
       await expect.poll(async () => await readSavedPosition(learnerState)).not.toBeNull();
@@ -323,26 +324,30 @@ test.describe("Lesson playback-position resume cycle", () => {
 });
 
 /**
- * The same cycle, on a lesson served by YouTube.
+ * The regression that shipped resume broken on every Basic Course lesson.
  *
  * @remarks
- * The suite above drives an `HTMLVideoElement`, so it only ever exercised the
- * self-hosted provider — which is how a bug that killed resume on every Basic
- * Course lesson shipped green. Answering the overlay left the YouTube provider
- * buffering forever: it had been paused while its initial play request was
- * still in flight, and from there it ignored every seek and play. See
- * `openspec/changes/fix-youtube-resume-stuck-buffering/design.md`.
+ * Answering the overlay left the YouTube provider buffering forever: it had
+ * been paused while its initial play request was still in flight, and from
+ * there it ignored every seek and play. It shipped green because the suite
+ * above then drove a self-hosted `HTMLVideoElement`. See
+ * `openspec/changes/archive/2026-09-08-fix-youtube-resume-stuck-buffering/design.md`.
  *
- * A YouTube lesson has no `<video>` to read, so playback is observed through
- * the player's own `data-*` state — the same surface
- * `hosted-lesson-playback.spec.ts` asserts on.
+ * Observed through the player's own `data-*` state and seek slider — the same
+ * surface `hosted-lesson-playback.spec.ts` asserts on — and kept on the Basic
+ * Course, where it was reported.
  */
 const YOUTUBE_COURSE_SLUG = "basic-course";
+const YOUTUBE_COURSE_ID = contentCatalog.courses.find(
+  (course) => course.slug === YOUTUBE_COURSE_SLUG,
+)!.id;
 
 const YOUTUBE_LESSON = contentCatalog.lessonRows
   .filter(
     (lesson): lesson is VideoLesson =>
-      lesson.kind === "video" && /^https?:/.test(lesson.source) && lesson.durationSeconds > 120,
+      lesson.courseId === YOUTUBE_COURSE_ID &&
+      lesson.kind === "video" &&
+      lesson.durationSeconds > 120,
   )
   .sort((a, b) => b.durationSeconds - a.durationSeconds)[0]!;
 
@@ -417,6 +422,7 @@ test.describe("Lesson playback-position resume cycle, on a YouTube lesson", () =
 test.describe("The resume overlay on a phone", () => {
   test.use(deviceWithoutEngine(devices["iPhone 13"]));
   test.skip(({ browserName }) => browserName !== "webkit", "phone Safari is WebKit");
+  skipOnCi("youtube");
 
   for (const width of [390, 320]) {
     test(`WHEN the overlay opens at ${width}px THEN the card lies inside the player`, async ({

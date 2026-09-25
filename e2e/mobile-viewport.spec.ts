@@ -2,8 +2,7 @@ import { contentCatalog } from "@/adapters/persistence/content-manifest/content-
 
 import { Page, test as visitor } from "@playwright/test";
 
-import { skipOnCi } from "./ci-unavailable";
-import { moduleOfCourse, modulesOfCourse } from "./content-seed-fixtures";
+import { lessonsOfModule, moduleOfCourse, modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
 
 /**
@@ -168,11 +167,15 @@ for (const viewport of PHONE_WIDTHS) {
         test(`WHEN the ${route.name} renders in '${locale}' THEN the document does not scroll horizontally`, async ({
           page,
         }) => {
-          // Only the three routes that open the Advanced Intermediate Course
-          // need its content; `home` and `not found` do not, and keep their
-          // coverage at every width and locale. Skipping the whole sweep would
-          // have thrown those away for a reason that does not apply to them.
-          if (route.path.includes(COURSE_SLUG)) skipOnCi("self-hosted-content");
+          // A known product defect, not an environment limit: at 320px the
+          // module title "Advanced Pronunciation Course" sets "Pronunciation"
+          // at text-5xl, a single word wider than the viewport, and the page
+          // scrolls sideways by ~15px. Reproduced on a production build. Kept
+          // visible as `fixme` so the fix — its own change — flips it back.
+          test.fixme(
+            viewport.width === 320 && route.name === "module overview",
+            "module title overflows at 320px: one word wider than the viewport",
+          );
 
           // Against a dev server under three browser projects, the heavier
           // routes stall (see `gotoRendered`). The generous budget is for
@@ -331,7 +334,6 @@ test.describe("Mobile viewport fit — header with a learner card at 320px", () 
 });
 
 test.describe("Mobile viewport fit — module list titles at 320px", () => {
-  skipOnCi("self-hosted-content");
   test.use({ viewport: { width: 320, height: 720 } });
 
   test("WHEN titles share a long prefix THEN adjacent rows stay distinguishable", async ({
@@ -339,14 +341,17 @@ test.describe("Mobile viewport fit — module list titles at 320px", () => {
   }) => {
     await gotoRendered(page, `/en/courses/${COURSE_SLUG}/modules/${SHARED_PREFIX_MODULE.slug}`);
 
-    const titles = page.locator("li span.font-semibold");
-    const [first, second] = [await titles.nth(0).innerText(), await titles.nth(1).innerText()];
-
-    // Both full titles are rendered, and they differ — the failure this
-    // guards against is every row reading "Exercise 1 Pronunciati…".
-    expect(first).not.toEqual(second);
-    expect(first).toMatch(/Exercise 1 Pronunciation Step By Step Lesson/);
-    expect(second).toMatch(/Exercise 2 Pronunciation Step By Step Lesson/);
+    // Both full titles are rendered in their own rows — the failure this
+    // guards against is every row reading "Exercise 1 Pronunciati…". Found by
+    // title rather than by style: the current step is styled apart from the
+    // rest, so a class selector skips whichever row is up next.
+    const [first, second] = lessonsOfModule(SHARED_PREFIX_MODULE.id);
+    expect(first!.title).not.toEqual(second!.title);
+    for (const lesson of [first!, second!]) {
+      await expect(
+        page.getByRole("listitem").getByText(lesson.title, { exact: true }),
+      ).toBeVisible();
+    }
   });
 
   test("WHEN a title wraps THEN its row keeps the watch-video action within the viewport", async ({
