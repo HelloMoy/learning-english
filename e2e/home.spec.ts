@@ -1,6 +1,5 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
-import { skipOnCi } from "./ci-unavailable";
 import { lessonsOfModule, modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-account-fixture";
 
@@ -172,7 +171,6 @@ test.describe("Onboarding", () => {
 });
 
 test.describe("My learning", () => {
-  skipOnCi("self-hosted-content");
   test("WHEN a lesson has been opened THEN My learning offers to resume it and marks its course", async ({
     page,
     learnerState,
@@ -180,6 +178,9 @@ test.describe("My learning", () => {
     await learnerState.profile({ name: "Ana García", avatar: { kind: "initials" } });
     await page.goto(FIRST_LESSON_URL);
     await expect(page.getByRole("heading", { name: FIRST_LESSON.title })).toBeVisible(COLD_ROUTE);
+    // The lesson page records the visit after it renders; leaving before that
+    // write lands makes My learning read an older location.
+    await expect.poll(() => learnerState.lastOpenedLessonId(), COLD_ROUTE).toBe(FIRST_LESSON.id);
 
     await page.goto("/en/learning");
 
@@ -210,6 +211,9 @@ test.describe("My learning", () => {
     await learnerState.profile({ name: "Ana García", avatar: { kind: "initials" } });
     await page.goto(FIRST_LESSON_URL);
     await expect(page.getByRole("heading", { name: FIRST_LESSON.title })).toBeVisible(COLD_ROUTE);
+    // The lesson page records the visit after it renders; leaving before that
+    // write lands makes My learning read an older location.
+    await expect.poll(() => learnerState.lastOpenedLessonId(), COLD_ROUTE).toBe(FIRST_LESSON.id);
     await learnerState.completed([FIRST_LESSON.id]);
 
     await page.goto("/en/learning");

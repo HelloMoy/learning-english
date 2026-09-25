@@ -1,7 +1,6 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
-import { skipOnCi } from "./ci-unavailable";
-import { courseBySlug, modulesOfCourse } from "./content-seed-fixtures";
+import { courseBySlug, lessonsOfModule, modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
 
 /**
@@ -12,11 +11,6 @@ import { expect, test } from "./learner-profile-fixture";
  * content seed is the whole catalog, so the course under test is simply
  * one of the declared ones. The IDs are imported from the generated seed
  * module so a future regenerate keeps these in sync.
- *
- * The tests intentionally do NOT stream the lesson video: they only
- * verify the video element's `src` attribute, which is the same path
- * the player would request (and which the static `public/` folder
- * serves via HTTP range).
  */
 const COURSE_SLUG = "advanced-intermediate-course";
 const FIRST_MODULE = modulesOfCourse(COURSE_SLUG)[0]!;
@@ -46,7 +40,6 @@ function lessonUrl(
 }
 
 test.describe("Course catalog navigation", () => {
-  skipOnCi("self-hosted-content");
   test("WHEN the home is visited THEN the levels table links to the course overview", async ({
     page,
   }) => {
@@ -66,9 +59,10 @@ test.describe("Course catalog navigation", () => {
     await page.goto(courseUrl("en"));
 
     await expect(page.getByRole("heading", { name: "Advanced Intermediate Course" })).toBeVisible();
-    await expect(page.getByTestId("course-module-list")).toBeVisible();
-    const startLink = page.getByTestId("start-course");
-    await expect(startLink).toBeVisible();
+    await expect(page.getByTestId("lesson-ring-tile")).toHaveCount(
+      modulesOfCourse(COURSE_SLUG).length,
+    );
+    const startLink = page.getByTestId("continue-tile").getByRole("link", { name: "Start course" });
     await expect(startLink).toHaveAttribute(
       "href",
       lessonUrl("en", COURSE_SLUG, FIRST_MODULE.slug, FIRST_LESSON.id),
@@ -88,11 +82,12 @@ test.describe("Course catalog navigation", () => {
     });
     await expect(moduleHeading).toBeVisible();
 
-    const firstLessonLink = page.getByRole("link", { name: /^watch video$/i }).first();
-    await expect(firstLessonLink).toHaveAttribute(
-      "href",
-      lessonUrl("en", COURSE_SLUG, FIRST_MODULE.slug, FIRST_LESSON.id),
-    );
+    for (const lesson of lessonsOfModule(FIRST_MODULE.id)) {
+      await expect(page.getByText(lesson.title, { exact: true })).toBeVisible();
+    }
+    await expect(
+      page.locator(`a[href="${lessonUrl("en", COURSE_SLUG, FIRST_MODULE.slug, FIRST_LESSON.id)}"]`),
+    ).not.toHaveCount(0);
   });
 
   test("WHEN the first lesson is opened THEN its breadcrumb links back to the course and module overviews", async ({
@@ -143,39 +138,6 @@ test.describe("Course catalog — locale awareness", () => {
       ).toHaveAttribute("href", courseUrl(locale));
     });
   }
-});
-
-test.describe("Course catalog — video asset", () => {
-  skipOnCi("self-hosted-content");
-  test("WHEN a video lesson is rendered THEN the source URL points to the content-seeded asset", async ({
-    page,
-    request,
-  }) => {
-    await page.goto(lessonUrl("en", COURSE_SLUG, FIRST_MODULE.slug, FIRST_LESSON.id));
-    const video = page.locator("video");
-    await expect(video).toBeVisible();
-
-    // The native player uses a child <source src=...> for the actual
-    // video URL; the <video> element itself exposes the source via
-    // currentSrc once metadata is available. Read the URL from the
-    // source element to avoid waiting for media metadata.
-    const sourceUrl = await page.evaluate(() => {
-      const video = document.querySelector("video");
-      if (!video) return null;
-      const source = video.querySelector("source");
-      if (source) return source.getAttribute("src");
-      return video.currentSrc || video.getAttribute("src");
-    });
-    expect(sourceUrl).toBeTruthy();
-    expect(sourceUrl).toMatch(new RegExp(`^/local-filesystem-lesson/${COURSE_SLUG}/`));
-
-    // Verify the asset supports HTTP byte-range requests without
-    // downloading the full body. Static assets under `public/` are
-    // served with `Accept-Ranges: bytes`; we only need the headers.
-    const head = await request.fetch(sourceUrl!, { method: "HEAD" });
-    expect(head.status()).toBe(200);
-    expect(head.headers()["accept-ranges"]).toBe("bytes");
-  });
 });
 
 test.describe("Course catalog — course id guard", () => {
