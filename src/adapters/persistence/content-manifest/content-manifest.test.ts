@@ -89,17 +89,58 @@ describe("contentCatalog", () => {
   });
 });
 
+type DeclaredVideo = { lessonPath: string; source: string };
+
+function declaredVideos(): DeclaredVideo[] {
+  return parseCourseManifests(courseManifests).flatMap((course) =>
+    course.modules.flatMap((module) =>
+      module.lessons.flatMap((lesson) =>
+        lesson.kind === "video"
+          ? [{ lessonPath: `${course.slug}/${module.slug}/${lesson.slug}`, source: lesson.source }]
+          : [],
+      ),
+    ),
+  );
+}
+
 /**
- * The one place the withheld course's slug is named. It asserts a content
- * decision — "the Advanced course is not published yet" — rather than
- * implementing one: no module that filters or wires the catalog knows it.
+ * A deployment never carries video bytes, so a lesson sourcing a local file
+ * would 404 in production while playing fine on a developer's machine.
+ */
+describe("the tracked manifests' video sources", () => {
+  const youtubeEmbed = /^https:\/\/www\.youtube\.com\/embed\/[\w-]{11}$/;
+
+  describe("GIVEN every declared video lesson", () => {
+    test("WHEN its source is read THEN it is a YouTube embed URL", () => {
+      const notOnYoutube = declaredVideos()
+        .filter((video) => !youtubeEmbed.test(video.source))
+        .map((video) => video.lessonPath);
+
+      expect(notOnYoutube).toEqual([]);
+    });
+
+    test("WHEN sources are compared THEN no two lessons share one video", () => {
+      const lessonsBySource = Map.groupBy(declaredVideos(), (video) => video.source);
+      const shared = [...lessonsBySource.values()]
+        .filter((videos) => videos.length > 1)
+        .map((videos) => videos.map((video) => video.lessonPath));
+
+      expect(shared).toEqual([]);
+    });
+  });
+});
+
+/**
+ * Asserts a content decision — every course is published — rather than
+ * implementing one. The draft filter stays in place, dormant, until its own
+ * change removes it; a course declaring itself a draft again fails here.
  */
 describe("the tracked manifests", () => {
-  describe("GIVEN the Advanced Intermediate Course is still being written", () => {
-    test("WHEN the manifests are parsed THEN it is the one declaring itself a draft", () => {
+  describe("GIVEN every course has been published", () => {
+    test("WHEN the manifests are parsed THEN none declares itself a draft", () => {
       const drafts = parseCourseManifests(courseManifests).filter((course) => course.draft);
 
-      expect(drafts.map((course) => course.slug)).toEqual(["advanced-intermediate-course"]);
+      expect(drafts.map((course) => course.slug)).toEqual([]);
     });
   });
 });
@@ -108,7 +149,8 @@ describe("the tracked manifests", () => {
  * The flag's effect on the shipped catalog. Re-imports the loader with the flag
  * flipped, because `contentCatalog` is a module-scope constant: the environment
  * is read once, when the module is first imported, which is exactly the
- * behaviour a build-time catalog wants.
+ * behaviour a build-time catalog wants. Hiding drafts is what production does
+ * by default, so this is the catalog production serves.
  */
 describe("contentCatalog with drafts hidden", () => {
   async function catalogWithDraftsHidden(): Promise<FlattenedCatalog> {
@@ -123,30 +165,19 @@ describe("contentCatalog with drafts hidden", () => {
     vi.resetModules();
   });
 
-  describe("GIVEN one tracked manifest declares itself a draft", () => {
-    test("WHEN the catalog loads THEN the draft course is not served", () => {
+  describe("GIVEN no tracked manifest declares itself a draft", () => {
+    test("WHEN the catalog loads THEN every course is served", () => {
       return catalogWithDraftsHidden().then((catalog) => {
-        expect(catalog.courses.map((course) => course.slug)).not.toContain(
+        expect(catalog.courses.map((course) => course.slug)).toEqual([
+          "basic-course",
           "advanced-intermediate-course",
-        );
+        ]);
       });
     });
 
-    test("WHEN the catalog loads THEN the published courses are still served", () => {
+    test("WHEN the catalog loads THEN it serves every lesson the manifests declare", () => {
       return catalogWithDraftsHidden().then((catalog) => {
-        expect(catalog.courses.map((course) => course.slug)).toEqual(["basic-course"]);
-      });
-    });
-
-    test("WHEN the catalog loads THEN the draft course leaves no rows behind", () => {
-      return catalogWithDraftsHidden().then((catalog) => {
-        const courseIds = new Set<string>(catalog.courses.map((course) => course.id));
-        const orphans = [
-          ...catalog.modules.map((row) => row.courseId),
-          ...catalog.lessonRows.map((row) => row.courseId),
-        ].filter((courseId) => !courseIds.has(courseId));
-
-        expect(orphans).toEqual([]);
+        expect(catalog.lessonRows).toHaveLength(contentCatalog.lessonRows.length);
       });
     });
   });
