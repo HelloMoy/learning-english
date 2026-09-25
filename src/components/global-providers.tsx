@@ -2,6 +2,7 @@
 
 import { PendingPrizeAnnouncement } from "@/components/pending-prize-announcement/pending-prize-announcement";
 import { useLegacyThemeMigration } from "@/hooks/use-legacy-theme-migration/use-legacy-theme-migration";
+import { useServiceWorkerRegistration } from "@/hooks/use-service-worker-registration/use-service-worker-registration";
 import type { AchievementLevel } from "@/lib/learner-achievements/learner-achievements";
 
 import NiceModal from "@ebay/nice-modal-react";
@@ -21,6 +22,10 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
  * job: a prize won in the last seconds of a lesson is announced wherever the
  * learner went next, not lost with the page that owed them the news.
  *
+ * {@link useServiceWorkerRegistration} is here for the same reason: the browser
+ * decides whether to offer an install once per visit, whichever page the
+ * learner happened to land on.
+ *
  * @param children - The page below the providers
  * @param levels - Every catalog course, for deciding where a waiting prize stands
  */
@@ -32,6 +37,7 @@ export function GlobalProviders({
   levels: ReadonlyArray<AchievementLevel>;
 }) {
   useLegacyThemeMigration();
+  useServiceWorkerRegistration();
 
   return (
     <NuqsAdapter>

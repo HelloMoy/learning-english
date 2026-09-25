@@ -6,7 +6,9 @@ Define the Immersion Cinema presentation of the locale layout and home route. Th
 ## Requirements
 ### Requirement: Global header shows brand and section chrome
 
-The locale layout SHALL render an Immersion Cinema header containing the `ENGLISH·COURSE` wordmark, a section eyebrow of the form `IMMERSION CINEMA · <SECTION>` where `<SECTION>` derives from the current route (`HOME`, `COURSE`, `MODULE`, `LESSON`, `START`, `MY LEARNING`, `ACHIEVEMENTS`, `PROFILE`), and the existing locale switcher and theme toggle re-styled as chips. The header SHALL remain a landmark, keep locale switching and theme toggling functional, and be localized.
+The locale layout SHALL render an Immersion Cinema header containing the `ENGLISH·COURSE` wordmark, a section eyebrow that reads the current section alone — `HOME`, `COURSE`, `MODULE`, `LESSON`, `START`, `MY LEARNING`, `ACHIEVEMENTS` or `PROFILE`, derived from the current route — and the existing locale switcher re-styled as a chip. The eyebrow SHALL NOT carry a brand tagline or any prefix before the section: the wordmark already names the product, and the eyebrow's only job is to say where the learner is. The header SHALL remain a landmark, keep locale switching functional, and be localized.
+
+The header SHALL NOT render a theme control at any viewport width or session state, and the avatar menu SHALL NOT offer a theme item. The theme is changed only from the Profile page's Preferences section (see the `profile-page` capability); the header offers a path there through the avatar menu's **Profile** link.
 
 The wordmark SHALL be a link whose destination depends on the session the request carries, because "back to the start" means a different page either side of signing in. Without a session it SHALL link to the locale home (`/[locale]`), which is where a visitor is being sold the course. With a session it SHALL link to My learning (`/[locale]/learning`), the signed-in learner's own first page; the marketing home has nothing left to tell them. Both destinations SHALL be resolved through the locale-aware navigation wrappers, so the active locale is preserved.
 
@@ -14,31 +16,37 @@ The destination SHALL follow the same server-decided session flag that chooses b
 
 When the device holds a learner profile, the header SHALL additionally render the learner's avatar as a menu trigger whose accessible name includes the learner's name, opening a menu with **My learning**, **Achievements** and **Profile** links, in that order, for the active locale. Without a profile, and before the profile is known, the trigger SHALL NOT render.
 
-On phone-class viewports (below `sm`) with a learner profile, the wordmark, the locale control and three 44px controls cannot share the width, so the theme control SHALL move out of the header row and into the avatar menu as an item that toggles the theme and names the current theme in its accessible name. From `sm` up, and whenever there is no profile, the theme toggle SHALL stay in the header row and the menu SHALL NOT repeat it.
-
 The wordmark SHALL read `ENGLISH·COURSE` in every supported locale. It is a brand mark, not copy: it is not translated, and it names the same product the site publishes to the outside world through its metadata, so a learner reads one name in the header, the browser tab and a shared link preview.
 
 The header SHALL fit within the viewport at every phone-class viewport width in every supported locale, rather than forcing the document to scroll horizontally. Its contents are not all equally load-bearing, so it sheds them in a fixed order as width runs out:
 
 1. The section eyebrow is the first to go — it restates information the page's own heading already carries.
-2. The controls' supporting text goes next: the locale control shows the active locale's short code (`EN`, `ES`, `PT`) in place of its full name, and the theme toggle drops its theme-name text and keeps its icon. Whatever visible text a control drops SHALL NOT change what assistive technology announces — each control's accessible name SHALL name the full concept (`Language: English`, `Theme: Dark`) at every width, and SHALL NOT be derived from the abbreviated visible text.
-3. The wordmark is never dropped; it is the header's identity and its way back to the learner's starting page.
+2. The controls' visible text goes next. The locale control shows the active locale's short code (`EN`, `ES`, `PT`) in place of its full name. The account control — the **Sign in** link without a session, the **Sign out** button with a session but no learner card — gives up its text entirely below `sm`: it renders as a 44×44 icon trigger that opens a menu holding that same action, written out in full, in the shape the learner's avatar menu already uses. Without a session that menu SHALL also offer **Create account**, after **Sign in**, which navigates to the sign-up route for the active locale: the menu costs the row no width for a second item, and a newcomer on a phone otherwise has no path to an account from the header. From `sm` up both controls render their full text as before. Whatever a control drops SHALL NOT change what assistive technology announces — each control's accessible name SHALL name the full concept (`Language: English`; an account menu that names itself as such) at every width, and SHALL NOT be derived from abbreviated visible text.
+3. The wordmark is never dropped or clipped; it is the header's identity and its way back to the learner's starting page.
 
 The locale control SHALL present the active locale as visible text at every width, so a learner can always see which language they are in without opening anything. Its width SHALL be governed by the label it currently displays rather than by the longest label it could display — a native `<select>`, whose rendered width is set by its widest `<option>`, cannot satisfy this and SHALL NOT be used.
 
-At every width the locale control, the theme control (in the header row, or in the avatar menu on a phone with a profile) and the avatar trigger SHALL remain fully within the viewport and operable. On touch-sized viewports each SHALL present a hit area of at least 44×44 CSS pixels, which may extend beyond its visible chip.
+At every width the locale control, the account control and the avatar trigger SHALL remain fully within the viewport and operable. On touch-sized viewports each SHALL present a hit area of at least 44×44 CSS pixels, which may extend beyond its visible text.
 
 #### Scenario: Section label reflects the route
 - **WHEN** the user is on the locale home
-- **THEN** the header eyebrow reads `IMMERSION CINEMA · HOME`; on a lesson route it reads `IMMERSION CINEMA · LESSON`; on `/learning` it reads `IMMERSION CINEMA · MY LEARNING`
+- **THEN** the header eyebrow reads `HOME`; on a lesson route it reads `LESSON`; on `/learning` it reads `MY LEARNING`
 
 #### Scenario: Section label names the Achievements route
 - **WHEN** the user is on `/en/achievements`
-- **THEN** the header eyebrow reads `IMMERSION CINEMA · ACHIEVEMENTS`
+- **THEN** the header eyebrow reads `ACHIEVEMENTS`
 
-#### Scenario: Locale and theme controls remain functional
-- **WHEN** the header renders with the chip-styled controls
-- **THEN** changing the locale and toggling the theme behave exactly as before the re-skin
+#### Scenario: Eyebrow carries no tagline
+- **WHEN** the header renders on any route in any locale
+- **THEN** the eyebrow text is exactly the localized section name, with no brand tagline and no `·` separator before it
+
+#### Scenario: The locale control remains functional
+- **WHEN** the header renders with the chip-styled locale control
+- **THEN** changing the locale behaves exactly as before the re-skin
+
+#### Scenario: The header offers no theme control
+- **WHEN** the header renders at any viewport width, with or without a session, with or without a learner profile
+- **THEN** no theme toggle renders in the header row, and opening the avatar menu offers no theme item — the theme is changed from the Profile page
 
 #### Scenario: A visitor without a session is sent to the locale home
 - **WHEN** the header renders for a request that carries no session
@@ -56,18 +64,6 @@ At every width the locale control, the theme control (in the header row, or in t
 - **WHEN** the header renders on a device with a saved learner profile
 - **THEN** an avatar trigger renders, and opening it offers My learning, Achievements and Profile links, in that order, for the active locale
 
-#### Scenario: On a phone with a profile, the theme control lives in the avatar menu
-- **WHEN** the header renders at a 320px viewport width on a device with a learner profile
-- **THEN** the theme toggle is not in the header row, the avatar menu offers a theme item, and the wordmark is not clipped
-
-#### Scenario: Switching the theme from the avatar menu keeps the menu open
-- **WHEN** the learner activates the avatar menu's theme item
-- **THEN** the menu stays open so the switch's slide is visible, and the theme changes once the slide has played
-
-#### Scenario: The avatar menu keeps its size while the theme switches
-- **WHEN** the theme item's label changes from one theme's name to the other's
-- **THEN** the item and the menu keep the width of the longer name, so the menu does not resize
-
 #### Scenario: No profile, no avatar trigger
 - **WHEN** the header renders on a device without a learner profile
 - **THEN** no avatar trigger renders
@@ -76,9 +72,37 @@ At every width the locale control, the theme control (in the header row, or in t
 - **WHEN** the header renders at a 320px viewport width in `en`, `es`, or `pt`, with or without a learner profile
 - **THEN** it fits within the viewport and contributes no horizontal document scroll
 
-#### Scenario: Controls shed visible text but keep their accessible names
-- **WHEN** the header renders at a phone-class width, showing `ES` in place of `Español` and hiding the theme name
-- **THEN** the locale control and theme toggle each still expose the same accessible name they expose at desktop widths — `Language: Spanish`, `Theme: Dark` — so a screen reader announces the full concept rather than the abbreviation
+#### Scenario: On a phone the account control is an icon that opens a menu
+- **WHEN** the header renders at a phone-class width for a visitor without a session
+- **THEN** no Sign in text renders in the header row; an account icon trigger of at least 44×44 CSS pixels renders in its place, and activating it opens a menu offering **Sign in**, which navigates to the sign-in route for the active locale
+
+#### Scenario: On a phone the signed-out account menu also offers Create account
+- **WHEN** a visitor without a session opens the phone account trigger
+- **THEN** the menu offers exactly two items, **Sign in** then **Create account**, and **Create account** navigates to the sign-up route for the active locale — `/es/sign-up` under `es`
+
+#### Scenario: The same trigger serves a session with no learner card
+- **WHEN** the header renders at a phone-class width for a request that carries a session on a device with no learner card
+- **THEN** the same account icon trigger renders, and its menu offers **Sign out** alone, with neither Sign in nor Create account
+
+#### Scenario: The account control keeps its desktop form
+- **WHEN** the header renders from `sm` up for a visitor without a session
+- **THEN** the **Sign in** link renders with its full label, exactly as it did before the phone trigger existed, and neither the icon trigger nor a Create account link is shown
+
+#### Scenario: The trigger names itself as a menu, not as the action
+- **WHEN** assistive technology reads the phone account trigger
+- **THEN** its accessible name identifies it as the account menu rather than claiming to be Sign in, and the action's own name is carried by the menu item, which is also its visible text
+
+#### Scenario: A signed-out visitor still reads the whole wordmark
+- **WHEN** the header renders at a 320px viewport width for a visitor without a session, in `en`, `es` or `pt`
+- **THEN** the `ENGLISH·COURSE` wordmark is rendered whole rather than clipped, alongside the locale chip and the Sign in control
+
+#### Scenario: A session without a learner card does not clip the wordmark either
+- **WHEN** the header renders at a 320px viewport width for a request that carries a session on a device with no learner card, so the Sign out button takes the account control's place
+- **THEN** the wordmark is rendered whole rather than clipped
+
+#### Scenario: The locale control sheds visible text but keeps its accessible name
+- **WHEN** the header renders at a phone-class width, showing `ES` in place of `Español`
+- **THEN** the locale control still exposes the same accessible name it exposes at desktop widths — `Language: Spanish` — so a screen reader announces the full concept rather than the abbreviation
 
 #### Scenario: The active language is always visible
 - **WHEN** the header renders at any width
@@ -92,9 +116,9 @@ At every width the locale control, the theme control (in the header row, or in t
 - **WHEN** a keyboard user opens the locale control, moves through the options with the arrow keys, and confirms one
 - **THEN** the locale changes, and when the menu closes focus returns to the control that opened it
 
-#### Scenario: Both controls stay operable on a phone
-- **WHEN** a learner on a 320px viewport reaches for the theme toggle or the locale switcher
-- **THEN** both are fully on screen and each offers a hit area of at least 44×44 CSS pixels
+#### Scenario: The locale control stays operable on a phone
+- **WHEN** a learner on a 320px viewport reaches for the locale switcher
+- **THEN** it is fully on screen and offers a hit area of at least 44×44 CSS pixels
 
 #### Scenario: The wordmark survives the narrowest width
 - **WHEN** the header renders at a 320px viewport width
@@ -201,4 +225,24 @@ show their learner card with its progress through the first course, and offer **
 #### Scenario: An onboarded learner sees their card in the closing band
 - **WHEN** the home renders on a device with a learner profile named `Ana García`
 - **THEN** after hydration the band reads `Pick up where you left off, Ana.`, shows the learner card, offers Continue, and no longer states the first lesson's runtime
+
+### Requirement: The header's controls share one chip treatment
+
+The header's controls SHALL be presented as one set rather than as individually styled elements. The install control, the locale control and the account trigger SHALL each render as a rounded-square chip carrying a border, a faint fill over the page, and the same hover and focus transitions, at a minimum of 44×44 CSS pixels.
+
+A control whose whole content is a glyph SHALL centre that glyph, and all such glyphs SHALL render at the same size, so two icon chips side by side read as siblings rather than as two different kinds of thing.
+
+The learner's avatar is exempt and SHALL keep its round frame. It is a portrait rather than a control — it carries a face or a learner's initials, and its shape is what distinguishes the person from the controls standing next to them.
+
+#### Scenario: The account trigger is a chip like its neighbours
+- **WHEN** the header renders at a phone-class width for a visitor with no session, beside the install control
+- **THEN** the account trigger carries the same chip treatment — border, fill, rounded-square corners and hover transition — and its glyph renders at the same size as the install control's
+
+#### Scenario: The chip treatment does not change the row's budget
+- **WHEN** the account trigger is presented as a chip rather than as a bare glyph
+- **THEN** it occupies the same 44×44 footprint, so the widths that let the wordmark render whole are unaffected
+
+#### Scenario: The avatar is a portrait, not a chip
+- **WHEN** the header renders for a learner whose card is known
+- **THEN** the avatar trigger keeps its round frame rather than taking the chip treatment
 

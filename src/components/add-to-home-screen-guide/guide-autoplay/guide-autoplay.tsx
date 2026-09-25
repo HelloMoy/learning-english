@@ -1,12 +1,13 @@
 "use client";
 
+import { GuidePlaybackRail } from "@/components/guide-playback-rail/guide-playback-rail";
 import { Button } from "@/components/ui/button/button";
 import { useFitScale } from "@/hooks/use-fit-scale/use-fit-scale";
-import { useHorizontalSwipe } from "@/hooks/use-horizontal-swipe/use-horizontal-swipe";
+import { STEP_INTERVAL_MS, useGuidePlayback } from "@/hooks/use-guide-playback/use-guide-playback";
 
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useId, useState } from "react";
+import { useId } from "react";
 
 import { GuidePhoneScreen, PHONE_HEIGHT } from "../guide-phone-screen/guide-phone-screen";
 import { INSTALL_RESULT, INSTALL_STEPS } from "../install-steps/install-steps";
@@ -23,12 +24,13 @@ const FRAMES = [...INSTALL_STEPS, INSTALL_RESULT];
  * How long each step stays on screen.
  *
  * @remarks
- * Exported so the tests drive the same clock the component does, rather than
- * hard-coding a duplicate of it that can drift.
+ * Re-exported from {@link useGuidePlayback}, which owns the pacing for every
+ * guide. Kept here so callers and tests that already reach for it on this
+ * module keep working.
  *
  * @category Components
  */
-export const STEP_INTERVAL_MS = 3_500;
+export { STEP_INTERVAL_MS };
 
 type GuideAutoplayProps = {
   /**
@@ -37,19 +39,6 @@ type GuideAutoplayProps = {
    */
   onDismiss: () => void;
 };
-
-/**
- * The frame `delta` away, both ends wrapping.
- *
- * @remarks
- * The `+ FRAMES.length` is what makes stepping back from the first frame land
- * on the last instead of on `-1`.
- */
-const frameAfter = (index: number, delta: number) =>
-  (index + delta + FRAMES.length) % FRAMES.length;
-
-const prefersReducedMotion = () =>
-  window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 
 /**
  * The install guide, playing itself: the four steps on a loop, and a drag to
@@ -97,29 +86,9 @@ const prefersReducedMotion = () =>
 export function GuideAutoplay({ onDismiss }: GuideAutoplayProps) {
   const t = useTranslations("Components.AddToHomeScreenGuide");
   const labelId = useId();
-  const [frameIndex, setFrameIndex] = useState(0);
+  const { frameIndex, isPlaying, showNext, showPrevious, showFrame, swipeHandlers } =
+    useGuidePlayback(FRAMES.length);
   const { ref: depictionRef, scale: depictionScale } = useFitScale(PHONE_HEIGHT);
-
-  const showNextFrame = () => setFrameIndex((current) => frameAfter(current, 1));
-  const showPreviousFrame = () => setFrameIndex((current) => frameAfter(current, -1));
-
-  // Leftwards is forwards: the finger travels the way the dots are laid out.
-  const swipeHandlers = useHorizontalSwipe({
-    onSwipeLeft: showNextFrame,
-    onSwipeRight: showPreviousFrame,
-  });
-
-  // One timer per frame rather than one interval for the whole loop: the wait
-  // starts again whenever the frame changes, so a learner who moves the guide
-  // by hand gets the frame they chose for its full time instead of for
-  // whatever was left of the tick they interrupted.
-  useEffect(() => {
-    if (prefersReducedMotion()) return;
-
-    const timer = setTimeout(() => setFrameIndex(frameAfter(frameIndex, 1)), STEP_INTERVAL_MS);
-
-    return () => clearTimeout(timer);
-  }, [frameIndex]);
 
   const frame = FRAMES[frameIndex]!;
   const isResult = frame.surface === "home-screen";
@@ -177,19 +146,15 @@ export function GuideAutoplay({ onDismiss }: GuideAutoplayProps) {
         {t(frame.messageKey)}
       </p>
 
-      <ol className="flex items-center gap-1.5">
-        {FRAMES.map((each, index) => (
-          <li
-            key={each.messageKey}
-            aria-hidden="true"
-            className={
-              index === frameIndex
-                ? "h-1.5 w-5 rounded-full bg-primary transition-all"
-                : "size-1.5 rounded-full bg-muted-foreground/40 transition-all"
-            }
-          />
-        ))}
-      </ol>
+      <GuidePlaybackRail
+        frameCount={FRAMES.length}
+        stepCount={INSTALL_STEPS.length}
+        frameIndex={frameIndex}
+        isPlaying={isPlaying}
+        onShowPrevious={showPrevious}
+        onShowNext={showNext}
+        onShowFrame={showFrame}
+      />
 
       <Button
         variant="ghost"

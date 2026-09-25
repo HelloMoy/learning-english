@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
   Body,
   Button,
@@ -69,6 +69,14 @@ export type AccountEmailProps = {
  * stored theme, and `cinema-theme-tokens` makes dark the variant the product
  * serves by default, so dark is what the message commits to.
  *
+ * Declaring `color-scheme: dark` does not stop every client from inverting
+ * it. The Gmail app on iOS inverts every colour but spares background images,
+ * so the fills that must not flip are also painted as one-colour gradients,
+ * and an embedded stylesheet that only Gmail matches blends the light text
+ * back to its colours; the buttons invert as a unit and still read. The same
+ * stylesheet gives the Outlook apps, which mark what they re-map with
+ * `data-ogsc` and `data-ogsb`, the colours to restore.
+ *
  * @category Email
  */
 export function AccountEmail({ lang, copy, url, action = "routine" }: AccountEmailProps) {
@@ -78,7 +86,7 @@ export function AccountEmail({ lang, copy, url, action = "routine" }: AccountEma
       dir="ltr"
     >
       <Head>
-        {/* Without these, Gmail and Outlook.com re-map an already-dark palette. */}
+        {/* Apple Mail honours these; Gmail ignores them, hence the stylesheet below. */}
         <meta
           name="color-scheme"
           content="dark"
@@ -87,66 +95,215 @@ export function AccountEmail({ lang, copy, url, action = "routine" }: AccountEma
           name="supported-color-schemes"
           content="dark"
         />
+        <style>{GMAIL_INVERSION_DEFENCE + OUTLOOK_INVERSION_DEFENCE}</style>
       </Head>
       <Preview>{copy.preview}</Preview>
-      <Body style={styles.page}>
-        <Section style={styles.letterboxBar}>&nbsp;</Section>
+      <Body
+        className="body cinema-ground"
+        style={styles.page}
+      >
+        <Section
+          className="cinema-letterbox"
+          style={styles.letterboxBar}
+        >
+          &nbsp;
+        </Section>
         <Container style={styles.frame}>
-          <Text style={styles.wordmark}>
-            ENGLISH<span style={styles.wordmarkDot}>·</span>COURSE
+          <Text
+            className="cinema-foreground cinema-wordmark"
+            style={styles.wordmark}
+          >
+            <KeptLightInGmail>ENGLISH</KeptLightInGmail>
+            <span
+              className="cinema-gold"
+              style={styles.wordmarkDot}
+            >
+              ·
+            </span>
+            <KeptLightInGmail>COURSE</KeptLightInGmail>
           </Text>
-          <Heading style={styles.heading}>{copy.heading}</Heading>
-          <Text style={styles.paragraph}>{copy.body}</Text>
+          <Heading
+            className="cinema-foreground"
+            style={styles.heading}
+          >
+            <KeptLightInGmail>{copy.heading}</KeptLightInGmail>
+          </Heading>
+          <Text
+            className="cinema-foreground"
+            style={styles.paragraph}
+          >
+            <KeptLightInGmail>{copy.body}</KeptLightInGmail>
+          </Text>
           <Button
+            className={CALL_TO_ACTION[action].className}
             href={url}
-            style={{ ...styles.callToAction, ...CALL_TO_ACTION_COLORS[action] }}
+            style={{ ...styles.callToAction, ...CALL_TO_ACTION[action].colors }}
           >
             {copy.button}
           </Button>
-          <Text style={styles.finePrint}>{copy.linkIntro}</Text>
+          <Text
+            className="cinema-muted"
+            style={styles.finePrint}
+          >
+            <KeptLightInGmail>{copy.linkIntro}</KeptLightInGmail>
+          </Text>
           <Link
+            className="cinema-link"
             href={url}
             style={styles.link}
           >
             {url}
           </Link>
-          <Hr style={styles.rule} />
-          <Text style={styles.finePrint}>{copy.ignore}</Text>
+          <Hr
+            className="cinema-rule"
+            style={styles.rule}
+          />
+          <Text
+            className="cinema-muted"
+            style={styles.finePrint}
+          >
+            <KeptLightInGmail>{copy.ignore}</KeptLightInGmail>
+          </Text>
         </Container>
-        <Section style={styles.letterboxBar}>&nbsp;</Section>
+        <Section
+          className="cinema-letterbox"
+          style={styles.letterboxBar}
+        >
+          &nbsp;
+        </Section>
       </Body>
     </Html>
   );
 }
 
-const CALL_TO_ACTION_COLORS: Record<AccountEmailAction, CSSProperties> = {
-  routine: { backgroundColor: "#e7b64c", border: "1px solid #e7b64c", color: "#1a1200" },
-  destructive: { backgroundColor: "#331512", border: "1px solid #b3402f", color: "#ef9d8c" },
-};
+/** Wraps light neutral text in the layers `GMAIL_INVERSION_DEFENCE` blends. */
+function KeptLightInGmail({ children }: { children: ReactNode }) {
+  return (
+    <span className="gmail-screen">
+      <span className="gmail-difference">{children}</span>
+    </span>
+  );
+}
 
 /*
- * Every literal below is a token from the `.dark` block of `globals.css`,
- * named in the comment beside it. Mail clients resolve neither custom
+ * The literals in `CINEMA` with a token beside them come from the `.dark` block
+ * of `globals.css`; the rest are the email's own. Mail clients resolve neither custom
  * properties nor `color-mix()`, so the values are written out — change one
  * here only when the token behind it moves.
  *
- * The two gradients are `CinemaBackground`'s, with its `color-mix()` resolved:
- * `--glow #f0c869` at 16% over `--background #08080b` is `#2d271a`, and the
- * focal layer's 24% is the same glow at that alpha. They ride on top of a
- * `background-color`, so a client that drops background images renders flat
- * near-black instead of falling back to white.
+ * `glowWash` and the focal layer's alpha are `CinemaBackground`'s gradients
+ * with their `color-mix()` resolved: `--glow #f0c869` at 16% over
+ * `--background #08080b` is `#2d271a`, and the focal layer is the same glow at
+ * 24%.
  */
+const CINEMA = {
+  ground: "#08080b", // --background
+  letterbox: "#000000", // --letterbox
+  foreground: "#f4f1ea", // --foreground
+  mutedForeground: "#9b968c", // --muted-foreground
+  gold: "#e7b64c", // --gold
+  onGold: "#1a1200", // --primary-foreground
+  bronzeText: "#d9a37a", // --bronze-text
+  border: "#26262f", // --border
+  destructiveFill: "#331512",
+  destructive: "#b3402f", // --destructive
+  destructiveLabel: "#ef9d8c",
+  glowWash: "#2d271a",
+  glowFocal: "rgba(240,200,105,0.24)",
+  glowFaded: "rgba(240,200,105,0)",
+} as const;
+
+/* The Gmail app on iOS inverts every colour in dark mode but never a
+   background image, so a fill that must not flip is painted twice: as an image
+   for Gmail, and as a colour for clients that drop images. */
+function solidFill(color: string): CSSProperties {
+  return { backgroundColor: color, backgroundImage: `linear-gradient(${color},${color})` };
+}
+
+/*
+ * Gmail replaces the doctype with a `<u>` right before the body, so
+ * `u + .body` matches in Gmail and nowhere else. Its iOS app inverts the text
+ * and the black of these layers alike; `difference` against the inverted
+ * outer layer turns the text back, and `screen` lays the result over the
+ * frame with the black dropping out. Only neutral text survives the trip:
+ * `difference` flips hue, which Gmail's own inversion keeps.
+ *
+ * Where a layer's edge falls on a fraction of a pixel, the two layers blend
+ * only partly and the inverted black shows as a hairline. As blocks, the
+ * layers take the frame's whole-pixel edges; the wordmark alone stays inline,
+ * so its gold dot keeps its place between the words.
+ */
+const GMAIL_INVERSION_DEFENCE = `
+u + .body .gmail-screen { background: #000000; mix-blend-mode: screen; display: block; }
+u + .body .gmail-difference { background: #000000; mix-blend-mode: difference; display: block; }
+u + .body .cinema-wordmark .gmail-screen, u + .body .cinema-wordmark .gmail-difference { display: inline-block; }
+`;
+
+/*
+ * Both buttons stay plain colour on purpose. A label cannot be blended back
+ * without hairlines on the fill, so in a client that inverts colours the fill
+ * and its label invert together — a dark gold button with a light label, or a
+ * light warning button with a dark one — and still read.
+ */
+const CALL_TO_ACTION: Record<AccountEmailAction, { className?: string; colors: CSSProperties }> = {
+  routine: {
+    className: "cinema-gold-button",
+    colors: {
+      backgroundColor: CINEMA.gold,
+      border: `1px solid ${CINEMA.gold}`,
+      color: CINEMA.onGold,
+    },
+  },
+  destructive: {
+    colors: {
+      backgroundColor: CINEMA.destructiveFill,
+      border: `1px solid ${CINEMA.destructive}`,
+      color: CINEMA.destructiveLabel,
+    },
+  },
+};
+
+/*
+ * Outlook.com and the Outlook apps mark what they re-map in dark mode with
+ * `data-ogsc` (text) and `data-ogsb` (background), so these put the cinema
+ * colours back on every element carrying the class.
+ */
+const OUTLOOK_TEXT_COLORS = {
+  "cinema-foreground": CINEMA.foreground,
+  "cinema-muted": CINEMA.mutedForeground,
+  "cinema-link": CINEMA.bronzeText,
+  "cinema-gold": CINEMA.gold,
+  "cinema-gold-button": CINEMA.onGold,
+};
+
+const OUTLOOK_FILL_COLORS = {
+  "cinema-ground": CINEMA.ground,
+  "cinema-letterbox": CINEMA.letterbox,
+  "cinema-rule": CINEMA.border,
+  "cinema-gold-button": CINEMA.gold,
+};
+
+const OUTLOOK_INVERSION_DEFENCE = [
+  ...Object.entries(OUTLOOK_TEXT_COLORS).map(
+    ([className, color]) => `[data-ogsc] .${className} { color: ${color} !important; }`,
+  ),
+  ...Object.entries(OUTLOOK_FILL_COLORS).map(
+    ([className, color]) => `[data-ogsb] .${className} { background-color: ${color} !important; }`,
+  ),
+].join("\n");
+
+/* The gradients ride on top of a `background-color`, so a client that drops
+   background images renders flat near-black instead of falling back to white. */
 const styles = {
   page: {
-    backgroundColor: "#08080b", // --background
-    backgroundImage:
-      "radial-gradient(45% 40% at 78% 10%, rgba(240,200,105,0.24), rgba(240,200,105,0) 70%), radial-gradient(90% 80% at 80% 0%, #2d271a, #08080b 62%)",
+    backgroundColor: CINEMA.ground,
+    backgroundImage: `radial-gradient(45% 40% at 78% 10%, ${CINEMA.glowFocal}, ${CINEMA.glowFaded} 70%), radial-gradient(90% 80% at 80% 0%, ${CINEMA.glowWash}, ${CINEMA.ground} 62%)`,
     fontFamily: "Geist, Helvetica, Arial, sans-serif",
     margin: 0,
     padding: 0,
   },
   letterboxBar: {
-    backgroundColor: "#000000", // --letterbox
+    ...solidFill(CINEMA.letterbox),
     fontSize: "0",
     height: "26px",
     lineHeight: "26px",
@@ -158,15 +315,15 @@ const styles = {
     textAlign: "center" as const,
   },
   wordmark: {
-    color: "#f4f1ea", // --foreground
+    color: CINEMA.foreground,
     fontSize: "12px",
     fontWeight: 800,
     letterSpacing: "0.24em",
     margin: "0 0 28px",
   },
-  wordmarkDot: { color: "#e7b64c", padding: "0 2px" }, // --gold
+  wordmarkDot: { color: CINEMA.gold, padding: "0 2px" },
   heading: {
-    color: "#f4f1ea", // --foreground
+    color: CINEMA.foreground,
     fontSize: "26px",
     fontWeight: 800,
     letterSpacing: "-0.02em",
@@ -174,7 +331,7 @@ const styles = {
     margin: "0 0 12px",
   },
   paragraph: {
-    color: "#f4f1ea", // --foreground
+    color: CINEMA.foreground,
     fontSize: "15px",
     lineHeight: "24px",
     margin: "0 0 28px",
@@ -188,17 +345,18 @@ const styles = {
     textDecoration: "none",
   },
   finePrint: {
-    color: "#9b968c", // --muted-foreground
+    color: CINEMA.mutedForeground,
     fontSize: "13px",
     lineHeight: "20px",
     margin: "28px 0 6px",
   },
   link: {
-    color: "#d9a37a", // --bronze-text
+    color: CINEMA.bronzeText,
     fontSize: "13px",
     wordBreak: "break-all" as const,
   },
-  /* `Hr` defaults `borderTop` to `#eaeaea`, so the colour has to be set there
-     rather than through `borderColor`, which it would ignore. */
-  rule: { borderTop: "1px solid #26262f", margin: "28px 0 0" }, // --border
+  /* A border cannot be painted as an image, so the rule is a 1px block
+     instead; `Hr` defaults `borderTop` to `#eaeaea`, which is why it is
+     cleared there rather than through `border`. */
+  rule: { ...solidFill(CINEMA.border), borderTop: "none", height: "1px", margin: "28px 0 0" },
 };
