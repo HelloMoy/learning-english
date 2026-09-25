@@ -51,7 +51,7 @@ Storybook conventions and rules for writing stories live in `AGENTS.md § Compon
 The project's API reference is generated from JSDoc comments using [TypeDoc](https://typedoc.org/). Output is a static site that documents every exported, JSDoc-commented symbol in `src/`.
 
 ```bash
-pnpm docs          # generate the static site in ./docs/
+pnpm run docs      # generate the static site in ./docs/ (plain `pnpm docs` is a pnpm built-in)
 pnpm docs:watch    # regenerate on file changes
 pnpm docs:serve    # serve ./docs/ at http://localhost:8080
 ```
