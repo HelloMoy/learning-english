@@ -5,7 +5,6 @@ import { GoldBadge } from "./gold-badge";
 const meta: Meta<typeof GoldBadge> = {
   title: "Cinema/GoldBadge",
   component: GoldBadge,
-  parameters: { backgrounds: { default: "dark" } },
   args: { children: "10 modules · 107 lessons", variant: "gold" },
   argTypes: { variant: { control: "inline-radio", options: ["gold", "neutral"] } },
 };

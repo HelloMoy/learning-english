@@ -10,7 +10,6 @@ import { WatchProgressBar } from "./watch-progress-bar";
 const meta: Meta<typeof WatchProgressBar> = {
   title: "Cinema/WatchProgressBar",
   component: WatchProgressBar,
-  parameters: { backgrounds: { default: "dark" } },
   args: { value: 40, max: 100, label: "40%", ariaLabel: "40% watched" },
   decorators: [
     (Story) => (

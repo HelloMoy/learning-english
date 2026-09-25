@@ -5,7 +5,6 @@ import { Eyebrow } from "./eyebrow";
 const meta: Meta<typeof Eyebrow> = {
   title: "Cinema/Eyebrow",
   component: Eyebrow,
-  parameters: { backgrounds: { default: "dark" } },
   args: { children: "Now streaming · Spoken English" },
 };
 

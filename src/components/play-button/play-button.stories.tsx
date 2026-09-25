@@ -5,7 +5,6 @@ import { PlayButton } from "./play-button";
 const meta: Meta<typeof PlayButton> = {
   title: "Cinema/PlayButton",
   component: PlayButton,
-  parameters: { backgrounds: { default: "dark" } },
   argTypes: { size: { control: "inline-radio", options: ["sm", "md", "lg"] } },
 };
 
