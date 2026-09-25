@@ -98,4 +98,13 @@ describe("ForgotPasswordForm", () => {
     expect(screen.getByLabelText("Email")).toHaveValue(email);
     expect(screen.queryByTestId("account-wait-beam")).not.toBeInTheDocument();
   });
+
+  test("WHEN it renders THEN the security check comes last, after the submit button", () => {
+    renderInLocale(<ForgotPasswordForm />);
+
+    const submit = screen.getByRole("button", { name: "Send reset link" });
+    const challenge = screen.getByRole("button", { name: "pass challenge" });
+
+    expect(submit.compareDocumentPosition(challenge)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
 });

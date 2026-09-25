@@ -90,8 +90,10 @@ bounces. ImprovMX's free plan forwards it to a real inbox.
 ## 4. Cloudflare Turnstile: bot protection
 
 1. Create a Turnstile widget in **Managed** mode, with both hostnames: `www.english-course.online`
-   and `english-course.online`. Don't use Invisible mode: the widget reserves visible space in
-   the forms.
+   and `english-course.online`. The app already hides the widget in production (the
+   `interaction-only` appearance), so it only shows when Cloudflare needs a click. Don't use
+   Invisible mode: it drops that checkbox fallback for visitors Cloudflare flags, and it
+   requires Cloudflare's Turnstile Privacy Addendum in the privacy policy.
    → `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (public) and `TURNSTILE_SECRET_KEY`
 
 Never ship the always-pass test keys from `.env.example` to production.

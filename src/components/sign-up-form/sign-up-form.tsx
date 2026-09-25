@@ -1,5 +1,6 @@
 "use client";
 
+import { AccountChallenge } from "@/components/account-challenge/account-challenge";
 import { AccountConfirmation } from "@/components/account-confirmation/account-confirmation";
 import { AccountField } from "@/components/account-field/account-field";
 import { AccountSubmitArea } from "@/components/account-submit-area/account-submit-area";
@@ -67,12 +68,6 @@ export function SignUpForm({ returnPath }: SignUpFormProps) {
   return (
     <div className="flex flex-col gap-5">
       <AccountWait busy={submission.isPending}>
-        <AccountWait.Paused className="flex flex-col gap-5">
-          <GoogleSignInButton returnPath={returnPath} />
-          <p className="text-center text-xs tracking-wide text-muted-foreground uppercase">
-            {t("divider")}
-          </p>
-        </AccountWait.Paused>
         <form
           noValidate
           onSubmit={handleSubmit}
@@ -100,11 +95,17 @@ export function SignUpForm({ returnPath }: SignUpFormProps) {
           </AccountWait.Paused>
           <AccountSubmitArea
             submission={submission}
-            challenged
             label={t("signUp.submit")}
             pendingLabel={t("signUp.submitting")}
           />
         </form>
+        <AccountWait.Paused className="flex flex-col gap-5">
+          <p className="text-center text-xs tracking-wide text-muted-foreground uppercase">
+            {t("divider")}
+          </p>
+          <GoogleSignInButton returnPath={returnPath} />
+        </AccountWait.Paused>
+        <AccountChallenge submission={submission} />
         <AccountWait.Status>{t("signUp.waiting")}</AccountWait.Status>
       </AccountWait>
     </div>

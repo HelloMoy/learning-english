@@ -1,5 +1,6 @@
 "use client";
 
+import { AccountChallenge } from "@/components/account-challenge/account-challenge";
 import { AccountField } from "@/components/account-field/account-field";
 import { AccountSubmitArea } from "@/components/account-submit-area/account-submit-area";
 import { AccountWait } from "@/components/account-wait/account-wait";
@@ -73,20 +74,16 @@ export function SignInForm({ returnPath, passwordUpdated = false }: SignInFormPr
   return (
     <div className="flex flex-col gap-5">
       <AccountWait busy={submission.isPending || isLeaving}>
-        <AccountWait.Paused className="flex flex-col gap-5">
-          {passwordUpdated ? (
+        {passwordUpdated ? (
+          <AccountWait.Paused>
             <p
               role="status"
               className="rounded-lg bg-muted px-3 py-2 text-center text-sm text-foreground"
             >
               {t("signIn.passwordUpdated")}
             </p>
-          ) : null}
-          <GoogleSignInButton returnPath={returnPath} />
-          <p className="text-center text-xs tracking-wide text-muted-foreground uppercase">
-            {t("divider")}
-          </p>
-        </AccountWait.Paused>
+          </AccountWait.Paused>
+        ) : null}
         <form
           noValidate
           onSubmit={handleSubmit}
@@ -114,11 +111,17 @@ export function SignInForm({ returnPath, passwordUpdated = false }: SignInFormPr
           </AccountWait.Paused>
           <AccountSubmitArea
             submission={submission}
-            challenged
             label={t("signIn.submit")}
             pendingLabel={t("signIn.submitting")}
           />
         </form>
+        <AccountWait.Paused className="flex flex-col gap-5">
+          <p className="text-center text-xs tracking-wide text-muted-foreground uppercase">
+            {t("divider")}
+          </p>
+          <GoogleSignInButton returnPath={returnPath} />
+        </AccountWait.Paused>
+        <AccountChallenge submission={submission} />
         <AccountWait.Status>{t("signIn.waiting")}</AccountWait.Status>
       </AccountWait>
     </div>

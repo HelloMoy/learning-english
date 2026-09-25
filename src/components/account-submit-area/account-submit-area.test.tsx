@@ -23,26 +23,12 @@ const submission = (overrides: Partial<AccountSubmission> = {}): AccountSubmissi
 });
 
 describe("AccountSubmitArea", () => {
-  test("WHEN challenged THEN the challenge sits above the submit button", () => {
+  test("WHEN rendered THEN it carries no challenge, which the form places on its own", () => {
     renderInLocale(
       <AccountSubmitArea
         submission={submission()}
-        challenged
         label="Sign in"
         pendingLabel="Signing in…"
-      />,
-    );
-
-    expect(screen.getByRole("button", { name: "pass challenge" })).toBeInTheDocument();
-  });
-
-  test("WHEN not challenged THEN there is no challenge", () => {
-    renderInLocale(
-      <AccountSubmitArea
-        submission={submission()}
-        challenged={false}
-        label="Save"
-        pendingLabel="Saving…"
       />,
     );
 
@@ -53,7 +39,6 @@ describe("AccountSubmitArea", () => {
     renderInLocale(
       <AccountSubmitArea
         submission={submission({ isReady: false })}
-        challenged
         label="Sign in"
         pendingLabel="Signing in…"
       />,
@@ -66,7 +51,6 @@ describe("AccountSubmitArea", () => {
     renderInLocale(
       <AccountSubmitArea
         submission={submission({ isPending: true, isReady: false })}
-        challenged
         label="Sign in"
         pendingLabel="Signing in…"
       />,
@@ -79,7 +63,6 @@ describe("AccountSubmitArea", () => {
     renderInLocale(
       <AccountSubmitArea
         submission={submission({ isPending: true, isReady: false })}
-        challenged
         label="Sign in"
         pendingLabel="Signing in…"
       />,
@@ -92,7 +75,6 @@ describe("AccountSubmitArea", () => {
     renderInLocale(
       <AccountSubmitArea
         submission={submission()}
-        challenged
         label="Sign in"
         pendingLabel="Signing in…"
       />,
@@ -109,7 +91,6 @@ describe("AccountSubmitArea", () => {
       <AccountWait busy>
         <AccountSubmitArea
           submission={submission({ isPending: false, isReady: true })}
-          challenged
           label="Sign in"
           pendingLabel="Signing in…"
         />
@@ -120,45 +101,10 @@ describe("AccountSubmitArea", () => {
     expect(screen.getByTestId("spinner-arc")).toBeInTheDocument();
   });
 
-  test("WHEN the request is in flight THEN the passed challenge goes out of play with the fields", () => {
-    // It is the brightest thing left on the card once the fields dim, and the
-    // learner can no longer act on it — it belongs with the rest of the pause
-    renderInLocale(
-      <AccountWait busy>
-        <AccountSubmitArea
-          submission={submission({ isPending: true, isReady: false })}
-          challenged
-          label="Sign in"
-          pendingLabel="Signing in…"
-        />
-      </AccountWait>,
-    );
-
-    const challenge = screen.getByRole("button", { name: "pass challenge" });
-    expect(challenge.closest("[inert]")).not.toBeNull();
-    expect(screen.getByRole("button", { name: "Signing in…" }).closest("[inert]")).toBeNull();
-  });
-
-  test("WHEN at rest THEN the challenge is live", () => {
-    renderInLocale(
-      <AccountWait busy={false}>
-        <AccountSubmitArea
-          submission={submission()}
-          challenged
-          label="Sign in"
-          pendingLabel="Signing in…"
-        />
-      </AccountWait>,
-    );
-
-    expect(screen.getByRole("button", { name: "pass challenge" }).closest("[inert]")).toBeNull();
-  });
-
   test("WHEN there is no surrounding wait THEN the request alone decides", () => {
     renderInLocale(
       <AccountSubmitArea
         submission={submission()}
-        challenged
         label="Sign in"
         pendingLabel="Signing in…"
       />,
@@ -171,7 +117,6 @@ describe("AccountSubmitArea", () => {
     renderInLocale(
       <AccountSubmitArea
         submission={submission({ errorKey: "captchaFailed" })}
-        challenged
         label="Entrar"
         pendingLabel="Entrando…"
       />,

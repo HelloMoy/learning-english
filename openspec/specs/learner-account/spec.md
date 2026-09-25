@@ -59,6 +59,8 @@ From the moment the form is submitted until the navigation takes the page away, 
 
 The sign-in and sign-up pages SHALL offer "Continue with Google". Completing Google's consent SHALL sign the learner in, creating the account on first use, and SHALL open the validated `next` path or `/[locale]/learning`. An account created through Google SHALL count as verified.
 
+On both pages the email-and-password form SHALL come first, and "Continue with Google" SHALL come second, after the form's submit button and after an "or" divider between the two.
+
 When the Google account's address already belongs to an email-and-password account, the two SHALL be linked into one account rather than creating a second one.
 
 #### Scenario: First Google sign-in creates the account
@@ -68,6 +70,14 @@ When the Google account's address already belongs to an email-and-password accou
 #### Scenario: Google links to an existing password account
 - **WHEN** a learner who signed up with `ana@example.com` and a password later completes Google sign-in as `ana@example.com`
 - **THEN** there is still exactly one account for that address, and it can sign in both ways
+
+#### Scenario: Email and password come before Google on sign-in
+- **WHEN** a visitor opens `/en/sign-in`
+- **THEN** the email field and the "Sign in" button come before "Continue with Google" in the page
+
+#### Scenario: Email and password come before Google on sign-up
+- **WHEN** a visitor opens `/en/sign-up`
+- **THEN** the name field and the "Create account" button come before "Continue with Google" in the page
 
 ### Requirement: A learner resets a forgotten password by email
 
@@ -143,6 +153,10 @@ The sign-up, sign-in and forgot-password forms SHALL carry a Cloudflare Turnstil
 
 Local development and the e2e suite SHALL use Cloudflare's published always-pass test keys, so no real challenge is ever solved in automation.
 
+Outside the development server, the challenge SHALL stay hidden unless Cloudflare needs the visitor to interact, and while it is hidden it SHALL take no space in the form, not even the spacing between the form's elements. On the development server the challenge SHALL always be visible, in space the form reserves for it.
+
+The challenge SHALL be the last element of each account form: after "Continue with Google" on sign-in and sign-up, and after the submit button on forgot-password. The card's footer links come after it.
+
 #### Scenario: A request without a challenge token is refused
 - **WHEN** a sign-in request reaches the server without a Turnstile token
 - **THEN** it is refused, and no session is created
@@ -150,6 +164,26 @@ Local development and the e2e suite SHALL use Cloudflare's published always-pass
 #### Scenario: Bursts are limited
 - **WHEN** a production build's sign-in endpoint receives more attempts from one client than the configured window allows
 - **THEN** further attempts are refused with a localized "too many attempts" message until the window passes, and the counter lives in the database
+
+#### Scenario: A production build hides a challenge the visitor does not need to solve
+- **WHEN** a visitor opens the sign-in form in a production build and Cloudflare passes them without interaction
+- **THEN** no Turnstile box is shown, the space between "Continue with Google" and the footer links is the same as with no challenge at all, and the form still submits with the challenge token
+
+#### Scenario: A production build shows the challenge when interaction is required
+- **WHEN** Cloudflare needs a visitor on a production build to interact
+- **THEN** the Turnstile checkbox appears in the form
+
+#### Scenario: The development server always shows the challenge
+- **WHEN** a developer opens the sign-in form on the development server
+- **THEN** the Turnstile box is visible in its reserved space
+
+#### Scenario: The challenge comes last in the form
+- **WHEN** a visitor opens `/en/sign-in` or `/en/sign-up`
+- **THEN** the Turnstile challenge comes after "Continue with Google" in the page, and before the footer link to the other account page
+
+#### Scenario: The challenge comes last on forgot-password
+- **WHEN** a visitor opens `/en/forgot-password`
+- **THEN** the Turnstile challenge comes after the submit button
 
 ### Requirement: Account pages are localized and accessible
 

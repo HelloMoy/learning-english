@@ -190,4 +190,22 @@ describe("SignInForm", () => {
     );
     expect(screen.getByRole("button", { name: "Continue with Google" })).toBeInTheDocument();
   });
+
+  test("WHEN it renders THEN email and password come first and Google second", () => {
+    renderInLocale(<SignInForm returnPath="/learning" />);
+
+    const submit = screen.getByRole("button", { name: "Sign in" });
+    const google = screen.getByRole("button", { name: "Continue with Google" });
+
+    expect(submit.compareDocumentPosition(google)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  test("WHEN it renders THEN the security check comes last, after Google", () => {
+    renderInLocale(<SignInForm returnPath="/learning" />);
+
+    const google = screen.getByRole("button", { name: "Continue with Google" });
+    const challenge = screen.getByRole("button", { name: "pass challenge" });
+
+    expect(google.compareDocumentPosition(challenge)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
 });
