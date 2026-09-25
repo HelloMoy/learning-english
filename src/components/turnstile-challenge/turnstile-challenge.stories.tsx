@@ -6,6 +6,9 @@ import { TurnstileChallenge } from "./turnstile-challenge";
 /**
  * The real Cloudflare widget. With the always-pass test site key from
  * `.env.example` it passes by itself a moment after it loads.
+ *
+ * Storybook's dev server shows the box. A static Storybook build is a
+ * production build, where the widget hides unless Cloudflare needs a click.
  */
 const meta = {
   title: "Components/TurnstileChallenge",
