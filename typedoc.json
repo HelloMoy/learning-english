@@ -22,6 +22,16 @@
 
   "out": "docs",
 
+  "plugin": ["./scripts/typedoc-cinema-theme/typedoc-cinema-theme.mts"],
+  "theme": "cinema",
+  "customCss": "./scripts/typedoc-cinema-theme/cinema.css",
+  "lightHighlightTheme": "gruvbox-dark-medium",
+  "darkHighlightTheme": "gruvbox-dark-medium",
+  "includeVersion": true,
+  "useFirstParagraphOfCommentAsSummary": true,
+  "favicon": "./src/app/icon.svg",
+  "cacheBust": true,
+
   "readme": "none",
 
   "navigation": {
