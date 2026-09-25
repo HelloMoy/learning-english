@@ -1,0 +1,968 @@
+/*
+ * Immersion Cinema — the API reference's stylesheet.
+ *
+ * Loaded by TypeDoc as `assets/custom.css`, after its own `style.css` and
+ * `highlight.css`. The palette is the app's dark variant, copied from the
+ * `.dark` block of `src/app/globals.css`; keep the two in step by hand.
+ *
+ * The reference is dark only. TypeDoc picks its palette from `data-theme`
+ * (`os` | `light` | `dark`) and the OS preference, so every token is set on
+ * `:root[data-theme]` too: that selector outranks TypeDoc's bare `:root`
+ * media-query blocks and ties its `[data-theme=…]` ones, which it then wins
+ * by loading later.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;800&family=Geist+Mono:wght@400;500&display=swap");
+
+/* ---------- Tokens ---------- */
+
+:root,
+:root[data-theme] {
+  --cinema-background: #08080b;
+  --cinema-foreground: #f4f1ea;
+  --cinema-card: #16171d;
+  --cinema-panel: #191a22;
+  --cinema-sidebar: #0d0e12;
+  --cinema-secondary: #1f2029;
+  --cinema-border: #26262f;
+  --cinema-muted: #9b968c;
+  --cinema-gold: #e7b64c;
+  --cinema-amber: #f0c869;
+  --cinema-bronze: #c08a5a;
+  --cinema-bronze-text: #d9a37a;
+  --cinema-glow: #f0c869;
+  --cinema-letterbox: #000000;
+  --cinema-on-gold: #1a1200;
+  --cinema-code-background: #0c0c10;
+  --cinema-radius: 0.625rem;
+
+  --cinema-sans:
+    "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --cinema-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  color-scheme: dark;
+  --color-scheme: dark;
+
+  --color-background: var(--cinema-background);
+  --color-background-secondary: var(--cinema-sidebar);
+  --color-background-active: var(--cinema-secondary);
+  --color-background-warning: #2b2112;
+  --color-warning-text: var(--cinema-foreground);
+  --color-accent: var(--cinema-border);
+  --color-active-menu-item: color-mix(in oklab, var(--cinema-gold) 10%, transparent);
+  --color-text: var(--cinema-foreground);
+  --color-contrast-text: var(--cinema-foreground);
+  --color-text-aside: var(--cinema-muted);
+  --color-link: var(--cinema-gold);
+  --color-focus-outline: var(--cinema-gold);
+  --color-icon-background: var(--cinema-card);
+  --color-icon-text: var(--cinema-foreground);
+  --color-comment-tag: var(--cinema-secondary);
+  --color-comment-tag-text: var(--cinema-foreground);
+  --color-document: var(--cinema-bronze-text);
+
+  --color-alert-note: var(--cinema-muted);
+  --color-alert-tip: #8fb573;
+  --color-alert-important: var(--cinema-amber);
+  --color-alert-warning: var(--cinema-gold);
+  --color-alert-caution: #d0634f;
+
+  --color-ts-project: var(--cinema-foreground);
+  --color-ts-module: var(--cinema-muted);
+  --color-ts-namespace: var(--cinema-muted);
+  --color-ts-enum: var(--cinema-amber);
+  --color-ts-enum-member: var(--cinema-amber);
+  --color-ts-variable: var(--cinema-muted);
+  --color-ts-function: var(--cinema-gold);
+  --color-ts-class: var(--cinema-amber);
+  --color-ts-interface: var(--cinema-bronze-text);
+  --color-ts-constructor: var(--cinema-amber);
+  --color-ts-property: var(--cinema-foreground);
+  --color-ts-method: var(--cinema-gold);
+  --color-ts-reference: var(--cinema-muted);
+  --color-ts-call-signature: var(--cinema-foreground);
+  --color-ts-index-signature: var(--cinema-foreground);
+  --color-ts-constructor-signature: var(--cinema-foreground);
+  --color-ts-parameter: var(--cinema-foreground);
+  --color-ts-type-parameter: var(--cinema-bronze-text);
+  --color-ts-accessor: var(--cinema-foreground);
+  --color-ts-get-signature: var(--cinema-foreground);
+  --color-ts-set-signature: var(--cinema-foreground);
+  --color-ts-type-alias: var(--cinema-bronze-text);
+  --color-ts-keyword: var(--cinema-gold);
+
+  --code-background: var(--cinema-code-background);
+  --dim-toolbar-contents-height: 3.75rem;
+}
+
+/* ---------- Page ground ---------- */
+
+html {
+  background: var(--cinema-background);
+}
+
+/* The ground colour lives on `html` only. A painted `body` background would
+   cover the glow below, which sits at z-index -1 in the root stacking
+   context — under the body's own background. */
+body {
+  background: transparent;
+  color: var(--cinema-foreground);
+  font-family: var(--cinema-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The CinemaBackground of the app: a warm wash from the upper right plus a
+   brighter focal glow, fixed behind everything. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      45% 40% at 78% 10%,
+      color-mix(in oklab, var(--cinema-glow) 24%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      90% 80% at 80% 0%,
+      color-mix(in oklab, var(--cinema-glow) 16%, var(--cinema-background)),
+      var(--cinema-background) 62%
+    );
+}
+
+::selection {
+  background: color-mix(in oklab, var(--cinema-gold) 35%, transparent);
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--cinema-gold) 55%, transparent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+a {
+  color: var(--cinema-gold);
+}
+
+code,
+pre,
+.tsd-signature,
+.tsd-breadcrumb {
+  font-family: var(--cinema-mono);
+}
+
+.tsd-typography :not(pre) > code,
+.tsd-comment :not(pre) > code,
+.tsd-returns-title + p code {
+  font-size: 0.88em;
+  padding: 0.1em 0.4em;
+  border: 1px solid var(--cinema-border);
+  border-radius: 5px;
+  background: var(--cinema-secondary);
+  color: var(--cinema-amber);
+}
+
+.cinema-eyebrow {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--cinema-gold);
+}
+
+.cinema-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 8px;
+  border: 1px solid;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.cinema-badge-gold {
+  color: var(--cinema-gold);
+  border-color: color-mix(in oklab, var(--cinema-gold) 40%, transparent);
+  background: color-mix(in oklab, var(--cinema-gold) 10%, transparent);
+}
+
+.cinema-badge-neutral {
+  color: var(--cinema-muted);
+  border-color: var(--cinema-border);
+  background: color-mix(in oklab, var(--cinema-foreground) 5%, transparent);
+}
+
+/* ---------- Toolbar ---------- */
+
+.tsd-page-toolbar {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--cinema-letterbox) 88%, transparent),
+    color-mix(in oklab, var(--cinema-background) 82%, transparent)
+  );
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid color-mix(in oklab, var(--cinema-border) 70%, transparent);
+}
+
+.tsd-toolbar-contents {
+  gap: 12px;
+}
+
+.tsd-page-toolbar .cinema-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  padding: 0;
+  color: var(--cinema-foreground);
+  text-decoration: none;
+}
+
+.cinema-wordmark {
+  font-weight: 800;
+  font-size: 15px;
+  line-height: 1;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cinema-wordmark-dot {
+  padding-inline: 0.15em;
+  color: var(--cinema-gold);
+}
+
+.cinema-api-tag {
+  padding: 4px 8px 4px 10px;
+  border: 1px solid color-mix(in oklab, var(--cinema-gold) 40%, transparent);
+  border-radius: 6px;
+  background: color-mix(in oklab, var(--cinema-gold) 10%, transparent);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: var(--cinema-gold);
+}
+
+#tsd-toolbar-links {
+  margin-left: auto;
+}
+
+/* TypeDoc's search trigger is an icon button; it is drawn as a search field
+   so the reference reads as searchable at a glance. */
+#tsd-search-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: min(340px, 36vw);
+  height: 36px;
+  padding: 0 10px 0 12px;
+  border: 1px solid var(--cinema-border);
+  border-radius: 8px;
+  background: color-mix(in oklab, var(--cinema-card) 80%, transparent);
+  color: var(--cinema-muted);
+  opacity: 1;
+}
+
+#tsd-search-trigger::after {
+  content: "Search the reference";
+  flex: 1;
+  overflow: hidden;
+  font: 13px var(--cinema-sans);
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#tsd-search-trigger:hover {
+  border-color: color-mix(in oklab, var(--cinema-gold) 45%, transparent);
+  color: var(--cinema-foreground);
+}
+
+#tsd-search-trigger svg {
+  flex-shrink: 0;
+}
+
+#tsd-search {
+  border: 1px solid var(--cinema-border);
+  border-radius: var(--cinema-radius);
+  background: var(--cinema-card);
+  color: var(--cinema-foreground);
+}
+
+#tsd-search-input {
+  font-family: var(--cinema-sans);
+  color: var(--cinema-foreground);
+}
+
+#tsd-search-results > li:nth-child(even) {
+  background: var(--cinema-panel);
+}
+
+#tsd-search-results > li:is(:hover, [aria-selected="true"]) {
+  background: color-mix(in oklab, var(--cinema-gold) 12%, var(--cinema-card));
+}
+
+.tsd-widget.menu {
+  border: 1px solid var(--cinema-border);
+  border-radius: 8px;
+}
+
+/* ---------- Sidebar navigation ---------- */
+
+.site-menu .tsd-navigation {
+  font-size: 13.5px;
+}
+
+.tsd-navigation a,
+.tsd-navigation summary > span,
+.tsd-page-navigation a {
+  border-radius: 6px;
+  color: color-mix(in oklab, var(--cinema-foreground) 80%, transparent);
+}
+
+.tsd-navigation a:hover,
+.tsd-page-navigation a:hover {
+  background: var(--cinema-secondary);
+  color: var(--cinema-foreground);
+  text-decoration: none;
+}
+
+.tsd-navigation a.current,
+.tsd-page-navigation a.current {
+  background: color-mix(in oklab, var(--cinema-gold) 9%, transparent);
+  box-shadow: inset 2px 0 0 var(--cinema-gold);
+  color: var(--cinema-gold);
+}
+
+.site-menu > .tsd-navigation > a:first-child {
+  color: var(--cinema-foreground);
+  font-weight: 600;
+}
+
+.tsd-accordion-summary > h3,
+.tsd-accordion-summary h3,
+.page-menu .tsd-accordion-summary {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--cinema-muted);
+}
+
+.tsd-theme-toggle {
+  display: none;
+}
+
+.settings-label {
+  color: var(--cinema-muted);
+}
+
+/* ---------- Home: marquee ---------- */
+
+.cinema-home {
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+  padding-bottom: 32px;
+}
+
+/* The marquee sits straight on the page ground: the page's own glow is its
+   backdrop, so it gets no card, border or gradient of its own. */
+.cinema-marquee {
+  padding-top: 16px;
+}
+
+.cinema-marquee h1 {
+  max-width: 16ch;
+  margin: 14px 0 16px;
+  font-size: clamp(34px, 5vw, 56px);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.cinema-marquee h1 em {
+  font-style: normal;
+  color: var(--cinema-amber);
+}
+
+.cinema-lede {
+  max-width: 58ch;
+  margin: 0;
+  font-size: 16px;
+  color: color-mix(in oklab, var(--cinema-foreground) 80%, transparent);
+}
+
+.cinema-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+/* ---------- Home: sections ---------- */
+
+.cinema-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.cinema-section-head h2 {
+  margin: 8px 0 0;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.cinema-section-head > p {
+  max-width: 44ch;
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--cinema-muted);
+}
+
+/* ---------- Home: layer posters ---------- */
+
+.cinema-posters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cinema-poster {
+  position: relative;
+  display: grid;
+  gap: 12px;
+}
+
+.cinema-poster-art {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  padding: 16px 18px;
+  border: 1px solid var(--cinema-border);
+  border-radius: var(--cinema-radius);
+  /* Flat, like every card: the page glow is the only gradient. */
+  background: var(--cinema-card);
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
+}
+
+.cinema-poster-path {
+  font-family: var(--cinema-mono);
+  font-size: 12px;
+  color: var(--cinema-muted);
+}
+
+.cinema-poster-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cinema-poster-count {
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.cinema-play {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border: 1px solid color-mix(in oklab, var(--cinema-foreground) 22%, transparent);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--cinema-foreground) 12%, transparent);
+  color: var(--cinema-foreground);
+}
+
+.cinema-poster-meta h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.cinema-poster-meta h3 a {
+  color: var(--cinema-foreground);
+  text-decoration: none;
+}
+
+/* The title link covers the whole poster, so the art is clickable too. */
+.cinema-poster-meta h3 a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--cinema-radius);
+}
+
+.cinema-poster-meta p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--cinema-muted);
+}
+
+.cinema-poster:hover .cinema-poster-art,
+.cinema-poster:focus-within .cinema-poster-art {
+  border-color: color-mix(in oklab, var(--cinema-gold) 55%, transparent);
+  transform: translateY(-2px);
+}
+
+.cinema-poster:hover .cinema-play,
+.cinema-poster:focus-within .cinema-play {
+  border-color: var(--cinema-gold);
+  background: var(--cinema-gold);
+  color: var(--cinema-on-gold);
+}
+
+/* ---------- Home: module index ---------- */
+
+.cinema-index {
+  overflow: hidden;
+  border: 1px solid var(--cinema-border);
+  border-radius: var(--cinema-radius);
+  background: color-mix(in oklab, var(--cinema-card) 70%, transparent);
+}
+
+.cinema-index-group {
+  scroll-margin-top: calc(var(--dim-header-height) + 16px);
+}
+
+.cinema-index-group-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--cinema-border);
+  background: var(--cinema-panel);
+}
+
+.cinema-index-group-head h3 {
+  font-size: 10px;
+}
+
+.cinema-index-count {
+  margin-left: auto;
+  font-family: var(--cinema-mono);
+  font-size: 11px;
+  color: var(--cinema-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.cinema-index-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cinema-index-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name kinds"
+    "summary summary";
+  align-items: baseline;
+  gap: 4px 16px;
+  padding: 12px 18px;
+  border-bottom: 1px solid color-mix(in oklab, var(--cinema-border) 60%, transparent);
+}
+
+.cinema-index-group:last-child .cinema-index-row:last-child {
+  border-bottom: 0;
+}
+
+.cinema-index-row:hover {
+  background: color-mix(in oklab, var(--cinema-gold) 5%, transparent);
+}
+
+.cinema-index-name {
+  grid-area: name;
+  font-family: var(--cinema-mono);
+  font-size: 13px;
+  color: var(--cinema-foreground);
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.cinema-index-name::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.cinema-index-row:hover .cinema-index-name {
+  color: var(--cinema-gold);
+}
+
+.cinema-dim {
+  color: var(--cinema-muted);
+}
+
+.cinema-index-summary {
+  grid-area: summary;
+  max-width: 80ch;
+}
+
+.cinema-index-summary,
+.cinema-index-summary p {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--cinema-muted);
+}
+
+.cinema-index-summary:empty {
+  display: none;
+}
+
+.cinema-index-kinds {
+  grid-area: kinds;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 4px;
+}
+
+/* ---------- Declaration pages ---------- */
+
+.tsd-page-title {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.tsd-breadcrumb {
+  font-size: 12px;
+}
+
+.tsd-breadcrumb a {
+  color: var(--cinema-muted);
+}
+
+.tsd-breadcrumb a:hover {
+  color: var(--cinema-gold);
+}
+
+.tsd-page-title h1 {
+  margin: 0;
+  font-family: var(--cinema-mono);
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+.cinema-kind {
+  margin-top: 8px;
+}
+
+.tsd-signature {
+  margin-top: 18px;
+  padding: 18px 20px;
+  border: 1px solid color-mix(in oklab, var(--cinema-gold) 35%, var(--cinema-border));
+  border-radius: var(--cinema-radius);
+  background: var(--cinema-card);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.tsd-signature-keyword {
+  color: var(--cinema-gold);
+}
+
+.tsd-signature-symbol {
+  color: var(--cinema-muted);
+}
+
+.tsd-signature-type,
+a.tsd-signature-type {
+  color: var(--cinema-bronze-text);
+  font-style: normal;
+}
+
+a.tsd-signature-type:hover {
+  color: var(--cinema-amber);
+}
+
+.tsd-kind-call-signature {
+  font-weight: 500;
+}
+
+.tsd-signatures .tsd-description {
+  margin-top: 18px;
+}
+
+.tsd-comment.tsd-typography {
+  max-width: 68ch;
+}
+
+.tsd-typography p,
+.tsd-typography li {
+  color: color-mix(in oklab, var(--cinema-foreground) 88%, transparent);
+}
+
+.tsd-description > .tsd-comment:first-child > p:first-child {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--cinema-foreground);
+}
+
+/* Section headings — Parameters, Returns, Remarks, Example, Type Declaration,
+   member groups — share the eyebrow treatment with a fading rule. */
+.tsd-parameters-title,
+.tsd-returns-title,
+.tsd-comment [class^="tsd-tag-"] > h4,
+.tsd-type-declaration > h4,
+.tsd-panel-group > .tsd-accordion-summary h2,
+.tsd-panel > h4 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 36px 0 14px;
+  font-family: var(--cinema-sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--cinema-gold);
+}
+
+.tsd-parameters-title::after,
+.tsd-returns-title::after,
+.tsd-comment [class^="tsd-tag-"] > h4::after,
+.tsd-type-declaration > h4::after,
+.tsd-panel > h4::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--cinema-border), transparent);
+}
+
+.tsd-returns-title .tsd-signature-type {
+  font-family: var(--cinema-mono);
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.tsd-parameter-list {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--cinema-border);
+  border-radius: var(--cinema-radius);
+  list-style: none;
+}
+
+.tsd-parameter-list > li {
+  margin: 0;
+  padding: 14px 18px;
+  background: color-mix(in oklab, var(--cinema-card) 70%, transparent);
+}
+
+.tsd-parameter-list > li + li {
+  border-top: 1px solid var(--cinema-border);
+}
+
+.tsd-parameter-list > li > span:first-child {
+  font-family: var(--cinema-mono);
+  font-size: 13.5px;
+}
+
+.tsd-parameter-list .tsd-comment p {
+  margin: 6px 0 0;
+  font-size: 14px;
+}
+
+/* ---------- Code blocks ---------- */
+
+pre {
+  padding: 16px 18px;
+  border: 1px solid var(--cinema-border);
+  border-radius: var(--cinema-radius);
+  background: var(--cinema-code-background);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+pre code {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+pre > button {
+  top: 10px;
+  right: 10px;
+  padding: 3px 10px;
+  border: 1px solid var(--cinema-border);
+  border-radius: 6px;
+  background: var(--cinema-panel);
+  color: var(--cinema-muted);
+  font: 600 11.5px var(--cinema-sans);
+}
+
+pre > button:hover {
+  border-color: color-mix(in oklab, var(--cinema-gold) 45%, transparent);
+  color: var(--cinema-gold);
+}
+
+/* ---------- Members and module pages ---------- */
+
+.tsd-panel.tsd-member,
+.tsd-member-summary,
+.tsd-index-panel {
+  border-color: var(--cinema-border);
+}
+
+.tsd-member .tsd-anchor-link,
+.tsd-member-summary-name {
+  font-family: var(--cinema-mono);
+}
+
+.tsd-member-summaries {
+  border: 1px solid var(--cinema-border);
+  border-radius: var(--cinema-radius);
+  background: color-mix(in oklab, var(--cinema-card) 70%, transparent);
+}
+
+.tsd-kind-icon ~ span,
+.tsd-member-summary-name a {
+  color: var(--cinema-foreground);
+}
+
+.tsd-sources {
+  margin-top: 36px;
+  padding-top: 16px;
+  border-top: 1px solid var(--cinema-border);
+  font-size: 13px;
+  color: var(--cinema-muted);
+}
+
+.tsd-sources a {
+  font-family: var(--cinema-mono);
+  color: var(--cinema-foreground);
+}
+
+.tsd-sources a:hover {
+  color: var(--cinema-gold);
+}
+
+/* ---------- Footer ---------- */
+
+footer {
+  border-top-color: var(--cinema-border);
+}
+
+.cinema-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  font-size: 12px;
+  color: var(--cinema-muted);
+}
+
+.cinema-footer p {
+  margin: 0;
+}
+
+.cinema-footer .cinema-wordmark {
+  font-size: 11px;
+}
+
+.cinema-footer code {
+  font-size: 12px;
+  color: var(--cinema-foreground);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1199px) {
+  .cinema-posters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 769px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  .cinema-index-row {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "name"
+      "summary"
+      "kinds";
+  }
+
+  .cinema-index-kinds {
+    justify-content: start;
+  }
+
+  #tsd-search-trigger {
+    width: 36px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  #tsd-search-trigger::after {
+    content: none;
+  }
+
+  .cinema-api-tag {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .cinema-posters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cinema-wordmark {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinema-poster-art {
+    transition: none;
+  }
+
+  .cinema-poster:hover .cinema-poster-art,
+  .cinema-poster:focus-within .cinema-poster-art {
+    transform: none;
+  }
+}
