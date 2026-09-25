@@ -54,10 +54,18 @@ export function captureInstallOffer(): void {
 /**
  * The offer captured before hydration, if one is waiting.
  *
+ * @remarks
+ * Safe to call where there is no browser. `useInstallPrompt` reads it as a
+ * lazy state initializer, which React also runs while rendering on the server;
+ * nothing can have been captured there, so the answer is `null` rather than a
+ * `ReferenceError` that fails every page carrying the site header.
+ *
  * @returns The stashed offer, or `null`
  * @category Utilities
  */
 export function takeStashedOffer(): BeforeInstallPromptEvent | null {
+  if (typeof window === "undefined") return null;
+
   return (window as WindowWithStash)[STASH] ?? null;
 }
 
