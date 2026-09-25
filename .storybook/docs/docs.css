@@ -1,0 +1,178 @@
+/*
+ * Styles for the workshop's docs pages, loaded by `CinemaDocsContainer`.
+ *
+ * Tailwind does not scan `.storybook/`, so the pages cannot use utility classes
+ * of their own; the app components they embed bring theirs from `src/`. Every
+ * colour here is an Immersion Cinema token, resolved dark because the container
+ * wraps each page in `.dark`.
+ */
+
+/* The page inherits its text colour from here rather than from <body>, which
+   follows the canvas theme. */
+.cinema-docs-page {
+  color: var(--foreground);
+}
+
+/* Storybook fills the page with the theme's content colour; clearing it lets
+   the container's cinema backdrop show through. */
+.cinema-docs-page .sbdocs-wrapper {
+  background: transparent;
+}
+
+.cinema-docs {
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+  padding-block: 8px 48px;
+  font-family: var(--font-sans);
+}
+
+.cinema-docs__hero {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cinema-docs__title {
+  margin: 0;
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+/* `--gold`, not `--amber`: on the light variant it is the bronze that stays
+   readable on ivory. */
+.cinema-docs__title-accent {
+  color: var(--gold);
+  text-shadow: 0 3px 30px color-mix(in oklab, var(--glow) 40%, transparent);
+}
+
+.cinema-docs__page-title {
+  margin: 0;
+  font-size: clamp(30px, 4vw, 40px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.cinema-docs__body {
+  margin: 0;
+  max-width: 72ch;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.cinema-docs__lead {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+}
+
+.cinema-docs__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* Heading on the left, its note on the right, as on the API reference home. */
+.cinema-docs__section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 32px;
+}
+
+.cinema-docs__section-head .cinema-docs__heading {
+  margin-top: 8px;
+}
+
+.cinema-docs__section-head .cinema-docs__note {
+  max-width: 44ch;
+}
+
+.cinema-docs__section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cinema-docs__heading {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.cinema-docs__note {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--muted-foreground);
+}
+
+/* Four sidebar groups and four shipping rules: two columns keep them even. */
+.cinema-docs__shelves,
+.cinema-docs__checklist.cinema-docs__checklist--pairs {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cinema-docs__shelves {
+  display: grid;
+  gap: 14px;
+}
+
+.cinema-docs__checklist {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 640px) {
+  .cinema-docs__shelves,
+  .cinema-docs__checklist.cinema-docs__checklist--pairs {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cinema-docs__check {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--card) 70%, transparent);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.cinema-docs__check svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  color: var(--gold);
+}
+
+.cinema-docs__check strong {
+  display: block;
+  color: var(--foreground);
+}
+
+.cinema-docs code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--gold);
+  /* A token name split at its hyphen ("--" / "amber") no longer reads as one. */
+  white-space: nowrap;
+}

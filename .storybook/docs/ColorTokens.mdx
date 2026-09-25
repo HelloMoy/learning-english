@@ -1,0 +1,10 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks";
+
+import globalsCss from "../../src/app/globals.css?raw";
+import { ColorTokensPage } from "./color-tokens-page/color-tokens-page";
+
+<Meta title="Docs/Color tokens" />
+
+<Unstyled>
+  <ColorTokensPage stylesheet={globalsCss} />
+</Unstyled>
