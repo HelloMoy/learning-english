@@ -51,13 +51,28 @@ The application SHALL provide a `delete-account` React Email template, localized
 
 Every account email SHALL render in the Immersion Cinema dark palette, from one shared shell, so
 the message a learner reads matches the app they are about to open. The shell SHALL ground the
-message on `#08080b`, set body text in `#f4f1ea` and fine print in `#9b968c`, and print the
-`ENGLISH·COURSE` wordmark with its gold `#e7b64c` middle dot above the heading.
+message on the neutral near-black `#080808`, set body text in `#f4f1ea` and fine print in
+`#9b968c`, and print the `ENGLISH·COURSE` wordmark with its gold `#e7b64c` middle dot above the
+heading.
+
+The ground SHALL be a neutral gray (equal red, green and blue) rather than the app's `#08080b`
+token, because the Outlook app on iOS re-maps any tinted colour in dark mode — `#08080b` comes
+back as a mid gray `#4c4c4e` — while it leaves neutral grays as they are. The two are
+indistinguishable on screen.
 
 The shell SHALL carry the `CinemaBackground` gradient — its two radial layers and its letterbox
 scrim — as static colour values, because mail clients do not support `color-mix()`. Those layers
-SHALL sit on top of a `background-color` of `#08080b`, so a client that drops background images
+SHALL sit on top of a `background-color` of `#080808`, so a client that drops background images
 renders flat near-black rather than falling back to white.
+
+The same two radial layers SHALL also be painted by a hosted PNG, `emails/cinema-glow.png`, baked
+over the `#080808` ground and served from the app's public folder. The image SHALL sit on a layer
+of its own inside the gradient layer, carrying only the image and its sizing — no colour — and
+SHALL be stretched to cover that layer. A client that draws images but no CSS gradients, as
+Outlook iOS does, then still shows the glow; a client that blocks remote images still shows the
+CSS gradients; and a client that strips an element's styles because it holds a `url()` loses only
+the image. The image's address SHALL be absolute, built from the origin of the link the email
+delivers, so the message loads it from the deployment that sent it.
 
 The message SHALL declare a dark colour scheme in its head. The declaration is a hint that some
 clients honour; it SHALL NOT be relied on to stop a client from inverting colours — that defence
@@ -69,13 +84,24 @@ read the learner's stored theme, so the palette is baked.
 #### Scenario: The shell renders on the cinema ground
 
 - **WHEN** any account email is rendered
-- **THEN** its body carries the `#08080b` background colour, the two radial gradient layers and the
+- **THEN** its body carries the `#080808` background colour, the two radial gradient layers and the
   letterbox scrim, and prints the `ENGLISH·COURSE` wordmark
+
+#### Scenario: The ground is a neutral gray
+
+- **WHEN** any account email is rendered
+- **THEN** no background colour in it is `#08080b`
+
+#### Scenario: The glow is also an image from the sending deployment
+
+- **WHEN** an account email is rendered for a link on `https://develop.example.com`
+- **THEN** a layer holding no background colour carries
+  `url(https://develop.example.com/emails/cinema-glow.png)` stretched to cover it
 
 #### Scenario: A client that drops background images still reads
 
 - **WHEN** a client strips `background-image` from the message
-- **THEN** the remaining `background-color` is `#08080b` and every text colour on it stays legible
+- **THEN** the remaining `background-color` is `#080808` and every text colour on it stays legible
 
 #### Scenario: The message declares its dark colour scheme
 
@@ -175,12 +201,14 @@ The link SHALL be a locale-qualified `/[locale]/forgot-password` path and SHALL 
 
 The shared shell SHALL hold its cinema colours against clients that invert an email's colours in
 dark mode whatever it declares: the Gmail app on iOS inverts every solid colour — backgrounds, text
-and borders — but leaves background images alone, and the Outlook apps re-map colours they judge
-too light or too dark.
+and borders — but leaves background images alone, and the Outlook app on iOS re-maps every tinted
+colour but leaves neutral grays alone and draws no CSS gradient.
 
 - Both letterbox bars and the rule SHALL be painted by a one-colour `background-image` of their
   own colour as well as their `background-color`, so a client that inverts colours but spares
   images leaves them as designed, and a client that drops images still has the colour.
+- Every fill that must stay dark — the ground, the letterbox bars and the rule — SHALL be a
+  neutral gray, so Outlook iOS leaves it as designed: the bars `#000000` and the rule `#262626`.
 - The shell SHALL carry an embedded stylesheet whose rules only Gmail applies (selected through
   the `<u>` element Gmail puts before the body, with the body carrying a dedicated class). Under
   those rules, the light neutral text — the wordmark letters, heading, body and fine print — SHALL
@@ -193,9 +221,11 @@ too light or too dark.
   blend layers invert hue; Gmail darkens them with their hue kept and they stay legible.
 - Both calls to action SHALL be left to invert as a unit, fill and label together: a label cannot
   be blended back without hairlines on its fill, and an inverted button still reads — a dark gold
-  button with a light label, or a light warning button with a dark one.
+  button with a light label, or a light warning button with a dark one. Outlook iOS re-maps them
+  the same way.
 - The stylesheet SHALL also carry Outlook's dark-mode overrides (`[data-ogsc]` for text colour,
-  `[data-ogsb]` for background colour) pinning the same colours.
+  `[data-ogsb]` for background colour) pinning the same colours, for the Outlook clients that
+  honour them. Outlook iOS does not.
 
 A client that drops embedded styles, gradients and blend modes together — Gmail showing a
 non-Google account — is out of reach; there the message SHALL still invert evenly, because every
@@ -206,6 +236,11 @@ background image has a matching `background-color` underneath.
 - **WHEN** any account email is rendered
 - **THEN** both letterbox bars and the rule each carry a one-colour `linear-gradient` background
   image of the same colour as their `background-color`
+
+#### Scenario: The rule is a neutral gray
+
+- **WHEN** any account email is rendered
+- **THEN** the rule is painted `#262626`, and no colour in the message is `#26262f`
 
 #### Scenario: Gmail's inversion is cancelled for light text
 

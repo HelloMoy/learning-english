@@ -74,8 +74,10 @@ export type AccountEmailProps = {
  * so the fills that must not flip are also painted as one-colour gradients,
  * and an embedded stylesheet that only Gmail matches blends the light text
  * back to its colours; the buttons invert as a unit and still read. The same
- * stylesheet gives the Outlook apps, which mark what they re-map with
- * `data-ogsc` and `data-ogsb`, the colours to restore.
+ * stylesheet gives the Outlook clients that mark what they re-map with
+ * `data-ogsc` and `data-ogsb` the colours to restore. The Outlook app on iOS
+ * honours neither: it re-maps every tinted colour and draws no gradient, so
+ * the dark fills are neutral grays and the glow is also a hosted image.
  *
  * @category Email
  */
@@ -102,74 +104,76 @@ export function AccountEmail({ lang, copy, url, action = "routine" }: AccountEma
         className="body cinema-ground"
         style={styles.page}
       >
-        <Section
-          className="cinema-letterbox"
-          style={styles.letterboxBar}
-        >
-          &nbsp;
-        </Section>
-        <Container style={styles.frame}>
-          <Text
-            className="cinema-foreground cinema-wordmark"
-            style={styles.wordmark}
+        <Section style={glowImageLayer(url)}>
+          <Section
+            className="cinema-letterbox"
+            style={styles.letterboxBar}
           >
-            <KeptLightInGmail>ENGLISH</KeptLightInGmail>
-            <span
-              className="cinema-gold"
-              style={styles.wordmarkDot}
+            &nbsp;
+          </Section>
+          <Container style={styles.frame}>
+            <Text
+              className="cinema-foreground cinema-wordmark"
+              style={styles.wordmark}
             >
-              ·
-            </span>
-            <KeptLightInGmail>COURSE</KeptLightInGmail>
-          </Text>
-          <Heading
-            className="cinema-foreground"
-            style={styles.heading}
+              <KeptLightInGmail>ENGLISH</KeptLightInGmail>
+              <span
+                className="cinema-gold"
+                style={styles.wordmarkDot}
+              >
+                ·
+              </span>
+              <KeptLightInGmail>COURSE</KeptLightInGmail>
+            </Text>
+            <Heading
+              className="cinema-foreground"
+              style={styles.heading}
+            >
+              <KeptLightInGmail>{copy.heading}</KeptLightInGmail>
+            </Heading>
+            <Text
+              className="cinema-foreground"
+              style={styles.paragraph}
+            >
+              <KeptLightInGmail>{copy.body}</KeptLightInGmail>
+            </Text>
+            <Button
+              className={CALL_TO_ACTION[action].className}
+              href={url}
+              style={{ ...styles.callToAction, ...CALL_TO_ACTION[action].colors }}
+            >
+              {copy.button}
+            </Button>
+            <Text
+              className="cinema-muted"
+              style={styles.finePrint}
+            >
+              <KeptLightInGmail>{copy.linkIntro}</KeptLightInGmail>
+            </Text>
+            <Link
+              className="cinema-link"
+              href={url}
+              style={styles.link}
+            >
+              {url}
+            </Link>
+            <Hr
+              className="cinema-rule"
+              style={styles.rule}
+            />
+            <Text
+              className="cinema-muted"
+              style={styles.finePrint}
+            >
+              <KeptLightInGmail>{copy.ignore}</KeptLightInGmail>
+            </Text>
+          </Container>
+          <Section
+            className="cinema-letterbox"
+            style={styles.letterboxBar}
           >
-            <KeptLightInGmail>{copy.heading}</KeptLightInGmail>
-          </Heading>
-          <Text
-            className="cinema-foreground"
-            style={styles.paragraph}
-          >
-            <KeptLightInGmail>{copy.body}</KeptLightInGmail>
-          </Text>
-          <Button
-            className={CALL_TO_ACTION[action].className}
-            href={url}
-            style={{ ...styles.callToAction, ...CALL_TO_ACTION[action].colors }}
-          >
-            {copy.button}
-          </Button>
-          <Text
-            className="cinema-muted"
-            style={styles.finePrint}
-          >
-            <KeptLightInGmail>{copy.linkIntro}</KeptLightInGmail>
-          </Text>
-          <Link
-            className="cinema-link"
-            href={url}
-            style={styles.link}
-          >
-            {url}
-          </Link>
-          <Hr
-            className="cinema-rule"
-            style={styles.rule}
-          />
-          <Text
-            className="cinema-muted"
-            style={styles.finePrint}
-          >
-            <KeptLightInGmail>{copy.ignore}</KeptLightInGmail>
-          </Text>
-        </Container>
-        <Section
-          className="cinema-letterbox"
-          style={styles.letterboxBar}
-        >
-          &nbsp;
+            &nbsp;
+          </Section>
         </Section>
       </Body>
     </Html>
@@ -191,24 +195,27 @@ function KeptLightInGmail({ children }: { children: ReactNode }) {
  * properties nor `color-mix()`, so the values are written out — change one
  * here only when the token behind it moves.
  *
+ * The fills that must stay dark are neutral grays, a hair off their tokens:
+ * the Outlook app on iOS leaves a neutral gray alone in dark mode but re-maps
+ * any tinted colour, however dark — `#08080b` comes back as `#4c4c4e`.
+ *
  * `glowWash` and the focal layer's alpha are `CinemaBackground`'s gradients
- * with their `color-mix()` resolved: `--glow #f0c869` at 16% over
- * `--background #08080b` is `#2d271a`, and the focal layer is the same glow at
- * 24%.
+ * with their `color-mix()` resolved: `--glow #f0c869` at 16% over the
+ * ground is `#2d2718`, and the focal layer is the same glow at 24%.
  */
 const CINEMA = {
-  ground: "#08080b", // --background
+  ground: "#080808", // --background #08080b, untinted
   letterbox: "#000000", // --letterbox
   foreground: "#f4f1ea", // --foreground
   mutedForeground: "#9b968c", // --muted-foreground
   gold: "#e7b64c", // --gold
   onGold: "#1a1200", // --primary-foreground
   bronzeText: "#d9a37a", // --bronze-text
-  border: "#26262f", // --border
+  border: "#262626", // --border #26262f, untinted
   destructiveFill: "#331512",
   destructive: "#b3402f", // --destructive
   destructiveLabel: "#ef9d8c",
-  glowWash: "#2d271a",
+  glowWash: "#2d2718",
   glowFocal: "rgba(240,200,105,0.24)",
   glowFaded: "rgba(240,200,105,0)",
 } as const;
@@ -218,6 +225,26 @@ const CINEMA = {
    for Gmail, and as a colour for clients that drop images. */
 function solidFill(color: string): CSSProperties {
   return { backgroundColor: color, backgroundImage: `linear-gradient(${color},${color})` };
+}
+
+/*
+ * The Outlook app on iOS draws no CSS gradient but does draw a `url()`, so the
+ * glow is also a bitmap of the page's two radial layers, baked over the ground.
+ * Stretched to its box it scales exactly as the percentage gradients do, and
+ * being opaque it hides them where it loads. It sits alone on its layer
+ * because Gmail's web client drops a whole `style` holding a `url()`: there
+ * only the image goes, and the gradients beneath remain. The address comes
+ * from the email's own link, so the image loads from the deployment that sent
+ * it.
+ */
+const GLOW_IMAGE_PATH = "/emails/cinema-glow.png";
+
+function glowImageLayer(actionUrl: string): CSSProperties {
+  return {
+    backgroundImage: `url(${new URL(GLOW_IMAGE_PATH, actionUrl).href})`,
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "100% 100%",
+  };
 }
 
 /*
