@@ -9,9 +9,7 @@ production.
 
 Temporary by design: it exists so the Advanced Intermediate Course can ship later, and it
 is shaped to be removed in two independent steps once every course is published.
-
 ## Requirements
-
 ### Requirement: A course manifest declares whether it is a draft
 
 `CourseManifest` SHALL accept an optional `draft` boolean. A manifest that omits it
@@ -29,6 +27,10 @@ malformed field does.
 `draft` SHALL be a property of a whole course. Modules, lessons and resources SHALL NOT
 carry it.
 
+No tracked manifest is currently a draft: the Advanced Intermediate Course, the course
+this capability was built for, is published. The capability stays in place until its
+machinery is removed by its own change.
+
 #### Scenario: A manifest without `draft` is published
 
 - **WHEN** a course manifest declares no `draft` field
@@ -36,8 +38,14 @@ carry it.
 
 #### Scenario: A manifest declares itself a draft
 
-- **WHEN** `src/content/advanced-intermediate-course.json` declares `"draft": true`
+- **WHEN** a course manifest declares `"draft": true`
 - **THEN** the parsed manifest carries `draft: true`, and no other manifest file changes
+
+#### Scenario: The Advanced Intermediate Course is published
+
+- **WHEN** `src/content/advanced-intermediate-course.json` is parsed
+- **THEN** it carries no `draft` field, and the course is served in production with no
+  `SHOW_DRAFT_COURSES` configured
 
 #### Scenario: A non-boolean `draft` fails the parse
 
@@ -47,8 +55,7 @@ carry it.
 
 #### Scenario: No code names the hidden course
 
-- **WHEN** a developer searches `src/` outside `src/content/` for the slug
-  `advanced-intermediate-course`
+- **WHEN** a developer searches `src/` outside `src/content/` for the slug of any course
 - **THEN** no module that filters or wires the catalog contains it
 
 ### Requirement: Draft courses are withheld from the catalog at a single point
@@ -194,3 +201,4 @@ module SHALL import them, so no caller is orphaned by the deletion.
 - **WHEN** a developer opens this change's `design.md`
 - **THEN** it lists every file to touch to remove the flag, in order, with nothing left
   to discover
+
