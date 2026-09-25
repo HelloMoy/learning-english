@@ -109,6 +109,15 @@ describe("SignUpForm", () => {
     expect(screen.getByRole("button", { name: "Continue with Google" })).toBeInTheDocument();
   });
 
+  test("WHEN it renders THEN email and password come first and Google second", () => {
+    renderInLocale(<SignUpForm returnPath="/learning" />);
+
+    const submit = screen.getByRole("button", { name: "Create account" });
+    const google = screen.getByRole("button", { name: "Continue with Google" });
+
+    expect(submit.compareDocumentPosition(google)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
   test("WHEN the request is in flight THEN the form is covered rather than replaced", async () => {
     signUp.mockReturnValue(new Promise(() => {}) as never);
     const email = faker.internet.email();

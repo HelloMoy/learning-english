@@ -73,20 +73,16 @@ export function SignInForm({ returnPath, passwordUpdated = false }: SignInFormPr
   return (
     <div className="flex flex-col gap-5">
       <AccountWait busy={submission.isPending || isLeaving}>
-        <AccountWait.Paused className="flex flex-col gap-5">
-          {passwordUpdated ? (
+        {passwordUpdated ? (
+          <AccountWait.Paused>
             <p
               role="status"
               className="rounded-lg bg-muted px-3 py-2 text-center text-sm text-foreground"
             >
               {t("signIn.passwordUpdated")}
             </p>
-          ) : null}
-          <GoogleSignInButton returnPath={returnPath} />
-          <p className="text-center text-xs tracking-wide text-muted-foreground uppercase">
-            {t("divider")}
-          </p>
-        </AccountWait.Paused>
+          </AccountWait.Paused>
+        ) : null}
         <form
           noValidate
           onSubmit={handleSubmit}
@@ -119,6 +115,12 @@ export function SignInForm({ returnPath, passwordUpdated = false }: SignInFormPr
             pendingLabel={t("signIn.submitting")}
           />
         </form>
+        <AccountWait.Paused className="flex flex-col gap-5">
+          <p className="text-center text-xs tracking-wide text-muted-foreground uppercase">
+            {t("divider")}
+          </p>
+          <GoogleSignInButton returnPath={returnPath} />
+        </AccountWait.Paused>
         <AccountWait.Status>{t("signIn.waiting")}</AccountWait.Status>
       </AccountWait>
     </div>

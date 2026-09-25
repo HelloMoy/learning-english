@@ -67,12 +67,6 @@ export function SignUpForm({ returnPath }: SignUpFormProps) {
   return (
     <div className="flex flex-col gap-5">
       <AccountWait busy={submission.isPending}>
-        <AccountWait.Paused className="flex flex-col gap-5">
-          <GoogleSignInButton returnPath={returnPath} />
-          <p className="text-center text-xs tracking-wide text-muted-foreground uppercase">
-            {t("divider")}
-          </p>
-        </AccountWait.Paused>
         <form
           noValidate
           onSubmit={handleSubmit}
@@ -105,6 +99,12 @@ export function SignUpForm({ returnPath }: SignUpFormProps) {
             pendingLabel={t("signUp.submitting")}
           />
         </form>
+        <AccountWait.Paused className="flex flex-col gap-5">
+          <p className="text-center text-xs tracking-wide text-muted-foreground uppercase">
+            {t("divider")}
+          </p>
+          <GoogleSignInButton returnPath={returnPath} />
+        </AccountWait.Paused>
         <AccountWait.Status>{t("signUp.waiting")}</AccountWait.Status>
       </AccountWait>
     </div>
