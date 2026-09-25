@@ -35,9 +35,51 @@ describe("AccountEmail", () => {
       );
 
       // Assert
-      expect(html).toContain("background-color:#08080b");
-      expect(html).toContain("radial-gradient(90% 80% at 80% 0%");
+      expect(html).toContain("background-color:#080808");
+      expect(html).toContain("radial-gradient(90% 80% at 80% 0%, #2d2718, #080808 62%)");
       expect(html).toContain("radial-gradient(45% 40% at 78% 10%");
+    });
+
+    test("WHEN it is rendered THEN the ground is a neutral gray AND so the Outlook app on iOS, which re-maps any tinted colour, leaves it dark", async () => {
+      // Arrange
+      const url = faker.internet.url();
+
+      // Act
+      const html = await render(
+        <AccountEmail
+          lang="en"
+          copy={copy}
+          url={url}
+        />,
+      );
+
+      // Assert
+      expect(html).not.toContain("#08080b");
+    });
+
+    test("WHEN it is rendered THEN the glow is also painted by an image from the link's own deployment, on a layer holding no colour, around the whole frame", async () => {
+      // Arrange
+      const url = faker.internet.url();
+      const glowImage = new URL("/emails/cinema-glow.png", url).href;
+
+      // Act
+      const html = await render(
+        <AccountEmail
+          lang="en"
+          copy={copy}
+          url={url}
+        />,
+      );
+
+      // Assert
+      const glowLayer = html.match(/<table[^>]*style="([^"]*url\([^"]*)"[^>]*>/);
+      expect(glowLayer?.[1]).toContain(`background-image:url(${glowImage})`);
+      expect(glowLayer?.[1]).toContain("background-size:100% 100%");
+      expect(glowLayer?.[1]).toContain("background-repeat:no-repeat");
+      expect(glowLayer?.[1]).not.toContain("background-color");
+      expect(html.indexOf(glowLayer?.[0] ?? "")).toBeLessThan(
+        html.indexOf('class="cinema-letterbox"'),
+      );
     });
 
     test("WHEN it is rendered THEN a black letterbox bar frames the content above AND below", async () => {
@@ -89,8 +131,11 @@ describe("AccountEmail", () => {
       );
 
       // Assert
-      expect(html).toContain("linear-gradient(#26262f,#26262f)");
-      expect(html).not.toContain("solid #26262f");
+      expect(html).toContain(
+        "background-color:#262626;background-image:linear-gradient(#262626,#262626)",
+      );
+      expect(html).not.toContain("solid #262626");
+      expect(html).not.toContain("#26262f");
     });
 
     test("WHEN it is rendered THEN a stylesheet only Gmail matches blends screen over difference on black AND the body carries the class it selects", async () => {
@@ -209,9 +254,9 @@ describe("AccountEmail", () => {
     );
 
     test.each([
-      ["cinema-ground", "#08080b"],
+      ["cinema-ground", "#080808"],
       ["cinema-letterbox", "#000000"],
-      ["cinema-rule", "#26262f"],
+      ["cinema-rule", "#262626"],
     ])(
       "WHEN Outlook re-maps backgrounds THEN [data-ogsb] restores the fill classed %s to %s",
       async (className, color) => {
