@@ -73,23 +73,39 @@ const holdTheNavigation = (page: Page) =>
   });
 
 /**
- * Opens the module overview and waits until the lesson link's prefetch has
- * landed — the state a learner is in when they read the list and tap a lesson.
- * The wait is registered before navigating, so an early prefetch is not missed.
+ * Opens the module overview and waits until every prefetch of the lesson has
+ * fully arrived — the state a learner is in when they read the list and tap a
+ * lesson. Waiting on the response alone is not enough: it resolves on the
+ * headers, and the shell is in the body. Playwright does not report when such a
+ * body finishes, so completion is read from the browser's own Resource Timing,
+ * which records an entry only once a response has been received in full.
  */
 async function openModuleWithLessonPrefetched(page: Page) {
-  const lessonPrefetched = page.waitForResponse((response) => {
-    const headers = response.request().headers();
-    return (
-      headers["next-router-prefetch"] !== undefined &&
-      headers["next-router-segment-prefetch"] === undefined &&
-      new URL(response.url()).pathname === LESSON_PATH
-    );
+  let prefetchesStarted = 0;
+  page.on("request", (request) => {
+    const isLessonPrefetch =
+      request.headers()["next-router-prefetch"] !== undefined &&
+      new URL(request.url()).pathname === LESSON_PATH;
+    if (isLessonPrefetch) prefetchesStarted += 1;
   });
+
   await page.goto(MODULE_PATH);
   await expect(lessonLink(page)).toBeVisible();
-  await lessonPrefetched;
+  await expect.poll(() => prefetchesStarted).toBeGreaterThan(0);
+  await expect
+    .poll(async () => (await lessonPrefetchesReceived(page)) >= prefetchesStarted)
+    .toBe(true);
 }
+
+/** How many fetches of the lesson's path the browser has received in full. */
+const lessonPrefetchesReceived = (page: Page) =>
+  page.evaluate(
+    (lessonPath) =>
+      performance
+        .getEntriesByType("resource")
+        .filter((entry) => new URL(entry.name).pathname === lessonPath).length,
+    LESSON_PATH,
+  );
 
 /**
  * The lesson's own link.
@@ -152,6 +168,11 @@ test.describe("Loading skeletons — the lesson video frame", () => {
 
 test.describe("Loading skeletons — route shells", () => {
   test.skip(!servesProductionBuild, "only a production build prefetches the shell");
+  // The app's service worker claims the page moments after it loads, and
+  // Playwright does not route requests that pass through one, so the hold
+  // would depend on whether it had claimed the page yet. Its fetch handler
+  // does nothing, so blocking it changes nothing about the shell.
+  test.use({ serviceWorkers: "block" });
 
   test("WHEN a lesson is opened from its module THEN the shell replaces the previous page", async ({
     page,
