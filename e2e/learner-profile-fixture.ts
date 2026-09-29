@@ -13,7 +13,7 @@ import type { LearnerState } from "./learner-state-fixture";
  * Course, module and lesson routes send a learner without a card to the
  * onboarding (capability: `learner-onboarding`). Specs that exercise the course
  * itself are not about the onboarding, so they run as a learner who has already
- * made their card.
+ * made their card and started the first course.
  */
 
 /** The learner every onboarded spec runs as. */
@@ -35,11 +35,23 @@ export async function seedLearnerProfile(learnerState: LearnerState): Promise<vo
   await learnerState.profile(ONBOARDED_LEARNER);
 }
 
+/** The course a learner who finished the onboarding started (step 3's recommendation). */
+export const FIRST_COURSE_SLUG = "basic-course";
+
+/**
+ * A learner who finished the onboarding: their card, and the first course they
+ * started from step 3 — what My learning needs to show them anything.
+ */
+export async function seedOnboardedLearner(learnerState: LearnerState): Promise<void> {
+  await seedLearnerProfile(learnerState);
+  await learnerState.enrolled([FIRST_COURSE_SLUG]);
+}
+
 /** Playwright's `test`, with every context signed in and holding a learner card. */
 export const test = signedIn.extend<{ onboardedLearner: void }>({
   onboardedLearner: [
     async ({ learnerState }, use) => {
-      await seedLearnerProfile(learnerState);
+      await seedOnboardedLearner(learnerState);
       await use();
     },
     { auto: true },

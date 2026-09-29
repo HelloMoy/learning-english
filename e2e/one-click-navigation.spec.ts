@@ -60,6 +60,7 @@ test.describe("Home and My learning — one click to the course, one to the less
 
   test("WHEN a lesson has been opened THEN My learning's Resume returns to it", async ({
     page,
+    learnerState,
   }) => {
     const lessonPath = lessonUrl(
       SECOND_COURSE.slug,
@@ -73,6 +74,11 @@ test.describe("Home and My learning — one click to the course, one to the less
       COLD_ROUTE,
     );
 
+    // The record is written after mount; My learning leads with the course it names.
+    await expect
+      .poll(() => learnerState.lastOpenedLessonId(), COLD_ROUTE)
+      .toBe(SECOND_COURSE_START.lesson.id);
+
     await page.goto("/en/learning");
 
     await page.getByRole("link", { name: "Resume" }).first().click(COLD_ROUTE);
@@ -80,8 +86,9 @@ test.describe("Home and My learning — one click to the course, one to the less
     await page.waitForURL(new RegExp(`${SECOND_COURSE_START.lesson.id}$`), COLD_ROUTE);
   });
 
-  test("WHEN a lesson has been opened THEN My learning's quieter link still opens the course", async ({
+  test("WHEN a lesson has been opened THEN My learning's View course opens that course", async ({
     page,
+    learnerState,
   }) => {
     await page.goto(
       lessonUrl(SECOND_COURSE.slug, SECOND_COURSE_START.module.slug, SECOND_COURSE_START.lesson.id),
@@ -90,9 +97,14 @@ test.describe("Home and My learning — one click to the course, one to the less
       COLD_ROUTE,
     );
 
+    await expect
+      .poll(() => learnerState.lastOpenedLessonId(), COLD_ROUTE)
+      .toBe(SECOND_COURSE_START.lesson.id);
+
     await page.goto("/en/learning");
 
-    await page.getByRole("link", { name: "View course content" }).first().click(COLD_ROUTE);
+    // The first View course is the leading course's progress panel.
+    await page.getByRole("link", { name: "View course" }).first().click(COLD_ROUTE);
 
     await page.waitForURL(`**/en/courses/${SECOND_COURSE.slug}`, COLD_ROUTE);
     await expect(page.getByTestId("course-overview")).toBeVisible(COLD_ROUTE);

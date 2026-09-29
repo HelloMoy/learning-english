@@ -73,14 +73,14 @@ test.describe("Course routes require a learner card", () => {
     await expect(page).toHaveURL(/\/en\/start\?next=%2Fcourses%2F/, COLD_ROUTE);
   });
 
-  test("WHEN next points off the site THEN finishing the onboarding opens My learning", async ({
+  test("WHEN next points off the site THEN finishing the card opens the first-course step", async ({
     page,
   }) => {
     await page.goto(`/en/start?next=${encodeURIComponent("https://evil.example")}`);
 
     await completeOnboarding(page);
 
-    await expect(page).toHaveURL("/en/learning", COLD_ROUTE);
+    await expect(page).toHaveURL("/en/start/first-course", COLD_ROUTE);
   });
 
   test("WHEN a signed-in request renders a course route THEN the course content is in the HTML", async ({

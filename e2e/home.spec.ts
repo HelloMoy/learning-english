@@ -105,9 +105,13 @@ test.describe("Landing", () => {
   });
 });
 
+const CARD = { name: "Ana García", avatar: { kind: "initials" } } as const;
+const pad = (sequence: number) => String(sequence).padStart(2, "0");
+
 test.describe("Onboarding", () => {
-  test("WHEN a visitor makes a learner card THEN they land on My learning, greeted by name", async ({
+  test("WHEN a visitor makes a learner card THEN step 3 recommends the Basic Course AND starting it opens its first video", async ({
     page,
+    learnerState,
   }) => {
     await page.goto("/en");
     await page.getByRole("link", { name: "Start course" }).first().click(COLD_ROUTE);
@@ -122,19 +126,61 @@ test.describe("Onboarding", () => {
 
     await page.getByRole("radio", { name: "Echo" }).click();
     await page.getByRole("button", { name: "Continue" }).click();
-    await page.waitForURL(/\/en\/learning$/, COLD_ROUTE);
+    await page.waitForURL(/\/en\/start\/first-course$/, COLD_ROUTE);
 
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Your first course, Ana" }),
+    ).toBeVisible(COLD_ROUTE);
+    await expect(page.getByText("Step 3 of 3")).toBeVisible();
+    await expect(page.getByText("Recommended for you")).toBeVisible();
+
+    await page.getByRole("button", { name: `Start the ${FIRST_COURSE.title}` }).click();
+    await page.waitForURL(new RegExp(`${FIRST_LESSON.id}$`), COLD_ROUTE);
+    await expect
+      .poll(() => learnerState.enrolledCourseSlugs(), COLD_ROUTE)
+      .toEqual([FIRST_COURSE.slug]);
+
+    await page.goto("/en/learning");
     await expect(page.getByRole("heading", { level: 1, name: "Welcome back, Ana." })).toBeVisible(
       COLD_ROUTE,
     );
-    await expect(page.getByRole("button", { name: "Learner menu for Ana García" })).toBeVisible();
+  });
+
+  test("WHEN the learner chooses See all courses on step 3 THEN Available courses opens AND nothing is enrolled", async ({
+    page,
+    learnerState,
+  }) => {
+    await learnerState.profile(CARD);
+    await page.goto("/en/start/first-course");
+
+    await page.getByRole("link", { name: "See all courses" }).click(COLD_ROUTE);
+
+    await page.waitForURL(/\/en\/courses$/, COLD_ROUTE);
+    await expect(page.getByRole("heading", { level: 1, name: "Available courses" })).toBeVisible(
+      COLD_ROUTE,
+    );
+    expect(await learnerState.enrolledCourseSlugs()).toEqual([]);
+  });
+
+  test("WHEN a learner with a card but no course opens My learning THEN step 3 opens without the step indicator", async ({
+    page,
+    learnerState,
+  }) => {
+    await learnerState.profile(CARD);
+    await page.goto("/en/learning");
+
+    await page.waitForURL(/\/en\/start\/first-course\?from=learning$/, COLD_ROUTE);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Your first course, Ana" }),
+    ).toBeVisible(COLD_ROUTE);
+    await expect(page.getByText("Step 3 of 3")).toHaveCount(0);
   });
 
   test("WHEN a learner with a card lands THEN the action reads Continue and skips the onboarding", async ({
     page,
     learnerState,
   }) => {
-    await learnerState.profile({ name: "Ana García", avatar: { kind: "initials" } });
+    await learnerState.profile(CARD);
     await page.goto("/en");
 
     await expect(page.getByRole("link", { name: "Continue" }).first()).toHaveAttribute(
@@ -150,11 +196,12 @@ test.describe("Onboarding", () => {
     await expect(page.getByText("to find out what your ear has been missing")).toHaveCount(0);
   });
 
-  test("WHEN a device with a card opens the onboarding THEN it is forwarded to My learning", async ({
+  test("WHEN a device with a card and a course opens the onboarding THEN it is forwarded to My learning", async ({
     page,
     learnerState,
   }) => {
-    await learnerState.profile({ name: "Ana García", avatar: { kind: "initials" } });
+    await learnerState.profile(CARD);
+    await learnerState.enrolled([FIRST_COURSE.slug]);
     await page.goto("/en/start");
 
     await page.waitForURL(/\/en\/learning$/, COLD_ROUTE);
@@ -163,7 +210,12 @@ test.describe("Onboarding", () => {
   test("WHEN a device without a card opens a learner page THEN it is sent to the onboarding", async ({
     page,
   }) => {
-    for (const path of ["/en/start/avatar", "/en/learning", "/en/profile"]) {
+    for (const path of [
+      "/en/start/avatar",
+      "/en/start/first-course",
+      "/en/learning",
+      "/en/profile",
+    ]) {
       await page.goto(path);
       await page.waitForURL(/\/en\/start$/, COLD_ROUTE);
     }
@@ -171,11 +223,11 @@ test.describe("Onboarding", () => {
 });
 
 test.describe("My learning", () => {
-  test("WHEN a lesson has been opened THEN My learning offers to resume it and marks its course", async ({
+  test("WHEN a lesson has been opened THEN My learning offers to resume it AND lists its course", async ({
     page,
     learnerState,
   }) => {
-    await learnerState.profile({ name: "Ana García", avatar: { kind: "initials" } });
+    await learnerState.profile(CARD);
     await page.goto(FIRST_LESSON_URL);
     await expect(page.getByRole("heading", { name: FIRST_LESSON.title })).toBeVisible(COLD_ROUTE);
     // The lesson page records the visit after it renders; leaving before that
@@ -186,18 +238,14 @@ test.describe("My learning", () => {
 
     await expect(
       page.getByText(
-        `${FIRST_COURSE.title} · Lesson ${FIRST_MODULE.sequence} · ${FIRST_MODULE.title} · Video ${FIRST_LESSON.sequence} of ${FIRST_MODULE_LESSONS.length}`,
+        `${FIRST_COURSE.title} · Module ${pad(FIRST_MODULE.sequence)} · Video ${FIRST_LESSON.sequence} of ${FIRST_MODULE_LESSONS.length}`,
       ),
     ).toBeVisible(COLD_ROUTE);
-    const rows = page
-      .getByRole("list", { name: "Available courses, in order" })
-      .getByRole("listitem");
-    await expect(rows.nth(0)).toContainText("In progress");
     await expect(
-      page.getByRole("list", { name: `Lessons in ${FIRST_COURSE.title}` }).getByRole("listitem"),
-    ).toHaveCount(modulesOfCourse(FIRST_COURSE.slug).length);
+      page.getByRole("heading", { level: 2, name: "1 course you’re enrolled in" }),
+    ).toBeVisible();
 
-    await page.getByRole("link", { name: "Resume" }).click();
+    await page.getByTestId("resume-tile").getByRole("link").click();
     await page.waitForURL(new RegExp(`${FIRST_LESSON.id}$`), COLD_ROUTE);
   });
 
@@ -208,7 +256,7 @@ test.describe("My learning", () => {
     const nextLesson = modulesOfCourse(FIRST_COURSE.slug)
       .flatMap((module) => lessonsOfModule(module.id))
       .find((lesson) => lesson.id !== FIRST_LESSON.id)!;
-    await learnerState.profile({ name: "Ana García", avatar: { kind: "initials" } });
+    await learnerState.profile(CARD);
     await page.goto(FIRST_LESSON_URL);
     await expect(page.getByRole("heading", { name: FIRST_LESSON.title })).toBeVisible(COLD_ROUTE);
     // The lesson page records the visit after it renders; leaving before that
@@ -217,7 +265,7 @@ test.describe("My learning", () => {
     await learnerState.completed([FIRST_LESSON.id]);
 
     await page.goto("/en/learning");
-    await expect(page.getByRole("link", { name: "Resume" })).toHaveAttribute(
+    await expect(page.getByTestId("resume-tile").getByRole("link")).toHaveAttribute(
       "href",
       new RegExp(`${nextLesson.id}$`),
       COLD_ROUTE,
@@ -230,6 +278,40 @@ test.describe("My learning", () => {
       COLD_ROUTE,
     );
   });
+
+  test("WHEN the learner last watched the second course THEN My learning resumes it AND lists both with their own places", async ({
+    page,
+    learnerState,
+  }) => {
+    const second = COURSES[1]!;
+    const secondModule = modulesOfCourse(second.slug)[0]!;
+    const secondLesson = lessonsOfModule(secondModule.id)[0]!;
+    const basicModule = modulesOfCourse(FIRST_COURSE.slug)[1]!;
+    const basicLesson = lessonsOfModule(basicModule.id)[2]!;
+    await learnerState.profile(CARD);
+    await learnerState.enrolled([FIRST_COURSE.slug, second.slug]);
+    await learnerState.continueWatching({
+      courseSlug: FIRST_COURSE.slug,
+      moduleSlug: basicModule.slug,
+      lessonId: basicLesson.id,
+    });
+    await learnerState.continueWatching({
+      courseSlug: second.slug,
+      moduleSlug: secondModule.slug,
+      lessonId: secondLesson.id,
+    });
+
+    await page.goto("/en/learning");
+
+    const tile = page.getByTestId("resume-tile");
+    await expect(tile.getByRole("heading", { level: 2, name: secondLesson.title })).toBeVisible(
+      COLD_ROUTE,
+    );
+    const cards = page.getByTestId("enrolled-course-summary-card");
+    await expect(cards).toHaveCount(2);
+    await expect(cards.nth(0)).toContainText(basicLesson.title);
+    await expect(cards.nth(1)).toHaveAttribute("data-current", "true");
+  });
 });
 
 test.describe("Profile", () => {
@@ -237,7 +319,8 @@ test.describe("Profile", () => {
     page,
     learnerState,
   }) => {
-    await learnerState.profile({ name: "Ana García", avatar: { kind: "initials" } });
+    await learnerState.profile(CARD);
+    await learnerState.enrolled([FIRST_COURSE.slug]);
     await page.goto("/en/learning");
 
     await page.getByRole("button", { name: "Learner menu for Ana García" }).click(COLD_ROUTE);

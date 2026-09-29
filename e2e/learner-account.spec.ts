@@ -7,7 +7,7 @@ import {
   test as signedIn,
   signInAs,
 } from "./learner-account-fixture";
-import { seedLearnerProfile } from "./learner-profile-fixture";
+import { seedOnboardedLearner } from "./learner-profile-fixture";
 import { authLinkMailedTo } from "./mailpit-inbox";
 
 /**
@@ -167,7 +167,7 @@ anonymous.describe("without a session", () => {
 
 signedIn.describe("with a session", () => {
   signedIn("signing out ends the session", async ({ page, learnerState }) => {
-    await seedLearnerProfile(learnerState);
+    await seedOnboardedLearner(learnerState);
     await page.goto("/en/learning");
 
     await page.getByRole("button", { name: /Learner menu for/ }).click();
