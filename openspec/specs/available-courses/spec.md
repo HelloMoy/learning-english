@@ -1,0 +1,113 @@
+# available-courses Specification
+
+## Purpose
+TBD - created by archiving change course-enrollment-views. Update Purpose after archive.
+## Requirements
+### Requirement: Available courses is a learner route that lists every catalog course
+
+The route `/[locale]/courses` SHALL render the Available courses page for a signed-in learner with a profile, under the same session and profile requirements as the other course routes. It SHALL show an eyebrow, the heading "Available courses", and a summary stating how many courses the catalog serves and how many of them the learner is enrolled in, with an "all" wording when the learner is enrolled in every one. Until the learner store is seeded, the learner-dependent sections SHALL render placeholders naming no course state.
+
+The header eyebrow SHALL read `COURSES` on this route.
+
+#### Scenario: The summary counts enrollments
+- **WHEN** a learner enrolled in `basic-course` opens `/en/courses` and the catalog serves two courses
+- **THEN** the summary reads `2 courses · you’re enrolled in 1`
+
+#### Scenario: Enrolled in everything
+- **WHEN** a learner enrolled in both catalog courses opens the page
+- **THEN** the summary says they are enrolled in all of them
+
+#### Scenario: No session, no page
+- **WHEN** `/en/courses` is requested without a session
+- **THEN** the response redirects to sign in and contains no course content
+
+### Requirement: The course the learner watched last is featured
+
+The page SHALL feature one enrolled course in a wide artwork hero: the enrolled course with the most recent continue-watching record, or, when no enrolled course has one, the first enrolled course in `sequence` order. The hero SHALL show:
+
+- the continue target's poster;
+- an `Enrolled` mark, and a label reading **Last watched** when the course has a record and **Your course** otherwise;
+- a chip naming the target video with its thumbnail, reading **Resume at m:ss** when the target is a video with a saved position and **Next up** otherwise;
+- the line "Level N · M modules · V videos" and the course title;
+- a small ring with the completed share, and the completed and total videos with the time left;
+- the course's prize icons, claimed ones lit;
+- a primary action that opens the target video and reads **Continue course**, **Start course** or **Watch again** according to the target's kind, and **View course**, which opens the course overview.
+
+When the learner is enrolled in no course, the first catalog course SHALL take the hero, marked **Recommended for you**, with **Start course** opening its first video.
+
+#### Scenario: The last watched course leads
+- **WHEN** a learner enrolled in both courses last opened an Advanced lesson
+- **THEN** the hero shows the Advanced course labelled Last watched
+
+#### Scenario: A saved position shows where to resume
+- **WHEN** the featured target is a video with a saved position of 365 seconds
+- **THEN** the chip reads `Resume at 06:05`
+
+#### Scenario: Nothing enrolled recommends the first course
+- **WHEN** a learner with no enrollment opens the page
+- **THEN** the hero shows the Basic Course marked Recommended for you, and Start course opens its first video
+
+### Requirement: The learner's other enrolled courses follow in compact cards
+
+Every enrolled course other than the featured one SHALL render under **Your other courses**, in `sequence` order, as a card with:
+
+- its continue target's thumbnail, with the saved progress of that video when there is one;
+- an `Enrolled` mark and "Level N";
+- the title;
+- a progress bar with the completed and total videos and the percentage;
+- the next video's title and module;
+- **Continue**, which opens that video, and **View course**.
+
+A course whose every video counts as complete SHALL read **Completed**, show its claimed and total prizes, and offer **Watch again**, which opens its first video. The section SHALL NOT render when there is no other enrolled course. From two cards the section SHALL lay them out in two columns on wide viewports.
+
+#### Scenario: The other enrolled course is listed
+- **WHEN** the featured course is Advanced and the learner is also enrolled in Basic
+- **THEN** Your other courses holds one card, for Basic, whose Continue opens Basic's continue target
+
+#### Scenario: A finished course reads Completed
+- **WHEN** every video of an enrolled, non-featured course is complete
+- **THEN** its card reads Completed and offers Watch again
+
+#### Scenario: One enrolled course, no section
+- **WHEN** the learner is enrolled in one course
+- **THEN** Your other courses does not render
+
+### Requirement: Courses the learner has not joined are offered in a shelf
+
+Every catalog course the learner is not enrolled in SHALL render under **More courses**, in `sequence` order, as a shelf card with:
+
+- its first video's thumbnail and "Level N";
+- its title;
+- up to four module thumbnails (each module's first video) with the count of the rest;
+- its module count, video count and total runtime;
+- **Enroll**;
+- **Preview course**, which opens its overview without enrolling.
+
+The section title SHALL read "Keep going after Level N", N being the highest level the learner is enrolled in, or "Start here" when they are enrolled in none. When the learner is enrolled in every course, the section SHALL remain and read that they are enrolled in every course and that new courses will show up there.
+
+**Enroll** SHALL enroll the learner through the client enrollment (optimistic): the course SHALL leave the shelf and appear under the enrolled courses at once, and SHALL return to the shelf if the server refuses.
+
+#### Scenario: Enrolling moves the course
+- **WHEN** a learner enrolled only in Basic activates Enroll on the Advanced card
+- **THEN** the Advanced course leaves More courses and appears under Your other courses, and after a reload it is still enrolled
+
+#### Scenario: A refused enrollment returns the card
+- **WHEN** the enroll action is refused
+- **THEN** the Advanced card is back in More courses
+
+#### Scenario: Previewing does not enroll
+- **WHEN** the learner activates Preview course on the Advanced card
+- **THEN** the Advanced overview opens and the learner is still not enrolled in it
+
+#### Scenario: Everything joined
+- **WHEN** the learner is enrolled in every catalog course
+- **THEN** More courses states that they are enrolled in every course
+
+### Requirement: Available courses copy is localized
+
+Every string on the page SHALL come from the active locale's messages in `en`, `es` and `pt` under `Components.*` namespaces, with ICU plurals for counts, and every link SHALL be locale-aware.
+
+#### Scenario: The page in Spanish
+- **WHEN** `/es/courses` renders
+- **THEN** the heading, summary, section titles, marks and actions render from `es.json`
+
