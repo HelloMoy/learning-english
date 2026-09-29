@@ -6,6 +6,7 @@ import { SmtpEmailSender } from "@/adapters/email/smtp-email-sender/smtp-email-s
 import {
   account,
   continueWatching,
+  courseEnrollment,
   earnedTicket,
   LEARNER_TABLES,
   learnerProfile,
@@ -549,6 +550,7 @@ const LEARNER_ROWS = new Map<SQLiteTable, (userId: string) => LearnerRow>([
   ],
   [earnedTicket, (userId) => ({ userId, lessonId: "lesson-1" })],
   [prizeClaim, (userId) => ({ userId, moduleSlug: "module" })],
+  [courseEnrollment, (userId) => ({ userId, courseSlug: "course" })],
 ]);
 
 // A learner table added without a row here fails loudly, so the deletion test

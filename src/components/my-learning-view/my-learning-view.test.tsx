@@ -96,6 +96,7 @@ const profile = LearnerProfile.parse({ name: "Ana García", avatar: { kind: "ini
 const storing = (stored: ContinueWatchingLocation | null): ContinueWatchingRepository => ({
   get: async () => stored,
   set: async () => {},
+  list: async () => [],
 });
 
 const watchedFor = (seconds: number | null): PlaybackPositionRepository => ({

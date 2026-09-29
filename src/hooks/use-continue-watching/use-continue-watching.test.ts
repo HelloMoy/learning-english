@@ -27,6 +27,7 @@ function makeFakeRepository(initial?: ContinueWatchingLocation): ContinueWatchin
     set: async (location) => {
       stored = location;
     },
+    list: async () => (stored ? [{ location: stored, watchedAt: 0 }] : []),
   };
 }
 

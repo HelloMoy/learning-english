@@ -12,6 +12,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import {
   continueWatching,
+  courseEnrollment,
   earnedTicket,
   learnerProfile,
   lessonCompletion,
@@ -54,6 +55,7 @@ describe.skipIf(!DOCKER_AVAILABLE)("learner progress tables (integration)", () =
       .values({ userId, courseSlug: "basic-course", moduleSlug: "1-introduction", lessonId });
     await libsql.database.insert(earnedTicket).values({ userId, lessonId });
     await libsql.database.insert(prizeClaim).values({ userId, moduleSlug: "1-introduction" });
+    await libsql.database.insert(courseEnrollment).values({ userId, courseSlug: "basic-course" });
   }
 
   const rowsOf = async (userId: string) =>
@@ -65,6 +67,7 @@ describe.skipIf(!DOCKER_AVAILABLE)("learner progress tables (integration)", () =
         continueWatching,
         earnedTicket,
         prizeClaim,
+        courseEnrollment,
       ].map((table) => libsql.database.$count(table, eq(table.userId, userId))),
     );
 
@@ -81,6 +84,7 @@ describe.skipIf(!DOCKER_AVAILABLE)("learner progress tables (integration)", () =
         "continue_watching",
         "earned_ticket",
         "prize_claim",
+        "course_enrollment",
       ]),
     );
   });
@@ -88,11 +92,11 @@ describe.skipIf(!DOCKER_AVAILABLE)("learner progress tables (integration)", () =
   test("deleting a user removes their progress from every learner table", async () => {
     const userId = await aUser();
     await giveProgress(userId);
-    expect(await rowsOf(userId)).toEqual([1, 1, 1, 1, 1, 1]);
+    expect(await rowsOf(userId)).toEqual([1, 1, 1, 1, 1, 1, 1]);
 
     await libsql.database.delete(user).where(eq(user.id, userId));
 
-    expect(await rowsOf(userId)).toEqual([0, 0, 0, 0, 0, 0]);
+    expect(await rowsOf(userId)).toEqual([0, 0, 0, 0, 0, 0, 0]);
   });
 
   test("one learner's deletion leaves another learner's progress alone", async () => {
@@ -102,6 +106,25 @@ describe.skipIf(!DOCKER_AVAILABLE)("learner progress tables (integration)", () =
 
     await libsql.database.delete(user).where(eq(user.id, deleted));
 
-    expect(await rowsOf(kept)).toEqual([1, 1, 1, 1, 1, 1]);
+    expect(await rowsOf(kept)).toEqual([1, 1, 1, 1, 1, 1, 1]);
+  });
+
+  test("a learner keeps one continue-watching row per course", async () => {
+    const userId = await aUser();
+    const locationIn = (courseSlug: string) => ({
+      userId,
+      courseSlug,
+      moduleSlug: "1-introduction",
+      lessonId: randomUUID(),
+    });
+
+    await libsql.database.insert(continueWatching).values(locationIn("basic-course"));
+    await libsql.database
+      .insert(continueWatching)
+      .values(locationIn("advanced-intermediate-course"));
+
+    expect(
+      await libsql.database.$count(continueWatching, eq(continueWatching.userId, userId)),
+    ).toBe(2);
   });
 });

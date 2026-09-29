@@ -70,6 +70,7 @@ const learner: LearnerProfileRepository = {
 const nothingStarted: ContinueWatchingRepository = {
   get: async () => null,
   set: async () => {},
+  list: async () => [],
 };
 
 const firstLesson = {
@@ -114,6 +115,7 @@ const continuing: ContinueWatchingRepository = {
       lessonId: continuedLesson.id,
     }),
   set: async () => {},
+  list: async () => [],
 };
 
 const resolveContinued = async (): Promise<ContinueWatchingPanel> => ({

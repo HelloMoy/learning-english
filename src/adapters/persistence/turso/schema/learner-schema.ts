@@ -44,14 +44,18 @@ export const playbackPosition = sqliteTable(
   (table) => [primaryKey({ columns: [table.userId, table.lessonId] })],
 );
 
-/** The one lesson location the learner opened last. */
-export const continueWatching = sqliteTable("continue_watching", {
-  userId: learner().primaryKey(),
-  courseSlug: text().notNull(),
-  moduleSlug: text().notNull(),
-  lessonId: text().notNull(),
-  updatedAt: writtenAt(),
-});
+/** The lesson location the learner opened last in each course; `updatedAt` orders them. */
+export const continueWatching = sqliteTable(
+  "continue_watching",
+  {
+    userId: learner(),
+    courseSlug: text().notNull(),
+    moduleSlug: text().notNull(),
+    lessonId: text().notNull(),
+    updatedAt: writtenAt(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.courseSlug] })],
+);
 
 /** One row per lesson whose ticket the learner has earned; kept for good. */
 export const earnedTicket = sqliteTable(
@@ -65,6 +69,13 @@ export const prizeClaim = sqliteTable(
   "prize_claim",
   { userId: learner(), moduleSlug: text().notNull(), claimedAt: writtenAt() },
   (table) => [primaryKey({ columns: [table.userId, table.moduleSlug] })],
+);
+
+/** One row per course the learner has enrolled in; kept for good. */
+export const courseEnrollment = sqliteTable(
+  "course_enrollment",
+  { userId: learner(), courseSlug: text().notNull(), enrolledAt: writtenAt() },
+  (table) => [primaryKey({ columns: [table.userId, table.courseSlug] })],
 );
 
 /**
@@ -81,4 +92,5 @@ export const LEARNER_TABLES = [
   continueWatching,
   earnedTicket,
   prizeClaim,
+  courseEnrollment,
 ] as const;

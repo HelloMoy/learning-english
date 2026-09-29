@@ -20,6 +20,7 @@ import { useCompletedLessons } from "@/hooks/use-lesson-completion/use-lesson-co
 import { useClaimedPrizes } from "@/hooks/use-prize-claims/use-prize-claims";
 import { useSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
 import {
+  courseOverviewEntries,
   courseOverviewProgress,
   type CourseOverviewEntry,
   type CourseOverviewProgress,
@@ -68,7 +69,7 @@ export function CourseProgressBoard({
   continueWatching,
 }: CourseProgressBoardProps) {
   const t = useTranslations("CourseCatalog.courseOverview");
-  const entries = pairWithSummaries(modules, moduleSummaries);
+  const entries = courseOverviewEntries(modules, moduleSummaries);
   const progress = useBoardProgress(course, entries, continueWatching);
   // Read once, like the three readings above: the tally and every tile draw
   // from the same claims, so no two of them can disagree.
@@ -132,7 +133,7 @@ function useBoardProgress(
   repository?: ContinueWatchingRepository,
 ): CourseOverviewProgress | null {
   const isHydrated = useIsHydrated();
-  const location = useStoredLocation(repository);
+  const location = useStoredLocation(course, repository);
   const completedIds = useCompletedLessons();
   const positions = useSavedPlaybackPositions();
 
@@ -140,19 +141,21 @@ function useBoardProgress(
   return courseOverviewProgress({ course, entries, location, completedIds, positions });
 }
 
-function useStoredLocation(repository?: ContinueWatchingRepository) {
+// This course's own place: watching another course since must not move it.
+function useStoredLocation(course: Course, repository?: ContinueWatchingRepository) {
   const continueWatching = useContinueWatching(repository);
   const [location, setLocation] = useState<ContinueWatchingLocation | null | typeof UNREAD>(UNREAD);
 
   useEffect(() => {
     let isCurrent = true;
-    void continueWatching.get().then((stored) => {
-      if (isCurrent) setLocation(stored);
+    void continueWatching.list().then((records) => {
+      const own = records.find((record) => record.location.courseSlug === course.slug);
+      if (isCurrent) setLocation(own?.location ?? null);
     });
     return () => {
       isCurrent = false;
     };
-  }, [continueWatching]);
+  }, [continueWatching, course.slug]);
 
   return location;
 }
@@ -178,15 +181,4 @@ function lessonReadingOf(
 ): LessonRingReading {
   const moduleProgress = progress?.modules[index];
   return moduleProgress ? { status: "read", progress: moduleProgress } : { status: "pending" };
-}
-
-function pairWithSummaries(
-  modules: ReadonlyArray<Module>,
-  moduleSummaries: ReadonlyArray<ModuleSummary>,
-): CourseOverviewEntry[] {
-  const summaryByModule = new Map(moduleSummaries.map((summary) => [summary.moduleId, summary]));
-  return modules.flatMap((module) => {
-    const summary = summaryByModule.get(module.id);
-    return summary ? [{ module, summary }] : [];
-  });
 }

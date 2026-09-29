@@ -6,7 +6,9 @@ import {
   createLearnerRepositories,
   type LearnerRepositories,
 } from "@/adapters/persistence/turso/learner-repositories/learner-repositories";
+import { makeEnrollInCourse } from "@/domain/use-cases/enroll-in-course/enroll-in-course";
 import { makeMarkLessonComplete } from "@/domain/use-cases/mark-lesson-complete/mark-lesson-complete";
+import { makeRecordContinueWatching } from "@/domain/use-cases/record-continue-watching/record-continue-watching";
 import { makeRecordPlaybackPosition } from "@/domain/use-cases/record-playback-position/record-playback-position";
 import { makeSaveLearnerProfile } from "@/domain/use-cases/save-learner-profile/save-learner-profile";
 import { makeUnmarkLessonComplete } from "@/domain/use-cases/unmark-lesson-complete/unmark-lesson-complete";
@@ -23,6 +25,8 @@ export type LearnerDependencies = {
     unmarkLessonComplete: ReturnType<typeof makeUnmarkLessonComplete>;
     recordPlaybackPosition: ReturnType<typeof makeRecordPlaybackPosition>;
     saveLearnerProfile: ReturnType<typeof makeSaveLearnerProfile>;
+    enrollInCourse: ReturnType<typeof makeEnrollInCourse>;
+    recordContinueWatching: ReturnType<typeof makeRecordContinueWatching>;
   };
 };
 
@@ -36,7 +40,8 @@ export type LearnerDependencies = {
  */
 export function getLearnerDependencies(learnerId: string): LearnerDependencies {
   const repositories = createLearnerRepositories(getDatabase(), learnerId);
-  const { lessons } = getCoursePlatformDeps();
+  const { courses, lessons } = getCoursePlatformDeps();
+  const enrollInCourse = makeEnrollInCourse({ courses, enrollments: repositories.enrollments });
 
   return {
     repositories,
@@ -48,6 +53,11 @@ export function getLearnerDependencies(learnerId: string): LearnerDependencies {
         positions: repositories.positions,
       }),
       saveLearnerProfile: makeSaveLearnerProfile({ profiles: repositories.profiles }),
+      enrollInCourse,
+      recordContinueWatching: makeRecordContinueWatching({
+        enrollInCourse,
+        continueWatching: repositories.continueWatching,
+      }),
     },
   };
 }

@@ -13,4 +13,5 @@ vi.mock("@/app/[locale]/learner-actions", () => ({
   saveLearnerProfileAction: vi.fn(async () => ({ data: { saved: true } })),
   earnTicketsAction: vi.fn(async () => ({ data: { earned: true } })),
   claimPrizeAction: vi.fn(async () => ({ data: { claimed: true } })),
+  enrollInCourseAction: vi.fn(async () => ({ data: { enrolled: true } })),
 }));

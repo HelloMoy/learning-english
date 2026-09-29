@@ -1,11 +1,13 @@
 import type { Database } from "@/adapters/persistence/turso/database/database";
 import { TursoContinueWatchingRepository } from "@/adapters/persistence/turso/turso-continue-watching-repository/turso-continue-watching-repository";
+import { TursoCourseEnrollmentRepository } from "@/adapters/persistence/turso/turso-course-enrollment-repository/turso-course-enrollment-repository";
 import { TursoEarnedTicketRepository } from "@/adapters/persistence/turso/turso-earned-ticket-repository/turso-earned-ticket-repository";
 import { TursoLearnerProfileRepository } from "@/adapters/persistence/turso/turso-learner-profile-repository/turso-learner-profile-repository";
 import { TursoPlaybackPositionRepository } from "@/adapters/persistence/turso/turso-playback-position-repository/turso-playback-position-repository";
 import { TursoPrizeClaimRepository } from "@/adapters/persistence/turso/turso-prize-claim-repository/turso-prize-claim-repository";
 import { TursoProgressTracker } from "@/adapters/persistence/turso/turso-progress-tracker/turso-progress-tracker";
 import type { ContinueWatchingRepository } from "@/domain/ports/continue-watching-repository/continue-watching-repository";
+import type { CourseEnrollmentRepository } from "@/domain/ports/course-enrollment-repository/course-enrollment-repository";
 import type { EarnedTicketRepository } from "@/domain/ports/earned-ticket-repository/earned-ticket-repository";
 import type { LearnerProfileRepository } from "@/domain/ports/learner-profile-repository/learner-profile-repository";
 import type { PlaybackPositionRepository } from "@/domain/ports/playback-position-repository/playback-position-repository";
@@ -24,6 +26,7 @@ export type LearnerRepositories = {
   profiles: LearnerProfileRepository;
   tickets: EarnedTicketRepository;
   prizeClaims: PrizeClaimRepository;
+  enrollments: CourseEnrollmentRepository;
 };
 
 /**
@@ -49,5 +52,6 @@ export function createLearnerRepositories(
     profiles: new TursoLearnerProfileRepository(database, learnerId),
     tickets: new TursoEarnedTicketRepository(database, learnerId),
     prizeClaims: new TursoPrizeClaimRepository(database, learnerId),
+    enrollments: new TursoCourseEnrollmentRepository(database, learnerId),
   };
 }

@@ -98,7 +98,11 @@ const learner: LearnerProfileRepository = {
   set: async () => {},
 };
 
-const nothingWatched: ContinueWatchingRepository = { get: async () => null, set: async () => {} };
+const nothingWatched: ContinueWatchingRepository = {
+  get: async () => null,
+  set: async () => {},
+  list: async () => [],
+};
 
 const watchedVowels: ContinueWatchingRepository = {
   get: async () =>
@@ -108,6 +112,7 @@ const watchedVowels: ContinueWatchingRepository = {
       lessonId: continuedLesson.id,
     }),
   set: async () => {},
+  list: async () => [],
 };
 
 const fortyPercentIn: PlaybackPositionRepository = {

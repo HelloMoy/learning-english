@@ -13,3 +13,4 @@ export const recordContinueWatchingAction = async () => ({ data: { recorded: tru
 export const saveLearnerProfileAction = async () => ({ data: { saved: true } });
 export const earnTicketsAction = async () => ({ data: { earned: true } });
 export const claimPrizeAction = async () => ({ data: { claimed: true } });
+export const enrollInCourseAction = async () => ({ data: { enrolled: true } });

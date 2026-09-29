@@ -23,12 +23,13 @@ export async function loadLearnerSnapshot(
   learnerId: string,
 ): Promise<LearnerSnapshot> {
   const repositories = createLearnerRepositories(database, learnerId);
-  const [profile, continueWatching, tickets, prizeClaims, completions, positions] =
+  const [profile, continueWatching, tickets, prizeClaims, enrollments, completions, positions] =
     await Promise.all([
       repositories.profiles.get(),
-      repositories.continueWatching.get(),
+      repositories.continueWatching.list(),
       repositories.tickets.list(),
       repositories.prizeClaims.list(),
+      repositories.enrollments.list(),
       database
         .select({ lessonId: lessonCompletion.lessonId })
         .from(lessonCompletion)
@@ -46,5 +47,6 @@ export async function loadLearnerSnapshot(
     continueWatching,
     earnedTicketLessonIds: [...tickets],
     claimedPrizeModuleSlugs: [...prizeClaims],
+    enrolledCourseSlugs: [...enrollments],
   };
 }

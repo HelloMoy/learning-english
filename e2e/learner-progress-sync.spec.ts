@@ -127,6 +127,27 @@ test.describe("Progress follows the learner", () => {
   });
 });
 
+test.describe("Opening a lesson enrolls the learner", () => {
+  test("WHEN a new learner opens an Advanced lesson THEN they are enrolled in it AND their Basic place is kept", async ({
+    page,
+    learnerState,
+  }) => {
+    await seedLearnerProfile(learnerState);
+    await learnerState.continueWatching({
+      courseSlug: BASIC.slug,
+      moduleSlug: INTRODUCTION!.slug,
+      lessonId: INTRODUCTION_LESSON.id,
+    });
+
+    await page.goto(lessonUrl(WATCHED_COURSE_SLUG, WATCHED_MODULE.slug, WATCHED_LESSON.id));
+
+    await expect
+      .poll(() => learnerState.enrolledCourseSlugs(), COLD_ROUTE)
+      .toEqual([WATCHED_COURSE_SLUG]);
+    expect(await learnerState.openedCourseSlugs()).toEqual([WATCHED_COURSE_SLUG, BASIC.slug]);
+  });
+});
+
 test.describe("Progress follows the learner — mid-video", () => {
   skipOnCi("youtube");
 

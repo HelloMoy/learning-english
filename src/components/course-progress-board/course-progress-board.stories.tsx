@@ -75,6 +75,7 @@ const moduleSummaries: ModuleSummary[] = modules.map((module, index) => {
 const storedLocation = (location: ContinueWatchingLocation | null): ContinueWatchingRepository => ({
   get: async () => location,
   set: async () => {},
+  list: async () => (location ? [{ location, watchedAt: 0 }] : []),
 });
 
 const meta = {
