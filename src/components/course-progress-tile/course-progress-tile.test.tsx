@@ -172,4 +172,51 @@ describe("CourseProgressTile", () => {
       expect(tile).not.toHaveTextContent("completedOfTotal");
     });
   });
+
+  describe("GIVEN a page whose own heading comes first", () => {
+    test("WHEN the tile renders with a level-two heading THEN the course title is an h2", () => {
+      // Act
+      render(
+        <CourseProgressTile
+          course={course}
+          reading={{ status: "pending" }}
+          headingLevel={2}
+        />,
+      );
+
+      // Assert
+      expect(screen.getByRole("heading", { level: 2, name: "Basic Course" })).toBeInTheDocument();
+      expect(screen.queryByRole("heading", { level: 1 })).toBeNull();
+    });
+
+    test("WHEN the tile is given the course's address THEN it offers View course there", () => {
+      // Act
+      render(
+        <CourseProgressTile
+          course={course}
+          reading={{ status: "pending" }}
+          href="/courses/basic-course"
+        />,
+      );
+
+      // Assert
+      expect(screen.getByRole("link", { name: "viewCourse" })).toHaveAttribute(
+        "href",
+        "/courses/basic-course",
+      );
+    });
+
+    test("WHEN the tile has no address THEN it offers no link", () => {
+      // Act
+      render(
+        <CourseProgressTile
+          course={course}
+          reading={{ status: "pending" }}
+        />,
+      );
+
+      // Assert
+      expect(screen.queryByRole("link")).toBeNull();
+    });
+  });
 });

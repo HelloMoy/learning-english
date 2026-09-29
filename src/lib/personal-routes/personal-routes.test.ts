@@ -9,11 +9,13 @@ describe("isPersonalPath", () => {
   test.each([
     ["a course", `/courses/${slug()}`],
     ["a lesson", `/courses/${slug()}/modules/${slug()}/lessons/${faker.string.uuid()}`],
+    ["Available courses", "/courses"],
     ["My learning", "/learning"],
     ["Achievements", "/achievements"],
     ["Profile", "/profile"],
     ["onboarding step one", "/start"],
     ["onboarding step two", "/start/avatar"],
+    ["onboarding step three", "/start/first-course"],
   ])("WHEN the path is %s THEN it needs a session", (_, path) => {
     expect(isPersonalPath(path)).toBe(true);
   });
@@ -25,7 +27,7 @@ describe("isPersonalPath", () => {
     ["forgot-password", "/forgot-password"],
     ["reset-password", "/reset-password"],
     ["a lookalike of a personal route", "/learning-paths"],
-    ["the bare courses segment", "/courses"],
+    ["a lookalike of Available courses", "/courses-archive"],
   ])("WHEN the path is %s THEN it stays public", (_, path) => {
     expect(isPersonalPath(path)).toBe(false);
   });

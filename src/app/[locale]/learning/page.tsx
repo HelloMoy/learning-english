@@ -6,8 +6,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { use } from "react";
 
-import { catalogLevels, loadCatalogEntries } from "../catalog-levels";
-import { homeFirstLesson } from "../home-first-lesson";
+import { loadCourseViews } from "../course-views";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -36,17 +35,14 @@ export default function MyLearningPage({ params }: Props) {
   const { locale } = use(params);
   setRequestLocale(locale);
 
-  const entries = use(loadCatalogEntries());
+  const courses = use(loadCourseViews());
 
   return (
     <main
       id="main"
       className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-20 px-4 py-10 sm:gap-28 sm:px-11 sm:py-16"
     >
-      <MyLearningView
-        levels={catalogLevels(entries)}
-        firstLesson={homeFirstLesson(entries)}
-      />
+      <MyLearningView courses={courses} />
     </main>
   );
 }

@@ -2,10 +2,10 @@ import { cn } from "@/lib/utils/utils";
 
 import { useTranslations } from "next-intl";
 
-/** The onboarding's steps: the name, then the avatar. */
-export type OnboardingStep = 1 | 2;
+/** The onboarding's steps: the name, the avatar, then the first course. */
+export type OnboardingStep = 1 | 2 | 3;
 
-const STEPS: ReadonlyArray<OnboardingStep> = [1, 2];
+const STEPS: ReadonlyArray<OnboardingStep> = [1, 2, 3];
 
 /**
  * Where the learner is in the onboarding, in words and as a segmented bar.

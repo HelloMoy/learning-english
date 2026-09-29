@@ -86,6 +86,19 @@ export const EveryPrizeClaimed: Story = {
   },
 };
 
+/** As My learning shows it: a level-two title and a View course link to the overview. */
+export const OnMyLearning: Story = {
+  args: {
+    headingLevel: 2,
+    href: "/courses/basic-course",
+    prizes: [
+      { prize: "whistle", isClaimed: true },
+      { prize: "harmonica", isClaimed: false },
+      { prize: "megaphone", isClaimed: false },
+    ],
+  },
+};
+
 /** Before progress is read: the course title and an empty ring, and no prize figures. */
 export const Pending: Story = {
   args: { reading: { status: "pending" } },

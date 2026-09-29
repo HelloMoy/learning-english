@@ -79,7 +79,7 @@ describe("OnboardingNameStep", () => {
       expect(
         await screen.findByRole("heading", { level: 1, name: "Let’s make your learner card" }),
       ).toBeInTheDocument();
-      expect(screen.getByText("Step 1 of 2")).toBeInTheDocument();
+      expect(screen.getByText("Step 1 of 3")).toBeInTheDocument();
       expect(screen.getByRole("textbox", { name: "Your name" })).toHaveValue("");
       expect(screen.getByText("0 of 48 videos")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();

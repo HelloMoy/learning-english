@@ -267,7 +267,7 @@ describe("SiteHeader learner menu", () => {
     expect(screen.getByTestId("learner-menu-placeholder")).toBeInTheDocument();
   });
 
-  test("GIVEN a learner profile WHEN the avatar is opened THEN it offers My learning, Achievements and Profile in order", async () => {
+  test("GIVEN a learner profile WHEN the avatar is opened THEN it offers My learning, Courses, Achievements and Profile in order", async () => {
     const user = userEvent.setup();
     mockUseLearnerProfile.mockReturnValue({
       status: "present",
@@ -285,6 +285,7 @@ describe("SiteHeader learner menu", () => {
       .map((item) => [item.textContent, item.getAttribute("href")]);
     expect(links).toEqual([
       ["myLearning", "/learning"],
+      ["courses", "/courses"],
       ["achievements", "/achievements"],
       ["profile", "/profile"],
     ]);
@@ -314,7 +315,7 @@ describe("SiteHeader learner menu", () => {
       await screen.findByRole("menu");
 
       const items = screen.getAllByRole("menuitem").map((item) => item.textContent);
-      expect(items).toEqual(["myLearning", "achievements", "profile", "signOut"]);
+      expect(items).toEqual(["myLearning", "courses", "achievements", "profile", "signOut"]);
     });
   });
 
