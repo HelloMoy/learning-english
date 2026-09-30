@@ -29,12 +29,15 @@ export type ProfileSaveBarProps = {
 };
 
 /**
- * The Profile page's save bar: docked to the bottom edge of the viewport for
- * as long as the learner's card has unsaved changes.
+ * The Profile page's save bar, for as long as the learner's card has unsaved
+ * changes: under the card on a wide screen, docked to the bottom edge of the
+ * viewport on a narrow one.
  *
  * @remarks
- * The page is long enough that an inline pair of buttons scrolls out of reach
- * while the learner is still editing, so the controls come to them instead.
+ * On a wide screen the page keeps the card in view in a column of its own, so
+ * the bar sits there, under the card it saves. On a narrow screen the card
+ * scrolls away while the learner edits, so the controls come to them instead.
+ * It is one bar that moves, never two, so there is only ever one Save.
  * They exist only when they can do something: nothing is drawn for a card with
  * nothing edited, which is also why the page no longer carries a disabled
  * Discard.
@@ -45,8 +48,8 @@ export type ProfileSaveBarProps = {
  * The bar clears the iPhone's home indicator by adding the bottom safe-area
  * inset to its own padding, rather than by sitting above it.
  *
- * It is as wide as the Profile page's own column, so the controls sit under
- * the content they act on rather than under the window.
+ * Docked, it is as wide as the Profile page's own column, so the controls sit
+ * under the content they act on rather than under the window.
  *
  * @example
  * ```tsx
@@ -66,8 +69,11 @@ export function ProfileSaveBar({ state, canSave, onSave, onDiscard }: ProfileSav
   if (state === "clean") return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 bg-gradient-to-t from-background via-background/95 to-transparent px-4 pt-8 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] sm:px-11">
-      <div className="pointer-events-auto mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold/40 bg-card/95 px-4 py-3 shadow-[0_26px_60px_-30px_rgba(0,0,0,0.9)] backdrop-blur sm:px-5">
+    <div
+      data-testid="profile-save-bar"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-40 bg-gradient-to-t from-background via-background/95 to-transparent px-4 pt-8 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] sm:px-11 lg:pointer-events-auto lg:static lg:z-auto lg:bg-none lg:p-0"
+    >
+      <div className="pointer-events-auto mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold/40 bg-card/95 px-4 py-3 shadow-[0_26px_60px_-30px_rgba(0,0,0,0.9)] backdrop-blur sm:px-5 lg:max-w-none lg:shadow-none">
         {state === "saved" ? (
           <p
             role="status"

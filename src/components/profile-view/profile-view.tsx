@@ -33,19 +33,23 @@ import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 
 /**
- * The Profile page: the learner's card and progress, then the sections that
- * edit the card, hold the account settings, set the preferences, and delete
- * the account.
+ * The Profile page: the learner's card and progress in a column of their own,
+ * beside the sections that edit the card, hold the sign-in and security
+ * settings, set the preferences, and delete the account.
  *
  * @remarks
- * Edits are drafts until **Save**: the card at the top of the page follows
- * every keystroke and every pick, and storage only changes when the learner
- * commits from {@link ProfileSaveBar}, which exists only while there is
- * something to save.
+ * Edits are drafts until **Save**: the card follows every keystroke and every
+ * pick, and storage only changes when the learner commits from
+ * {@link ProfileSaveBar}, which exists only while there is something to save.
  *
- * The page's `h1` is the learner's *stored* name, so a page a learner is
- * half-way through renaming does not rename itself under them; only the card
- * previews the draft.
+ * On a wide screen the card column stays in view while the sections scroll, so
+ * the live preview is beside whatever is being edited, and the save bar sits
+ * in that column under the card. On a narrow screen the card comes first and
+ * the bar docks to the bottom of the viewport.
+ *
+ * The page's `h1` is its localized title, not the learner's name: the name
+ * already reads on the card and in the field, and a heading that repeated it
+ * would be the third copy on one screen.
  *
  * The page edits an existing card, so a device without one is sent to the
  * onboarding to make it.
@@ -87,6 +91,14 @@ export function ProfileView({
     />
   );
 }
+
+/** The card column and the sections: side by side on a wide screen, stacked on a narrow one. */
+const PROFILE_COLUMNS =
+  "grid grid-cols-1 gap-8 lg:grid-cols-[22.5rem_minmax(0,1fr)] lg:items-start lg:gap-12";
+
+/** The delete section, set apart from the rest as a danger zone. */
+const DANGER_PANEL =
+  "mt-8 rounded-[1.125rem] border border-destructive/40 bg-destructive/5 p-5 sm:p-6";
 
 const isSameAvatar = (left: LearnerAvatar, right: LearnerAvatar): boolean =>
   left.kind === "initials"
@@ -140,86 +152,93 @@ function ProfileEditor({
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 sm:gap-10">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 sm:gap-10">
       <div className="flex flex-col gap-2">
         <Eyebrow>{t("eyebrow")}</Eyebrow>
         <h1 className="font-sans text-[1.875rem] leading-[1.05] font-extrabold tracking-tight text-foreground sm:text-[2.625rem]">
-          {profile.name}
+          {t("title")}
         </h1>
         <p className="text-[0.9375rem] text-muted-foreground">{t("intro")}</p>
       </div>
 
-      <ProfileCardBand
-        name={name}
-        avatar={avatar}
-        level={level}
-        lessonRuntimes={lessonRuntimes}
-        levels={levels}
-      />
-
-      <div className="flex flex-col">
-        <ProfileSection
-          title={t("sections.identity")}
-          note={t("sections.identityNote")}
+      <div className={PROFILE_COLUMNS}>
+        <div
+          data-testid="profile-card-column"
+          className="flex flex-col gap-4 lg:sticky lg:top-24"
         >
-          <label className="flex max-w-xl flex-col gap-2">
-            <span className="text-[13px] font-semibold text-muted-foreground">
-              {t("nameLabel")}
-            </span>
-            <input
-              type="text"
-              value={name}
-              onChange={(event) => editName(event.target.value)}
-              autoComplete="name"
-              maxLength={LEARNER_NAME_MAX_LENGTH}
-              className="min-h-14 w-full rounded-xl border border-border bg-card px-[1.125rem] text-lg text-foreground focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none"
-            />
-          </label>
-          <div className="flex flex-col gap-2.5">
-            <span className="text-[13px] font-semibold text-muted-foreground">
-              {t("avatarLabel")}
-            </span>
-            <AvatarPicker
-              name={name}
-              value={avatar}
-              onChange={editAvatar}
-              className="sm:grid-cols-9"
-            />
-          </div>
-        </ProfileSection>
+          <ProfileCardBand
+            name={name}
+            avatar={avatar}
+            level={level}
+            lessonRuntimes={lessonRuntimes}
+            levels={levels}
+          />
+          <ProfileSaveBar
+            state={saveState({ isDirty, isSaving, isSaved })}
+            canSave={hasName}
+            onSave={handleSave}
+            onDiscard={discard}
+          />
+        </div>
 
-        {account ? (
-          <ProfileSection title={t("account.heading")}>
-            <AccountSection account={account} />
+        <div className="flex min-w-0 flex-col">
+          <ProfileSection
+            title={t("sections.identity")}
+            note={t("sections.identityNote")}
+            className="border-t-0 pt-0"
+          >
+            <label className="flex max-w-xl flex-col gap-2">
+              <span className="text-[13px] font-semibold text-muted-foreground">
+                {t("nameLabel")}
+              </span>
+              <input
+                type="text"
+                value={name}
+                onChange={(event) => editName(event.target.value)}
+                autoComplete="name"
+                maxLength={LEARNER_NAME_MAX_LENGTH}
+                className="min-h-14 w-full rounded-xl border border-border bg-card px-[1.125rem] text-lg text-foreground focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none"
+              />
+            </label>
+            <div className="flex flex-col gap-2.5">
+              <span className="text-[13px] font-semibold text-muted-foreground">
+                {t("avatarLabel")}
+              </span>
+              <AvatarPicker
+                name={name}
+                value={avatar}
+                onChange={editAvatar}
+                className="sm:grid-cols-5 xl:grid-cols-9"
+              />
+            </div>
           </ProfileSection>
-        ) : null}
 
-        <ProfileSection title={t("sections.preferences")}>
-          <div className="flex flex-col">
-            <PreferenceRow label={t("preferences.languageLabel")}>
-              <LocaleSwitcher />
-            </PreferenceRow>
-            <PreferenceRow label={t("preferences.themeLabel")}>
-              <ThemeToggle />
-            </PreferenceRow>
-          </div>
-        </ProfileSection>
+          {account ? (
+            <ProfileSection title={t("account.heading")}>
+              <AccountSection account={account} />
+            </ProfileSection>
+          ) : null}
 
-        <ProfileSection
-          title={t("deleteAccount.heading")}
-          note={t("deleteAccount.description")}
-          className="[&>div>h2]:text-base"
-        >
-          <DeleteAccountSection />
-        </ProfileSection>
+          <ProfileSection title={t("sections.preferences")}>
+            <div className="flex flex-col">
+              <PreferenceRow label={t("preferences.languageLabel")}>
+                <LocaleSwitcher />
+              </PreferenceRow>
+              <PreferenceRow label={t("preferences.themeLabel")}>
+                <ThemeToggle />
+              </PreferenceRow>
+            </div>
+          </ProfileSection>
+
+          <ProfileSection
+            title={t("deleteAccount.heading")}
+            note={t("deleteAccount.description")}
+            className={DANGER_PANEL}
+          >
+            <DeleteAccountSection />
+          </ProfileSection>
+        </div>
       </div>
-
-      <ProfileSaveBar
-        state={saveState({ isDirty, isSaving, isSaved })}
-        canSave={hasName}
-        onSave={handleSave}
-        onDiscard={discard}
-      />
     </div>
   );
 }
@@ -255,20 +274,22 @@ function ProfileShell() {
     <div
       data-testid="profile-shell"
       aria-hidden="true"
-      className="mx-auto flex w-full max-w-5xl flex-col gap-8 sm:gap-10"
+      className="mx-auto flex w-full max-w-6xl flex-col gap-8 sm:gap-10"
     >
       <div className="flex flex-col gap-2">
         <Skeleton className="h-3 w-24" />
         <Skeleton className="h-10 w-full max-w-sm" />
       </div>
-      <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
-        <Skeleton className="h-56 w-full rounded-[1.25rem] lg:w-[26rem] lg:flex-none" />
-        <Skeleton className="h-56 w-full rounded-[1.125rem]" />
-      </div>
-      <div className="flex flex-col gap-5 border-t border-border pt-8">
-        <Skeleton className="h-6 w-32" />
-        <Skeleton className="h-14 w-full max-w-xl rounded-xl" />
-        <Skeleton className="h-40 w-full rounded-[1.125rem]" />
+      <div className={PROFILE_COLUMNS}>
+        <div className="flex flex-col gap-4">
+          <Skeleton className="h-56 w-full rounded-[1.25rem]" />
+          <Skeleton className="h-14 w-full rounded-xl" />
+        </div>
+        <div className="flex flex-col gap-5">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-14 w-full max-w-xl rounded-xl" />
+          <Skeleton className="h-40 w-full rounded-[1.125rem]" />
+        </div>
       </div>
     </div>
   );

@@ -541,6 +541,10 @@
       "start": "Empezar el {course}",
       "seeAll": "Ver todos los cursos",
       "note": "Al empezar el curso se agrega a Mi aprendizaje. Puedes unirte a otros cursos cuando quieras."
+    },
+    "AccountRow": {
+      "change": "Cambiar",
+      "close": "Cerrar"
     }
   },
   "CourseCatalog": {
@@ -670,16 +674,14 @@
   },
   "Profile": {
     "eyebrow": "Perfil",
+    "title": "Tu perfil",
     "intro": "Tu tarjeta, tu cuenta y tus preferencias.",
     "sections": {
-      "identity": "Identidad",
+      "identity": "Tu tarjeta",
       "identityNote": "Los cambios aparecen en tu tarjeta mientras editas.",
       "preferences": "Preferencias"
     },
     "progress": {
-      "heading": "Tu progreso en {course}",
-      "videos": "{completed} de {total, plural, one {# vídeo} other {# vídeos}}",
-      "percent": "{percent, number, percent}",
       "ticketsLabel": "Tickets ganados",
       "prizesLabel": "Premios conseguidos"
     },
@@ -696,12 +698,13 @@
       "unsaved": "Tienes cambios sin guardar"
     },
     "account": {
-      "heading": "Cuenta",
+      "heading": "Acceso y seguridad",
       "emailLabel": "Correo",
       "methodsLabel": "Cómo inicias sesión",
       "methodPassword": "Correo y contraseña",
       "methodGoogle": "Google",
-      "googleManaged": "Tu correo viene de Google, así que se cambia allí y esta cuenta no tiene contraseña."
+      "googleManaged": "Tu correo viene de Google, así que se cambia allí y esta cuenta no tiene contraseña.",
+      "passwordLabel": "Contraseña"
     },
     "password": {
       "heading": "Cambiar tu contraseña",

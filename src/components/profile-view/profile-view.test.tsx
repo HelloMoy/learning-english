@@ -105,15 +105,15 @@ describe("ProfileView", () => {
   });
 
   describe("GIVEN a learner with a card", () => {
-    test("WHEN the page opens THEN it is titled with the learner and reads as an outline", async () => {
+    test("WHEN the page opens THEN it is titled Your profile and reads as an outline", async () => {
       renderProfile();
 
       expect(
-        await screen.findByRole("heading", { level: 1, name: "Ana García" }),
+        await screen.findByRole("heading", { level: 1, name: "Your profile" }),
       ).toBeInTheDocument();
       expect(await sectionHeadings()).toEqual([
-        "Identity",
-        "Account",
+        "Your card",
+        "Sign-in and security",
         "Preferences",
         "Delete account",
       ]);
@@ -157,7 +157,7 @@ describe("ProfileView", () => {
     test("WHEN the account is known THEN its section names the address", async () => {
       renderProfile();
 
-      const settings = await screen.findByRole("region", { name: "Account" });
+      const settings = await screen.findByRole("region", { name: "Sign-in and security" });
       expect(within(settings).getByText("ana@example.com")).toBeInTheDocument();
     });
 
@@ -165,7 +165,7 @@ describe("ProfileView", () => {
       renderProfile(makeStubLearnerProfileRepository({ profile }), null);
 
       expect(await screen.findByRole("textbox", { name: "Name" })).toHaveValue("Ana García");
-      expect(await sectionHeadings()).toEqual(["Identity", "Preferences", "Delete account"]);
+      expect(await sectionHeadings()).toEqual(["Your card", "Preferences", "Delete account"]);
     });
 
     test("WHEN videos are complete THEN the card counts them", async () => {
@@ -189,10 +189,22 @@ describe("ProfileView", () => {
       await user.type(field, "Ana María López");
 
       expect(card().getByText("Ana María López")).toBeInTheDocument();
-      expect(screen.getByRole("heading", { level: 1, name: "Ana García" })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1, name: "Your profile" })).toBeInTheDocument();
       expect(screen.getByText("You have unsaved changes")).toBeInTheDocument();
       expect(saveButton()).toBeEnabled();
       expect(await profiles.get()).toEqual(profile);
+    });
+
+    test("WHEN the name is edited THEN one save bar rises, in the card column under the card", async () => {
+      const user = userEvent.setup();
+      renderProfile();
+
+      await user.type(await screen.findByRole("textbox", { name: "Name" }), "!");
+
+      const column = within(screen.getByTestId("profile-card-column"));
+      expect(column.getByTestId("learner-card")).toBeInTheDocument();
+      expect(column.getByRole("button", { name: "Save changes" })).toBeInTheDocument();
+      expect(screen.getAllByRole("button", { name: "Save changes" })).toHaveLength(1);
     });
 
     test("WHEN the name is cleared THEN the bar stays but Save is unavailable", async () => {
@@ -228,9 +240,10 @@ describe("ProfileView", () => {
 
       expect(await screen.findByText("Perfil")).toBeInTheDocument();
       expect(screen.getByText("Seu cartão, sua conta e suas preferências.")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1, name: "Seu perfil" })).toBeInTheDocument();
       expect(await sectionHeadings()).toEqual([
-        "Identidade",
-        "Conta",
+        "Seu cartão",
+        "Acesso e segurança",
         "Preferências",
         "Excluir conta",
       ]);

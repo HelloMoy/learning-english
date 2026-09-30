@@ -58,6 +58,49 @@ describe("LearnerCard", () => {
     });
   });
 
+  describe("GIVEN a progress bar", () => {
+    test("WHEN the bar is not asked for THEN the card draws none", () => {
+      renderInLocale(
+        <LearnerCard
+          name="Ana García"
+          avatar={{ kind: "initials" }}
+          level={level}
+          progress={{ completed: 12, total: 48 }}
+        />,
+      );
+
+      expect(screen.queryByTestId("learner-card-progress-bar")).not.toBeInTheDocument();
+    });
+
+    test("WHEN the bar is asked for THEN it fills to the completed share", () => {
+      renderInLocale(
+        <LearnerCard
+          name="Ana García"
+          avatar={{ kind: "initials" }}
+          level={level}
+          progress={{ completed: 12, total: 48 }}
+          showProgressBar
+        />,
+      );
+
+      expect(screen.getByTestId("learner-card-progress-bar")).toHaveStyle({ width: "25%" });
+    });
+
+    test("WHEN the course has no videos THEN the bar stays empty", () => {
+      renderInLocale(
+        <LearnerCard
+          name="Ana García"
+          avatar={{ kind: "initials" }}
+          level={level}
+          progress={{ completed: 0, total: 0 }}
+          showProgressBar
+        />,
+      );
+
+      expect(screen.getByTestId("learner-card-progress-bar")).toHaveStyle({ width: "0%" });
+    });
+  });
+
   test("WHEN no distinction is given THEN the card carries none", () => {
     renderInLocale(
       <LearnerCard

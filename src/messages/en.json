@@ -541,6 +541,10 @@
       "start": "Start the {course}",
       "seeAll": "See all courses",
       "note": "Starting the course adds it to My learning. You can join other courses any time."
+    },
+    "AccountRow": {
+      "change": "Change",
+      "close": "Close"
     }
   },
   "CourseCatalog": {
@@ -670,16 +674,14 @@
   },
   "Profile": {
     "eyebrow": "Profile",
+    "title": "Your profile",
     "intro": "Your card, your account and your preferences.",
     "sections": {
-      "identity": "Identity",
+      "identity": "Your card",
       "identityNote": "Changes show on your card as you edit.",
       "preferences": "Preferences"
     },
     "progress": {
-      "heading": "Your progress in {course}",
-      "videos": "{completed} of {total, plural, one {# video} other {# videos}}",
-      "percent": "{percent, number, percent}",
       "ticketsLabel": "Tickets earned",
       "prizesLabel": "Prizes claimed"
     },
@@ -696,12 +698,13 @@
       "unsaved": "You have unsaved changes"
     },
     "account": {
-      "heading": "Account",
+      "heading": "Sign-in and security",
       "emailLabel": "Email address",
       "methodsLabel": "How you sign in",
       "methodPassword": "Email and password",
       "methodGoogle": "Google",
-      "googleManaged": "Your address comes from Google, so it is changed there and this account has no password."
+      "googleManaged": "Your address comes from Google, so it is changed there and this account has no password.",
+      "passwordLabel": "Password"
     },
     "password": {
       "heading": "Change your password",

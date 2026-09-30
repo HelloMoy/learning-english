@@ -61,9 +61,9 @@ test.describe("Account deletion", () => {
     await signInAs(later, learnerAccount);
     const laterPage = await later.newPage();
     await laterPage.goto("/en/profile");
-    // The Profile page is titled with the learner, so its heading is the proof
-    // that the account — and its card — outlived the link.
-    await expect(laterPage.getByRole("heading", { level: 1 })).toHaveText(ONBOARDED_LEARNER.name);
+    // The card carries the learner's name, so it is the proof that the account
+    // — and its card — outlived the link.
+    await expect(laterPage.getByTestId("learner-card")).toContainText(ONBOARDED_LEARNER.name);
     await later.close();
   });
 });

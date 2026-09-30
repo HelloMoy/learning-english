@@ -1,13 +1,14 @@
 "use client";
 
 import { LearnerCard, type LearnerCardLevel } from "@/components/learner-card/learner-card";
-import { ProgressRing } from "@/components/progress-ring/progress-ring";
 import type { LearnerAvatar } from "@/domain/entities/learner-profile/learner-profile";
 import type { LessonProgressSlice } from "@/domain/use-cases/find-course-catalog/find-course-catalog";
 import { useCourseWatchProgress } from "@/hooks/use-course-watch-progress/use-course-watch-progress";
 import { useIsHydrated } from "@/hooks/use-is-hydrated/use-is-hydrated";
 import { useLearnerAchievements } from "@/hooks/use-learner-achievements/use-learner-achievements";
+import { Link } from "@/i18n/navigation";
 import type { AchievementLevel } from "@/lib/learner-achievements/learner-achievements";
+import { cn } from "@/lib/utils/utils";
 
 import { useFormatter, useTranslations } from "next-intl";
 
@@ -21,25 +22,27 @@ export type ProfileCardBandProps = {
   avatar: LearnerAvatar;
   /** The level the card names. */
   level: LearnerCardLevel;
-  /** The level's lessons, which the progress panel counts. */
+  /** The level's lessons, which the card's progress line and bar count. */
   lessonRuntimes: ReadonlyArray<LessonProgressSlice>;
   /** Every catalog course, which the tickets and prizes are counted across. */
   levels: ReadonlyArray<AchievementLevel>;
 };
 
 /**
- * The band that opens the Profile page: the learner card beside what the
- * learner has done — the level's completed share, the tickets they have
- * earned and the prizes they have claimed.
+ * The Profile page's card column: the learner card, which carries the level's
+ * progress as a count and a bar, and under it two ticket stubs counting the
+ * tickets the learner has earned and the prizes they have claimed, each a link
+ * to the Achievements page where those tickets are spent and prizes live.
  *
  * @remarks
  * The card is the real card, not a labelled preview: it follows the name being
  * typed and the avatar being picked, which is why the band takes them as
- * values rather than reading the stored profile itself.
+ * values rather than reading the stored profile itself. It is the only place
+ * on the page that names the progress.
  *
  * Every figure reads zero until hydration commits, the same rule the card's
  * own progress line follows, because the learner's progress lives in the
- * browser's store and the server has no figure to render. The rows are sized
+ * browser's store and the server has no figure to render. The stubs are sized
  * by their labels rather than their numbers, so adopting the real figures
  * moves nothing on the page.
  *
@@ -73,86 +76,70 @@ export function ProfileCardBand({
   const watched = useCourseWatchProgress(lessonRuntimes);
   const achievements = useLearnerAchievements(levels);
 
-  const completed = isHydrated ? watched.completedCount : 0;
-  const share = isHydrated ? watched.completedFraction : 0;
-
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch lg:gap-6">
-      <div className="lg:w-[26rem] lg:flex-none">
-        <LearnerCard
-          name={name}
-          avatar={avatar}
-          level={level}
-          size="large"
-          progress={{ completed, total: watched.lessonCount }}
+    <div className="flex flex-col gap-3.5">
+      <LearnerCard
+        name={name}
+        avatar={avatar}
+        level={level}
+        size="large"
+        progress={{
+          completed: isHydrated ? watched.completedCount : 0,
+          total: watched.lessonCount,
+        }}
+        showProgressBar
+      />
+      <div className="grid grid-cols-2 gap-2.5">
+        <CountStub
+          testId="tickets-earned"
+          value={isHydrated ? achievements.ticketsEarned : 0}
+          label={t("ticketsLabel")}
+          className="bg-ticket text-ticket-ink"
+        />
+        <CountStub
+          testId="prizes-claimed"
+          value={isHydrated ? achievements.prizesRedeemed : 0}
+          label={t("prizesLabel")}
+          className="bg-primary text-primary-foreground"
         />
       </div>
-      <section
-        aria-labelledby="profile-progress-label"
-        data-testid="profile-progress"
-        className="flex flex-1 flex-col justify-center gap-5 rounded-[1.125rem] border border-border bg-card p-5 sm:p-6"
-      >
-        <div className="flex items-center gap-4 sm:gap-5">
-          <ProgressRing
-            size={76}
-            fraction={share}
-          >
-            <span className="text-[15px] font-extrabold text-popover-foreground tabular-nums">
-              {t("percent", { percent: share })}
-            </span>
-          </ProgressRing>
-          <div className="flex min-w-0 flex-col gap-1.5">
-            <p
-              id="profile-progress-label"
-              className="text-[13px] font-semibold text-muted-foreground"
-            >
-              {t("heading", { course: level.courseTitle })}
-            </p>
-            <p className="text-xl leading-tight font-extrabold tracking-tight text-foreground tabular-nums">
-              {t("videos", { completed, total: watched.lessonCount })}
-            </p>
-            <span
-              aria-hidden="true"
-              className="h-1.5 w-full max-w-[18rem] overflow-hidden rounded-full bg-border"
-            >
-              <span
-                className="block h-full rounded-full bg-gradient-to-r from-bronze to-gold transition-[width] duration-500 motion-reduce:transition-none"
-                style={{ width: `${share * 100}%` }}
-              />
-            </span>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-2.5">
-          <Stat
-            testId="tickets-earned"
-            value={isHydrated ? achievements.ticketsEarned : 0}
-            label={t("ticketsLabel")}
-          />
-          <Stat
-            testId="prizes-claimed"
-            value={isHydrated ? achievements.prizesRedeemed : 0}
-            label={t("prizesLabel")}
-          />
-        </div>
-      </section>
     </div>
   );
 }
 
-function Stat({ testId, value, label }: { testId: string; value: number; label: string }) {
+/**
+ * One count on a stub notched like the lesson tickets it counts, linking to
+ * the Achievements page. The focus ring is drawn inside the stub because the
+ * notched mask would clip one drawn outside it.
+ */
+function CountStub({
+  testId,
+  value,
+  label,
+  className,
+}: {
+  testId: string;
+  value: number;
+  label: string;
+  className: string;
+}) {
   const format = useFormatter();
 
   return (
-    <p
+    <Link
+      href="/achievements"
       data-testid={testId}
-      className="flex flex-col gap-0.5 rounded-xl border border-border bg-panel-2 px-4 py-3"
+      className={cn(
+        "lesson-ticket flex items-center gap-3 rounded-xl px-4 py-3 transition-[filter] hover:brightness-105 focus-visible:ring-3 focus-visible:ring-primary-foreground/75 focus-visible:outline-none focus-visible:ring-inset motion-reduce:transition-none",
+        className,
+      )}
     >
-      <span className="text-2xl leading-none font-extrabold tracking-tight text-foreground tabular-nums">
+      <span className="text-2xl leading-none font-extrabold tracking-tight tabular-nums">
         {format.number(value)}
-      </span>
-      <span className="text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+      </span>{" "}
+      <span className="text-[11px] leading-tight font-bold tracking-[0.12em] uppercase">
         {label}
       </span>
-    </p>
+    </Link>
   );
 }

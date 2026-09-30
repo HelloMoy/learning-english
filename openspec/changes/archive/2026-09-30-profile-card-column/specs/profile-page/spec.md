@@ -1,8 +1,5 @@
-# profile-page Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change learner-onboarding. Update Purpose after archive.
-## Requirements
 ### Requirement: The Profile page opens with the learner's card and their progress
 
 The Profile page SHALL hold the large learner card in a column of its own. On a wide viewport that
@@ -314,4 +311,3 @@ Every string SHALL come from `Profile.email.*` in `en`, `es` and `pt`.
 - **WHEN** `/pt/profile` renders and the address row is opened
 - **THEN** the form's heading, label, the note about the link, the button and the confirmation render
   from `pt.json`
-
