@@ -68,10 +68,12 @@ const givenHalfTheCourseWatched = () => {
   givenLearner.claimedPrizes([vowels.slug]);
 };
 
-/** The panel beside the card — the card prints the same tally in its footer. */
-const panel = () => within(screen.getByTestId("profile-progress"));
+/** The card, the one place on the page that names the progress. */
+const card = () => within(screen.getByTestId("learner-card"));
 
-const stat = (testId: string) => within(screen.getByTestId(testId));
+const bar = () => screen.getByTestId("learner-card-progress-bar");
+
+const stub = (testId: string) => within(screen.getByTestId(testId));
 
 beforeEach(() => {
   vi.mocked(useIsHydrated).mockReturnValue(true);
@@ -82,17 +84,45 @@ beforeEach(() => {
 
 describe("ProfileCardBand", () => {
   describe("GIVEN a learner part-way through the level", () => {
-    test("WHEN the band renders THEN it names the progress, the tickets and the prizes", async () => {
+    test("WHEN the band renders THEN the card names the progress with a bar AND the stubs count tickets and prizes", async () => {
       givenHalfTheCourseWatched();
 
       renderBand();
 
-      expect(screen.getByTestId("learner-card")).toBeInTheDocument();
-      await waitFor(() => expect(panel().getByText("2 of 4 videos")).toBeInTheDocument());
-      expect(panel().getByText("50%")).toBeInTheDocument();
-      expect(panel().getByText("Your progress in Basic Course")).toBeInTheDocument();
-      expect(stat("tickets-earned").getByText("2")).toBeInTheDocument();
-      expect(stat("prizes-claimed").getByText("1")).toBeInTheDocument();
+      await waitFor(() => expect(card().getByText("2 of 4 videos")).toBeInTheDocument());
+      expect(bar()).toHaveStyle({ width: "50%" });
+      expect(stub("tickets-earned").getByText("2")).toBeInTheDocument();
+      expect(stub("prizes-claimed").getByText("1")).toBeInTheDocument();
+    });
+
+    test("WHEN the band renders THEN the progress is not repeated in a panel or a ring", async () => {
+      givenHalfTheCourseWatched();
+
+      renderBand();
+
+      await waitFor(() => expect(card().getByText("2 of 4 videos")).toBeInTheDocument());
+      expect(screen.queryByTestId("profile-progress")).not.toBeInTheDocument();
+      expect(screen.getAllByText("2 of 4 videos")).toHaveLength(1);
+      expect(screen.queryByText("50%")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN the counts under the card", () => {
+    test("WHEN the band renders THEN each count is a link to the achievements, named by what it counts", async () => {
+      givenHalfTheCourseWatched();
+
+      renderBand();
+
+      await waitFor(() =>
+        expect(screen.getByRole("link", { name: "2 Tickets earned" })).toHaveAttribute(
+          "href",
+          "/achievements",
+        ),
+      );
+      expect(screen.getByRole("link", { name: "1 Prizes claimed" })).toHaveAttribute(
+        "href",
+        "/achievements",
+      );
     });
   });
 
@@ -100,10 +130,10 @@ describe("ProfileCardBand", () => {
     test("WHEN the band renders THEN every figure is zero", async () => {
       renderBand();
 
-      await waitFor(() => expect(panel().getByText("0 of 4 videos")).toBeInTheDocument());
-      expect(panel().getByText("0%")).toBeInTheDocument();
-      expect(stat("tickets-earned").getByText("0")).toBeInTheDocument();
-      expect(stat("prizes-claimed").getByText("0")).toBeInTheDocument();
+      await waitFor(() => expect(card().getByText("0 of 4 videos")).toBeInTheDocument());
+      expect(bar()).toHaveStyle({ width: "0%" });
+      expect(stub("tickets-earned").getByText("0")).toBeInTheDocument();
+      expect(stub("prizes-claimed").getByText("0")).toBeInTheDocument();
     });
   });
 
@@ -114,9 +144,10 @@ describe("ProfileCardBand", () => {
 
       renderBand();
 
-      expect(panel().getByText("0 of 4 videos")).toBeInTheDocument();
-      expect(panel().getByText("0%")).toBeInTheDocument();
-      expect(stat("tickets-earned").getByText("0")).toBeInTheDocument();
+      expect(card().getByText("0 of 4 videos")).toBeInTheDocument();
+      expect(bar()).toHaveStyle({ width: "0%" });
+      expect(stub("tickets-earned").getByText("0")).toBeInTheDocument();
+      expect(stub("prizes-claimed").getByText("0")).toBeInTheDocument();
     });
   });
 
@@ -126,10 +157,9 @@ describe("ProfileCardBand", () => {
 
       renderBand("pt");
 
-      await waitFor(() => expect(panel().getByText("2 de 4 vídeos")).toBeInTheDocument());
-      expect(panel().getByText("Seu progresso em Basic Course")).toBeInTheDocument();
-      expect(panel().getByText("Tickets ganhos")).toBeInTheDocument();
-      expect(panel().getByText("Prêmios resgatados")).toBeInTheDocument();
+      await waitFor(() => expect(card().getByText("2 de 4 vídeos")).toBeInTheDocument());
+      expect(stub("tickets-earned").getByText("Tickets ganhos")).toBeInTheDocument();
+      expect(stub("prizes-claimed").getByText("Prêmios resgatados")).toBeInTheDocument();
     });
   });
 });

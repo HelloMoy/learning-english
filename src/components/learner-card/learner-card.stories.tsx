@@ -97,6 +97,16 @@ export const Large: Story = {
   },
 };
 
+/** The Profile page card: large, with the progress bar under the footer. */
+export const WithProgressBar: Story = {
+  args: {
+    size: "large",
+    progress: { completed: 12, total: 48 },
+    avatar: { kind: "illustration", id: "wave" },
+    showProgressBar: true,
+  },
+};
+
 /** Completing one course: the bronze finish and label. */
 export const Bronze: Story = {
   args: { size: "large", distinction: "bronze", progress: { completed: 48, total: 48 } },

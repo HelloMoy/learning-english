@@ -541,6 +541,10 @@
       "start": "Começar o {course}",
       "seeAll": "Ver todos os cursos",
       "note": "Ao começar o curso, ele entra em Meu aprendizado. Você pode entrar em outros cursos quando quiser."
+    },
+    "AccountRow": {
+      "change": "Alterar",
+      "close": "Fechar"
     }
   },
   "CourseCatalog": {
@@ -670,16 +674,14 @@
   },
   "Profile": {
     "eyebrow": "Perfil",
+    "title": "Seu perfil",
     "intro": "Seu cartão, sua conta e suas preferências.",
     "sections": {
-      "identity": "Identidade",
+      "identity": "Seu cartão",
       "identityNote": "As mudanças aparecem no seu cartão enquanto você edita.",
       "preferences": "Preferências"
     },
     "progress": {
-      "heading": "Seu progresso em {course}",
-      "videos": "{completed} de {total, plural, one {# vídeo} other {# vídeos}}",
-      "percent": "{percent, number, percent}",
       "ticketsLabel": "Tickets ganhos",
       "prizesLabel": "Prêmios resgatados"
     },
@@ -696,12 +698,13 @@
       "unsaved": "Você tem alterações não salvas"
     },
     "account": {
-      "heading": "Conta",
+      "heading": "Acesso e segurança",
       "emailLabel": "E-mail",
       "methodsLabel": "Como você entra",
       "methodPassword": "E-mail e senha",
       "methodGoogle": "Google",
-      "googleManaged": "Seu e-mail vem do Google, então ele é trocado por lá e esta conta não tem senha."
+      "googleManaged": "Seu e-mail vem do Google, então ele é trocado por lá e esta conta não tem senha.",
+      "passwordLabel": "Senha"
     },
     "password": {
       "heading": "Trocar sua senha",
