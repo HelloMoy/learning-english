@@ -86,19 +86,19 @@ test.describe("Course overview", () => {
       await page.waitForURL(`**${moduleUrl(MODULES[index]!.slug)}`, COLD_ROUTE);
     });
 
-    test("WHEN the tile of a one-video lesson is clicked THEN that video opens", async ({
+    test("WHEN the tile of a one-video lesson is clicked THEN its module overview opens too", async ({
       page,
     }) => {
       // Arrange
       const index = indexOfFirstModuleWith((count) => count === 1);
-      const onlyLesson = lessonsOfModule(MODULES[index]!.id)[0]!;
       await page.goto(courseUrl("en"));
 
       // Act
       await tileOf(page, index).click(COLD_ROUTE);
 
       // Assert
-      await page.waitForURL(`**${lessonUrl(MODULES[index]!.slug, onlyLesson.id)}`, COLD_ROUTE);
+      await page.waitForURL(`**${moduleUrl(MODULES[index]!.slug)}`, COLD_ROUTE);
+      await expect(page.getByTestId("module-overview")).toBeVisible(COLD_ROUTE);
     });
 
     for (const locale of ["en", "es"]) {
