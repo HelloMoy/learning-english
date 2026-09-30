@@ -89,7 +89,7 @@ Every catalog course the learner is not enrolled in SHALL render under **More co
 - up to four module thumbnails (each module's first video) with the count of the rest;
 - its module count, video count and total runtime;
 - **Enroll**;
-- **Preview course**, which opens its overview without enrolling.
+- **Preview course**, which opens its course page (`course-detail-page`) without enrolling.
 
 The section title SHALL read "Keep going after Level N", N being the highest derived level among the **level** courses the learner is enrolled in, or "Start here" when they are enrolled in no level course. Enrolling in a reference course SHALL NOT change N. When the learner is enrolled in every course, the section SHALL remain and read that they are enrolled in every course and that new courses will show up there.
 
@@ -105,7 +105,7 @@ The section title SHALL read "Keep going after Level N", N being the highest der
 
 #### Scenario: Previewing does not enroll
 - **WHEN** the learner activates Preview course on the Advanced card
-- **THEN** the Advanced overview opens and the learner is still not enrolled in it
+- **THEN** the Advanced course page opens with **Enroll**, and the learner is still not enrolled in it
 
 #### Scenario: Everything joined
 - **WHEN** the learner is enrolled in every catalog course
