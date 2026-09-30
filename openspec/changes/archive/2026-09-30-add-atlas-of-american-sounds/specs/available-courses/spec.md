@@ -1,25 +1,4 @@
-# available-courses Specification
-
-## Purpose
-TBD - created by archiving change course-enrollment-views. Update Purpose after archive.
-## Requirements
-### Requirement: Available courses is a learner route that lists every catalog course
-
-The route `/[locale]/courses` SHALL render the Available courses page for a signed-in learner with a profile, under the same session and profile requirements as the other course routes. It SHALL show an eyebrow, the heading "Available courses", and a summary stating how many courses the catalog serves and how many of them the learner is enrolled in, with an "all" wording when the learner is enrolled in every one. Until the learner store is seeded, the learner-dependent sections SHALL render placeholders naming no course state.
-
-The header eyebrow SHALL read `COURSES` on this route.
-
-#### Scenario: The summary counts enrollments
-- **WHEN** a learner enrolled in `basic-course` opens `/en/courses` and the catalog serves two courses
-- **THEN** the summary reads `2 courses · you’re enrolled in 1`
-
-#### Scenario: Enrolled in everything
-- **WHEN** a learner enrolled in both catalog courses opens the page
-- **THEN** the summary says they are enrolled in all of them
-
-#### Scenario: No session, no page
-- **WHEN** `/en/courses` is requested without a session
-- **THEN** the response redirects to sign in and contains no course content
+## MODIFIED Requirements
 
 ### Requirement: The course the learner watched last is featured
 
@@ -118,12 +97,3 @@ The section title SHALL read "Keep going after Level N", N being the highest der
 #### Scenario: Only a reference course joined
 - **WHEN** a learner enrolled only in the Atlas of American Sounds opens the page
 - **THEN** More courses reads `Start here`
-
-### Requirement: Available courses copy is localized
-
-Every string on the page SHALL come from the active locale's messages in `en`, `es` and `pt` under `Components.*` namespaces, with ICU plurals for counts, and every link SHALL be locale-aware.
-
-#### Scenario: The page in Spanish
-- **WHEN** `/es/courses` renders
-- **THEN** the heading, summary, section titles, marks and actions render from `es.json`
-

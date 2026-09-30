@@ -73,9 +73,26 @@ The application SHALL assign each module a prize by its slug from a fixed catalo
 | `8-everyday-english-phrases-part-2-master-them` | tin-can phone |
 | `9-speak-with-confidence-in-30-days` | crown |
 | `10-the-practice-zone-sharpen-your-skills` | wind-up robot |
+| `1-the-vowel-map` | compass |
+| `2-front-vowels` | xylophone |
+| `3-central-vowels` | maracas |
+| `4-back-vowels` | trumpet |
+| `5-diphthongs` | boomerang |
+| `6-r-colored-vowels` | roller skate |
+| `7-stop-consonants` | party popper |
+| `8-fricatives` | pinwheel |
+| `9-affricates` | jack-in-the-box |
+| `10-nasals` | bell |
+| `11-liquids` | rubber duck |
+| `12-glides` | kite |
 
 A module whose slug is not in the catalog SHALL receive a gift box. Each prize SHALL have a localized
-name and an illustration that can be drawn in full colour or as a single-colour silhouette.
+name and an illustration that can be drawn in full colour or as a single-colour silhouette. Every module
+the catalog ships SHALL have its own catalogued prize, so no shipped module falls back to the gift box.
+
+Each new illustration SHALL follow the existing prizes' drawing: shapes on the same 64-unit grid, painted
+only with the three prize paints, and recognisable by its outline alone when drawn as a silhouette. No two
+prizes SHALL share an outline.
 
 #### Scenario: Vowels redeems a harmonica
 - **WHEN** the prize for the module `2-vowels` is looked up
@@ -84,6 +101,18 @@ name and an illustration that can be drawn in full colour or as a single-colour 
 #### Scenario: An unknown module still has a prize
 - **WHEN** a module with the slug `11-bonus-module` is looked up
 - **THEN** its prize is the gift box
+
+#### Scenario: Fricatives redeem a pinwheel
+- **WHEN** the prize for the module `8-fricatives` is looked up
+- **THEN** it is the pinwheel
+
+#### Scenario: Every shipped module has its own prize
+- **WHEN** every module slug in the catalog, the Atlas's included, is looked up
+- **THEN** none of them receives the gift box
+
+#### Scenario: A new prize is named in every locale
+- **WHEN** the kite is claimed and shown under `es` and under `pt`
+- **THEN** its name renders from that locale's messages, never as a raw key
 
 ### Requirement: A module's tickets ready its prize, and the learner claims it
 
@@ -125,8 +154,12 @@ A course SHALL count as complete when it holds at least one lesson and every one
 earned its ticket. The learner's distinction SHALL be:
 
 - `student` while no course is complete;
-- `bronze` once at least one course is complete and not every course holding lessons is;
-- `gold` once every course holding lessons is complete.
+- `bronze` once at least one course — level or reference — is complete and not every **level** course
+  holding lessons is;
+- `gold` once every **level** course holding lessons is complete.
+
+A reference course SHALL NOT be required for gold, so adding one to the catalog never takes gold away
+from a learner who holds it. Its lessons still earn tickets and its modules still ready prizes.
 
 The distinction SHALL follow tickets alone: claiming a prize SHALL NOT change it.
 
@@ -141,6 +174,14 @@ The distinction SHALL follow tickets alone: claiming a prize SHALL NOT change it
 #### Scenario: Finishing every course earns gold
 - **WHEN** every lesson of every course has earned its ticket
 - **THEN** the distinction is `gold`
+
+#### Scenario: Gold does not wait for a reference course
+- **WHEN** every lesson of both level courses has earned its ticket and the Atlas of American Sounds has none
+- **THEN** the distinction is `gold`
+
+#### Scenario: A reference course alone earns bronze
+- **WHEN** every lesson of the Atlas of American Sounds has earned its ticket and no level course is complete
+- **THEN** the distinction is `bronze`
 
 ### Requirement: Achievements is the learner's own page
 
@@ -163,7 +204,7 @@ The Achievements page SHALL show:
 - how many tickets are earned out of every lesson in the catalog, and how many prizes are claimed out
   of every module that holds lessons;
 - a prize counter: for each course, in catalog order, a shelf holding every module's prize in module
-  sequence order.
+  sequence order. A reference course has its shelf like any other course.
 
 Each prize on a shelf SHALL show:
 
@@ -178,7 +219,7 @@ named module has the given tickets. States SHALL NOT be told apart by colour alo
 
 #### Scenario: Counts span the whole catalog
 - **WHEN** a learner has completed the one lesson of `Introduction`, claimed its prize, and completed 12 lessons of `Vowels`
-- **THEN** the page shows 13 tickets earned out of 155 and 1 prize redeemed out of 15
+- **THEN** the page shows 13 tickets earned out of 218 and 1 prize redeemed out of 27, the totals spanning the Basic Course, the Advanced Intermediate Course and the Atlas of American Sounds
 
 #### Scenario: A claimed prize is named
 - **WHEN** the learner has claimed the `Introduction` prize
@@ -203,7 +244,7 @@ explain, in the active locale:
 
 - a ticket is earned by completing a lesson, and carries the lesson's sound;
 - a module's tickets ready its prize, which stays hidden until the learner claims it on the counter;
-- the distinction is bronze once one course is complete and gold once every course is.
+- the distinction is bronze once one course is complete and gold once every level is.
 
 It SHALL show each level beside an example drawn with the real pieces, and the prize example SHALL be a
 prize the learner can recognise — not a silhouette, which is what a prize looks like when it is not
@@ -219,6 +260,10 @@ by Escape, and SHALL return focus to the action that opened it. It SHALL NOT cha
 #### Scenario: Escape closes the explanation
 - **WHEN** the dialog is open and the learner presses Escape
 - **THEN** the dialog closes and focus returns to How do they work?
+
+#### Scenario: Gold names the levels
+- **WHEN** the dialog renders in `en`
+- **THEN** it reads that completing every level turns the card gold
 
 ### Requirement: Earning a ticket is announced on the lesson page
 
