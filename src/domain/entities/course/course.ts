@@ -17,6 +17,45 @@ export const CourseTrack = z.enum(["level", "reference"]);
 export type CourseTrack = z.infer<typeof CourseTrack>;
 
 /**
+ * What a learner can do once they finish a course, one sentence each, in the
+ * order the course presents them.
+ */
+export const CourseOutcomes = z.array(z.string().min(1));
+
+export type CourseOutcomes = z.infer<typeof CourseOutcomes>;
+
+/**
+ * The sounds a course teaches, as IPA symbols. Vowels include diphthongs and
+ * r-coloured vowels; they are kept apart from consonants because a learner
+ * reads the two groups differently.
+ */
+export const CourseSounds = z.object({
+  vowels: z.array(z.string().min(1)),
+  consonants: z.array(z.string().min(1)),
+});
+
+export type CourseSounds = z.infer<typeof CourseSounds>;
+
+/** A course's prose in one other language; a field left out falls back to the course's own. */
+export const CourseTranslation = z.object({
+  description: z.string().min(1).optional(),
+  outcomes: CourseOutcomes.optional(),
+});
+
+export type CourseTranslation = z.infer<typeof CourseTranslation>;
+
+/**
+ * A course's prose in other languages, keyed by ISO 639-1 code (`es`, `pt`).
+ * Titles are never translated: only the description and the outcomes.
+ */
+export const CourseTranslations = z.record(
+  z.string().regex(/^[a-z]{2}$/, "ISO 639-1 lower-case"),
+  CourseTranslation,
+);
+
+export type CourseTranslations = z.infer<typeof CourseTranslations>;
+
+/**
  * A course in the platform. The hexágono does not know the subject — `language`
  * is data, not behavior. A "course" of cooking would satisfy the same schema.
  */
@@ -40,6 +79,12 @@ export const Course = z.object({
    */
   sequence: z.number().int().positive(),
   track: CourseTrack,
+  /** Absent when the course declares none; a surface then shows no outcomes section. */
+  outcomes: CourseOutcomes.optional(),
+  /** Absent for courses that are not about single sounds. */
+  sounds: CourseSounds.optional(),
+  /** The description and outcomes in other languages; absent when the course declares none. */
+  translations: CourseTranslations.optional(),
 });
 
 export type Course = z.infer<typeof Course>;

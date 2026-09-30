@@ -1,6 +1,7 @@
 import { getCoursePlatformDeps } from "@/adapters/persistence/in-memory/use-case-dependencies/use-case-dependencies";
 import { SHARE_CARD_SIZE, ShareCard } from "@/components/share-card/share-card";
 import { Slug } from "@/domain/entities/slug/slug";
+import { courseCopy } from "@/lib/course-copy/course-copy";
 import { shareCardFonts } from "@/lib/share-card-fonts/share-card-fonts";
 import { shareHeadline } from "@/lib/share-headline/share-headline";
 
@@ -46,7 +47,7 @@ export default async function Image({ params }: Props) {
       kicker={
         standing.kind === "level" ? t("levelFact", { level: standing.number }) : t("referenceFact")
       }
-      headline={shareHeadline(course.description)}
+      headline={shareHeadline(courseCopy(course, locale).description)}
       supporting={course.title}
       facts={[
         t("moduleFact", { count: modules.length }),

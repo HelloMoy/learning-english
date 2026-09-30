@@ -5,7 +5,14 @@ import { aCourseView, asReference, lessonOf } from "@/test-setup/stubs/course-vi
 
 import { describe, expect, test } from "vitest";
 
-import { courseCardModel, courseFacts, courseShelf, type CourseShelfInput } from "./course-shelf";
+import {
+  courseCardModel,
+  courseFacts,
+  courseFirstVideo,
+  coursePrizes,
+  courseShelf,
+  type CourseShelfInput,
+} from "./course-shelf";
 
 const basic = aCourseView("basic-course", 1, [1, 3]);
 const advanced = aCourseView("advanced-intermediate-course", 2, [2, 2]);
@@ -166,6 +173,76 @@ describe("courseShelf", () => {
 describe("courseFacts", () => {
   test("WHEN read THEN it counts modules, videos and the total runtime", () => {
     expect(courseFacts(basic)).toEqual({ moduleCount: 2, videoCount: 4, runtimeSeconds: 4 * 600 });
+  });
+});
+
+describe("coursePrizes", () => {
+  describe("GIVEN a course with an empty module", () => {
+    test("WHEN read THEN only the modules holding videos have a prize", () => {
+      // Arrange
+      const view = aCourseView("basic-course", 1, [2, 0, 1]);
+
+      // Act
+      const prizes = coursePrizes(view, new Set());
+
+      // Assert
+      expect(prizes).toHaveLength(2);
+      expect(prizes.every((entry) => !entry.isClaimed)).toBe(true);
+    });
+  });
+
+  describe("GIVEN a claimed module", () => {
+    test("WHEN read THEN its prize is claimed AND the others are not", () => {
+      // Arrange
+      const view = aCourseView("basic-course", 1, [1, 1]);
+
+      // Act
+      const prizes = coursePrizes(view, new Set([view.modules[1]!.slug]));
+
+      // Assert
+      expect(prizes.map((entry) => entry.isClaimed)).toEqual([false, true]);
+    });
+  });
+});
+
+describe("courseFirstVideo", () => {
+  describe("GIVEN a course whose first module holds videos", () => {
+    test("WHEN read THEN it is the first video of the first module", () => {
+      // Arrange
+      const view = basic;
+
+      // Act
+      const first = courseFirstVideo(view);
+
+      // Assert
+      expect(first).toEqual({ module: view.modules[0], lesson: lessonOf(view, 0, 0) });
+    });
+  });
+
+  describe("GIVEN a course whose first module is empty", () => {
+    test("WHEN read THEN it is the first video of the next module that holds one", () => {
+      // Arrange
+      const view = aCourseView("basic-course", 1, [0, 2]);
+
+      // Act
+      const first = courseFirstVideo(view);
+
+      // Assert
+      expect(first).toEqual({ module: view.modules[1], lesson: lessonOf(view, 1, 0) });
+    });
+  });
+
+  describe("GIVEN a course with no videos", () => {
+    test("WHEN read THEN there is no first video", () => {
+      // Arrange
+      const view = aCourseView("basic-course", 1, [0]);
+
+      // Act
+      const first = courseFirstVideo(view);
+
+      // Assert
+      expect(first).toBeNull();
+    });
   });
 });
 

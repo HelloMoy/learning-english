@@ -112,6 +112,12 @@
         "eyebrowUse": "Os rótulos de seção usam Geist a 12px, em negrito, maiúsculas e com espaçamento de <code>0.32em</code>, em dourado. Use o componente <code>Eyebrow</code> em vez de refazer o estilo.",
         "eyebrowSample": "Módulo 2 · Vogais"
       }
+    },
+    "CourseSection": {
+      "eyebrow": "Conteúdo",
+      "heading": "5 aulas, um prêmio em cada",
+      "longHeading": "Ao terminar o último vídeo, você vai conseguir dizer cada som do inglês americano",
+      "content": "Cada aula do curso, em ordem, com seus vídeos dentro."
     }
   }
 }

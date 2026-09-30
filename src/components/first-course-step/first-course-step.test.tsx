@@ -1,11 +1,13 @@
 import { enrollInCourseAction } from "@/app/[locale]/learner-actions";
+import { Course } from "@/domain/entities/course/course";
 import { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
 import { useRouter } from "@/i18n/navigation";
 import { learnerStore } from "@/lib/learner-store/learner-store";
-import { renderInLocale } from "@/test-setup/render-in-locale";
+import { renderInLocale, type TestLocale } from "@/test-setup/render-in-locale";
 import { aCourseView, lessonOf } from "@/test-setup/stubs/course-views";
 import { makeStubLearnerProfileRepository } from "@/test-setup/stubs/domain-repos";
 
+import { faker } from "@faker-js/faker";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
@@ -28,10 +30,12 @@ const renderStep = ({
   profiles = makeStubLearnerProfileRepository({ profile }),
   searchParams = "",
   course = basic,
+  locale = "en",
 }: {
   profiles?: ReturnType<typeof makeStubLearnerProfileRepository>;
   searchParams?: string;
   course?: typeof basic;
+  locale?: TestLocale;
 } = {}) =>
   renderInLocale(
     <NuqsTestingAdapter searchParams={searchParams}>
@@ -40,7 +44,31 @@ const renderStep = ({
         course={course}
       />
     </NuqsTestingAdapter>,
+    locale,
   );
+
+describe("FirstCourseStep — translated description", () => {
+  describe("GIVEN a course translated into Portuguese", () => {
+    test("WHEN the step opens in pt THEN the recommendation shows the Portuguese description", async () => {
+      // Arrange
+      const portuguese = faker.lorem.sentence();
+      const course = {
+        ...basic,
+        course: Course.parse({
+          ...basic.course,
+          translations: { pt: { description: portuguese } },
+        }),
+      };
+
+      // Act
+      renderStep({ course, locale: "pt" });
+
+      // Assert
+      expect(await screen.findByText(portuguese)).toBeInTheDocument();
+      expect(screen.queryByText(basic.course.description)).not.toBeInTheDocument();
+    });
+  });
+});
 
 describe("FirstCourseStep", () => {
   test("WHEN storage has not answered THEN a shell stands in for the step", () => {

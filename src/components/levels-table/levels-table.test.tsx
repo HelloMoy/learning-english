@@ -49,10 +49,36 @@ const atlas = {
   standing: { kind: "reference" },
 } as const;
 
-const rowsOf = () =>
-  within(screen.getByRole("list", { name: "Available courses, in order" })).getAllByRole(
-    "listitem",
-  );
+const rowsOf = (listName = "Available courses, in order") =>
+  within(screen.getByRole("list", { name: listName })).getAllByRole("listitem");
+
+describe("LevelsTable — translated descriptions", () => {
+  describe("GIVEN a course translated into Spanish", () => {
+    test("WHEN the table renders in es THEN the row shows the Spanish description", () => {
+      // Arrange
+      const spanish = faker.lorem.sentence();
+      const translated = {
+        ...basic,
+        course: Course.parse({ ...basic.course, translations: { es: { description: spanish } } }),
+      };
+
+      // Act
+      renderInLocale(
+        <LevelsTable
+          courses={[translated]}
+          continued={null}
+        />,
+        "es",
+      );
+
+      // Assert
+      expect(rowsOf("Cursos disponibles, en orden")[0]).toHaveTextContent(spanish);
+      expect(rowsOf("Cursos disponibles, en orden")[0]).not.toHaveTextContent(
+        basic.course.description,
+      );
+    });
+  });
+});
 
 describe("LevelsTable", () => {
   test("WHEN courses arrive out of order THEN the rows follow their sequence", () => {

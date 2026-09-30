@@ -5,6 +5,38 @@
   "description": "From single sounds to real speech: contractions and reductions, American intonation, the rules of fast natural English, and everyday phrases.",
   "language": "en",
   "sequence": 2,
+  "outcomes": [
+    "Say American vowels at natural speed, not only in slow, careful words.",
+    "Use contractions and reductions like I’m, you’ll and would’ve the way native speakers do.",
+    "Shape your sentences with American intonation: falling, rising, fall-rise and rise-fall.",
+    "Link words together with the rules for fast, natural English.",
+    "Understand and use common everyday expressions in context.",
+    "Build speaking confidence with a 30-day plan and step-by-step practice exercises."
+  ],
+  "translations": {
+    "es": {
+      "description": "De los sonidos sueltos al habla real: contracciones y reducciones, entonación americana, las reglas del inglés rápido y natural, y frases cotidianas.",
+      "outcomes": [
+        "Decir las vocales americanas a velocidad natural, no solo en palabras lentas y cuidadas.",
+        "Usar contracciones y reducciones como I’m, you’ll y would’ve igual que los hablantes nativos.",
+        "Dar forma a tus frases con la entonación americana: descendente, ascendente, descendente-ascendente y ascendente-descendente.",
+        "Enlazar palabras con las reglas del inglés rápido y natural.",
+        "Entender y usar expresiones cotidianas comunes en contexto.",
+        "Ganar confianza al hablar con un plan de 30 días y ejercicios de práctica paso a paso."
+      ]
+    },
+    "pt": {
+      "description": "Dos sons isolados à fala real: contrações e reduções, entonação americana, as regras do inglês rápido e natural e frases do dia a dia.",
+      "outcomes": [
+        "Dizer as vogais americanas em velocidade natural, não só em palavras lentas e cuidadosas.",
+        "Usar contrações e reduções como I’m, you’ll e would’ve do jeito que os falantes nativos usam.",
+        "Dar forma às suas frases com a entonação americana: descendente, ascendente, descendente-ascendente e ascendente-descendente.",
+        "Ligar as palavras com as regras do inglês rápido e natural.",
+        "Entender e usar expressões comuns do dia a dia em contexto.",
+        "Ganhar confiança para falar com um plano de 30 dias e exercícios práticos passo a passo."
+      ]
+    }
+  },
   "modules": [
     {
       "id": "2d0d3f73-6afe-579b-8db7-517d76e65fce",

@@ -27,7 +27,7 @@ export type CourseShelfCardProps = {
  * **Enroll** enrolls through the learner store at once (capability
  * `course-enrollment`), so the page moves the course to the learner's courses
  * before the server answers, and back if it refuses. **Preview course** opens
- * the overview without enrolling. The strip shows each module's first video,
+ * the course page (`CourseDetailView`) without enrolling. The strip shows each module's first video,
  * up to four, and counts the rest.
  *
  * @example

@@ -47,6 +47,9 @@ function toCourse(course: CourseManifest): Course {
     moduleCount: course.modules.length,
     sequence: course.sequence,
     track: course.track,
+    ...(course.outcomes && { outcomes: course.outcomes }),
+    ...(course.sounds && { sounds: course.sounds }),
+    ...(course.translations && { translations: course.translations }),
   });
 }
 

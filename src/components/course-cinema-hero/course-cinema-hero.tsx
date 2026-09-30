@@ -1,3 +1,4 @@
+import { CinemaHeroArtwork } from "@/components/cinema-hero-artwork/cinema-hero-artwork";
 import { PrizeIcon } from "@/components/prize-icon/prize-icon";
 import { ProgressRing } from "@/components/progress-ring/progress-ring";
 import { useRuntimeLabel } from "@/hooks/use-runtime-label/use-runtime-label";
@@ -32,9 +33,6 @@ const ACTION_KEY: Record<TargetVideo["kind"], "continueCourse" | "startCourse" |
   start: "startCourse",
   rewatch: "watchAgain",
 };
-
-const PLACEHOLDER_GLOW =
-  "radial-gradient(90% 90% at 70% 10%, color-mix(in oklab, var(--glow) 24%, var(--background)), var(--background) 70%)";
 
 /**
  * Available courses' lead: one course as a wide cinema frame — its next
@@ -72,7 +70,7 @@ export function CourseCinemaHero({ model, label }: CourseCinemaHeroProps) {
         </span>
       )}
       <article className="relative isolate flex min-h-[26rem] flex-col justify-end gap-3 overflow-hidden rounded-[22px] border border-border bg-background p-5 sm:p-7 lg:aspect-[21/9] lg:min-h-0 lg:rounded-[26px] lg:p-8">
-        <HeroArtwork poster={target?.lesson.poster} />
+        <CinemaHeroArtwork poster={target?.lesson.poster} />
         <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground lg:top-5 lg:left-5">
           {label === "recommended" ? (
             <Star
@@ -105,33 +103,6 @@ export function CourseCinemaHero({ model, label }: CourseCinemaHeroProps) {
         <HeroFooter model={model} />
       </article>
     </section>
-  );
-}
-
-function HeroArtwork({ poster }: { poster: string | undefined }) {
-  return (
-    <span
-      aria-hidden="true"
-      className="absolute inset-0 -z-10"
-    >
-      {poster ? (
-        <Image
-          src={poster}
-          alt=""
-          fill
-          priority
-          sizes="(min-width: 1024px) 1100px, 100vw"
-          className="object-cover object-[center_30%]"
-        />
-      ) : (
-        <span
-          className="absolute inset-0"
-          style={{ background: PLACEHOLDER_GLOW }}
-        />
-      )}
-      <span className="absolute inset-0 bg-linear-to-r from-background/80 via-background/25 to-transparent" />
-      <span className="absolute inset-0 bg-linear-to-t from-background from-5% via-background/45 via-35% to-transparent" />
-    </span>
   );
 }
 

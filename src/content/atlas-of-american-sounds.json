@@ -6,6 +6,90 @@
   "language": "en",
   "sequence": 3,
   "track": "reference",
+  "outcomes": [
+    "Find every American vowel on the vowel chart and tell long vowels from short ones.",
+    "Produce every vowel, diphthong and r-colored vowel of American English on its own.",
+    "Separate minimal pairs like sheep and ship, bus and boss, thin and thing, pray and play.",
+    "Pronounce every consonant, including the flap T in “water” and the glottal T in “button”.",
+    "Go straight to the one sound you struggle with and drill it in a short lesson."
+  ],
+  "sounds": {
+    "vowels": [
+      "i",
+      "ɪ",
+      "eɪ",
+      "ɛ",
+      "æ",
+      "ə",
+      "ʌ",
+      "ɑ",
+      "u",
+      "ʊ",
+      "oʊ",
+      "ɔ",
+      "aɪ",
+      "aʊ",
+      "ɔɪ",
+      "ɝ",
+      "ɚ",
+      "ɪr",
+      "ɛr",
+      "ɑr",
+      "ɔr",
+      "aɪr"
+    ],
+    "consonants": [
+      "p",
+      "b",
+      "t",
+      "t̬",
+      "ʔ",
+      "d",
+      "k",
+      "g",
+      "f",
+      "v",
+      "θ",
+      "ð",
+      "s",
+      "z",
+      "ʃ",
+      "ʒ",
+      "h",
+      "tʃ",
+      "dʒ",
+      "n",
+      "m",
+      "ŋ",
+      "r",
+      "l",
+      "ɫ",
+      "w",
+      "j"
+    ]
+  },
+  "translations": {
+    "es": {
+      "description": "Cada sonido del inglés americano, una lección para cada uno: vocales, diptongos, vocales con r y consonantes, con panoramas generales y ejercicios de pares mínimos. Videos del canal Sounds American.",
+      "outcomes": [
+        "Ubicar cada vocal americana en la tabla de vocales y distinguir las largas de las cortas.",
+        "Producir por separado cada vocal, diptongo y vocal con r del inglés americano.",
+        "Distinguir pares mínimos como sheep y ship, bus y boss, thin y thing, pray y play.",
+        "Pronunciar cada consonante, incluida la T flap de “water” y la T glotal de “button”.",
+        "Ir directo al sonido que te cuesta y practicarlo en una lección corta."
+      ]
+    },
+    "pt": {
+      "description": "Cada som do inglês americano, uma aula para cada um: vogais, ditongos, vogais com r e consoantes, com visões gerais e exercícios de pares mínimos. Vídeos do canal Sounds American.",
+      "outcomes": [
+        "Localizar cada vogal americana no quadro de vogais e distinguir as longas das curtas.",
+        "Produzir isoladamente cada vogal, ditongo e vogal com r do inglês americano.",
+        "Distinguir pares mínimos como sheep e ship, bus e boss, thin e thing, pray e play.",
+        "Pronunciar cada consoante, incluindo o T flap de “water” e o T glotal de “button”.",
+        "Ir direto ao som que é difícil para você e treiná-lo em uma aula curta."
+      ]
+    }
+  },
   "modules": [
     {
       "id": "fa438608-5521-5972-9dbf-6bdb99cf4ec9",
