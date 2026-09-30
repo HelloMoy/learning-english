@@ -35,6 +35,14 @@ const passwordForm = (page: Page) =>
   page.locator('form[aria-labelledby="change-password-heading"]');
 const emailSection = (page: Page) => page.locator('[aria-labelledby="change-email-heading"]');
 
+/**
+ * The forms start folded under their rows, so a learner opens one first. Exact,
+ * because each form's own submit button ("Change password") would otherwise
+ * match the row's control too.
+ */
+const openRow = (page: Page, name: string) =>
+  page.getByRole("button", { name, exact: true }).click();
+
 /** Whether the browser's cookie still resolves to a live session. */
 async function sessionOf(context: BrowserContext): Promise<unknown> {
   return (await context.request.get("/api/auth/get-session")).json();
@@ -53,6 +61,7 @@ test.describe("Account identity", () => {
     const newPassword = `${learnerAccount.password}-next`;
 
     await page.goto("/en/profile");
+    await openRow(page, "Change Password");
     await page.getByLabel("Current password").fill(learnerAccount.password);
     await page.getByLabel("New password").fill(newPassword);
     await page.getByRole("button", { name: "Change password" }).click();
@@ -80,6 +89,7 @@ test.describe("Account identity", () => {
     const before = await messagesMailedTo(page, learnerAccount.email);
 
     await page.goto("/es/profile");
+    await openRow(page, "Cambiar Contraseña");
     await page.getByLabel("Contraseña actual").fill(learnerAccount.password);
     await page.getByLabel("Contraseña nueva").fill(`${learnerAccount.password}-next`);
     await page.getByRole("button", { name: "Cambiar contraseña" }).click();
@@ -102,6 +112,7 @@ test.describe("Account identity", () => {
     await seedLearnerProfile(learnerState);
 
     await page.goto("/en/profile");
+    await openRow(page, "Change Password");
     await page.getByLabel("Current password").fill("not-the-password");
     await page.getByLabel("New password").fill("a-brand-new-password");
     await page.getByRole("button", { name: "Change password" }).click();
@@ -125,6 +136,7 @@ test.describe("Account identity", () => {
     const signUpLink = await authLinkMailedTo(page, learnerAccount.email, VERIFY_LINK);
 
     await page.goto("/es/profile");
+    await openRow(page, "Cambiar Correo");
     await page.getByLabel("Correo nuevo").fill(newEmail);
     await page.getByRole("button", { name: "Cambiar correo" }).click();
 
@@ -161,6 +173,7 @@ test.describe("Account identity", () => {
     const before = await messagesMailedTo(page, someoneElse.email);
 
     await page.goto("/en/profile");
+    await openRow(page, "Change Email address");
     await page.getByLabel("New email address").fill(someoneElse.email);
     await page.getByRole("button", { name: "Change email" }).click();
 
