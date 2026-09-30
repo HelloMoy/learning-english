@@ -1,4 +1,6 @@
+import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 import type { ShareCardProps } from "@/components/share-card/share-card";
+import { shareHeadline } from "@/lib/share-headline/share-headline";
 
 import type { ReactElement } from "react";
 import { describe, expect, test, vi } from "vitest";
@@ -19,14 +21,22 @@ vi.mock("@/lib/share-card-fonts/share-card-fonts", () => ({
   shareCardFonts: async () => [],
 }));
 
+async function cardOf(courseSlug: string, locale: "en" | "es" | "pt"): Promise<ShareCardProps> {
+  const response = (await Image({
+    params: Promise.resolve({ locale, courseSlug }),
+  })) as unknown as { element: ReactElement<ShareCardProps> };
+  return response.element.props;
+}
+
 async function kickerOf(
   courseSlug: string,
   locale: "en" | "es" = "en",
 ): Promise<string | undefined> {
-  const response = (await Image({
-    params: Promise.resolve({ locale, courseSlug }),
-  })) as unknown as { element: ReactElement<ShareCardProps> };
-  return response.element.props.kicker;
+  return (await cardOf(courseSlug, locale)).kicker;
+}
+
+async function headlineOf(courseSlug: string, locale: "en" | "es" | "pt") {
+  return (await cardOf(courseSlug, locale)).headline;
 }
 
 describe("the course sharing image", () => {
@@ -40,5 +50,16 @@ describe("the course sharing image", () => {
 
   test("WHEN a reference course's card is served in es THEN the kicker is Spanish", async () => {
     expect(await kickerOf("atlas-of-american-sounds", "es")).toBe("Referencia");
+  });
+
+  test("WHEN the card is served in pt THEN the headline is the course's Portuguese description", async () => {
+    // Arrange
+    const basic = contentCatalog.courses.find((course) => course.slug === "basic-course")!;
+
+    // Act
+    const headline = await headlineOf("basic-course", "pt");
+
+    // Assert
+    expect(headline).toBe(shareHeadline(basic.translations!.pt!.description!));
   });
 });

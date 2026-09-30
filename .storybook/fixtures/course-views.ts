@@ -30,6 +30,9 @@ type Manifest = {
   language: string;
   sequence: number;
   track?: "level" | "reference";
+  outcomes?: string[];
+  sounds?: { vowels: string[]; consonants: string[] };
+  translations?: Record<string, { description?: string; outcomes?: string[] }>;
   modules: ManifestModule[];
 };
 
@@ -57,6 +60,9 @@ function courseViewOf<Standing extends CourseStanding>(
     moduleCount: manifest.modules.length,
     track: manifest.track ?? "level",
     sequence: manifest.sequence,
+    ...(manifest.outcomes && { outcomes: manifest.outcomes }),
+    ...(manifest.sounds && { sounds: manifest.sounds }),
+    ...(manifest.translations && { translations: manifest.translations }),
   });
   const modules = manifest.modules.map((module) =>
     Module.parse({

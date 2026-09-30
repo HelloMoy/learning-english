@@ -12,10 +12,11 @@ import { useLearnerRedirect } from "@/hooks/use-learner-redirect/use-learner-red
 import { useRuntimeLabel } from "@/hooks/use-runtime-label/use-runtime-label";
 import { lessonPath } from "@/i18n/lesson-routes";
 import { Link, useRouter } from "@/i18n/navigation";
+import { courseCopy } from "@/lib/course-copy/course-copy";
 import { courseFacts } from "@/lib/course-shelf/course-shelf";
 
 import { LayoutGrid, Play, Star } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 
@@ -124,6 +125,7 @@ function CourseHero({ course }: { course: FirstLevelCourse }) {
   const t = useTranslations("Components.FirstCourseStep");
   const facts = courseFacts(course);
   const poster = firstVideoOf(course)?.lesson.poster;
+  const { description } = courseCopy(course.course, useLocale());
 
   return (
     <article className="relative isolate flex min-h-80 flex-col justify-end gap-2.5 overflow-hidden rounded-[22px] border border-border bg-background p-6 lg:min-h-[22rem] lg:rounded-[26px] lg:p-8">
@@ -162,9 +164,7 @@ function CourseHero({ course }: { course: FirstLevelCourse }) {
       <h2 className="text-[2rem] leading-none font-black tracking-[-0.035em] text-balance text-foreground lg:text-[2.75rem]">
         {course.course.title}
       </h2>
-      <p className="max-w-[48ch] text-[0.9375rem] text-foreground/80">
-        {course.course.description}
-      </p>
+      <p className="max-w-[48ch] text-[0.9375rem] text-foreground/80">{description}</p>
     </article>
   );
 }

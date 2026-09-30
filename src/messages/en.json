@@ -545,6 +545,55 @@
     "AccountRow": {
       "change": "Change",
       "close": "Close"
+    },
+    "CourseEnrollAction": {
+      "enroll": "Enroll",
+      "startCourse": "Start course"
+    },
+    "CourseOutcomes": {
+      "eyebrow": "What you’ll learn",
+      "heading": "By the last video you’ll be able to"
+    },
+    "CourseSoundStrip": {
+      "eyebrow": "Sounds",
+      "heading": "{count, plural, one {# sound} other {# sounds}} you’ll master",
+      "vowels": "Vowels",
+      "consonants": "Consonants"
+    },
+    "CourseSyllabus": {
+      "eyebrow": "Syllabus",
+      "heading": "{count, plural, one {# lesson, one prize} other {# lessons, one prize each}}",
+      "listLabel": "Lessons in order",
+      "lessonOrdinal": "Lesson {number}",
+      "videoOrdinal": "Video {number}",
+      "lessonFacts": "{videos, plural, one {# video} other {# videos}} · {runtime}"
+    },
+    "CourseEnrollCard": {
+      "joinTitle": "Join this course",
+      "joinBody": "It goes to My learning, and you can start right away.",
+      "enrolledTitle": "You’re enrolled",
+      "enrolledBody": "It’s in My learning. Start whenever you like.",
+      "statsLabel": "Course size",
+      "videos": "{count, plural, one {video} other {videos}}",
+      "runtime": "of video",
+      "lessons": "{count, plural, one {lesson} other {lessons}}",
+      "prizes": "{count, plural, one {prize to redeem} other {prizes to redeem}}",
+      "paceLabel": "Your pace",
+      "paceOption": "{minutes} min",
+      "paceLine": "At {minutes} min a day, you finish in about {weeks, plural, one {# week} other {# weeks}}."
+    },
+    "CourseDetailHero": {
+      "level": "Level {level}",
+      "reference": "Reference",
+      "enrolled": "Enrolled",
+      "firstVideo": "First video",
+      "facts": "Level {level} · {lessons, plural, one {# lesson} other {# lessons}} · {videos, plural, one {# video} other {# videos}} · {runtime}",
+      "referenceFacts": "Reference · {lessons, plural, one {# lesson} other {# lessons}} · {videos, plural, one {# video} other {# videos}} · {runtime}",
+      "prizes": "{count, plural, one {# prize} other {# prizes}}"
+    },
+    "CourseEnrollBar": {
+      "label": "Join this course",
+      "facts": "{videos, plural, one {# video} other {# videos}} · {runtime}"
     }
   },
   "CourseCatalog": {

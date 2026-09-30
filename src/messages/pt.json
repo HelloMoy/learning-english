@@ -545,6 +545,55 @@
     "AccountRow": {
       "change": "Alterar",
       "close": "Fechar"
+    },
+    "CourseEnrollAction": {
+      "enroll": "Inscrever-me",
+      "startCourse": "Começar o curso"
+    },
+    "CourseOutcomes": {
+      "eyebrow": "O que você vai aprender",
+      "heading": "Ao terminar o último vídeo, você vai conseguir"
+    },
+    "CourseSoundStrip": {
+      "eyebrow": "Sons",
+      "heading": "{count, plural, one {# som que você vai dominar} other {# sons que você vai dominar}}",
+      "vowels": "Vogais",
+      "consonants": "Consoantes"
+    },
+    "CourseSyllabus": {
+      "eyebrow": "Conteúdo",
+      "heading": "{count, plural, one {# aula, um prêmio} other {# aulas, um prêmio em cada}}",
+      "listLabel": "Aulas em ordem",
+      "lessonOrdinal": "Aula {number}",
+      "videoOrdinal": "Vídeo {number}",
+      "lessonFacts": "{videos, plural, one {# vídeo} other {# vídeos}} · {runtime}"
+    },
+    "CourseEnrollCard": {
+      "joinTitle": "Entre neste curso",
+      "joinBody": "Ele vai para Meu aprendizado e você pode começar agora mesmo.",
+      "enrolledTitle": "Você está inscrito",
+      "enrolledBody": "Está em Meu aprendizado. Comece quando quiser.",
+      "statsLabel": "Tamanho do curso",
+      "videos": "{count, plural, one {vídeo} other {vídeos}}",
+      "runtime": "de vídeo",
+      "lessons": "{count, plural, one {aula} other {aulas}}",
+      "prizes": "{count, plural, one {prêmio para ganhar} other {prêmios para ganhar}}",
+      "paceLabel": "Seu ritmo",
+      "paceOption": "{minutes} min",
+      "paceLine": "Com {minutes} min por dia, você termina em cerca de {weeks, plural, one {# semana} other {# semanas}}."
+    },
+    "CourseDetailHero": {
+      "level": "Nível {level}",
+      "reference": "Referência",
+      "enrolled": "Inscrito",
+      "firstVideo": "Primeiro vídeo",
+      "facts": "Nível {level} · {lessons, plural, one {# aula} other {# aulas}} · {videos, plural, one {# vídeo} other {# vídeos}} · {runtime}",
+      "referenceFacts": "Referência · {lessons, plural, one {# aula} other {# aulas}} · {videos, plural, one {# vídeo} other {# vídeos}} · {runtime}",
+      "prizes": "{count, plural, one {# prêmio} other {# prêmios}}"
+    },
+    "CourseEnrollBar": {
+      "label": "Entre neste curso",
+      "facts": "{videos, plural, one {# vídeo} other {# vídeos}} · {runtime}"
     }
   },
   "CourseCatalog": {

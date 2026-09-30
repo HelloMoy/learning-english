@@ -112,6 +112,12 @@
         "eyebrowUse": "Las etiquetas de sección van en Geist a 12px, en negrita, mayúsculas y con espaciado de <code>0.32em</code>, en dorado. Usa el componente <code>Eyebrow</code> en vez de rehacer el estilo.",
         "eyebrowSample": "Módulo 2 · Vocales"
       }
+    },
+    "CourseSection": {
+      "eyebrow": "Temario",
+      "heading": "5 lecciones, un premio cada una",
+      "longHeading": "Al terminar el último video podrás decir cada sonido del inglés americano",
+      "content": "Cada lección del curso, en orden, con sus videos dentro."
     }
   }
 }

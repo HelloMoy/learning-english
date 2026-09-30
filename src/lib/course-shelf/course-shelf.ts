@@ -4,7 +4,11 @@ import {
   type CourseStanding,
 } from "@/domain/entities/course-standing/course-standing";
 import type { Course } from "@/domain/entities/course/course";
-import type { CourseForView } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
+import type { Module } from "@/domain/entities/module/module";
+import type {
+  CourseForView,
+  ModuleLesson,
+} from "@/domain/use-cases/find-course-for-view/find-course-for-view";
 import {
   courseOverviewEntries,
   courseOverviewProgress,
@@ -144,6 +148,28 @@ export function courseFacts({ modules, moduleSummaries }: CourseForView): Course
   };
 }
 
+/**
+ * A course's first video and the module it sits in.
+ *
+ * @category Course shelf
+ */
+export type FirstVideo = { module: Module; lesson: ModuleLesson };
+
+/**
+ * The video a course starts with: the first video of the first module, in
+ * `sequence` order, that holds any.
+ *
+ * @param view - The course as the course overview sees it
+ * @returns The first video, or `null` when the course holds no video
+ *
+ * @category Course shelf
+ */
+export function courseFirstVideo({ modules, moduleSummaries }: CourseForView): FirstVideo | null {
+  const index = moduleSummaries.findIndex((summary) => summary.lessons.length > 0);
+  if (index === -1) return null;
+  return { module: modules[index]!, lesson: moduleSummaries[index]!.lessons[0]! };
+}
+
 /** A continue target that names a video. */
 export type TargetVideo = Exclude<ContinueTarget, { kind: "none" }>;
 
@@ -197,7 +223,7 @@ export function courseCardModel(
     targetVideoCount: target ? videoCountOf(view, target) : 0,
     targetPositionSeconds: target ? (learner.positions.get(target.lesson.id) ?? null) : null,
     watchedAt: record?.watchedAt ?? null,
-    prizes: prizesOf(view, learner.claimedPrizes),
+    prizes: coursePrizes(view, learner.claimedPrizes),
     isCompleted,
   };
 }
@@ -208,9 +234,21 @@ function videoCountOf({ moduleSummaries }: CourseForView, target: TargetVideo): 
   );
 }
 
-// A module with no videos has nothing to redeem, so it is no prize — the rule
-// the course overview and the prize counter count by.
-function prizesOf(view: CourseForView, claimedPrizes: ReadonlySet<string>): CardPrize[] {
+/**
+ * A course's prizes, one per module that holds videos, each marked claimed or
+ * not.
+ *
+ * @remarks
+ * A module with no videos has nothing to redeem, so it is no prize — the rule
+ * the course overview and the prize counter count by.
+ *
+ * @param view - The course as the course overview sees it
+ * @param claimedPrizes - Slugs of the modules whose prize the learner has claimed
+ * @returns The prizes in module `sequence` order
+ *
+ * @category Course shelf
+ */
+export function coursePrizes(view: CourseForView, claimedPrizes: ReadonlySet<string>): CardPrize[] {
   return courseOverviewEntries(view.modules, view.moduleSummaries)
     .filter((entry) => entry.summary.lessons.length > 0)
     .map(({ module }) => ({

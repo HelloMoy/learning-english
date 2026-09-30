@@ -12,6 +12,8 @@
  *
  * @category Metadata
  */
+import type { Course } from "@/domain/entities/course/course";
+import { courseCopy } from "@/lib/course-copy/course-copy";
 
 /** The brand, matching `og:site_name` and the header wordmark. */
 const PUBLISHER = { "@type": "Organization" as const, name: "English Course" };
@@ -39,15 +41,14 @@ export function websiteSchema(input: { siteUrl: string; locale: string }) {
 /**
  * A course, in the vocabulary Google reads to build course results.
  *
- * @param input.course - The course as the catalog holds it
+ * @param input.course - The course as the catalog holds it; its description is given in `locale`
  * @param input.siteUrl - The absolute origin
  * @param input.locale - The locale being served
  * @returns A schema.org `Course`
  */
 export function courseSchema(input: {
-  course: {
+  course: Pick<Course, "description" | "outcomes" | "translations"> & {
     title: string;
-    description: string;
     slug: string;
     language: string;
     lessonCount: number;
@@ -61,7 +62,7 @@ export function courseSchema(input: {
     "@context": SCHEMA_CONTEXT,
     "@type": "Course" as const,
     name: course.title,
-    description: course.description,
+    description: courseCopy(course, locale).description,
     url: `${siteUrl}/${locale}/courses/${course.slug}`,
     // What the course teaches, not the locale it is presented in.
     inLanguage: course.language,

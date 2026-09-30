@@ -151,6 +151,90 @@ describe("parseCourseManifests", () => {
     });
   });
 
+  describe("GIVEN a course declaring what it teaches", () => {
+    test("WHEN neither `outcomes` nor `sounds` is declared THEN the course carries neither", () => {
+      // Arrange
+      const manifest = courseManifest();
+
+      // Act
+      const [course] = parseCourseManifests([manifest]);
+
+      // Assert
+      expect(course!.outcomes).toBeUndefined();
+      expect(course!.sounds).toBeUndefined();
+    });
+
+    test("WHEN `outcomes` are declared THEN they survive the parse in order", () => {
+      // Arrange
+      const outcomes = faker.helpers.multiple(() => faker.lorem.sentence(), { count: 3 });
+
+      // Act
+      const [course] = parseCourseManifests([courseManifest({ outcomes })]);
+
+      // Assert
+      expect(course!.outcomes).toEqual(outcomes);
+    });
+
+    test("WHEN `sounds` are declared THEN vowels and consonants survive the parse", () => {
+      // Arrange
+      const sounds = { vowels: ["ə", "ɪ", "aɪ"], consonants: ["θ", "ð"] };
+
+      // Act
+      const [course] = parseCourseManifests([courseManifest({ sounds })]);
+
+      // Assert
+      expect(course!.sounds).toEqual(sounds);
+    });
+
+    test.each([
+      ["an empty outcome", { outcomes: [""] }],
+      ["an empty vowel", { sounds: { vowels: [""], consonants: [] } }],
+      ["sounds without consonants", { sounds: { vowels: ["ə"] } }],
+    ])("WHEN it declares %s THEN it is rejected naming the course", (_label, overrides) => {
+      // Arrange
+      const manifest = courseManifest({ ...overrides, slug: "sound-course" });
+
+      // Act
+      const parse = () => parseCourseManifests([manifest]);
+
+      // Assert
+      expect(parse).toThrow(InvalidCourseManifestError);
+      expect(parse).toThrow(/sound-course/);
+    });
+  });
+
+  describe("GIVEN a course declaring translations of its copy", () => {
+    test("WHEN `translations` are declared THEN they survive the parse", () => {
+      // Arrange
+      const translations = {
+        es: { description: faker.lorem.sentence(), outcomes: [faker.lorem.sentence()] },
+        pt: { description: faker.lorem.sentence() },
+      };
+
+      // Act
+      const [course] = parseCourseManifests([courseManifest({ translations })]);
+
+      // Assert
+      expect(course!.translations).toEqual(translations);
+    });
+
+    test.each([
+      ["a key that is not a language code", { translations: { spanish: { description: "Hola" } } }],
+      ["an empty description", { translations: { es: { description: "" } } }],
+      ["an empty outcome", { translations: { es: { outcomes: [""] } } }],
+    ])("WHEN it declares %s THEN it is rejected naming the course", (_label, overrides) => {
+      // Arrange
+      const manifest = courseManifest({ ...overrides, slug: "translated-course" });
+
+      // Act
+      const parse = () => parseCourseManifests([manifest]);
+
+      // Assert
+      expect(parse).toThrow(InvalidCourseManifestError);
+      expect(parse).toThrow(/translated-course/);
+    });
+  });
+
   describe("GIVEN two courses colliding on the ladder", () => {
     test("WHEN two manifests share a slug THEN it is rejected naming both", () => {
       const manifests = [

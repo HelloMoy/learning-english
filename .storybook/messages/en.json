@@ -112,6 +112,12 @@
         "eyebrowUse": "Section labels are Geist at 12px, bold, uppercase and spaced at <code>0.32em</code>, in gold. Use the <code>Eyebrow</code> component rather than rebuilding the style.",
         "eyebrowSample": "Module 2 · Vowels"
       }
+    },
+    "CourseSection": {
+      "eyebrow": "Syllabus",
+      "heading": "5 lessons, one prize each",
+      "longHeading": "By the last video you’ll be able to say every sound of American English",
+      "content": "Every lesson of the course, in order, with its videos inside."
     }
   }
 }

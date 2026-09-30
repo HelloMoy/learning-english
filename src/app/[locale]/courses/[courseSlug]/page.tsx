@@ -1,9 +1,12 @@
 import { getCoursePlatformDeps } from "@/adapters/persistence/in-memory/use-case-dependencies/use-case-dependencies";
+import { CourseDetailView } from "@/components/course-detail-view/course-detail-view";
 import { CourseOverview } from "@/components/course-overview/course-overview";
 import { CourseOverviewError } from "@/components/course-overview/course-overview-error";
+import { CoursePageSwitch } from "@/components/course-page-switch/course-page-switch";
 import { StructuredData } from "@/components/structured-data/structured-data";
 import { Slug } from "@/domain/entities/slug/slug";
 import { requireSupportedLocale } from "@/i18n/require-supported-locale/require-supported-locale";
+import { courseCopy } from "@/lib/course-copy/course-copy";
 import { breadcrumbSchema, courseSchema } from "@/lib/course-schema/course-schema";
 import { shareMetadata } from "@/lib/share-metadata/share-metadata";
 import { siteUrl } from "@/lib/site-url/site-url";
@@ -38,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     href: `/courses/${course.slug}`,
     title: course.title,
     description: meta("courseDescription", {
-      description: course.description,
+      description: courseCopy(course, locale).description,
       moduleCount: modules.length,
       lessonCount: course.lessonCount,
     }),
@@ -58,7 +61,8 @@ export default async function CourseOverviewPage({ params }: Props) {
   if (result.isErr()) {
     return <CourseOverviewError />;
   }
-  const { course } = result.value;
+  const view = result.value;
+  const { course } = view;
   const origin = siteUrl();
   const courseUrl = `${origin}/${locale}/courses/${course.slug}`;
 
@@ -69,10 +73,17 @@ export default async function CourseOverviewPage({ params }: Props) {
     >
       <StructuredData data={courseSchema({ course, siteUrl: origin, locale })} />
       <StructuredData data={breadcrumbSchema([{ name: course.title, url: courseUrl }])} />
-      <CourseOverview
-        course={result.value.course}
-        modules={result.value.modules}
-        moduleSummaries={result.value.moduleSummaries}
+      <CoursePageSwitch
+        courseSlug={course.slug}
+        title={course.title}
+        detail={<CourseDetailView view={view} />}
+        board={
+          <CourseOverview
+            course={course}
+            modules={view.modules}
+            moduleSummaries={view.moduleSummaries}
+          />
+        }
       />
     </main>
   );

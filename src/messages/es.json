@@ -545,6 +545,55 @@
     "AccountRow": {
       "change": "Cambiar",
       "close": "Cerrar"
+    },
+    "CourseEnrollAction": {
+      "enroll": "Inscribirme",
+      "startCourse": "Empezar el curso"
+    },
+    "CourseOutcomes": {
+      "eyebrow": "Lo que vas a aprender",
+      "heading": "Al terminar el último video podrás"
+    },
+    "CourseSoundStrip": {
+      "eyebrow": "Sonidos",
+      "heading": "{count, plural, one {# sonido que dominarás} other {# sonidos que dominarás}}",
+      "vowels": "Vocales",
+      "consonants": "Consonantes"
+    },
+    "CourseSyllabus": {
+      "eyebrow": "Temario",
+      "heading": "{count, plural, one {# lección, un premio} other {# lecciones, un premio cada una}}",
+      "listLabel": "Lecciones en orden",
+      "lessonOrdinal": "Lección {number}",
+      "videoOrdinal": "Video {number}",
+      "lessonFacts": "{videos, plural, one {# video} other {# videos}} · {runtime}"
+    },
+    "CourseEnrollCard": {
+      "joinTitle": "Únete a este curso",
+      "joinBody": "Pasa a Mi aprendizaje y puedes empezar de inmediato.",
+      "enrolledTitle": "Ya estás inscrito",
+      "enrolledBody": "Está en Mi aprendizaje. Empieza cuando quieras.",
+      "statsLabel": "Tamaño del curso",
+      "videos": "{count, plural, one {video} other {videos}}",
+      "runtime": "de video",
+      "lessons": "{count, plural, one {lección} other {lecciones}}",
+      "prizes": "{count, plural, one {premio por ganar} other {premios por ganar}}",
+      "paceLabel": "Tu ritmo",
+      "paceOption": "{minutes} min",
+      "paceLine": "A {minutes} min al día, terminas en {weeks, plural, one {más o menos # semana} other {unas # semanas}}."
+    },
+    "CourseDetailHero": {
+      "level": "Nivel {level}",
+      "reference": "Referencia",
+      "enrolled": "Inscrito",
+      "firstVideo": "Primer video",
+      "facts": "Nivel {level} · {lessons, plural, one {# lección} other {# lecciones}} · {videos, plural, one {# video} other {# videos}} · {runtime}",
+      "referenceFacts": "Referencia · {lessons, plural, one {# lección} other {# lecciones}} · {videos, plural, one {# video} other {# videos}} · {runtime}",
+      "prizes": "{count, plural, one {# premio} other {# premios}}"
+    },
+    "CourseEnrollBar": {
+      "label": "Únete a este curso",
+      "facts": "{videos, plural, one {# video} other {# videos}} · {runtime}"
     }
   },
   "CourseCatalog": {

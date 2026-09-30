@@ -317,3 +317,94 @@ describe("the Atlas of American Sounds manifest", () => {
     });
   });
 });
+
+describe("what the tracked courses teach", () => {
+  const declared = parseCourseManifests(courseManifests);
+  const courseOf = (slug: string) => declared.find((course) => course.slug === slug);
+  const soundsOf = (slug: string) => {
+    const sounds = courseOf(slug)?.sounds;
+    return [...(sounds?.vowels ?? []), ...(sounds?.consonants ?? [])];
+  };
+  // A lesson names its sound between slashes: "/æ/ as in “cat”".
+  const symbolsNamedIn = (slug: string) =>
+    (courseOf(slug)?.modules ?? [])
+      .flatMap((module) => module.lessons)
+      .flatMap((lesson) => [...lesson.title.matchAll(/\/([^/\s]+)\//g)].map((match) => match[1]));
+
+  describe("GIVEN the tracked manifests", () => {
+    test("WHEN parsed THEN every course declares between four and six outcomes", () => {
+      // Arrange
+      const outcomeCounts = declared.map((course) => course.outcomes?.length ?? 0);
+
+      // Act
+      const outOfRange = outcomeCounts.filter((count) => count < 4 || count > 6);
+
+      // Assert
+      expect(outOfRange).toEqual([]);
+    });
+
+    test("WHEN the Basic Course is parsed THEN it teaches 15 vowels AND 26 consonants", () => {
+      // Arrange
+      const basic = courseOf("basic-course");
+
+      // Act
+      const sounds = basic?.sounds;
+
+      // Assert
+      expect(sounds?.vowels).toHaveLength(15);
+      expect(sounds?.consonants).toHaveLength(26);
+    });
+
+    test("WHEN the Atlas is parsed THEN every sound its lesson titles name is declared", () => {
+      // Arrange
+      const named = symbolsNamedIn("atlas-of-american-sounds");
+
+      // Act
+      const declaredSounds = soundsOf("atlas-of-american-sounds");
+
+      // Assert
+      expect(declaredSounds).toEqual(expect.arrayContaining(named));
+    });
+
+    test("WHEN any course's sounds are listed THEN none is declared twice", () => {
+      // Arrange
+      const soundLists = declared.map((course) => soundsOf(course.slug));
+
+      // Act
+      const duplicated = soundLists.filter((sounds) => new Set(sounds).size !== sounds.length);
+
+      // Assert
+      expect(duplicated).toEqual([]);
+    });
+
+    test.each(["es", "pt"])(
+      "WHEN parsed THEN every course translates its description AND each outcome into %s",
+      (locale) => {
+        // Arrange
+        const courses = declared;
+
+        // Act
+        const untranslated = courses.filter((course) => {
+          const translation = course.translations?.[locale];
+          return (
+            !translation?.description || translation.outcomes?.length !== course.outcomes?.length
+          );
+        });
+
+        // Assert
+        expect(untranslated.map((course) => course.slug)).toEqual([]);
+      },
+    );
+
+    test("WHEN the Advanced Intermediate Course is parsed THEN it declares no sounds", () => {
+      // Arrange
+      const advanced = courseOf("advanced-intermediate-course");
+
+      // Act
+      const sounds = advanced?.sounds;
+
+      // Assert
+      expect(sounds).toBeUndefined();
+    });
+  });
+});

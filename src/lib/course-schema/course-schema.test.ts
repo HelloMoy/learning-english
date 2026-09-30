@@ -42,6 +42,19 @@ describe("courseSchema", () => {
     expect(schema.provider).toMatchObject({ "@type": "Organization", name: "English Course" });
   });
 
+  test("WHEN served in a locale the course is translated into THEN the description is that locale's", () => {
+    // Arrange
+    const spanish = faker.lorem.sentence();
+    const course = { ...aCourse(), translations: { es: { description: spanish } } };
+
+    // Act
+    const schema = courseSchema({ course, siteUrl: SITE, locale: "es" });
+
+    // Assert
+    expect(schema.description).toBe(spanish);
+    expect(schema.inLanguage).toBe(course.language);
+  });
+
   test("claims no rating, review, offer or price", () => {
     const serialized = JSON.stringify(
       courseSchema({ course: aCourse(), siteUrl: SITE, locale: "en" }),

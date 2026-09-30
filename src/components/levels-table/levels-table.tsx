@@ -2,9 +2,10 @@ import type { CourseStanding } from "@/domain/entities/course-standing/course-st
 import type { Course } from "@/domain/entities/course/course";
 import { courseOverviewPath } from "@/i18n/lesson-routes";
 import { Link } from "@/i18n/navigation";
+import { courseCopy } from "@/lib/course-copy/course-copy";
 import { cn } from "@/lib/utils/utils";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 /** One catalog course and where it stands: a numbered level, or reference material. */
 export type StandingCourse = {
@@ -72,6 +73,7 @@ function LevelRow({
   completedCount,
 }: StandingCourse & { completedCount: number | null }) {
   const t = useTranslations("Components.LevelsTable");
+  const { description } = courseCopy(course, useLocale());
   const isContinued = completedCount !== null;
 
   return (
@@ -84,7 +86,7 @@ function LevelRow({
       <h3 className="font-sans text-[1.375rem] font-extrabold tracking-tight text-foreground lg:text-[1.75rem]">
         {course.title}
       </h3>
-      <p className="text-[0.9375rem] leading-relaxed text-muted-foreground">{course.description}</p>
+      <p className="text-[0.9375rem] leading-relaxed text-muted-foreground">{description}</p>
       <div className="flex flex-wrap items-center gap-2 lg:flex-col lg:items-start">
         {isContinued ? (
           <span className="rounded-md border border-gold/40 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-gold">

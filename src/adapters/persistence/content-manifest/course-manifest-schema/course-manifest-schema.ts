@@ -1,5 +1,10 @@
 import { assertSafeKey } from "@/adapters/persistence/blob-store/blob-key/blob-key";
-import { CourseTrack } from "@/domain/entities/course/course";
+import {
+  CourseOutcomes,
+  CourseSounds,
+  CourseTrack,
+  CourseTranslations,
+} from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId, ResourceId } from "@/domain/entities/ids/ids";
 import { ResourceKind } from "@/domain/entities/resource/resource";
 import { Slug } from "@/domain/entities/slug/slug";
@@ -149,6 +154,12 @@ export const CourseManifest = z.object({
    * manifest written before tracks existed keeps its meaning unedited.
    */
   track: CourseTrack.default("level"),
+  /** What the course teaches, for learners deciding whether to join. Absent means none declared. */
+  outcomes: CourseOutcomes.optional(),
+  /** The IPA sounds the course teaches. Absent for courses that are not about single sounds. */
+  sounds: CourseSounds.optional(),
+  /** The description and outcomes in other languages, keyed by ISO 639-1 code. */
+  translations: CourseTranslations.optional(),
   modules: z.array(ManifestModule).min(1),
 });
 
