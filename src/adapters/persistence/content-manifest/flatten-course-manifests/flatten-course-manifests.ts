@@ -46,6 +46,7 @@ function toCourse(course: CourseManifest): Course {
     lessonCount: countLessons(course),
     moduleCount: course.modules.length,
     sequence: course.sequence,
+    track: course.track,
   });
 }
 

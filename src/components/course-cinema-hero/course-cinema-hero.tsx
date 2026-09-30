@@ -58,7 +58,8 @@ const PLACEHOLDER_GLOW =
  */
 export function CourseCinemaHero({ model, label }: CourseCinemaHeroProps) {
   const t = useTranslations("Components.CourseCinemaHero");
-  const { course, target } = model;
+  const { course, target, standing } = model;
+  const facts = { modules: model.facts.moduleCount, videos: model.facts.videoCount };
 
   return (
     <section
@@ -94,11 +95,9 @@ export function CourseCinemaHero({ model, label }: CourseCinemaHeroProps) {
           />
         ) : null}
         <span className="text-[0.6875rem] font-bold tracking-[0.3em] text-gold uppercase">
-          {t("facts", {
-            level: course.sequence,
-            modules: model.facts.moduleCount,
-            videos: model.facts.videoCount,
-          })}
+          {standing.kind === "level"
+            ? t("facts", { level: standing.number, ...facts })
+            : t("referenceFacts", facts)}
         </span>
         <h2 className="max-w-[18ch] text-[2rem] leading-none font-black tracking-[-0.035em] text-balance text-foreground lg:text-[3.25rem]">
           {course.title}

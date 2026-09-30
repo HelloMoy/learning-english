@@ -1,0 +1,1367 @@
+{
+  "id": "e66beaa0-7f54-53da-9804-f6a244a7dd1b",
+  "slug": "atlas-of-american-sounds",
+  "title": "Atlas of American Sounds",
+  "description": "Every sound of American English, one lesson each: vowels, diphthongs, r-colored vowels and consonants, with overviews and minimal-pair drills. Videos by the Sounds American channel.",
+  "language": "en",
+  "sequence": 3,
+  "track": "reference",
+  "modules": [
+    {
+      "id": "fa438608-5521-5972-9dbf-6bdb99cf4ec9",
+      "slug": "1-the-vowel-map",
+      "title": "The Vowel Map",
+      "sequence": 1,
+      "lessons": [
+        {
+          "id": "a257d896-c5c1-5571-9898-177fd00eaa6d",
+          "slug": "1-the-vowel-chart",
+          "sequence": 1,
+          "title": "The Vowel Chart",
+          "kind": "video",
+          "description": "A tour of the American English vowel chart: where each vowel sits in the mouth and how the vowels relate to one another.",
+          "source": "https://www.youtube.com/embed/7EdRAfOMfnU",
+          "durationSeconds": 1791,
+          "poster": "atlas-of-american-sounds/1-the-vowel-map/1-the-vowel-chart/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/1-the-vowel-map/1-the-vowel-chart/readme.md",
+          "resources": [
+            {
+              "id": "a306fb23-f632-5ac1-b485-d7695bba863b",
+              "title": "The Vowel Chart Notes",
+              "url": "atlas-of-american-sounds/1-the-vowel-map/1-the-vowel-chart/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "b6435b16-d6dd-5107-8c9d-cd1bb702fb9a",
+          "slug": "2-long-and-short-vowels",
+          "sequence": 2,
+          "title": "Long and Short Vowels",
+          "kind": "video",
+          "description": "What the labels “long” and “short” really mean for English vowels, and what tells a pair like /i/ and /ɪ/ apart.",
+          "source": "https://www.youtube.com/embed/GQa9w__GqLc",
+          "durationSeconds": 767,
+          "poster": "atlas-of-american-sounds/1-the-vowel-map/2-long-and-short-vowels/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/1-the-vowel-map/2-long-and-short-vowels/readme.md",
+          "resources": [
+            {
+              "id": "a2825f58-1669-52d8-ab82-89249290a674",
+              "title": "Long and Short Vowels Notes",
+              "url": "atlas-of-american-sounds/1-the-vowel-map/2-long-and-short-vowels/readme.md",
+              "kind": "other"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dda4309c-268b-5fcf-b567-dde31e20fe3b",
+      "slug": "2-front-vowels",
+      "title": "Front Vowels",
+      "sequence": 2,
+      "lessons": [
+        {
+          "id": "5c0009a1-bbcf-5cbc-9b2a-54012e5e0567",
+          "slug": "1-i-as-in-be",
+          "sequence": 1,
+          "title": "/i/ as in “be”",
+          "kind": "video",
+          "description": "The /i/ sound of “be”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/PIu5WDIco0I",
+          "durationSeconds": 394,
+          "poster": "atlas-of-american-sounds/2-front-vowels/1-i-as-in-be/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/2-front-vowels/1-i-as-in-be/readme.md",
+          "resources": [
+            {
+              "id": "7aa2b24a-b659-55b3-8b56-69f98a7d9486",
+              "title": "/i/ as in “be” Notes",
+              "url": "atlas-of-american-sounds/2-front-vowels/1-i-as-in-be/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "9c8c84fd-e927-537c-9d73-b72b7798155a",
+          "slug": "2-ih-as-in-it",
+          "sequence": 2,
+          "title": "/ɪ/ as in “it”",
+          "kind": "video",
+          "description": "The /ɪ/ sound of “it”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/Ok_HG-0lNCA",
+          "durationSeconds": 379,
+          "poster": "atlas-of-american-sounds/2-front-vowels/2-ih-as-in-it/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/2-front-vowels/2-ih-as-in-it/readme.md",
+          "resources": [
+            {
+              "id": "8d24562d-fa18-5f91-b7f6-640914867541",
+              "title": "/ɪ/ as in “it” Notes",
+              "url": "atlas-of-american-sounds/2-front-vowels/2-ih-as-in-it/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "1be34877-8875-59ed-99d9-0570dba02e5b",
+          "slug": "3-ei-as-in-make",
+          "sequence": 3,
+          "title": "/eɪ/ as in “make”",
+          "kind": "video",
+          "description": "The /eɪ/ sound of “make”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/0RXzfRcjk-s",
+          "durationSeconds": 341,
+          "poster": "atlas-of-american-sounds/2-front-vowels/3-ei-as-in-make/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/2-front-vowels/3-ei-as-in-make/readme.md",
+          "resources": [
+            {
+              "id": "a346fef8-d836-5b41-b3f3-6b1c30ea285d",
+              "title": "/eɪ/ as in “make” Notes",
+              "url": "atlas-of-american-sounds/2-front-vowels/3-ei-as-in-make/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "535bb839-986f-5fc6-a098-fe105d1ac361",
+          "slug": "4-eh-as-in-bed",
+          "sequence": 4,
+          "title": "/ɛ/ as in “bed”",
+          "kind": "video",
+          "description": "The /ɛ/ sound of “bed”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/OLG3cCLcNiI",
+          "durationSeconds": 341,
+          "poster": "atlas-of-american-sounds/2-front-vowels/4-eh-as-in-bed/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/2-front-vowels/4-eh-as-in-bed/readme.md",
+          "resources": [
+            {
+              "id": "de68dc19-8acc-5bce-b5f5-6125501f6e17",
+              "title": "/ɛ/ as in “bed” Notes",
+              "url": "atlas-of-american-sounds/2-front-vowels/4-eh-as-in-bed/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "caa522a2-f0ac-588e-98e6-3e49dd4a884b",
+          "slug": "5-ae-as-in-cat",
+          "sequence": 5,
+          "title": "/æ/ as in “cat”",
+          "kind": "video",
+          "description": "The /æ/ sound of “cat”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/mynucZiy-Ug",
+          "durationSeconds": 324,
+          "poster": "atlas-of-american-sounds/2-front-vowels/5-ae-as-in-cat/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/2-front-vowels/5-ae-as-in-cat/readme.md",
+          "resources": [
+            {
+              "id": "512bc567-42f5-5888-a6d0-3ff83567c728",
+              "title": "/æ/ as in “cat” Notes",
+              "url": "atlas-of-american-sounds/2-front-vowels/5-ae-as-in-cat/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "aaaffbd7-95a7-51d3-aae7-523465d1734d",
+          "slug": "6-sheep-or-ship",
+          "sequence": 6,
+          "title": "Sheep or Ship? /i/ vs /ɪ/",
+          "kind": "video",
+          "description": "Hear and say the difference between /i/ and /ɪ/ in pairs like “sheep” and “ship”.",
+          "source": "https://www.youtube.com/embed/FYI6Vt3uq7s",
+          "durationSeconds": 411,
+          "poster": "atlas-of-american-sounds/2-front-vowels/6-sheep-or-ship/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/2-front-vowels/6-sheep-or-ship/readme.md",
+          "resources": [
+            {
+              "id": "8e21212a-204e-513d-8d98-9e7d8331ed0d",
+              "title": "Sheep or Ship? /i/ vs /ɪ/ Notes",
+              "url": "atlas-of-american-sounds/2-front-vowels/6-sheep-or-ship/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "f5e927ed-89ae-5e57-8cb6-7909344481ce",
+          "slug": "7-did-or-dead",
+          "sequence": 7,
+          "title": "Did or Dead? /ɪ/ vs /ɛ/",
+          "kind": "video",
+          "description": "Hear and say the difference between /ɪ/ and /ɛ/ in pairs like “did” and “dead”.",
+          "source": "https://www.youtube.com/embed/m7JQRKkY7cc",
+          "durationSeconds": 439,
+          "poster": "atlas-of-american-sounds/2-front-vowels/7-did-or-dead/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/2-front-vowels/7-did-or-dead/readme.md",
+          "resources": [
+            {
+              "id": "a8341a2b-9ef7-55e3-824e-daf9b143aaf6",
+              "title": "Did or Dead? /ɪ/ vs /ɛ/ Notes",
+              "url": "atlas-of-american-sounds/2-front-vowels/7-did-or-dead/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "0fab3595-6129-5b3a-bc62-97600ccf08a5",
+          "slug": "8-taste-or-test",
+          "sequence": 8,
+          "title": "Taste or Test? /eɪ/ vs /ɛ/",
+          "kind": "video",
+          "description": "Hear and say the difference between /eɪ/ and /ɛ/ in pairs like “taste” and “test”.",
+          "source": "https://www.youtube.com/embed/29AKpIou3kM",
+          "durationSeconds": 479,
+          "poster": "atlas-of-american-sounds/2-front-vowels/8-taste-or-test/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/2-front-vowels/8-taste-or-test/readme.md",
+          "resources": [
+            {
+              "id": "956f015e-7437-52d7-a54e-80ea67ad072f",
+              "title": "Taste or Test? /eɪ/ vs /ɛ/ Notes",
+              "url": "atlas-of-american-sounds/2-front-vowels/8-taste-or-test/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "4200b54b-52aa-51e0-bb10-a912ce6c3287",
+          "slug": "9-made-or-mad",
+          "sequence": 9,
+          "title": "Made or Mad? /eɪ/ vs /æ/",
+          "kind": "video",
+          "description": "Hear and say the difference between /eɪ/ and /æ/ in pairs like “made” and “mad”.",
+          "source": "https://www.youtube.com/embed/MKX_2yF-Fqo",
+          "durationSeconds": 437,
+          "poster": "atlas-of-american-sounds/2-front-vowels/9-made-or-mad/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/2-front-vowels/9-made-or-mad/readme.md",
+          "resources": [
+            {
+              "id": "146ae76f-673f-5d5f-9c8d-fabfca060186",
+              "title": "Made or Mad? /eɪ/ vs /æ/ Notes",
+              "url": "atlas-of-american-sounds/2-front-vowels/9-made-or-mad/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "872175ff-2542-5474-936a-a90b65324f31",
+          "slug": "10-bed-or-bad",
+          "sequence": 10,
+          "title": "Bed or Bad? /ɛ/ vs /æ/",
+          "kind": "video",
+          "description": "Hear and say the difference between /ɛ/ and /æ/ in pairs like “bed” and “bad”.",
+          "source": "https://www.youtube.com/embed/GnWPcvI20Uk",
+          "durationSeconds": 430,
+          "poster": "atlas-of-american-sounds/2-front-vowels/10-bed-or-bad/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/2-front-vowels/10-bed-or-bad/readme.md",
+          "resources": [
+            {
+              "id": "17b1f4f3-0d77-5d67-ae7b-a9ada1091c4d",
+              "title": "Bed or Bad? /ɛ/ vs /æ/ Notes",
+              "url": "atlas-of-american-sounds/2-front-vowels/10-bed-or-bad/readme.md",
+              "kind": "other"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "9ca286e3-8c2b-5b91-a6bb-3f937fc3c048",
+      "slug": "3-central-vowels",
+      "title": "Central Vowels",
+      "sequence": 3,
+      "lessons": [
+        {
+          "id": "ad7fb9ef-fa0e-512f-bfb4-30c20b221b0c",
+          "slug": "1-schwa-as-in-ago",
+          "sequence": 1,
+          "title": "/ə/ as in “ago”",
+          "kind": "video",
+          "description": "The /ə/ sound of “ago”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/m1mDSUSwNls",
+          "durationSeconds": 332,
+          "poster": "atlas-of-american-sounds/3-central-vowels/1-schwa-as-in-ago/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/3-central-vowels/1-schwa-as-in-ago/readme.md",
+          "resources": [
+            {
+              "id": "7bd1fa33-c948-5af4-b279-38ce5583c8ed",
+              "title": "/ə/ as in “ago” Notes",
+              "url": "atlas-of-american-sounds/3-central-vowels/1-schwa-as-in-ago/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "a39138e2-a1aa-544c-b795-ff565d612ef9",
+          "slug": "2-uh-as-in-us",
+          "sequence": 2,
+          "title": "/ʌ/ as in “us”",
+          "kind": "video",
+          "description": "The /ʌ/ sound of “us”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/X1utTZqC3AI",
+          "durationSeconds": 328,
+          "poster": "atlas-of-american-sounds/3-central-vowels/2-uh-as-in-us/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/3-central-vowels/2-uh-as-in-us/readme.md",
+          "resources": [
+            {
+              "id": "8b1758b7-d078-5b99-82f2-cf5e00f3bf35",
+              "title": "/ʌ/ as in “us” Notes",
+              "url": "atlas-of-american-sounds/3-central-vowels/2-uh-as-in-us/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "44831fdc-5a37-594d-9a50-27477d561e9b",
+          "slug": "3-ah-as-in-got",
+          "sequence": 3,
+          "title": "/ɑ/ as in “got”",
+          "kind": "video",
+          "description": "The /ɑ/ sound of “got”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/R5CY1UniS68",
+          "durationSeconds": 327,
+          "poster": "atlas-of-american-sounds/3-central-vowels/3-ah-as-in-got/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/3-central-vowels/3-ah-as-in-got/readme.md",
+          "resources": [
+            {
+              "id": "0898c08f-6873-51aa-9f02-136f9e486467",
+              "title": "/ɑ/ as in “got” Notes",
+              "url": "atlas-of-american-sounds/3-central-vowels/3-ah-as-in-got/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "8938de0c-95fd-5c24-a853-d0a7d7006b2a",
+          "slug": "4-bus-or-boss",
+          "sequence": 4,
+          "title": "Bus or Boss? /ʌ/ vs /ɑ/",
+          "kind": "video",
+          "description": "Hear and say the difference between /ʌ/ and /ɑ/ in pairs like “bus” and “boss”.",
+          "source": "https://www.youtube.com/embed/MqcCCFptaJk",
+          "durationSeconds": 416,
+          "poster": "atlas-of-american-sounds/3-central-vowels/4-bus-or-boss/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/3-central-vowels/4-bus-or-boss/readme.md",
+          "resources": [
+            {
+              "id": "1480e14a-0e50-5ae2-ac25-814241489460",
+              "title": "Bus or Boss? /ʌ/ vs /ɑ/ Notes",
+              "url": "atlas-of-american-sounds/3-central-vowels/4-bus-or-boss/readme.md",
+              "kind": "other"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ed8be947-c1c2-5827-b6a1-63602ab5a872",
+      "slug": "4-back-vowels",
+      "title": "Back Vowels",
+      "sequence": 4,
+      "lessons": [
+        {
+          "id": "f12f2834-bfb3-5650-bca3-1c5b16a22b01",
+          "slug": "1-u-as-in-blue",
+          "sequence": 1,
+          "title": "/u/ as in “blue”",
+          "kind": "video",
+          "description": "The /u/ sound of “blue”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/lkM6CKBM2ns",
+          "durationSeconds": 343,
+          "poster": "atlas-of-american-sounds/4-back-vowels/1-u-as-in-blue/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/4-back-vowels/1-u-as-in-blue/readme.md",
+          "resources": [
+            {
+              "id": "ddda68c1-d76d-54fe-b840-1867a307450c",
+              "title": "/u/ as in “blue” Notes",
+              "url": "atlas-of-american-sounds/4-back-vowels/1-u-as-in-blue/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "ace0dffa-7fb4-5e98-abd4-a329dd11a646",
+          "slug": "2-uu-as-in-put",
+          "sequence": 2,
+          "title": "/ʊ/ as in “put”",
+          "kind": "video",
+          "description": "The /ʊ/ sound of “put”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/moLTR-dLQQY",
+          "durationSeconds": 342,
+          "poster": "atlas-of-american-sounds/4-back-vowels/2-uu-as-in-put/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/4-back-vowels/2-uu-as-in-put/readme.md",
+          "resources": [
+            {
+              "id": "a377b519-f990-5bdb-8046-ac6490b38ba1",
+              "title": "/ʊ/ as in “put” Notes",
+              "url": "atlas-of-american-sounds/4-back-vowels/2-uu-as-in-put/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "53f66a59-55f8-533b-b530-2083129d5291",
+          "slug": "3-ou-as-in-go",
+          "sequence": 3,
+          "title": "/oʊ/ as in “go”",
+          "kind": "video",
+          "description": "The /oʊ/ sound of “go”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/4kPJLHiiGdU",
+          "durationSeconds": 340,
+          "poster": "atlas-of-american-sounds/4-back-vowels/3-ou-as-in-go/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/4-back-vowels/3-ou-as-in-go/readme.md",
+          "resources": [
+            {
+              "id": "58ac249f-f75b-58e8-9e97-96c64c7de4b1",
+              "title": "/oʊ/ as in “go” Notes",
+              "url": "atlas-of-american-sounds/4-back-vowels/3-ou-as-in-go/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "8b1b4e3a-d143-5dd4-8e95-506ceecdef50",
+          "slug": "4-aw-as-in-on",
+          "sequence": 4,
+          "title": "/ɔ/ as in “on”",
+          "kind": "video",
+          "description": "The /ɔ/ sound of “on”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/pr_KAu-_Hmo",
+          "durationSeconds": 350,
+          "poster": "atlas-of-american-sounds/4-back-vowels/4-aw-as-in-on/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/4-back-vowels/4-aw-as-in-on/readme.md",
+          "resources": [
+            {
+              "id": "cccaf146-8792-5fe1-bd3d-4226e564b5cd",
+              "title": "/ɔ/ as in “on” Notes",
+              "url": "atlas-of-american-sounds/4-back-vowels/4-aw-as-in-on/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "3b13ffbd-166f-57eb-9c23-cf700bcaf355",
+          "slug": "5-low-or-law",
+          "sequence": 5,
+          "title": "Low or Law? /oʊ/ vs /ɔ/",
+          "kind": "video",
+          "description": "Hear and say the difference between /oʊ/ and /ɔ/ in pairs like “low” and “law”.",
+          "source": "https://www.youtube.com/embed/ZEqiQgoHgGo",
+          "durationSeconds": 476,
+          "poster": "atlas-of-american-sounds/4-back-vowels/5-low-or-law/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/4-back-vowels/5-low-or-law/readme.md",
+          "resources": [
+            {
+              "id": "8b25149b-b692-59d7-8589-851b33a11d19",
+              "title": "Low or Law? /oʊ/ vs /ɔ/ Notes",
+              "url": "atlas-of-american-sounds/4-back-vowels/5-low-or-law/readme.md",
+              "kind": "other"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d90a8850-6750-577f-97c4-fa906e196878",
+      "slug": "5-diphthongs",
+      "title": "Diphthongs",
+      "sequence": 5,
+      "lessons": [
+        {
+          "id": "435c514f-d648-5943-890f-6595dd5900cc",
+          "slug": "1-ai-as-in-like",
+          "sequence": 1,
+          "title": "/aɪ/ as in “like”",
+          "kind": "video",
+          "description": "The /aɪ/ sound of “like”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/8uD-GuuSgyk",
+          "durationSeconds": 596,
+          "poster": "atlas-of-american-sounds/5-diphthongs/1-ai-as-in-like/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/5-diphthongs/1-ai-as-in-like/readme.md",
+          "resources": [
+            {
+              "id": "6d05d182-9cb7-56f4-98d0-5280dafd3339",
+              "title": "/aɪ/ as in “like” Notes",
+              "url": "atlas-of-american-sounds/5-diphthongs/1-ai-as-in-like/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "3743212c-9216-58a6-8c7a-54548f44345b",
+          "slug": "2-au-as-in-cloud",
+          "sequence": 2,
+          "title": "/aʊ/ as in “cloud”",
+          "kind": "video",
+          "description": "The /aʊ/ sound of “cloud”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/-V690OA75bA",
+          "durationSeconds": 600,
+          "poster": "atlas-of-american-sounds/5-diphthongs/2-au-as-in-cloud/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/5-diphthongs/2-au-as-in-cloud/readme.md",
+          "resources": [
+            {
+              "id": "d39c43bb-e92f-56f7-ae1d-b0c09d44dce0",
+              "title": "/aʊ/ as in “cloud” Notes",
+              "url": "atlas-of-american-sounds/5-diphthongs/2-au-as-in-cloud/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "7e28a819-356b-5098-ae2c-f7963baf2af3",
+          "slug": "3-oi-as-in-boy",
+          "sequence": 3,
+          "title": "/ɔɪ/ as in “boy”",
+          "kind": "video",
+          "description": "The /ɔɪ/ sound of “boy”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/ZfjPBN22mK8",
+          "durationSeconds": 550,
+          "poster": "atlas-of-american-sounds/5-diphthongs/3-oi-as-in-boy/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/5-diphthongs/3-oi-as-in-boy/readme.md",
+          "resources": [
+            {
+              "id": "6d4f4eaa-a75d-5b93-8726-b509368af91e",
+              "title": "/ɔɪ/ as in “boy” Notes",
+              "url": "atlas-of-american-sounds/5-diphthongs/3-oi-as-in-boy/readme.md",
+              "kind": "other"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4cddbec5-37a1-5475-8f6d-04f498d559de",
+      "slug": "6-r-colored-vowels",
+      "title": "R-Colored Vowels",
+      "sequence": 6,
+      "lessons": [
+        {
+          "id": "6c016efb-c03c-5c2f-8376-f3e0f3181613",
+          "slug": "1-r-colored-vowels-overview",
+          "sequence": 1,
+          "title": "R-Colored Vowels Overview",
+          "kind": "video",
+          "description": "An overview of the r-colored vowels: the American English vowels shaped by the r that follows them.",
+          "source": "https://www.youtube.com/embed/ZJnrTGH3aXo",
+          "durationSeconds": 500,
+          "poster": "atlas-of-american-sounds/6-r-colored-vowels/1-r-colored-vowels-overview/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/6-r-colored-vowels/1-r-colored-vowels-overview/readme.md",
+          "resources": [
+            {
+              "id": "c91021d5-0d29-5197-99d6-26b37e2cebde",
+              "title": "R-Colored Vowels Overview Notes",
+              "url": "atlas-of-american-sounds/6-r-colored-vowels/1-r-colored-vowels-overview/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "cedab087-fccf-5cd6-808a-d70ca319703c",
+          "slug": "2-ur-as-in-first",
+          "sequence": 2,
+          "title": "/ɝ/ as in “first”",
+          "kind": "video",
+          "description": "The /ɝ/ sound of “first”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/6ppOrwjvslc",
+          "durationSeconds": 621,
+          "poster": "atlas-of-american-sounds/6-r-colored-vowels/2-ur-as-in-first/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/6-r-colored-vowels/2-ur-as-in-first/readme.md",
+          "resources": [
+            {
+              "id": "80b99c14-f63d-5c45-abd9-6dccb9eb1fa1",
+              "title": "/ɝ/ as in “first” Notes",
+              "url": "atlas-of-american-sounds/6-r-colored-vowels/2-ur-as-in-first/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "c515f024-9114-500b-9665-50f293a6f7a1",
+          "slug": "3-er-as-in-after",
+          "sequence": 3,
+          "title": "/ɚ/ as in “after”",
+          "kind": "video",
+          "description": "The /ɚ/ sound of “after”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/AzNRoSGBh44",
+          "durationSeconds": 511,
+          "poster": "atlas-of-american-sounds/6-r-colored-vowels/3-er-as-in-after/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/6-r-colored-vowels/3-er-as-in-after/readme.md",
+          "resources": [
+            {
+              "id": "d46f98fb-f778-5e21-aed1-ed570d8bcce4",
+              "title": "/ɚ/ as in “after” Notes",
+              "url": "atlas-of-american-sounds/6-r-colored-vowels/3-er-as-in-after/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "6d723d5e-f5fe-5cec-8c22-675451322364",
+          "slug": "4-ir-as-in-hero",
+          "sequence": 4,
+          "title": "/ɪr/ as in “hero”",
+          "kind": "video",
+          "description": "The /ɪr/ sound of “hero”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/X0bkG5ZfzH4",
+          "durationSeconds": 591,
+          "poster": "atlas-of-american-sounds/6-r-colored-vowels/4-ir-as-in-hero/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/6-r-colored-vowels/4-ir-as-in-hero/readme.md",
+          "resources": [
+            {
+              "id": "57422f44-9305-5a33-aefb-18373dda7b76",
+              "title": "/ɪr/ as in “hero” Notes",
+              "url": "atlas-of-american-sounds/6-r-colored-vowels/4-ir-as-in-hero/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "759aef93-be23-5e70-a4f0-385a5b72873c",
+          "slug": "5-air-as-in-chair",
+          "sequence": 5,
+          "title": "/ɛr/ as in “chair”",
+          "kind": "video",
+          "description": "The /ɛr/ sound of “chair”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/ZjurI7xtCjE",
+          "durationSeconds": 641,
+          "poster": "atlas-of-american-sounds/6-r-colored-vowels/5-air-as-in-chair/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/6-r-colored-vowels/5-air-as-in-chair/readme.md",
+          "resources": [
+            {
+              "id": "40556f45-ac90-5c3f-8ec2-a5d54827b1b4",
+              "title": "/ɛr/ as in “chair” Notes",
+              "url": "atlas-of-american-sounds/6-r-colored-vowels/5-air-as-in-chair/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "e0ae7c06-c0dd-552c-842d-8e6927b43cd3",
+          "slug": "6-ar-as-in-car",
+          "sequence": 6,
+          "title": "/ɑr/ as in “car”",
+          "kind": "video",
+          "description": "The /ɑr/ sound of “car”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/x6E2L2vLH78",
+          "durationSeconds": 608,
+          "poster": "atlas-of-american-sounds/6-r-colored-vowels/6-ar-as-in-car/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/6-r-colored-vowels/6-ar-as-in-car/readme.md",
+          "resources": [
+            {
+              "id": "9c4d1975-5991-5a12-88a0-2677a7cdd8d1",
+              "title": "/ɑr/ as in “car” Notes",
+              "url": "atlas-of-american-sounds/6-r-colored-vowels/6-ar-as-in-car/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "9b9c78a6-5037-58f6-a651-2f133c46bdd3",
+          "slug": "7-or-as-in-sport",
+          "sequence": 7,
+          "title": "/ɔr/ as in “sport”",
+          "kind": "video",
+          "description": "The /ɔr/ sound of “sport”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/ZbDrxmP4_S4",
+          "durationSeconds": 676,
+          "poster": "atlas-of-american-sounds/6-r-colored-vowels/7-or-as-in-sport/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/6-r-colored-vowels/7-or-as-in-sport/readme.md",
+          "resources": [
+            {
+              "id": "47527b1b-471e-5f36-9f69-148801aff934",
+              "title": "/ɔr/ as in “sport” Notes",
+              "url": "atlas-of-american-sounds/6-r-colored-vowels/7-or-as-in-sport/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "2faf164c-a60c-5b45-b0f2-d48710f75697",
+          "slug": "8-ire-as-in-fire",
+          "sequence": 8,
+          "title": "/aɪr/ as in “fire”",
+          "kind": "video",
+          "description": "The /aɪr/ sound of “fire”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/PdV7RymsiMY",
+          "durationSeconds": 679,
+          "poster": "atlas-of-american-sounds/6-r-colored-vowels/8-ire-as-in-fire/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/6-r-colored-vowels/8-ire-as-in-fire/readme.md",
+          "resources": [
+            {
+              "id": "dc61682e-31bf-5d19-a949-0f057b439308",
+              "title": "/aɪr/ as in “fire” Notes",
+              "url": "atlas-of-american-sounds/6-r-colored-vowels/8-ire-as-in-fire/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "c06f1426-c8ee-5b42-b401-6adff21db7a9",
+          "slug": "9-r-colored-vowels-exercise",
+          "sequence": 9,
+          "title": "R-Colored Vowels: Advanced Exercise",
+          "kind": "video",
+          "description": "A practice session that puts every r-colored vowel to work in words and phrases.",
+          "source": "https://www.youtube.com/embed/GbbBpiMVbi0",
+          "durationSeconds": 625,
+          "poster": "atlas-of-american-sounds/6-r-colored-vowels/9-r-colored-vowels-exercise/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/6-r-colored-vowels/9-r-colored-vowels-exercise/readme.md",
+          "resources": [
+            {
+              "id": "827a7ea9-c27c-5059-9b40-2967a873bb3a",
+              "title": "R-Colored Vowels: Advanced Exercise Notes",
+              "url": "atlas-of-american-sounds/6-r-colored-vowels/9-r-colored-vowels-exercise/readme.md",
+              "kind": "other"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "b2e4672c-343a-55db-9a9e-76953ecfef19",
+      "slug": "7-stop-consonants",
+      "title": "Stop Consonants",
+      "sequence": 7,
+      "lessons": [
+        {
+          "id": "9515455f-4c49-5483-9611-9ed1d111b8f3",
+          "slug": "1-stop-consonants-overview",
+          "sequence": 1,
+          "title": "Stop Consonants Overview",
+          "kind": "video",
+          "description": "An overview of the stop consonants: how /p/, /b/, /t/, /d/, /k/ and /g/ stop the air and then release it.",
+          "source": "https://www.youtube.com/embed/yFPbLcUCraQ",
+          "durationSeconds": 739,
+          "poster": "atlas-of-american-sounds/7-stop-consonants/1-stop-consonants-overview/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/7-stop-consonants/1-stop-consonants-overview/readme.md",
+          "resources": [
+            {
+              "id": "4afa397c-29ae-52f7-b6db-e6c16c73c0d5",
+              "title": "Stop Consonants Overview Notes",
+              "url": "atlas-of-american-sounds/7-stop-consonants/1-stop-consonants-overview/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "21a50ae9-9cfe-5c29-941a-e6b49fefeba3",
+          "slug": "2-p-as-in-pie",
+          "sequence": 2,
+          "title": "/p/ as in “pie”",
+          "kind": "video",
+          "description": "The /p/ sound of “pie”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/V_n_rUKQSew",
+          "durationSeconds": 532,
+          "poster": "atlas-of-american-sounds/7-stop-consonants/2-p-as-in-pie/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/7-stop-consonants/2-p-as-in-pie/readme.md",
+          "resources": [
+            {
+              "id": "3552cf10-fc0b-572e-9faa-a4e3c58af1d3",
+              "title": "/p/ as in “pie” Notes",
+              "url": "atlas-of-american-sounds/7-stop-consonants/2-p-as-in-pie/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "73beb105-6cd1-57ee-b7c6-ddae82185029",
+          "slug": "3-b-as-in-boy",
+          "sequence": 3,
+          "title": "/b/ as in “boy”",
+          "kind": "video",
+          "description": "The /b/ sound of “boy”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/LbCOXRz7Uf8",
+          "durationSeconds": 529,
+          "poster": "atlas-of-american-sounds/7-stop-consonants/3-b-as-in-boy/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/7-stop-consonants/3-b-as-in-boy/readme.md",
+          "resources": [
+            {
+              "id": "f03f2d1e-7987-5a3f-ba8a-9cc713d24d2c",
+              "title": "/b/ as in “boy” Notes",
+              "url": "atlas-of-american-sounds/7-stop-consonants/3-b-as-in-boy/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "530d6642-cf67-5fa9-91fe-2b17d0e1211e",
+          "slug": "4-t-as-in-toy",
+          "sequence": 4,
+          "title": "/t/ as in “toy”",
+          "kind": "video",
+          "description": "The /t/ sound of “toy”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/mLlotV_0dRI",
+          "durationSeconds": 608,
+          "poster": "atlas-of-american-sounds/7-stop-consonants/4-t-as-in-toy/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/7-stop-consonants/4-t-as-in-toy/readme.md",
+          "resources": [
+            {
+              "id": "17f48035-e289-529f-aaf8-f24b0106f41b",
+              "title": "/t/ as in “toy” Notes",
+              "url": "atlas-of-american-sounds/7-stop-consonants/4-t-as-in-toy/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "59e74016-5e2d-5206-a3e2-2db3d226a7a5",
+          "slug": "5-flap-t-as-in-water",
+          "sequence": 5,
+          "title": "Flap T /t̬/ as in “water”",
+          "kind": "video",
+          "description": "The flap T /t̬/ sound of “water”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/9b-UIkuwOdU",
+          "durationSeconds": 415,
+          "poster": "atlas-of-american-sounds/7-stop-consonants/5-flap-t-as-in-water/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/7-stop-consonants/5-flap-t-as-in-water/readme.md",
+          "resources": [
+            {
+              "id": "dd5c521f-10da-59b2-a781-cf8343832dc2",
+              "title": "Flap T /t̬/ as in “water” Notes",
+              "url": "atlas-of-american-sounds/7-stop-consonants/5-flap-t-as-in-water/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "3ceaf9de-bdd5-5f08-bf8c-822447c773f1",
+          "slug": "6-glottal-t-as-in-button",
+          "sequence": 6,
+          "title": "Glottal T /ʔ/ as in “button”",
+          "kind": "video",
+          "description": "The glottal T /ʔ/ sound of “button”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/Vabg-EUHOQk",
+          "durationSeconds": 578,
+          "poster": "atlas-of-american-sounds/7-stop-consonants/6-glottal-t-as-in-button/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/7-stop-consonants/6-glottal-t-as-in-button/readme.md",
+          "resources": [
+            {
+              "id": "6efe835c-f3d1-5ba3-afaa-2cebdffa06ee",
+              "title": "Glottal T /ʔ/ as in “button” Notes",
+              "url": "atlas-of-american-sounds/7-stop-consonants/6-glottal-t-as-in-button/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "9e0190ff-3a57-59a3-ad0d-7712c203606c",
+          "slug": "7-d-as-in-dog",
+          "sequence": 7,
+          "title": "/d/ as in “dog”",
+          "kind": "video",
+          "description": "The /d/ sound of “dog”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/N73xPe0x79g",
+          "durationSeconds": 519,
+          "poster": "atlas-of-american-sounds/7-stop-consonants/7-d-as-in-dog/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/7-stop-consonants/7-d-as-in-dog/readme.md",
+          "resources": [
+            {
+              "id": "07326752-e6ac-5e9d-bf98-1334eda3318f",
+              "title": "/d/ as in “dog” Notes",
+              "url": "atlas-of-american-sounds/7-stop-consonants/7-d-as-in-dog/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "f2edefeb-fac4-5bff-b722-e17be3709989",
+          "slug": "8-k-as-in-key",
+          "sequence": 8,
+          "title": "/k/ as in “key”",
+          "kind": "video",
+          "description": "The /k/ sound of “key”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/zxrveu6yu6E",
+          "durationSeconds": 603,
+          "poster": "atlas-of-american-sounds/7-stop-consonants/8-k-as-in-key/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/7-stop-consonants/8-k-as-in-key/readme.md",
+          "resources": [
+            {
+              "id": "428f34f7-41be-53f7-b74c-9b509393f130",
+              "title": "/k/ as in “key” Notes",
+              "url": "atlas-of-american-sounds/7-stop-consonants/8-k-as-in-key/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "38164d30-a696-5720-b510-a2870162a441",
+          "slug": "9-g-as-in-gift",
+          "sequence": 9,
+          "title": "/g/ as in “gift”",
+          "kind": "video",
+          "description": "The /g/ sound of “gift”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/vP5XKYvxe0Q",
+          "durationSeconds": 538,
+          "poster": "atlas-of-american-sounds/7-stop-consonants/9-g-as-in-gift/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/7-stop-consonants/9-g-as-in-gift/readme.md",
+          "resources": [
+            {
+              "id": "a2eaaf7b-dcca-5f08-9abf-bc529b22a410",
+              "title": "/g/ as in “gift” Notes",
+              "url": "atlas-of-american-sounds/7-stop-consonants/9-g-as-in-gift/readme.md",
+              "kind": "other"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e7ac4dbb-da46-5589-ab37-41e672cffe0b",
+      "slug": "8-fricatives",
+      "title": "Fricatives",
+      "sequence": 8,
+      "lessons": [
+        {
+          "id": "e099fffc-b20b-5f69-a13e-5a9bd34f7d63",
+          "slug": "1-f-as-in-fun",
+          "sequence": 1,
+          "title": "/f/ as in “fun”",
+          "kind": "video",
+          "description": "The /f/ sound of “fun”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/05f62-73nrY",
+          "durationSeconds": 844,
+          "poster": "atlas-of-american-sounds/8-fricatives/1-f-as-in-fun/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/8-fricatives/1-f-as-in-fun/readme.md",
+          "resources": [
+            {
+              "id": "8822ca77-0cd5-59c3-b962-226eff9f9844",
+              "title": "/f/ as in “fun” Notes",
+              "url": "atlas-of-american-sounds/8-fricatives/1-f-as-in-fun/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "43f839e8-09ee-5d30-96f8-4420c2b1e4fd",
+          "slug": "2-v-as-in-very",
+          "sequence": 2,
+          "title": "/v/ as in “very”",
+          "kind": "video",
+          "description": "The /v/ sound of “very”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/U5Oro6v0klg",
+          "durationSeconds": 864,
+          "poster": "atlas-of-american-sounds/8-fricatives/2-v-as-in-very/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/8-fricatives/2-v-as-in-very/readme.md",
+          "resources": [
+            {
+              "id": "5bf7590f-a435-5608-b4e7-ccd0859a38d4",
+              "title": "/v/ as in “very” Notes",
+              "url": "atlas-of-american-sounds/8-fricatives/2-v-as-in-very/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "6e13b313-3f8b-5c22-9b51-93823a98f119",
+          "slug": "3-voiceless-th-as-in-think",
+          "sequence": 3,
+          "title": "/θ/ as in “think”",
+          "kind": "video",
+          "description": "The /θ/ sound of “think”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/qC0l6GQZtM4",
+          "durationSeconds": 470,
+          "poster": "atlas-of-american-sounds/8-fricatives/3-voiceless-th-as-in-think/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/8-fricatives/3-voiceless-th-as-in-think/readme.md",
+          "resources": [
+            {
+              "id": "762bdcdd-94f0-541f-a7fb-b5ce341909c5",
+              "title": "/θ/ as in “think” Notes",
+              "url": "atlas-of-american-sounds/8-fricatives/3-voiceless-th-as-in-think/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "ea7332ec-c9b5-507e-a1b6-efe97ed9c557",
+          "slug": "4-voiced-th-as-in-this",
+          "sequence": 4,
+          "title": "/ð/ as in “this”",
+          "kind": "video",
+          "description": "The /ð/ sound of “this”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/EZb_EWVCUoE",
+          "durationSeconds": 444,
+          "poster": "atlas-of-american-sounds/8-fricatives/4-voiced-th-as-in-this/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/8-fricatives/4-voiced-th-as-in-this/readme.md",
+          "resources": [
+            {
+              "id": "ea78e5d9-02fb-5191-9794-8bd63c1d4136",
+              "title": "/ð/ as in “this” Notes",
+              "url": "atlas-of-american-sounds/8-fricatives/4-voiced-th-as-in-this/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "647dd0e4-320c-51f2-9e45-e4c4d8ad6a91",
+          "slug": "5-s-as-in-sun",
+          "sequence": 5,
+          "title": "/s/ as in “sun”",
+          "kind": "video",
+          "description": "The /s/ sound of “sun”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/6hWPXaPXrnQ",
+          "durationSeconds": 802,
+          "poster": "atlas-of-american-sounds/8-fricatives/5-s-as-in-sun/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/8-fricatives/5-s-as-in-sun/readme.md",
+          "resources": [
+            {
+              "id": "030b9837-cd38-54ff-99cb-5d1b2008abcf",
+              "title": "/s/ as in “sun” Notes",
+              "url": "atlas-of-american-sounds/8-fricatives/5-s-as-in-sun/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "8823e636-3201-5e53-a837-937e693651fd",
+          "slug": "6-z-as-in-zoo",
+          "sequence": 6,
+          "title": "/z/ as in “zoo”",
+          "kind": "video",
+          "description": "The /z/ sound of “zoo”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/ky7Jh9Bbjts",
+          "durationSeconds": 745,
+          "poster": "atlas-of-american-sounds/8-fricatives/6-z-as-in-zoo/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/8-fricatives/6-z-as-in-zoo/readme.md",
+          "resources": [
+            {
+              "id": "8407400b-3740-5fbb-8837-ce63c9202990",
+              "title": "/z/ as in “zoo” Notes",
+              "url": "atlas-of-american-sounds/8-fricatives/6-z-as-in-zoo/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "451a5573-b54f-5ad8-b698-046577511b9a",
+          "slug": "7-sh-as-in-show",
+          "sequence": 7,
+          "title": "/ʃ/ as in “show”",
+          "kind": "video",
+          "description": "The /ʃ/ sound of “show”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/wINb4HFguck",
+          "durationSeconds": 749,
+          "poster": "atlas-of-american-sounds/8-fricatives/7-sh-as-in-show/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/8-fricatives/7-sh-as-in-show/readme.md",
+          "resources": [
+            {
+              "id": "a2d4742d-6870-57b3-83aa-ff3ea180c000",
+              "title": "/ʃ/ as in “show” Notes",
+              "url": "atlas-of-american-sounds/8-fricatives/7-sh-as-in-show/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "afef30b0-4541-5965-b136-3f69ff8a9263",
+          "slug": "8-zh-as-in-vision",
+          "sequence": 8,
+          "title": "/ʒ/ as in “vision”",
+          "kind": "video",
+          "description": "The /ʒ/ sound of “vision”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/k8ImSmVOSVA",
+          "durationSeconds": 594,
+          "poster": "atlas-of-american-sounds/8-fricatives/8-zh-as-in-vision/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/8-fricatives/8-zh-as-in-vision/readme.md",
+          "resources": [
+            {
+              "id": "682582ef-4f22-5fc8-903a-826fb781a43c",
+              "title": "/ʒ/ as in “vision” Notes",
+              "url": "atlas-of-american-sounds/8-fricatives/8-zh-as-in-vision/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "3fb6fd55-874e-5cf7-851b-82a17a3124aa",
+          "slug": "9-h-as-in-home",
+          "sequence": 9,
+          "title": "/h/ as in “home”",
+          "kind": "video",
+          "description": "The /h/ sound of “home”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/dV6At0g4n78",
+          "durationSeconds": 937,
+          "poster": "atlas-of-american-sounds/8-fricatives/9-h-as-in-home/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/8-fricatives/9-h-as-in-home/readme.md",
+          "resources": [
+            {
+              "id": "eb962dd7-eb45-5a69-a9c9-d52261967cea",
+              "title": "/h/ as in “home” Notes",
+              "url": "atlas-of-american-sounds/8-fricatives/9-h-as-in-home/readme.md",
+              "kind": "other"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a17394df-77f2-5f84-be5a-63b2bf764375",
+      "slug": "9-affricates",
+      "title": "Affricates",
+      "sequence": 9,
+      "lessons": [
+        {
+          "id": "1bbc887e-aafa-5c11-ba82-572d606b7cd5",
+          "slug": "1-ch-as-in-chair",
+          "sequence": 1,
+          "title": "/tʃ/ as in “chair”",
+          "kind": "video",
+          "description": "The /tʃ/ sound of “chair”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/WoyI_omRpcw",
+          "durationSeconds": 825,
+          "poster": "atlas-of-american-sounds/9-affricates/1-ch-as-in-chair/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/9-affricates/1-ch-as-in-chair/readme.md",
+          "resources": [
+            {
+              "id": "0dbfcce1-a43c-5c80-9ba2-e416ade31e80",
+              "title": "/tʃ/ as in “chair” Notes",
+              "url": "atlas-of-american-sounds/9-affricates/1-ch-as-in-chair/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "99eeacd3-0b83-5765-89af-e6be16e9302f",
+          "slug": "2-dzh-as-in-job",
+          "sequence": 2,
+          "title": "/dʒ/ as in “job”",
+          "kind": "video",
+          "description": "The /dʒ/ sound of “job”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/zJJ3hhHtjtI",
+          "durationSeconds": 852,
+          "poster": "atlas-of-american-sounds/9-affricates/2-dzh-as-in-job/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/9-affricates/2-dzh-as-in-job/readme.md",
+          "resources": [
+            {
+              "id": "36680f3c-be20-533b-854d-e878a2261ea4",
+              "title": "/dʒ/ as in “job” Notes",
+              "url": "atlas-of-american-sounds/9-affricates/2-dzh-as-in-job/readme.md",
+              "kind": "other"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "662b937a-25a0-54dd-9e91-2c9a784a16d7",
+      "slug": "10-nasals",
+      "title": "Nasals",
+      "sequence": 10,
+      "lessons": [
+        {
+          "id": "0d4d83dc-79c3-5d36-8ca2-30d77aae8ff0",
+          "slug": "1-n-as-in-nice",
+          "sequence": 1,
+          "title": "/n/ as in “nice”",
+          "kind": "video",
+          "description": "The /n/ sound of “nice”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/1eyr7O4TFmI",
+          "durationSeconds": 436,
+          "poster": "atlas-of-american-sounds/10-nasals/1-n-as-in-nice/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/10-nasals/1-n-as-in-nice/readme.md",
+          "resources": [
+            {
+              "id": "ee607f82-e6c0-534f-a90b-50c3784a371d",
+              "title": "/n/ as in “nice” Notes",
+              "url": "atlas-of-american-sounds/10-nasals/1-n-as-in-nice/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "8298c19e-ef68-5892-92d1-def10097aab9",
+          "slug": "2-m-as-in-map",
+          "sequence": 2,
+          "title": "/m/ as in “map”",
+          "kind": "video",
+          "description": "The /m/ sound of “map”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/tkiN8BsBEfA",
+          "durationSeconds": 649,
+          "poster": "atlas-of-american-sounds/10-nasals/2-m-as-in-map/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/10-nasals/2-m-as-in-map/readme.md",
+          "resources": [
+            {
+              "id": "5225c926-0432-5597-90f1-540fc7f8683e",
+              "title": "/m/ as in “map” Notes",
+              "url": "atlas-of-american-sounds/10-nasals/2-m-as-in-map/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "5bb305ec-694a-5461-9df2-6b72be4950b5",
+          "slug": "3-ng-as-in-thing",
+          "sequence": 3,
+          "title": "/ŋ/ as in “thing”",
+          "kind": "video",
+          "description": "The /ŋ/ sound of “thing”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/5xVq8T88oJw",
+          "durationSeconds": 731,
+          "poster": "atlas-of-american-sounds/10-nasals/3-ng-as-in-thing/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/10-nasals/3-ng-as-in-thing/readme.md",
+          "resources": [
+            {
+              "id": "61c00f64-af38-5c2a-9f1c-1b2cdd191dea",
+              "title": "/ŋ/ as in “thing” Notes",
+              "url": "atlas-of-american-sounds/10-nasals/3-ng-as-in-thing/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "00808607-9cf8-5fbf-93e3-205c1d6ea2bc",
+          "slug": "4-thin-or-thing",
+          "sequence": 4,
+          "title": "Thin or Thing? /n/ vs /ŋ/",
+          "kind": "video",
+          "description": "Hear and say the difference between /n/ and /ŋ/ in pairs like “thin” and “thing”.",
+          "source": "https://www.youtube.com/embed/8bKIm60nK80",
+          "durationSeconds": 545,
+          "poster": "atlas-of-american-sounds/10-nasals/4-thin-or-thing/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/10-nasals/4-thin-or-thing/readme.md",
+          "resources": [
+            {
+              "id": "6c61c1e5-f3db-567f-9a1d-fccade529993",
+              "title": "Thin or Thing? /n/ vs /ŋ/ Notes",
+              "url": "atlas-of-american-sounds/10-nasals/4-thin-or-thing/readme.md",
+              "kind": "other"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0c2f6de8-0d07-59b4-bbde-3b0e26d75e2e",
+      "slug": "11-liquids",
+      "title": "Liquids",
+      "sequence": 11,
+      "lessons": [
+        {
+          "id": "6b76afcd-b9ba-5c96-ac29-a9d526484a0a",
+          "slug": "1-r-as-in-run",
+          "sequence": 1,
+          "title": "/r/ as in “run”",
+          "kind": "video",
+          "description": "The /r/ sound of “run”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/q5a2-KuHkBU",
+          "durationSeconds": 432,
+          "poster": "atlas-of-american-sounds/11-liquids/1-r-as-in-run/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/11-liquids/1-r-as-in-run/readme.md",
+          "resources": [
+            {
+              "id": "ea9be3a1-8980-5c91-9919-b0af7643debf",
+              "title": "/r/ as in “run” Notes",
+              "url": "atlas-of-american-sounds/11-liquids/1-r-as-in-run/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "a18b483e-6bcc-51aa-b528-cfe2c67ed92d",
+          "slug": "2-l-as-in-let",
+          "sequence": 2,
+          "title": "/l/ as in “let”",
+          "kind": "video",
+          "description": "The /l/ sound of “let”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/JamM8TgB_AA",
+          "durationSeconds": 435,
+          "poster": "atlas-of-american-sounds/11-liquids/2-l-as-in-let/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/11-liquids/2-l-as-in-let/readme.md",
+          "resources": [
+            {
+              "id": "f6bac4ac-f05e-517a-b02c-9b4534406d32",
+              "title": "/l/ as in “let” Notes",
+              "url": "atlas-of-american-sounds/11-liquids/2-l-as-in-let/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "8965083a-7e76-5477-9cb0-63169564cb45",
+          "slug": "3-dark-l-as-in-call",
+          "sequence": 3,
+          "title": "Dark L as in “call”",
+          "kind": "video",
+          "description": "The dark L sound of “call”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/ZTgYjGXFAkw",
+          "durationSeconds": 793,
+          "poster": "atlas-of-american-sounds/11-liquids/3-dark-l-as-in-call/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/11-liquids/3-dark-l-as-in-call/readme.md",
+          "resources": [
+            {
+              "id": "cfbd6663-4dbe-50d4-82de-96aed2a9ef86",
+              "title": "Dark L as in “call” Notes",
+              "url": "atlas-of-american-sounds/11-liquids/3-dark-l-as-in-call/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "b1e18bfa-e236-557b-9c16-08624d630a67",
+          "slug": "4-pray-or-play",
+          "sequence": 4,
+          "title": "Pray or Play? /r/ vs /l/",
+          "kind": "video",
+          "description": "Hear and say the difference between /r/ and /l/ in pairs like “pray” and “play”.",
+          "source": "https://www.youtube.com/embed/DKJfeW89lR0",
+          "durationSeconds": 478,
+          "poster": "atlas-of-american-sounds/11-liquids/4-pray-or-play/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/11-liquids/4-pray-or-play/readme.md",
+          "resources": [
+            {
+              "id": "bd8292fc-1f85-5464-8b24-e7dad0d73d1e",
+              "title": "Pray or Play? /r/ vs /l/ Notes",
+              "url": "atlas-of-american-sounds/11-liquids/4-pray-or-play/readme.md",
+              "kind": "other"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3fb0f90b-6cd3-57de-8d5c-1740911145d5",
+      "slug": "12-glides",
+      "title": "Glides",
+      "sequence": 12,
+      "lessons": [
+        {
+          "id": "15b9aee7-59ce-599e-8636-405ee90f2198",
+          "slug": "1-w-as-in-way",
+          "sequence": 1,
+          "title": "/w/ as in “way”",
+          "kind": "video",
+          "description": "The /w/ sound of “way”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/nMB5mX_PGHQ",
+          "durationSeconds": 741,
+          "poster": "atlas-of-american-sounds/12-glides/1-w-as-in-way/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/12-glides/1-w-as-in-way/readme.md",
+          "resources": [
+            {
+              "id": "384b2ac6-f799-5b98-993a-ad153c876e4f",
+              "title": "/w/ as in “way” Notes",
+              "url": "atlas-of-american-sounds/12-glides/1-w-as-in-way/readme.md",
+              "kind": "other"
+            }
+          ]
+        },
+        {
+          "id": "07126bff-c74a-5c20-91bc-2bf64ae314a5",
+          "slug": "2-y-as-in-yes",
+          "sequence": 2,
+          "title": "/j/ as in “yes”",
+          "kind": "video",
+          "description": "The /j/ sound of “yes”: how to shape it, and the words to practice it with.",
+          "source": "https://www.youtube.com/embed/1G8SCotE2yg",
+          "durationSeconds": 663,
+          "poster": "atlas-of-american-sounds/12-glides/2-y-as-in-yes/thumbnail.jpeg",
+          "notesKey": "atlas-of-american-sounds/12-glides/2-y-as-in-yes/readme.md",
+          "resources": [
+            {
+              "id": "af259d67-a9e9-5456-9ba8-d2dde87d9671",
+              "title": "/j/ as in “yes” Notes",
+              "url": "atlas-of-american-sounds/12-glides/2-y-as-in-yes/readme.md",
+              "kind": "other"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

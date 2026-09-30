@@ -2,7 +2,7 @@ import { ContinueWatchingRecord } from "@/domain/entities/continue-watching-reco
 import type { CourseForView } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
 import { courseCardModel, courseShelf } from "@/lib/course-shelf/course-shelf";
 import { renderInLocale } from "@/test-setup/render-in-locale";
-import { aCourseView, lessonOf } from "@/test-setup/stubs/course-views";
+import { aCourseView, asReference, lessonOf } from "@/test-setup/stubs/course-views";
 
 import { screen, within } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
@@ -119,7 +119,7 @@ describe("CourseCinemaHero", () => {
     test("WHEN it renders THEN it reads recommended AND carries no enrolled mark", () => {
       renderInLocale(
         <CourseCinemaHero
-          model={modelOf(advanced, { enrolled: false })}
+          model={modelOf(aCourseView("basic-course", 1, [1, 3]), { enrolled: false })}
           label="recommended"
         />,
       );
@@ -159,6 +159,37 @@ describe("CourseCinemaHero", () => {
 
       expect(screen.getByText("Tu curso")).toBeInTheDocument();
       expect(screen.getByRole("link", { name: /Empezar el curso/ })).toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN a reference course the learner watched last", () => {
+    const atlas = asReference(aCourseView("atlas-of-american-sounds", 3, [2, 1]));
+
+    test("WHEN it renders THEN its facts read Reference with no level number", () => {
+      renderInLocale(
+        <CourseCinemaHero
+          model={modelOf(atlas, { recordAt: [0, 0] })}
+          label="last-watched"
+        />,
+      );
+
+      const hero = screen.getByTestId("course-cinema-hero");
+      expect(hero).toHaveTextContent("Reference · 2 modules · 3 videos");
+      expect(hero).not.toHaveTextContent(/Level \d/);
+    });
+
+    test("WHEN it renders in es THEN its facts read Referencia", () => {
+      renderInLocale(
+        <CourseCinemaHero
+          model={modelOf(atlas, { recordAt: [0, 0] })}
+          label="last-watched"
+        />,
+        "es",
+      );
+
+      expect(screen.getByTestId("course-cinema-hero")).toHaveTextContent(
+        "Referencia · 2 módulos · 3 videos",
+      );
     });
   });
 });

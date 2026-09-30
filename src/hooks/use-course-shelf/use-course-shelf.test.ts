@@ -1,6 +1,6 @@
 import { ContinueWatchingLocation } from "@/domain/entities/continue-watching-location/continue-watching-location";
 import { givenLearner } from "@/test-setup/learner-store/learner-store";
-import { aCourseView, lessonOf } from "@/test-setup/stubs/course-views";
+import { aCourseView, asReference, lessonOf } from "@/test-setup/stubs/course-views";
 
 import { renderHook } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
@@ -10,6 +10,7 @@ import { useCourseShelf } from "./use-course-shelf";
 const basic = aCourseView("basic-course", 1, [1, 3]);
 const advanced = aCourseView("advanced-intermediate-course", 2, [2, 2]);
 const courses = [basic, advanced];
+const atlas = asReference(aCourseView("atlas-of-american-sounds", 3, [2]));
 
 describe("useCourseShelf", () => {
   test("WHEN the learner's state is not seeded THEN the shelf is pending", () => {
@@ -54,6 +55,25 @@ describe("useCourseShelf", () => {
     expect(result.current.available.map((view) => view.course.slug)).toEqual([
       "advanced-intermediate-course",
     ]);
+    expect(result.current.highestEnrolledLevel).toBeNull();
+  });
+
+  test("WHEN the learner is enrolled in Basic and a reference course THEN the highest level is still 1", () => {
+    givenLearner.enrolledCourses(["basic-course", "atlas-of-american-sounds"]);
+
+    const { result } = renderHook(() => useCourseShelf([...courses, atlas]));
+
+    if (result.current.status !== "read") throw new Error("expected a read shelf");
+    expect(result.current.highestEnrolledLevel).toBe(1);
+  });
+
+  test("WHEN the learner is enrolled only in a reference course THEN no level is enrolled", () => {
+    givenLearner.enrolledCourses(["atlas-of-american-sounds"]);
+
+    const { result } = renderHook(() => useCourseShelf([...courses, atlas]));
+
+    if (result.current.status !== "read") throw new Error("expected a read shelf");
+    expect(result.current.enrolledCount).toBe(1);
     expect(result.current.highestEnrolledLevel).toBeNull();
   });
 });

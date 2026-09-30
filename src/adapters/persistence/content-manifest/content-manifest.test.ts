@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 import { parseCourseManifests } from "@/adapters/persistence/content-manifest/course-manifest-schema/course-manifest-schema";
 import type { FlattenedCatalog } from "@/adapters/persistence/content-manifest/flatten-course-manifests/flatten-course-manifests";
@@ -171,6 +174,7 @@ describe("contentCatalog with drafts hidden", () => {
         expect(catalog.courses.map((course) => course.slug)).toEqual([
           "basic-course",
           "advanced-intermediate-course",
+          "atlas-of-american-sounds",
         ]);
       });
     });
@@ -179,6 +183,137 @@ describe("contentCatalog with drafts hidden", () => {
       return catalogWithDraftsHidden().then((catalog) => {
         expect(catalog.lessonRows).toHaveLength(contentCatalog.lessonRows.length);
       });
+    });
+  });
+});
+
+/**
+ * The Atlas of American Sounds' content contract (`atlas-of-american-sounds`
+ * spec): a reference course in twelve sound-family modules, every poster stored
+ * locally beside its lesson.
+ */
+describe("the Atlas of American Sounds manifest", () => {
+  const ATLAS_SLUG = "atlas-of-american-sounds";
+  const MODULE_LESSON_COUNTS = [
+    ["1-the-vowel-map", 2],
+    ["2-front-vowels", 10],
+    ["3-central-vowels", 4],
+    ["4-back-vowels", 5],
+    ["5-diphthongs", 3],
+    ["6-r-colored-vowels", 9],
+    ["7-stop-consonants", 9],
+    ["8-fricatives", 9],
+    ["9-affricates", 2],
+    ["10-nasals", 4],
+    ["11-liquids", 4],
+    ["12-glides", 2],
+  ];
+
+  const declared = parseCourseManifests(courseManifests);
+  const atlas = () => declared.find((course) => course.slug === ATLAS_SLUG);
+  const atlasLessons = () => atlas()?.modules.flatMap((module) => module.lessons) ?? [];
+  const lessonTitlesOf = (moduleSlug: string) =>
+    atlas()
+      ?.modules.find((module) => module.slug === moduleSlug)
+      ?.lessons.map((lesson) => lesson.title) ?? [];
+
+  describe("GIVEN the tracked manifests", () => {
+    test("WHEN parsed THEN the Atlas is declared as a reference course", () => {
+      expect(atlas()).toMatchObject({ title: "Atlas of American Sounds", track: "reference" });
+    });
+
+    test("WHEN parsed THEN the Atlas follows every level course", () => {
+      const levelSequences = declared
+        .filter((course) => course.track === "level")
+        .map((course) => course.sequence);
+
+      expect(atlas()?.sequence).toBeGreaterThan(Math.max(...levelSequences));
+    });
+
+    test("WHEN its description is read THEN it credits Sounds American", () => {
+      expect(atlas()?.description).toContain("Sounds American");
+    });
+
+    test("WHEN its modules are listed THEN they are the twelve sound families in order", () => {
+      const counts = atlas()?.modules.map((module) => [module.slug, module.lessons.length]);
+
+      expect(counts).toEqual(MODULE_LESSON_COUNTS);
+    });
+
+    test("WHEN its module slugs are compared THEN no other course shares one", () => {
+      const otherSlugs = new Set(
+        declared
+          .filter((course) => course.slug !== ATLAS_SLUG)
+          .flatMap((course) => course.modules.map((module) => module.slug)),
+      );
+      const shared = (atlas()?.modules ?? []).filter((module) => otherSlugs.has(module.slug));
+
+      expect(shared.map((module) => module.slug)).toEqual([]);
+    });
+
+    test("WHEN its posters are read THEN each is the lesson's own local thumbnail", () => {
+      const misplaced = (atlas()?.modules ?? []).flatMap((module) =>
+        module.lessons
+          .filter(
+            (lesson) =>
+              lesson.kind !== "video" ||
+              lesson.poster !== `${ATLAS_SLUG}/${module.slug}/${lesson.slug}/thumbnail.jpeg`,
+          )
+          .map((lesson) => `${module.slug}/${lesson.slug}`),
+      );
+
+      expect(atlasLessons()).toHaveLength(63);
+      expect(misplaced).toEqual([]);
+    });
+
+    test("WHEN Front Vowels is listed THEN each contrast follows both of its sounds", () => {
+      const titles = lessonTitlesOf("2-front-vowels");
+
+      expect(titles.indexOf("Sheep or Ship? /i/ vs /ɪ/")).toBeGreaterThan(
+        Math.max(titles.indexOf("/i/ as in “be”"), titles.indexOf("/ɪ/ as in “it”")),
+      );
+    });
+
+    test("WHEN Stop Consonants is listed THEN its overview opens the module AND /p/ follows", () => {
+      const [first, second] = lessonTitlesOf("7-stop-consonants");
+
+      expect([first, second]).toEqual(["Stop Consonants Overview", "/p/ as in “pie”"]);
+    });
+
+    test("WHEN the /æ/ lesson is read THEN it names its sound AND plays its own video", () => {
+      const cat = atlas()
+        ?.modules.find((module) => module.slug === "2-front-vowels")
+        ?.lessons.find((lesson) => lesson.slug === "5-ae-as-in-cat");
+
+      expect(cat).toMatchObject({
+        title: "/æ/ as in “cat”",
+        source: "https://www.youtube.com/embed/mynucZiy-Ug",
+        durationSeconds: 324,
+      });
+    });
+
+    test("WHEN the vowel chart's notes are read THEN every language warns the chart no longer clicks", () => {
+      const notes = readFileSync(
+        path.join(
+          process.cwd(),
+          "public/local-filesystem-lesson",
+          ATLAS_SLUG,
+          "1-the-vowel-map/1-the-vowel-chart/readme.md",
+        ),
+        "utf8",
+      );
+
+      expect(notes).toContain("ya no es interactivo");
+      expect(notes).toContain("no longer interactive");
+      expect(notes).toContain("não é mais interativo");
+    });
+
+    test("WHEN its lesson descriptions are read THEN none is the notes-card placeholder", () => {
+      const placeholders = atlasLessons().filter(
+        (lesson) => lesson.kind === "video" && lesson.description.includes("Resource below"),
+      );
+
+      expect(placeholders.map((lesson) => lesson.slug)).toEqual([]);
     });
   });
 });

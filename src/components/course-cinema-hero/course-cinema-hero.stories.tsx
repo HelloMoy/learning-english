@@ -5,6 +5,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import {
   ADVANCED_COURSE_VIEW,
+  ATLAS_COURSE_VIEW,
   BASIC_COURSE_VIEW,
   videoOf,
 } from "../../../.storybook/fixtures/course-views";
@@ -49,6 +50,18 @@ const notStarted = (() => {
   return courseCardModel(shelf.featured!, { positions: new Map(), claimedPrizes: new Set() });
 })();
 
+/** Enrolled in the Atlas of American Sounds, not started: reference material, not a level. */
+const referenceCourse = (() => {
+  const shelf = courseShelf({
+    courses: [ATLAS_COURSE_VIEW],
+    enrolledSlugs: new Set([ATLAS_COURSE_VIEW.course.slug]),
+    records: [],
+    completedIds: new Set(),
+    positions: new Map(),
+  });
+  return courseCardModel(shelf.featured!, { positions: new Map(), claimedPrizes: new Set() });
+})();
+
 const meta = {
   title: "Components/CourseCinemaHero",
   component: CourseCinemaHero,
@@ -76,6 +89,11 @@ export const YourCourse: Story = {
 /** A learner enrolled in nothing: the first course, recommended. */
 export const Recommended: Story = {
   args: { model: notStarted, label: "recommended" },
+};
+
+/** A reference course: its facts read Reference instead of a level. */
+export const ReferenceCourse: Story = {
+  args: { model: referenceCourse, label: "your-course" },
 };
 
 /** Spanish copy. */

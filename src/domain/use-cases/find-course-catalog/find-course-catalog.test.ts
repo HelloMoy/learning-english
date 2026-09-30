@@ -17,6 +17,7 @@ const course = Course.parse({
   language: "en",
   lessonCount: 2,
   moduleCount: 1,
+  track: "level",
   sequence: 1,
 });
 
@@ -286,6 +287,7 @@ describe("findCourseCatalog", () => {
       language: "en",
       lessonCount: 0,
       moduleCount: 0,
+      track: "level",
       sequence: 2,
     });
     const useCase = makeFindCourseCatalog({
@@ -305,6 +307,38 @@ describe("findCourseCatalog", () => {
       expect(result.value.entries.map((entry) => entry.course.id)).toEqual([
         course.id,
         secondCourse.id,
+      ]);
+    }
+  });
+
+  it("attaches each course's standing, numbering levels around a reference course", async () => {
+    const reference = Course.parse({
+      ...course,
+      id: CourseId.parse("99999999-9999-4999-8999-999999999999"),
+      slug: "reference-course",
+      track: "reference",
+      sequence: 2,
+    });
+    const laterLevel = Course.parse({
+      ...course,
+      id: CourseId.parse("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+      slug: "later-level",
+      sequence: 3,
+    });
+    const useCase = makeFindCourseCatalog({
+      courses: makeStubCourseRepository({ available: [course, reference, laterLevel] }),
+      modules: makeStubModuleRepository(),
+      lessons: makeStubLessonRepository(),
+    });
+
+    const result = await useCase();
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.entries.map((entry) => entry.standing)).toEqual([
+        { kind: "level", number: 1 },
+        { kind: "reference" },
+        { kind: "level", number: 2 },
       ]);
     }
   });

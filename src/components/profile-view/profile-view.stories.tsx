@@ -21,6 +21,7 @@ const course = Course.parse({
   language: "en",
   lessonCount: 48,
   moduleCount: 1,
+  track: "level",
   sequence: 1,
 });
 

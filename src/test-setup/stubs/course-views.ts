@@ -1,4 +1,5 @@
 import { ContinueWatchingRecord } from "@/domain/entities/continue-watching-record/continue-watching-record";
+import type { LevelStanding } from "@/domain/entities/course-standing/course-standing";
 import { Course } from "@/domain/entities/course/course";
 import { LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Module } from "@/domain/entities/module/module";
@@ -26,7 +27,7 @@ export function aCourseView(
   slug: string,
   sequence: number,
   lessonsPerModule: ReadonlyArray<number>,
-): CourseForView {
+): CourseForView & { standing: LevelStanding } {
   const course = Course.parse({
     id: faker.string.uuid(),
     slug,
@@ -35,6 +36,7 @@ export function aCourseView(
     language: "en",
     lessonCount: lessonsPerModule.reduce((total, count) => total + count, 0),
     moduleCount: lessonsPerModule.length,
+    track: "level",
     sequence,
   });
   const modules = lessonsPerModule.map((_, index) =>
@@ -61,7 +63,22 @@ export function aCourseView(
       lessons,
     };
   });
-  return { course, modules, moduleSummaries, firstLesson: null };
+  return {
+    course,
+    standing: { kind: "level", number: sequence },
+    modules,
+    moduleSummaries,
+    firstLesson: null,
+  };
+}
+
+/** Test double: the same fixture course, standing as reference material rather than a level. */
+export function asReference(view: CourseForView): CourseForView {
+  return {
+    ...view,
+    course: Course.parse({ ...view.course, track: "reference" }),
+    standing: { kind: "reference" },
+  };
 }
 
 /** The `lessonIndex`-th video of the `moduleIndex`-th module of a fixture view. */

@@ -20,17 +20,34 @@ const buildCourse = (overrides: {
     language: "en",
     lessonCount: 48,
     moduleCount: 5,
+    track: "level",
     ...overrides,
   });
 
-const basic = buildCourse({ slug: "basic-course", title: "Basic Course", sequence: 1 });
-const advanced = buildCourse({
-  slug: "advanced-intermediate-course",
-  title: "Advanced Intermediate Course",
-  sequence: 2,
-  lessonCount: 107,
-  moduleCount: 10,
-});
+const basic = {
+  course: buildCourse({ slug: "basic-course", title: "Basic Course", sequence: 1 }),
+  standing: { kind: "level", number: 1 },
+} as const;
+const advanced = {
+  course: buildCourse({
+    slug: "advanced-intermediate-course",
+    title: "Advanced Intermediate Course",
+    sequence: 2,
+    lessonCount: 107,
+    moduleCount: 10,
+  }),
+  standing: { kind: "level", number: 2 },
+} as const;
+const atlas = {
+  course: buildCourse({
+    slug: "atlas-of-american-sounds",
+    title: "Atlas of American Sounds",
+    sequence: 3,
+    lessonCount: 63,
+    moduleCount: 12,
+  }),
+  standing: { kind: "reference" },
+} as const;
 
 const rowsOf = () =>
   within(screen.getByRole("list", { name: "Available courses, in order" })).getAllByRole(
@@ -63,7 +80,7 @@ describe("LevelsTable", () => {
 
     const second = rowsOf()[1]!;
     expect(second).toHaveTextContent("Level 2");
-    expect(second).toHaveTextContent(advanced.description);
+    expect(second).toHaveTextContent(advanced.course.description);
     expect(second).toHaveTextContent("10 lessons · 107 videos");
     const links = within(second).getAllByRole("link");
     expect(links).toHaveLength(1);
@@ -78,7 +95,7 @@ describe("LevelsTable", () => {
     renderInLocale(
       <LevelsTable
         courses={[basic, advanced]}
-        continued={{ courseSlug: basic.slug, completedCount: 6 }}
+        continued={{ courseSlug: basic.course.slug, completedCount: 6 }}
       />,
     );
 
@@ -105,5 +122,55 @@ describe("LevelsTable", () => {
     expect(row).toHaveTextContent("Nivel 1");
     expect(row).toHaveTextContent("5 lecciones · 48 videos");
     expect(within(row).getByRole("link")).toHaveAccessibleName("Ver curso");
+  });
+
+  test("WHEN a level's sequence differs from its level THEN the row prints its level", () => {
+    const levelAfterReference = { ...advanced, course: { ...advanced.course, sequence: 5 } };
+
+    renderInLocale(
+      <LevelsTable
+        courses={[levelAfterReference]}
+        continued={null}
+      />,
+    );
+
+    expect(rowsOf()[0]).toHaveTextContent("Level 2");
+    expect(rowsOf()[0]).not.toHaveTextContent("Level 5");
+  });
+
+  test("WHEN reference courses are listed THEN each row reads Reference in a table named for them", () => {
+    renderInLocale(
+      <LevelsTable
+        courses={[atlas]}
+        continued={null}
+        listing="reference"
+      />,
+    );
+
+    const row = within(screen.getByRole("list", { name: "Reference courses" })).getByRole(
+      "listitem",
+    );
+    expect(row).toHaveTextContent("Reference");
+    expect(row).not.toHaveTextContent(/Level \d/);
+    expect(row).toHaveTextContent("12 lessons · 63 videos");
+    expect(within(row).getByRole("link")).toHaveAttribute(
+      "href",
+      expect.stringContaining("/courses/atlas-of-american-sounds"),
+    );
+  });
+
+  test("WHEN a reference row renders in pt THEN it reads Referência", () => {
+    renderInLocale(
+      <LevelsTable
+        courses={[atlas]}
+        continued={null}
+        listing="reference"
+      />,
+      "pt",
+    );
+
+    expect(screen.getByRole("list", { name: "Cursos de referência" })).toHaveTextContent(
+      "Referência",
+    );
   });
 });

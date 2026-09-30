@@ -49,6 +49,7 @@ describe("AchievementsGuideModal", () => {
     expect(dialog).toHaveTextContent("Complete a lesson to earn its ticket");
     expect(dialog).toHaveTextContent("Collect every ticket of a module to claim its prize");
     expect(dialog).toHaveTextContent("Complete a course to turn your card bronze");
+    expect(dialog).toHaveTextContent("Complete every level to turn it gold");
   });
 
   test("WHEN shown THEN the ticket and prize examples are drawn beside their explanations", async () => {

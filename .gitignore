@@ -66,10 +66,11 @@ public/local-filesystem-lesson/*
 # ...except each course's text assets. Every lecture is served by YouTube
 # (declared in `src/content/<course>.json`), so what remains on disk is notes,
 # posters and PDFs — ~25 MB for the Basic Course, ~21 MB for the Advanced
-# Intermediate Course — small enough to track, and the one part of the content
-# tree a fresh clone cannot regenerate.
+# Intermediate Course, ~3 MB for the Atlas of American Sounds — small enough to
+# track, and the one part of the content tree a fresh clone cannot regenerate.
 !public/local-filesystem-lesson/basic-course/
 !public/local-filesystem-lesson/advanced-intermediate-course/
+!public/local-filesystem-lesson/atlas-of-american-sounds/
 
 # Video bytes are never tracked, whichever course they belong to. This rule is
 # what keeps the negation above safe while the Basic Course's .mp4 files are

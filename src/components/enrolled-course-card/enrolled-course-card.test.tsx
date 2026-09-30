@@ -1,5 +1,11 @@
 import { renderInLocale } from "@/test-setup/render-in-locale";
-import { aCardModel, aCourseView, everyVideoOf, lessonOf } from "@/test-setup/stubs/course-views";
+import {
+  aCardModel,
+  aCourseView,
+  asReference,
+  everyVideoOf,
+  lessonOf,
+} from "@/test-setup/stubs/course-views";
 
 import { screen } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
@@ -73,6 +79,17 @@ describe("EnrolledCourseCard", () => {
 
       expect(screen.getByText("Inscrito")).toBeInTheDocument();
       expect(screen.getByText("Nível 1")).toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN an enrolled reference course", () => {
+    const atlas = asReference(aCourseView("atlas-of-american-sounds", 3, [2]));
+
+    test("WHEN it renders THEN it reads Reference where a level reads Level N", () => {
+      renderInLocale(<EnrolledCourseCard model={aCardModel(atlas)} />);
+
+      expect(screen.getByText("Reference")).toBeInTheDocument();
+      expect(screen.queryByText(/Level \d/)).not.toBeInTheDocument();
     });
   });
 });

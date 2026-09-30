@@ -28,7 +28,7 @@ describe("ticketSymbol", () => {
   });
 });
 
-const aCourse = (sequence = 1): Course =>
+const aCourse = (sequence = 1, track: "level" | "reference" = "level"): Course =>
   Course.parse({
     id: CourseId.parse(faker.string.uuid()),
     slug: `course-${sequence}`,
@@ -37,6 +37,7 @@ const aCourse = (sequence = 1): Course =>
     language: "en",
     lessonCount: 0,
     moduleCount: 0,
+    track,
     sequence,
   });
 
@@ -366,6 +367,43 @@ describe("the learner's distinction", () => {
     });
 
     expect(distinction).toBe("gold");
+  });
+
+  const withReference = () => {
+    const catalog = twoCourses();
+    const atlas = aCourse(3, "reference");
+    const atlasModule = aModule(atlas, 1, "1-the-vowel-map");
+    const atlasLessons = lessonsOf(atlasModule, 2);
+    const reference: AchievementLevel = {
+      course: atlas,
+      modules: [atlasModule],
+      lessonRuntimes: atlasLessons,
+    };
+    return { ...catalog, levels: [...catalog.levels, reference], atlasLessons };
+  };
+
+  test("WHEN every level course is complete AND the reference course is not THEN the learner holds gold", () => {
+    const { levels, basicLessons, advancedLessons } = withReference();
+
+    const { distinction } = learnerAchievements({
+      levels,
+      isEarned: earnedAmong([...basicLessons, ...advancedLessons]),
+      isClaimed: nothingClaimed,
+    });
+
+    expect(distinction).toBe("gold");
+  });
+
+  test("WHEN only the reference course is complete THEN the learner holds bronze", () => {
+    const { levels, atlasLessons } = withReference();
+
+    const { distinction } = learnerAchievements({
+      levels,
+      isEarned: earnedAmong(atlasLessons),
+      isClaimed: nothingClaimed,
+    });
+
+    expect(distinction).toBe("bronze");
   });
 
   test("WHEN no course holds lessons THEN the learner is a student", () => {

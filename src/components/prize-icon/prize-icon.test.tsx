@@ -1,4 +1,5 @@
 import { PRIZE_IDS } from "@/lib/module-prizes/module-prizes";
+import { MESSAGES } from "@/test-setup/render-in-locale";
 
 import { render } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
@@ -53,4 +54,19 @@ describe("PrizeIcon", () => {
     expect(svg).toHaveAttribute("width", "48");
     expect(svg).toHaveAttribute("height", "48");
   });
+
+  test.each(Object.keys(MESSAGES))(
+    "WHEN the %s catalogue is read THEN every prize has a name",
+    (locale) => {
+      const names = (
+        MESSAGES[locale as keyof typeof MESSAGES] as {
+          Components: { PrizeIcon: { names: Record<string, string> } };
+        }
+      ).Components.PrizeIcon.names;
+
+      const unnamed = PRIZE_IDS.filter((prize) => !names[prize]?.trim());
+
+      expect(unnamed).toEqual([]);
+    },
+  );
 });

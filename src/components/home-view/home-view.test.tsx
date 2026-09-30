@@ -19,11 +19,13 @@ const buildCourse = (overrides: {
   sequence: number;
   lessonCount: number;
   moduleCount: number;
+  track?: "level" | "reference";
 }) =>
   Course.parse({
     id: faker.string.uuid(),
     description: faker.lorem.sentence(),
     language: "en",
+    track: "level",
     ...overrides,
   });
 
@@ -67,11 +69,26 @@ const introductionLesson = slice(introduction.id);
 const levels: HomeLevel[] = [
   {
     course: basic,
+    standing: { kind: "level", number: 1 },
     modules: [introduction, vowels],
     lessonRuntimes: [introductionLesson, slice(vowels.id), slice(vowels.id)],
   },
-  { course: advanced, modules: [], lessonRuntimes: [] },
+  { course: advanced, standing: { kind: "level", number: 2 }, modules: [], lessonRuntimes: [] },
 ];
+
+const atlas: HomeLevel = {
+  course: buildCourse({
+    slug: "atlas-of-american-sounds",
+    title: "Atlas of American Sounds",
+    sequence: 3,
+    lessonCount: 63,
+    moduleCount: 12,
+    track: "reference",
+  }),
+  standing: { kind: "reference" },
+  modules: [],
+  lessonRuntimes: [],
+};
 
 const firstLesson = {
   href: `/courses/basic-course/modules/module-1/lessons/${introductionLesson.id}`,
@@ -144,6 +161,54 @@ describe("HomeView", () => {
       );
 
       expect(screen.getByText("3 videos · Basic Course")).toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN a catalog holding a reference course", () => {
+    test("WHEN rendered THEN the reference course sits in its own section, outside the levels", () => {
+      renderInLocale(
+        <HomeView
+          levels={[...levels, atlas]}
+          firstLesson={firstLesson}
+          profiles={makeStubLearnerProfileRepository()}
+        />,
+      );
+
+      expect(screen.getByRole("heading", { name: "2 levels, in order" })).toBeInTheDocument();
+      expect(
+        within(screen.getByRole("list", { name: "Available courses, in order" })).getAllByRole(
+          "listitem",
+        ),
+      ).toHaveLength(2);
+      expect(screen.getByRole("heading", { name: "One course for any level" })).toBeInTheDocument();
+      const reference = within(screen.getByRole("list", { name: "Reference courses" }));
+      expect(reference.getByRole("listitem")).toHaveTextContent("Atlas of American Sounds");
+    });
+
+    test("WHEN the reference course comes first THEN the hero still names the first level", () => {
+      renderInLocale(
+        <HomeView
+          levels={[atlas, ...levels]}
+          firstLesson={firstLesson}
+          profiles={makeStubLearnerProfileRepository()}
+        />,
+      );
+
+      expect(screen.getByText("3 videos · Basic Course")).toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN a catalog of levels only", () => {
+    test("WHEN rendered THEN no reference section appears", () => {
+      renderInLocale(
+        <HomeView
+          levels={levels}
+          firstLesson={firstLesson}
+          profiles={makeStubLearnerProfileRepository()}
+        />,
+      );
+
+      expect(screen.queryByRole("list", { name: "Reference courses" })).not.toBeInTheDocument();
     });
   });
 

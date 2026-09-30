@@ -2,6 +2,7 @@
 
 import { OnboardingProgress } from "@/components/onboarding-progress/onboarding-progress";
 import { OnboardingShell } from "@/components/onboarding-shell/onboarding-shell";
+import type { LevelStanding } from "@/domain/entities/course-standing/course-standing";
 import { learnerFirstName } from "@/domain/entities/learner-profile/learner-profile";
 import type { LearnerProfileRepository } from "@/domain/ports/learner-profile-repository/learner-profile-repository";
 import type { CourseForView } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
@@ -18,6 +19,9 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 
+/** The course this step recommends: always a level, never reference material. */
+type FirstLevelCourse = CourseForView & { standing: LevelStanding };
+
 const NAME_STEP_PATH = "/start";
 
 /** `from=learning` marks a learner sent here by My learning, not mid-onboarding. */
@@ -25,8 +29,8 @@ const fromParser = parseAsStringLiteral(["learning"]);
 
 /** Props for {@link FirstCourseStep}. */
 export type FirstCourseStepProps = {
-  /** The first catalog course, the one every new learner is recommended. */
-  course: CourseForView;
+  /** The first level course, the one every new learner is recommended. */
+  course: FirstLevelCourse;
   /** Overrides the profile storage adapter; tests inject a stub. */
   profiles?: LearnerProfileRepository;
 };
@@ -61,7 +65,7 @@ export function FirstCourseStep({ course, profiles }: FirstCourseStepProps) {
   );
 }
 
-function Recommendation({ course, firstName }: { course: CourseForView; firstName: string }) {
+function Recommendation({ course, firstName }: { course: FirstLevelCourse; firstName: string }) {
   const t = useTranslations("Components.FirstCourseStep");
   const router = useRouter();
   const [from] = useQueryState("from", fromParser);
@@ -116,7 +120,7 @@ function Recommendation({ course, firstName }: { course: CourseForView; firstNam
   );
 }
 
-function CourseHero({ course }: { course: CourseForView }) {
+function CourseHero({ course }: { course: FirstLevelCourse }) {
   const t = useTranslations("Components.FirstCourseStep");
   const facts = courseFacts(course);
   const poster = firstVideoOf(course)?.lesson.poster;
@@ -150,7 +154,7 @@ function CourseHero({ course }: { course: CourseForView }) {
       </span>
       <span className="text-[0.6875rem] font-bold tracking-[0.3em] text-gold uppercase">
         {t("facts", {
-          level: course.course.sequence,
+          level: course.standing.number,
           modules: facts.moduleCount,
           videos: facts.videoCount,
         })}

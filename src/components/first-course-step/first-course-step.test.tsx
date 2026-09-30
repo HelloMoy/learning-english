@@ -27,15 +27,17 @@ beforeEach(() => {
 const renderStep = ({
   profiles = makeStubLearnerProfileRepository({ profile }),
   searchParams = "",
+  course = basic,
 }: {
   profiles?: ReturnType<typeof makeStubLearnerProfileRepository>;
   searchParams?: string;
+  course?: typeof basic;
 } = {}) =>
   renderInLocale(
     <NuqsTestingAdapter searchParams={searchParams}>
       <FirstCourseStep
         profiles={profiles}
-        course={basic}
+        course={course}
       />
     </NuqsTestingAdapter>,
   );
@@ -75,6 +77,18 @@ describe("FirstCourseStep", () => {
       const modules = screen.getAllByTestId("first-course-module");
       expect(modules).toHaveLength(5);
       expect(modules[0]).toHaveTextContent(`01${basic.modules[0]!.title}`);
+    });
+
+    test("WHEN the course sits after a reference course THEN its facts print its level, not its sequence", async () => {
+      renderStep({
+        course: {
+          ...aCourseView("basic-course", 2, [1, 3]),
+          standing: { kind: "level", number: 1 },
+        },
+      });
+
+      await screen.findByRole("heading", { level: 1 });
+      expect(screen.getByText(/^Level 1 ·/)).toBeInTheDocument();
     });
 
     test("WHEN the step opens THEN no Not now action is offered", async () => {

@@ -17,6 +17,7 @@ const course = Course.parse({
   language: "en",
   lessonCount: 2,
   moduleCount: 2,
+  track: "level",
   sequence: 1,
 });
 
@@ -69,6 +70,33 @@ const durationOf = (lesson: Lesson): number =>
   lesson.kind === "video" ? lesson.durationSeconds : 0;
 
 describe("findCourseForView", () => {
+  describe("GIVEN a catalog of a level course and a reference course", () => {
+    const reference = Course.parse({
+      ...course,
+      id: "88888888-8888-4888-8888-888888888888",
+      slug: "reference-course",
+      track: "reference",
+      sequence: 2,
+    });
+    const useCase = makeFindCourseForView({
+      courses: makeStubCourseRepository({ courses: [course, reference] }),
+      modules: makeStubModuleRepository(),
+      lessons: makeStubLessonRepository(),
+    });
+
+    it("stands the level course at level 1", async () => {
+      const result = await useCase({ courseSlug: course.slug });
+
+      expect(result._unsafeUnwrap().standing).toEqual({ kind: "level", number: 1 });
+    });
+
+    it("stands the reference course as reference", async () => {
+      const result = await useCase({ courseSlug: reference.slug });
+
+      expect(result._unsafeUnwrap().standing).toEqual({ kind: "reference" });
+    });
+  });
+
   it("returns course-not-found when slug has no match", async () => {
     const useCase = makeFindCourseForView({
       courses: makeStubCourseRepository({ bySlugMap: {} }),

@@ -28,6 +28,7 @@ function buildCourseFixture() {
     language: "en",
     lessonCount: 3,
     moduleCount: 1,
+    track: "level",
     sequence: 1,
   });
   const courseModule = Module.parse({
@@ -69,6 +70,7 @@ function buildTwoModuleCourseFixture() {
     language: "en",
     lessonCount: 3,
     moduleCount: 2,
+    track: "level",
     sequence: 1,
   });
   const courseModule1 = Module.parse({
