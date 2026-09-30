@@ -96,7 +96,11 @@ test.describe("Progress follows the learner", () => {
     const other = await laptop.newPage();
     await other.goto(`/en/courses/${BASIC.slug}`);
 
-    await expect(other.getByTestId("course-overview")).toBeVisible(COLD_ROUTE);
+    // The card alone enrolls in nothing, so the course route opens its course page
+    // (`course-detail-page`); what matters is that it is not the onboarding.
+    await expect(other.getByRole("heading", { level: 1, name: BASIC.title })).toBeVisible(
+      COLD_ROUTE,
+    );
     await expect(other).toHaveURL(`/en/courses/${BASIC.slug}`);
     await laptop.close();
   });
