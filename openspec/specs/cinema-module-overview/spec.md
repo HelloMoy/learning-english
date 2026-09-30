@@ -346,7 +346,7 @@ coloured, named prize once claimed. Its Claim prize link SHALL be the same text 
 Once every ticket is collected — ready or claimed — the finale's primary action SHALL be a button
 reading **Start Lesson NN →**, where `NN` is the next lesson's ordinal padded to two digits, leading to
 the next lesson of the course that holds videos, to the same destination the course overview's tile
-for that lesson opens: its only video when it holds one, otherwise its overview. While the prize is
+for that lesson opens: that lesson's module overview, however many videos it holds. While the prize is
 ready, the Claim prize text link SHALL remain on the card, on the prize label's line. A module that is the last of its course to
 hold videos SHALL offer no Start Lesson action. While tickets are still being collected the finale
 SHALL offer no Start Lesson action.
@@ -382,7 +382,7 @@ finale SHALL show no prize state, ticket count or action.
 
 #### Scenario: The next lesson opens where the course overview opens it
 - **WHEN** every ticket of `Ejercicios para dominar el ritmo en Inglés` is collected and the next lesson, `Fluidez y Velocidad`, holds a single video
-- **THEN** Start Lesson 05 → opens that video's lesson page
+- **THEN** Start Lesson 05 → opens the `Fluidez y Velocidad` module overview, not that video's lesson page
 
 #### Scenario: The course's last lesson offers no next lesson
 - **WHEN** every ticket of the last lesson of a course is collected

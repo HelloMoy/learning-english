@@ -109,8 +109,8 @@ prize but does not reveal it. The illustration SHALL be decoration, hidden from 
 adding no control and no tab stop to the tile.
 
 A tile SHALL NOT list the lesson's videos. Activating a tile SHALL open the lesson's module
-overview for the active locale — or, when the lesson holds exactly one video, that video's
-page. When the learner has progress to continue (a continue tile labelled Continue where you
+overview for the active locale, however many videos the lesson holds — a lesson holding a
+single video opens its overview exactly as one holding several does. When the learner has progress to continue (a continue tile labelled Continue where you
 left off), the lesson holding the continue tile's video SHALL be visually emphasized; a course
 not started or fully watched emphasizes no lesson.
 
@@ -147,9 +147,9 @@ title.
 - **WHEN** the learner activates the tile of a lesson holding several videos
 - **THEN** they navigate to that lesson's module overview for the active locale
 
-#### Scenario: A one-video lesson opens its video
+#### Scenario: A one-video lesson opens its overview too
 - **WHEN** the learner activates the tile of a lesson holding exactly one video
-- **THEN** they navigate to that video's page
+- **THEN** they navigate to that lesson's module overview for the active locale, not to the video's page
 
 #### Scenario: Tiles never list videos
 - **WHEN** the course overview renders in any progress state

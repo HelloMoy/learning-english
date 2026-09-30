@@ -4,7 +4,7 @@ import type { Course } from "@/domain/entities/course/course";
 import type { Module } from "@/domain/entities/module/module";
 import type { ModuleSummary } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
 import { useRuntimeLabel } from "@/hooks/use-runtime-label/use-runtime-label";
-import { moduleEntryPath } from "@/i18n/lesson-routes";
+import { moduleOverviewPath } from "@/i18n/lesson-routes";
 import { Link } from "@/i18n/navigation";
 import type {
   ModuleOverviewProgress,
@@ -67,7 +67,7 @@ const PRIZE_SCRIM =
  *
  * @remarks
  * The tile never lists the lesson's videos — that is the module overview's job,
- * and the tile links there (straight to the video when the lesson holds one).
+ * and the tile links there however many videos the lesson holds.
  *
  * On a phone the tile is a row led by its ring; from `lg` it is a card with an
  * artwork band the ring overlaps. The lesson holding the video the learner
@@ -97,7 +97,7 @@ export function LessonRingTile({
 
   return (
     <Link
-      href={moduleEntryPath(course, module, summary.lessons) as never}
+      href={moduleOverviewPath(course, module) as never}
       aria-label={t("openLessonTile", { number: module.sequence, title: module.title })}
       data-testid="lesson-ring-tile"
       data-status={progress?.status ?? "pending"}

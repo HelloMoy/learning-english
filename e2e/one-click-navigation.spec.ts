@@ -114,9 +114,7 @@ test.describe("Home and My learning — one click to the course, one to the less
 test.describe("Lesson tile — one click from the course overview to the module", () => {
   test("WHEN a lesson tile's body is clicked THEN its module overview opens", async ({ page }) => {
     const modules = modulesOfCourse(FIRST_COURSE.slug);
-    // A one-video lesson's tile opens its video instead, so aim at the first
-    // module that actually has an overview worth opening.
-    const moduleIndex = modules.findIndex((module) => lessonsOfModule(module.id).length > 1);
+    const moduleIndex = 0;
     await page.goto(`/en/courses/${FIRST_COURSE.slug}`);
 
     await page

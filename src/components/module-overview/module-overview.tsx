@@ -4,7 +4,7 @@ import type { Course } from "@/domain/entities/course/course";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
 import type { Module } from "@/domain/entities/module/module";
 import type { ModuleWithLessons } from "@/domain/use-cases/find-module-for-view/find-module-for-view";
-import { courseOverviewPath, moduleEntryPath } from "@/i18n/lesson-routes";
+import { courseOverviewPath, moduleOverviewPath } from "@/i18n/lesson-routes";
 import { Link } from "@/i18n/navigation";
 import { splitRuntime } from "@/lib/module-route/module-route";
 
@@ -92,7 +92,7 @@ export function ModuleOverview({
             nextModule
               ? {
                   sequence: nextModule.module.sequence,
-                  href: moduleEntryPath(course, nextModule.module, nextModule.lessons),
+                  href: moduleOverviewPath(course, nextModule.module),
                 }
               : undefined
           }

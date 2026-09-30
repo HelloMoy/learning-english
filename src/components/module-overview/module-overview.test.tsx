@@ -198,7 +198,7 @@ describe("ModuleOverview — the next lesson", () => {
     });
   };
 
-  test("WHEN every ticket is in and a next lesson holds one video THEN the finale starts that video", async () => {
+  test("WHEN every ticket is in and a next lesson holds one video THEN the finale opens that lesson's overview", async () => {
     completeEveryLesson([lessonA, lessonB]);
 
     render(
@@ -213,10 +213,7 @@ describe("ModuleOverview — the next lesson", () => {
     const start = await screen.findByRole("link", {
       name: key("startNextLesson", { number: "04" }),
     });
-    expect(start).toHaveAttribute(
-      "href",
-      `/courses/course-1/modules/mod-2/lessons/${onlyVideo.id}`,
-    );
+    expect(start).toHaveAttribute("href", "/courses/course-1/modules/mod-2");
   });
 
   test("WHEN there is no next lesson THEN the finale offers none", async () => {
