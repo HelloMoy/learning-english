@@ -55,7 +55,10 @@ test.describe("Course catalog navigation", () => {
 
   test("WHEN the course card is activated THEN the course overview renders the module list and start course CTA", async ({
     page,
+    learnerState,
   }) => {
+    // The progress board is for learners enrolled in the course (`cinema-course-overview`).
+    await learnerState.enrolled([COURSE_SLUG]);
     await page.goto(courseUrl("en"));
 
     await expect(page.getByRole("heading", { name: "Advanced Intermediate Course" })).toBeVisible();

@@ -125,7 +125,12 @@ test.describe("watch progress", () => {
     await expect(row.getByRole("progressbar")).toHaveCount(0);
   });
 
-  test("the course overview's lesson tile counts the finished lesson", async ({ page }) => {
+  test("the course overview's lesson tile counts the finished lesson", async ({
+    page,
+    learnerState,
+  }) => {
+    // The progress board is for learners enrolled in the course (`cinema-course-overview`).
+    await learnerState.enrolled([COURSE_SLUG]);
     await page.goto(courseUrl("en"));
 
     // The seeded positions put the learner part-way through the first module,
@@ -138,7 +143,8 @@ test.describe("watch progress", () => {
 });
 
 test.describe("watch progress, for a learner with none", () => {
-  test("a course the learner has not started shows no progress", async ({ page }) => {
+  test("a course the learner has not started shows no progress", async ({ page, learnerState }) => {
+    await learnerState.enrolled([COURSE_SLUG]);
     await page.goto(courseUrl("en"));
     await expect(page.getByTestId("course-overview")).toBeVisible();
 
