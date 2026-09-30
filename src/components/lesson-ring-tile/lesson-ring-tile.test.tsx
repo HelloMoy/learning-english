@@ -179,7 +179,7 @@ describe("LessonRingTile", () => {
   });
 
   describe("GIVEN a lesson holding exactly one video", () => {
-    test("WHEN the tile renders THEN it links straight to that video", () => {
+    test("WHEN the tile renders THEN it links to the lesson's overview, not to the video", () => {
       // Arrange
       const entry = moduleWith(1);
 
@@ -189,7 +189,7 @@ describe("LessonRingTile", () => {
       // Assert
       expect(screen.getByRole("link")).toHaveAttribute(
         "href",
-        `/courses/basic-course/modules/2-vowels/lessons/${entry.summary.lessons[0]!.id}`,
+        "/courses/basic-course/modules/2-vowels",
       );
     });
   });

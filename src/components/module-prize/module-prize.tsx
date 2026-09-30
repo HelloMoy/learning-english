@@ -19,7 +19,7 @@ const THUMB_GLOW =
 export type NextLessonLink = {
   /** The next lesson's ordinal in its course. */
   sequence: number;
-  /** The locale-less path that opens it — see `moduleEntryPath`. */
+  /** The locale-less path that opens it: its module overview. */
   href: string;
 };
 
