@@ -17,6 +17,7 @@ const course = Course.parse({
   language: "en",
   lessonCount: 1,
   moduleCount: 1,
+  track: "level",
   sequence: 1,
 });
 
@@ -42,6 +43,7 @@ const videoLesson = Lesson.parse({
 
 const entryWith = (firstLesson: Lesson | null): CourseCatalogEntry => ({
   course,
+  standing: { kind: "level", number: 1 },
   firstLesson,
   modules: [module_],
   lessonRuntimes: [],
@@ -68,6 +70,22 @@ describe("homeFirstLesson", () => {
     });
 
     expect(homeFirstLesson([entryWith(reading)])?.minutes).toBeNull();
+  });
+
+  test("WHEN a reference course comes first THEN the level-1 course's lesson is linked", () => {
+    const reference: CourseCatalogEntry = {
+      ...entryWith(videoLesson),
+      course: Course.parse({
+        ...course,
+        id: faker.string.uuid(),
+        slug: "atlas-of-american-sounds",
+      }),
+      standing: { kind: "reference" },
+    };
+
+    expect(homeFirstLesson([reference, entryWith(videoLesson)])?.href).toBe(
+      `/courses/basic-course/modules/1-introduction/lessons/${videoLesson.id}`,
+    );
   });
 
   test("WHEN the catalog is empty or its first course has no lesson THEN there is nothing to link to", () => {

@@ -30,6 +30,7 @@ const course = Course.parse({
   language: "en",
   lessonCount: 1,
   moduleCount: 1,
+  track: "level",
   sequence: 1,
 });
 const modA = Module.parse({

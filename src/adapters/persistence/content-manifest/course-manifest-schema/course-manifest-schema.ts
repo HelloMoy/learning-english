@@ -1,4 +1,5 @@
 import { assertSafeKey } from "@/adapters/persistence/blob-store/blob-key/blob-key";
+import { CourseTrack } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId, ResourceId } from "@/domain/entities/ids/ids";
 import { ResourceKind } from "@/domain/entities/resource/resource";
 import { Slug } from "@/domain/entities/slug/slug";
@@ -143,6 +144,11 @@ export const CourseManifest = z.object({
    * changes, and the course is served everywhere.
    */
   draft: z.boolean().default(false),
+  /**
+   * A rung of the ladder or reference material. Absent means `level`, so every
+   * manifest written before tracks existed keeps its meaning unedited.
+   */
+  track: CourseTrack.default("level"),
   modules: z.array(ManifestModule).min(1),
 });
 

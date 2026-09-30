@@ -1,7 +1,7 @@
 import { enrollInCourseAction } from "@/app/[locale]/learner-actions";
 import { learnerStore } from "@/lib/learner-store/learner-store";
 import { renderInLocale } from "@/test-setup/render-in-locale";
-import { aCourseView } from "@/test-setup/stubs/course-views";
+import { aCourseView, asReference } from "@/test-setup/stubs/course-views";
 
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -60,5 +60,16 @@ describe("CourseShelfCard", () => {
 
     expect(screen.getByRole("button", { name: "Inscribirme" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ver el curso" })).toBeInTheDocument();
+  });
+
+  test("WHEN the course is reference material THEN the card reads Reference in place of a level", () => {
+    renderInLocale(
+      <CourseShelfCard view={asReference(aCourseView("atlas-of-american-sounds", 3, [2, 10]))} />,
+      "pt",
+    );
+
+    const card = screen.getByTestId("course-shelf-card");
+    expect(within(card).getByText("Referência")).toBeInTheDocument();
+    expect(within(card).queryByText(/Nível \d/)).not.toBeInTheDocument();
   });
 });

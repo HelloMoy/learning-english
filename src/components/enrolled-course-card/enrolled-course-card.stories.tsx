@@ -4,7 +4,11 @@ import { courseCardModel, courseShelf } from "@/lib/course-shelf/course-shelf";
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { BASIC_COURSE_VIEW, videoOf } from "../../../.storybook/fixtures/course-views";
+import {
+  ATLAS_COURSE_VIEW,
+  BASIC_COURSE_VIEW,
+  videoOf,
+} from "../../../.storybook/fixtures/course-views";
 import { EnrolledCourseCard } from "./enrolled-course-card";
 
 const everyVideo = (view: CourseForView) =>
@@ -54,6 +58,18 @@ const completed = (() => {
   });
 })();
 
+/** Enrolled in the Atlas of American Sounds, not started. */
+const referenceCourse = (() => {
+  const shelf = courseShelf({
+    courses: [ATLAS_COURSE_VIEW],
+    enrolledSlugs: new Set([ATLAS_COURSE_VIEW.course.slug]),
+    records: [],
+    completedIds: new Set(),
+    positions: new Map(),
+  });
+  return courseCardModel(shelf.featured!, { positions: new Map(), claimedPrizes: new Set() });
+})();
+
 const meta = {
   title: "Components/EnrolledCourseCard",
   component: EnrolledCourseCard,
@@ -77,6 +93,11 @@ export const InProgress: Story = {};
 /** Every video watched: Completed, prizes, Watch again. */
 export const Completed: Story = {
   args: { model: completed },
+};
+
+/** A reference course: it reads Reference where a level reads Level N. */
+export const ReferenceCourse: Story = {
+  args: { model: referenceCourse },
 };
 
 /** Spanish copy. */

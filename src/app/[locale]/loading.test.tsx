@@ -50,6 +50,15 @@ describe("Home loading shell", () => {
       expect(rows).toHaveLength(2);
     });
 
+    test("WHEN the shell renders THEN it traces one reference row per reference course the catalog ships", () => {
+      // Act
+      renderShell();
+
+      // Assert
+      const rows = document.querySelectorAll('[data-testid="home-shell-reference"] > *');
+      expect(rows).toHaveLength(1);
+    });
+
     test("WHEN the shell renders THEN it announces once and its shapes stay silent", () => {
       // Act
       renderShell();

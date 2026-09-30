@@ -15,6 +15,18 @@ export const PRIZE_IDS = [
   "tinphone",
   "crown",
   "robot",
+  "compass",
+  "xylophone",
+  "maracas",
+  "trumpet",
+  "boomerang",
+  "skate",
+  "popper",
+  "pinwheel",
+  "jackbox",
+  "bell",
+  "duck",
+  "kite",
   "gift",
 ] as const;
 
@@ -42,6 +54,18 @@ const PRIZE_BY_MODULE_SLUG: Readonly<Record<string, PrizeId>> = {
   "8-everyday-english-phrases-part-2-master-them": "tinphone",
   "9-speak-with-confidence-in-30-days": "crown",
   "10-the-practice-zone-sharpen-your-skills": "robot",
+  "1-the-vowel-map": "compass",
+  "2-front-vowels": "xylophone",
+  "3-central-vowels": "maracas",
+  "4-back-vowels": "trumpet",
+  "5-diphthongs": "boomerang",
+  "6-r-colored-vowels": "skate",
+  "7-stop-consonants": "popper",
+  "8-fricatives": "pinwheel",
+  "9-affricates": "jackbox",
+  "10-nasals": "bell",
+  "11-liquids": "duck",
+  "12-glides": "kite",
 };
 
 /** The module slugs the catalog assigns a prize to. */

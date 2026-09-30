@@ -897,6 +897,11 @@ requires and that were previously derived from the filesystem: `id`, `slug`,
 exists. It SHALL likewise declare every resource with its `id`, `lessonId`,
 `title`, `url` and `kind`.
 
+A manifest MAY declare the course's `track` as `level` or `reference`. A manifest
+that declares no `track` SHALL be read as `level`, so every course declared before
+tracks existed keeps its meaning without being edited. Any other value SHALL fail
+the manifest parse, naming the course.
+
 A lesson's `source` and `poster`, and a resource's `url`, SHALL each be either a
 content key resolved through `BlobStore` or an absolute `http(s)` URL used
 verbatim. Which one it is SHALL be decided by the value's own shape, exactly as
@@ -904,10 +909,10 @@ it is today.
 
 Every manifest SHALL be validated against a Zod schema. A manifest that is
 malformed JSON or fails the schema SHALL fail loudly rather than fall back to any
-default. Because `slug` and `sequence` must be unique across the whole ladder,
-that check SHALL run over the full set after each file is parsed. There SHALL NOT
-be a no-manifest fallback: the manifests are required, and an absent one is an
-error.
+default. Because `slug` and `sequence` must be unique across the whole catalog,
+level and reference courses alike, that check SHALL run over the full set after
+each file is parsed. There SHALL NOT be a no-manifest fallback: the manifests are
+required, and an absent one is an error.
 
 #### Scenario: A fresh clone serves the catalog without the content tree
 
@@ -951,6 +956,16 @@ error.
 
 - **WHEN** two manifests declare the same `sequence`, or the same `slug`
 - **THEN** validation fails and names both files
+
+#### Scenario: A manifest without a track is a level
+
+- **WHEN** a manifest declares no `track`
+- **THEN** it parses and its course's track is `level`
+
+#### Scenario: An unknown track fails the parse
+
+- **WHEN** a manifest declares `"track": "elective"`
+- **THEN** `parseCourseManifests` throws `InvalidCourseManifestError` naming that course
 
 ### Requirement: The application reads the catalog without a code-generation step
 
@@ -1062,8 +1077,8 @@ pull gigabytes of video into the repository.
 The non-video assets of every course whose lectures stream from YouTube — lesson
 notes, posters, PDFs and the other files its manifest references — SHALL be
 tracked, because they are the part of its content tree that cannot be
-regenerated and are small enough to version. Today that is the Basic Course and
-the Advanced Intermediate Course.
+regenerated and are small enough to version. Today that is the Basic Course, the
+Advanced Intermediate Course and the Atlas of American Sounds.
 
 #### Scenario: A video file under a tracked course is still ignored
 
@@ -1082,6 +1097,12 @@ the Advanced Intermediate Course.
 - **WHEN** a developer clones the repository
 - **THEN** every poster, notes file and resource the Advanced Intermediate
   Course's manifest references is present, and none of its video files are
+
+#### Scenario: The Atlas's text assets are tracked
+
+- **WHEN** a developer clones the repository
+- **THEN** every `thumbnail.jpeg` and `readme.md` the Atlas of American Sounds'
+  manifest references is present
 
 ### Requirement: Declared assets are checked against the catalog
 
@@ -1127,11 +1148,12 @@ without buying anything back. Should a second content source return, the composi
 change to make then, not machinery to keep unused now.
 
 Catalog order SHALL come from `Course.sequence`, which each course declares in its own
-manifest. The ladder therefore has exactly as many rungs as there are manifests it serves,
-and moving a course between rungs is a one-line manifest edit. Withholding a draft course
-SHALL leave the remaining courses in ascending `sequence` order with no renumbering: the
-ladder's ordinals come from the data, so a gap in `sequence` values is not a gap in the
-rendered ladder.
+manifest. The ladder therefore has exactly as many rungs as there are **level** manifests
+it serves; a reference course is ordered by its `sequence` but is not a rung. Moving a
+course between positions is a one-line manifest edit. Withholding a draft course SHALL
+leave the remaining courses in ascending `sequence` order with no renumbering of the
+manifests: level numbers are derived from the level courses' order, so a gap in
+`sequence` values is not a gap in the rendered ladder.
 
 Booting without the content root SHALL fail visibly through the assets it cannot serve,
 never by silently substituting different courses. A developer who has not obtained the
@@ -1156,6 +1178,11 @@ the content root.
 - **WHEN** a developer clones the repository and starts the app without the content root
 - **THEN** every served course, module and lesson renders, locally-stored assets 404, and
   lessons served by an external URL still play
+
+#### Scenario: A reference course is not a rung
+
+- **WHEN** the manifests declare two level courses and one reference course
+- **THEN** the catalog serves three courses and the ladder has two rungs
 
 ### Requirement: A video lesson may declare when it was published
 

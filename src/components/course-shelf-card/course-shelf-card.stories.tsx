@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { ADVANCED_COURSE_VIEW, BASIC_COURSE_VIEW } from "../../../.storybook/fixtures/course-views";
+import {
+  ADVANCED_COURSE_VIEW,
+  ATLAS_COURSE_VIEW,
+  BASIC_COURSE_VIEW,
+} from "../../../.storybook/fixtures/course-views";
 import { CourseShelfCard } from "./course-shelf-card";
 
 const meta = {
@@ -19,6 +23,11 @@ export const AdvancedCourse: Story = {};
 /** The Basic course: five modules, four shown and one counted. */
 export const BasicCourse: Story = {
   args: { view: BASIC_COURSE_VIEW },
+};
+
+/** The Atlas of American Sounds: reference material, so the badge reads Reference. */
+export const ReferenceCourse: Story = {
+  args: { view: ATLAS_COURSE_VIEW },
 };
 
 /** Spanish copy. */

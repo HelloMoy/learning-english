@@ -32,7 +32,7 @@ export type EnrolledCourseCardProps = {
  */
 export function EnrolledCourseCard({ model }: EnrolledCourseCardProps) {
   const t = useTranslations("Components.EnrolledCourseCard");
-  const { course, tally, target, isCompleted } = model;
+  const { course, standing, tally, target, isCompleted } = model;
 
   return (
     <article
@@ -60,7 +60,7 @@ export function EnrolledCourseCard({ model }: EnrolledCourseCardProps) {
             </span>
           )}
           <span className="text-[0.6875rem] font-bold tracking-[0.3em] text-gold uppercase">
-            {t("level", { level: course.sequence })}
+            {standing.kind === "level" ? t("level", { level: standing.number }) : t("reference")}
           </span>
         </div>
         <h3 className="text-lg leading-tight font-black tracking-[-0.02em] text-foreground">

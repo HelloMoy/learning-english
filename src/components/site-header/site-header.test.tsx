@@ -353,6 +353,7 @@ describe("SiteHeader prize mark", () => {
         language: "en",
         lessonCount: lessons.length,
         moduleCount: 1,
+        track: "level",
         sequence: 1,
       }),
       modules: [vowels],

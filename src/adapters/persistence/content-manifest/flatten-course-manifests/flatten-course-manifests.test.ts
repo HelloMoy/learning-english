@@ -25,7 +25,10 @@ function videoLesson(overrides: Record<string, unknown> = {}): Record<string, un
 }
 
 /** One course with one module holding `lessons`, parsed into manifest shape. */
-function catalogOf(lessons: ReadonlyArray<Record<string, unknown>>) {
+function catalogOf(
+  lessons: ReadonlyArray<Record<string, unknown>>,
+  courseOverrides: Record<string, unknown> = {},
+) {
   return parseCourseManifests([
     {
       id: COURSE_ID,
@@ -43,6 +46,7 @@ function catalogOf(lessons: ReadonlyArray<Record<string, unknown>>) {
           lessons,
         },
       ],
+      ...courseOverrides,
     },
   ]);
 }
@@ -55,6 +59,20 @@ describe("flattenCourseManifests", () => {
       );
 
       expect(courses[0]).toMatchObject({ lessonCount: 2, moduleCount: 1 });
+    });
+
+    test("WHEN the manifest declares no track THEN the course is a level", () => {
+      const { courses } = flattenCourseManifests(catalogOf([videoLesson()]));
+
+      expect(courses[0]!.track).toBe("level");
+    });
+
+    test("WHEN the manifest declares the reference track THEN the course carries it", () => {
+      const { courses } = flattenCourseManifests(
+        catalogOf([videoLesson()], { track: "reference" }),
+      );
+
+      expect(courses[0]!.track).toBe("reference");
     });
 
     test("WHEN it is flattened THEN parent ids are propagated down the tree", () => {

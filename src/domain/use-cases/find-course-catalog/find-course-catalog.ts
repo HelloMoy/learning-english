@@ -1,3 +1,7 @@
+import {
+  courseStandings,
+  type CourseStanding,
+} from "@/domain/entities/course-standing/course-standing";
 import type { Course } from "@/domain/entities/course/course";
 import type { LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
@@ -38,6 +42,8 @@ export type LessonProgressSlice = {
  */
 export type CourseCatalogEntry = {
   course: Course;
+  /** A numbered level, or reference material — never read the level off `course.sequence`. */
+  standing: CourseStanding;
   firstLesson: Lesson | null;
   modules: Module[];
   /**
@@ -94,6 +100,11 @@ const pickFirstLesson = (lessons: ReadonlyArray<Lesson>): Lesson | null => {
   return sorted[0] ?? null;
 };
 
+const standingOf = (
+  standings: ReadonlyMap<Course["id"], CourseStanding>,
+  course: Course,
+): CourseStanding => standings.get(course.id) ?? { kind: "reference" };
+
 export const makeFindCourseCatalog = (deps: {
   courses: CourseRepository;
   modules: ModuleRepository;
@@ -105,6 +116,7 @@ export const makeFindCourseCatalog = (deps: {
         if (courses.length === 0) {
           return ResultAsync.fromSafePromise(Promise.resolve({ entries: [] }));
         }
+        const standings = courseStandings(courses);
         return ResultAsync.fromPromise(
           Promise.all(
             courses.map((course) =>
@@ -118,6 +130,7 @@ export const makeFindCourseCatalog = (deps: {
                     : [];
                 return {
                   course,
+                  standing: standingOf(standings, course),
                   firstLesson: pickFirstLesson(lessonsInFirstModule),
                   modules,
                   lessonRuntimes: inLearningOrder(lessons, modules).map(toLessonProgressSlice),

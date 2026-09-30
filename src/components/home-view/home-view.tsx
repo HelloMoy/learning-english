@@ -8,6 +8,11 @@ import { NewVisitorHero } from "@/components/new-visitor-hero/new-visitor-hero";
 import { StartCourseLink } from "@/components/start-course-link/start-course-link";
 import { StartHereBand } from "@/components/start-here-band/start-here-band";
 import { VowelLengthCard } from "@/components/vowel-length-card/vowel-length-card";
+import {
+  findFirstLevel,
+  FIRST_LEVEL,
+  type CourseStanding,
+} from "@/domain/entities/course-standing/course-standing";
 import type { Course } from "@/domain/entities/course/course";
 import type { Module } from "@/domain/entities/module/module";
 import type { LearnerProfileRepository } from "@/domain/ports/learner-profile-repository/learner-profile-repository";
@@ -19,6 +24,8 @@ import { useTranslations } from "next-intl";
 /** One catalog course with the structure progress is counted over. */
 export type HomeLevel = {
   course: Course;
+  /** A numbered level, or reference material. */
+  standing: CourseStanding;
   modules: Module[];
   lessonRuntimes: LessonProgressSlice[];
 };
@@ -44,7 +51,7 @@ export type HomeFirstLesson = {
  * The server renders the visitor's band, because only the browser can read the
  * profile.
  *
- * @param levels - The catalog, one entry per course, in sequence order
+ * @param levels - The catalog, one entry per course — level and reference alike — in sequence order
  * @param firstLesson - The first course's first lesson, or `null` for an empty catalog
  * @param profiles - Overrides the profile storage adapter; tests inject a stub
  */
@@ -58,7 +65,7 @@ export function HomeView({
   profiles?: LearnerProfileRepository;
 }) {
   const learner = useLearnerProfile(profiles);
-  const firstLevel = levels[0];
+  const firstLevel = findFirstLevel(levels);
   if (!firstLevel || firstLesson === null) {
     return <CatalogEmpty />;
   }
@@ -74,11 +81,12 @@ export function HomeView({
         aside={<VowelLengthCard variant="hear-the-difference" />}
       />
       <LearnerQuestions />
-      <LevelsSection levels={levels} />
+      <LevelsSection levels={levels.filter(isLevel)} />
+      <ReferenceSection references={levels.filter((level) => !isLevel(level))} />
       {learner.status === "present" ? (
         <ContinueBand
           profile={learner.profile}
-          level={{ number: firstLevel.course.sequence, courseTitle: firstLevel.course.title }}
+          level={{ number: FIRST_LEVEL, courseTitle: firstLevel.course.title }}
           lessonRuntimes={firstLevel.lessonRuntimes}
           action={startCourse}
         />
@@ -104,11 +112,36 @@ function LevelsSection({ levels }: { levels: ReadonlyArray<HomeLevel> }) {
         </h2>
       </div>
       <LevelsTable
-        courses={levels.map((level) => level.course)}
+        courses={levels}
         continued={null}
       />
     </section>
   );
+}
+
+function ReferenceSection({ references }: { references: ReadonlyArray<HomeLevel> }) {
+  const t = useTranslations("HomePage.reference");
+  if (references.length === 0) return null;
+
+  return (
+    <section className="flex flex-col gap-7">
+      <div className="flex flex-col gap-3">
+        <Eyebrow>{t("eyebrow")}</Eyebrow>
+        <h2 className="font-sans text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+          {t("heading", { count: references.length })}
+        </h2>
+      </div>
+      <LevelsTable
+        courses={references}
+        continued={null}
+        listing="reference"
+      />
+    </section>
+  );
+}
+
+function isLevel(level: HomeLevel): boolean {
+  return level.standing.kind === "level";
 }
 
 function CatalogEmpty() {

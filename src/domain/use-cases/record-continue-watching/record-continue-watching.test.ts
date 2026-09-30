@@ -21,6 +21,7 @@ const aCourse = () =>
     language: "en",
     lessonCount: 10,
     moduleCount: 2,
+    track: "level",
     sequence: 1,
   });
 

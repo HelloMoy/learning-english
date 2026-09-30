@@ -14,8 +14,10 @@ import { expect, FIRST_COURSE_SLUG, ONBOARDED_LEARNER, test } from "./learner-pr
 /** Compiling a route on a cold `pnpm dev` overruns the default 5s timeout. */
 const COLD_ROUTE = { timeout: 60_000 };
 
-const BASIC = contentCatalog.courses[0]!;
-const ADVANCED = contentCatalog.courses[1]!;
+const COURSES = contentCatalog.courses;
+const BASIC = COURSES[0]!;
+const ADVANCED = COURSES[1]!;
+const REFERENCE = COURSES.find((course) => course.track === "reference")!;
 
 test.describe("Available courses", () => {
   test("WHEN the learner opens Courses from the avatar menu THEN the page opens", async ({
@@ -32,7 +34,7 @@ test.describe("Available courses", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Available courses" })).toBeVisible(
       COLD_ROUTE,
     );
-    await expect(page.getByText("2 courses · you’re enrolled in 1")).toBeVisible();
+    await expect(page.getByText(`${COURSES.length} courses · you’re enrolled in 1`)).toBeVisible();
   });
 
   test("WHEN the learner enrolls from the shelf THEN the course joins their courses AND stays after a reload", async ({
@@ -43,6 +45,7 @@ test.describe("Available courses", () => {
 
     await page
       .getByTestId("course-shelf-card")
+      .filter({ hasText: ADVANCED.title })
       .getByRole("button", { name: "Enroll" })
       .click(COLD_ROUTE);
 
@@ -56,7 +59,22 @@ test.describe("Available courses", () => {
       ADVANCED.title,
       COLD_ROUTE,
     );
-    await expect(page.getByTestId("course-shelf-card")).toHaveCount(0);
+    await expect(
+      page.getByTestId("course-shelf-card").filter({ hasText: ADVANCED.title }),
+    ).toHaveCount(0);
+  });
+
+  test("WHEN the reference course is on the shelf THEN its card reads Reference AND the shelf keeps going after Level 1", async ({
+    page,
+  }) => {
+    await page.goto("/en/courses");
+
+    const card = page.getByTestId("course-shelf-card").filter({ hasText: REFERENCE.title });
+    await expect(card).toContainText("Reference", COLD_ROUTE);
+    await expect(card).not.toContainText(/Level \d/);
+    await expect(
+      page.getByRole("heading", { level: 2, name: "Keep going after Level 1" }),
+    ).toBeVisible();
   });
 
   test("WHEN the learner last watched the second course THEN it leads as last watched", async ({

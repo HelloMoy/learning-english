@@ -38,6 +38,10 @@
       "eyebrow": "Cursos disponíveis",
       "heading": "{count, plural, one {Um nível, em ordem} other {# níveis, em ordem}}"
     },
+    "reference": {
+      "eyebrow": "Referência",
+      "heading": "{count, plural, one {Um curso para qualquer nível} other {# cursos para qualquer nível}}"
+    },
     "continueBand": {
       "eyebrow": "Continue aprendendo",
       "heading": "Continue de onde parou, {name}."
@@ -309,7 +313,9 @@
     },
     "LevelsTable": {
       "tableLabel": "Cursos disponíveis, em ordem",
+      "referenceTableLabel": "Cursos de referência",
       "levelOrdinal": "Nível {number}",
+      "referenceOrdinal": "Referência",
       "counts": "{lessons, plural, one {# lição} other {# lições}} · {videos, plural, one {# vídeo} other {# vídeos}}",
       "viewCourse": "Ver curso",
       "continueCourse": "Continuar curso",
@@ -340,7 +346,7 @@
       "prizeTitle": "Prêmios",
       "prizeBody": "Junte todos os tickets de um módulo para resgatar o prêmio dele no balcão.",
       "distinctionTitle": "Distinção",
-      "distinctionBody": "Conclua um curso e seu cartão fica bronze. Conclua todos e ele fica ouro.",
+      "distinctionBody": "Conclua um curso e seu cartão fica bronze. Conclua todos os níveis e ele fica ouro.",
       "close": "Entendi"
     },
     "PrizeIcon": {
@@ -360,6 +366,18 @@
         "tinphone": "Telefone de lata",
         "crown": "Coroa",
         "robot": "Robô de corda",
+        "compass": "Bússola",
+        "xylophone": "Xilofone",
+        "maracas": "Maracas",
+        "trumpet": "Trompete",
+        "boomerang": "Bumerangue",
+        "skate": "Patins",
+        "popper": "Lança-confete",
+        "pinwheel": "Cata-vento",
+        "jackbox": "Caixa surpresa",
+        "bell": "Sino",
+        "duck": "Patinho de borracha",
+        "kite": "Pipa",
         "gift": "Caixa de presente"
       }
     },
@@ -451,6 +469,7 @@
       "nextUp": "A seguir",
       "resumeAt": "Retomar em {time}",
       "facts": "Nível {level} · {modules, plural, one {# módulo} other {# módulos}} · {videos, plural, one {# vídeo} other {# vídeos}}",
+      "referenceFacts": "Referência · {modules, plural, one {# módulo} other {# módulos}} · {videos, plural, one {# vídeo} other {# vídeos}}",
       "percent": "{percent, number, percent}",
       "progress": "{completed} de {total, plural, one {# vídeo} other {# vídeos}}",
       "timeLeft": "faltam {duration}",
@@ -465,6 +484,7 @@
       "enrolled": "Inscrito",
       "completed": "Concluído",
       "level": "Nível {level}",
+      "reference": "Referência",
       "progress": "{completed} de {total} · {percent, number, percent}",
       "nextUp": "A seguir: <strong>{title}</strong> · Módulo {module}",
       "prizes": "{claimed} de {total, plural, one {# prêmio} other {# prêmios}}",
@@ -474,6 +494,7 @@
     },
     "CourseShelfCard": {
       "level": "Nível {level}",
+      "reference": "Referência",
       "facts": "{modules, plural, one {# módulo} other {# módulos}} · {videos, plural, one {# vídeo} other {# vídeos}} · {runtime}",
       "enroll": "Inscrever-me",
       "preview": "Ver o curso"
@@ -601,6 +622,7 @@
     "moduleFact": "{count, plural, one {# módulo} other {# módulos}}",
     "lessonFact": "{count, plural, one {# aula} other {# aulas}}",
     "levelFact": "Nível {level}",
+    "referenceFact": "Referência",
     "imageAlt": "{title} — English Course",
     "lessonBadge": "Aula {sequence}",
     "startTitle": "Crie seu cartão de aluno",

@@ -19,7 +19,9 @@ import { expect, test } from "./learner-account-fixture";
  * this suite with it.
  */
 const COURSES = contentCatalog.courses;
-const FIRST_COURSE = COURSES[0]!;
+const LEVEL_COURSES = COURSES.filter((course) => course.track === "level");
+const REFERENCE_COURSES = COURSES.filter((course) => course.track === "reference");
+const FIRST_COURSE = LEVEL_COURSES[0]!;
 
 /** Compiling a route on a cold `pnpm dev` overruns the default 5s timeout. */
 const COLD_ROUTE = { timeout: 60_000 };
@@ -59,21 +61,36 @@ test.describe("Landing", () => {
     await expect(page.getByRole("link", { name: "Resume" })).toHaveCount(0);
   });
 
-  test("WHEN the landing is visited THEN every catalog course gets a row, in sequence order", async ({
+  test("WHEN the landing is visited THEN every level course gets a row, in sequence order", async ({
     page,
   }) => {
     await page.goto("/en");
 
     await expect(
-      page.getByRole("heading", { name: `${COURSES.length} levels, in order` }),
+      page.getByRole("heading", { name: `${LEVEL_COURSES.length} levels, in order` }),
     ).toBeVisible(COLD_ROUTE);
     const rows = page
       .getByRole("list", { name: "Available courses, in order" })
       .getByRole("listitem");
-    await expect(rows).toHaveCount(COURSES.length);
-    for (const [index, course] of COURSES.entries()) {
+    await expect(rows).toHaveCount(LEVEL_COURSES.length);
+    for (const [index, course] of LEVEL_COURSES.entries()) {
       await expect(rows.nth(index)).toContainText(course.title);
     }
+  });
+
+  test("WHEN the landing is visited THEN the reference courses sit in their own table AND open their overview", async ({
+    page,
+  }) => {
+    await page.goto("/en");
+
+    const rows = page.getByRole("list", { name: "Reference courses" }).getByRole("listitem");
+    await expect(rows).toHaveCount(REFERENCE_COURSES.length, COLD_ROUTE);
+    const atlas = rows.filter({ hasText: "Atlas of American Sounds" });
+    await expect(atlas).toContainText("Reference");
+
+    await atlas.getByRole("link", { name: "View course" }).click();
+
+    await page.waitForURL(/\/en\/courses\/atlas-of-american-sounds$/, COLD_ROUTE);
   });
 
   test("WHEN the landing is visited in /es THEN the editorial copy is Spanish", async ({

@@ -1,7 +1,7 @@
 import { ContinueWatchingRecord } from "@/domain/entities/continue-watching-record/continue-watching-record";
 import type { Course } from "@/domain/entities/course/course";
 import type { CourseForView } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
-import { aCourseView, lessonOf } from "@/test-setup/stubs/course-views";
+import { aCourseView, asReference, lessonOf } from "@/test-setup/stubs/course-views";
 
 import { describe, expect, test } from "vitest";
 
@@ -9,6 +9,7 @@ import { courseCardModel, courseFacts, courseShelf, type CourseShelfInput } from
 
 const basic = aCourseView("basic-course", 1, [1, 3]);
 const advanced = aCourseView("advanced-intermediate-course", 2, [2, 2]);
+const atlas = asReference(aCourseView("atlas-of-american-sounds", 3, [2]));
 
 const recordAt = (
   view: CourseForView,
@@ -52,6 +53,27 @@ describe("courseShelf", () => {
       const shelf = shelfOf({ courses: [advanced, basic] });
 
       expect(slugsOf(shelf.available)).toEqual(["advanced-intermediate-course"]);
+    });
+  });
+
+  describe("GIVEN a learner enrolled in nothing AND a reference course ahead of the levels", () => {
+    test("WHEN the shelf is read THEN the level-1 course is recommended, not the reference", () => {
+      const referenceFirst = asReference(aCourseView("atlas-of-american-sounds", 1, [2]));
+      const levelOne = {
+        ...aCourseView("basic-course", 2, [1, 3]),
+        standing: { kind: "level", number: 1 } as const,
+      };
+      const levelTwo = {
+        ...aCourseView("advanced-intermediate-course", 3, [2, 2]),
+        standing: { kind: "level", number: 2 } as const,
+      };
+      const shelf = shelfOf({ courses: [referenceFirst, levelOne, levelTwo] });
+
+      expect(shelf.recommended?.view.course.slug).toBe("basic-course");
+      expect(slugsOf(shelf.available)).toEqual([
+        "atlas-of-american-sounds",
+        "advanced-intermediate-course",
+      ]);
     });
   });
 
@@ -179,6 +201,20 @@ describe("courseCardModel", () => {
 
     expect(model.targetPositionSeconds).toBeNull();
     expect(model.watchedAt).toBeNull();
+  });
+
+  test("WHEN read THEN the model carries the course's standing", () => {
+    const shelf = shelfOf({
+      courses: [basic, atlas],
+      enrolledSlugs: new Set(["atlas-of-american-sounds"]),
+    });
+
+    const model = courseCardModel(shelf.featured!, {
+      positions: new Map(),
+      claimedPrizes: new Set(),
+    });
+
+    expect(model.standing).toEqual({ kind: "reference" });
   });
 
   test("WHEN a module's prize was claimed THEN only that prize reads as claimed", () => {

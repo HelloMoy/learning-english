@@ -1,4 +1,5 @@
 import { FirstCourseStep } from "@/components/first-course-step/first-course-step";
+import { findFirstLevel } from "@/domain/entities/course-standing/course-standing";
 import { requireSupportedLocale } from "@/i18n/require-supported-locale/require-supported-locale";
 import { personalRouteMetadata } from "@/lib/share-metadata/share-metadata";
 
@@ -31,7 +32,7 @@ export default function StartFirstCoursePage({ params }: Props) {
   const { locale } = use(params);
   setRequestLocale(locale);
 
-  const [firstCourse] = use(loadCourseViews());
+  const firstCourse = findFirstLevel(use(loadCourseViews()));
   if (!firstCourse) notFound();
 
   return (

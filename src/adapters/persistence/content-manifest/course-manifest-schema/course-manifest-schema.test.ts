@@ -121,6 +121,36 @@ describe("parseCourseManifests", () => {
     });
   });
 
+  describe("GIVEN a course declaring its track", () => {
+    test("WHEN `track` is absent THEN the course is a level", () => {
+      const [course] = parseCourseManifests([courseManifest()]);
+
+      expect(course!.track).toBe("level");
+    });
+
+    test("WHEN `track` is reference THEN it survives the parse", () => {
+      const [course] = parseCourseManifests([courseManifest({ track: "reference" })]);
+
+      expect(course!.track).toBe("reference");
+    });
+
+    test("WHEN `track` is unknown THEN it is rejected naming the course", () => {
+      const manifest = courseManifest({ track: "elective", slug: "atlas-of-american-sounds" });
+
+      expect(() => parseCourseManifests([manifest])).toThrow(InvalidCourseManifestError);
+      expect(() => parseCourseManifests([manifest])).toThrow(/atlas-of-american-sounds/);
+    });
+
+    test("WHEN a reference course claims a level's sequence THEN the ladder is still ambiguous", () => {
+      const manifests = [
+        courseManifest({ slug: "basic-course", sequence: 1 }),
+        courseManifest({ slug: "atlas-of-american-sounds", sequence: 1, track: "reference" }),
+      ];
+
+      expect(() => parseCourseManifests(manifests)).toThrow(/atlas-of-american-sounds/);
+    });
+  });
+
   describe("GIVEN two courses colliding on the ladder", () => {
     test("WHEN two manifests share a slug THEN it is rejected naming both", () => {
       const manifests = [

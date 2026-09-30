@@ -38,12 +38,14 @@ export default async function Image({ params }: Props) {
   });
   if (result.isErr()) notFound();
 
-  const { course, modules } = result.value;
+  const { course, standing, modules } = result.value;
   const t = await getTranslations({ locale, namespace: "Metadata" });
 
   return new ImageResponse(
     <ShareCard
-      kicker={t("levelFact", { level: course.sequence })}
+      kicker={
+        standing.kind === "level" ? t("levelFact", { level: standing.number }) : t("referenceFact")
+      }
       headline={shareHeadline(course.description)}
       supporting={course.title}
       facts={[

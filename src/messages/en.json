@@ -38,6 +38,10 @@
       "eyebrow": "Available courses",
       "heading": "{count, plural, one {One level, in order} other {# levels, in order}}"
     },
+    "reference": {
+      "eyebrow": "Reference",
+      "heading": "{count, plural, one {One course for any level} other {# courses for any level}}"
+    },
     "continueBand": {
       "eyebrow": "Keep going",
       "heading": "Pick up where you left off, {name}."
@@ -309,7 +313,9 @@
     },
     "LevelsTable": {
       "tableLabel": "Available courses, in order",
+      "referenceTableLabel": "Reference courses",
       "levelOrdinal": "Level {number}",
+      "referenceOrdinal": "Reference",
       "counts": "{lessons, plural, one {# lesson} other {# lessons}} · {videos, plural, one {# video} other {# videos}}",
       "viewCourse": "View course",
       "continueCourse": "Continue course",
@@ -340,7 +346,7 @@
       "prizeTitle": "Prizes",
       "prizeBody": "Collect every ticket of a module to claim its prize at the counter.",
       "distinctionTitle": "Distinction",
-      "distinctionBody": "Complete a course to turn your card bronze. Complete every course to turn it gold.",
+      "distinctionBody": "Complete a course to turn your card bronze. Complete every level to turn it gold.",
       "close": "Got it"
     },
     "PrizeIcon": {
@@ -360,6 +366,18 @@
         "tinphone": "Tin-can phone",
         "crown": "Crown",
         "robot": "Wind-up robot",
+        "compass": "Compass",
+        "xylophone": "Xylophone",
+        "maracas": "Maracas",
+        "trumpet": "Trumpet",
+        "boomerang": "Boomerang",
+        "skate": "Roller skate",
+        "popper": "Party popper",
+        "pinwheel": "Pinwheel",
+        "jackbox": "Jack-in-the-box",
+        "bell": "Bell",
+        "duck": "Rubber duck",
+        "kite": "Kite",
         "gift": "Gift box"
       }
     },
@@ -451,6 +469,7 @@
       "nextUp": "Next up",
       "resumeAt": "Resume at {time}",
       "facts": "Level {level} · {modules, plural, one {# module} other {# modules}} · {videos, plural, one {# video} other {# videos}}",
+      "referenceFacts": "Reference · {modules, plural, one {# module} other {# modules}} · {videos, plural, one {# video} other {# videos}}",
       "percent": "{percent, number, percent}",
       "progress": "{completed} of {total, plural, one {# video} other {# videos}}",
       "timeLeft": "{duration} left",
@@ -465,6 +484,7 @@
       "enrolled": "Enrolled",
       "completed": "Completed",
       "level": "Level {level}",
+      "reference": "Reference",
       "progress": "{completed} of {total} · {percent, number, percent}",
       "nextUp": "Next up: <strong>{title}</strong> · Module {module}",
       "prizes": "{claimed} of {total, plural, one {# prize} other {# prizes}}",
@@ -474,6 +494,7 @@
     },
     "CourseShelfCard": {
       "level": "Level {level}",
+      "reference": "Reference",
       "facts": "{modules, plural, one {# module} other {# modules}} · {videos, plural, one {# video} other {# videos}} · {runtime}",
       "enroll": "Enroll",
       "preview": "Preview course"
@@ -601,6 +622,7 @@
     "moduleFact": "{count, plural, one {# module} other {# modules}}",
     "lessonFact": "{count, plural, one {# lesson} other {# lessons}}",
     "levelFact": "Level {level}",
+    "referenceFact": "Reference",
     "imageAlt": "{title} — English Course",
     "lessonBadge": "Lesson {sequence}",
     "startTitle": "Make your learner card",

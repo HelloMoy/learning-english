@@ -1,4 +1,8 @@
 import type { ContinueWatchingRecord } from "@/domain/entities/continue-watching-record/continue-watching-record";
+import {
+  findFirstLevel,
+  type CourseStanding,
+} from "@/domain/entities/course-standing/course-standing";
 import type { Course } from "@/domain/entities/course/course";
 import type { CourseForView } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
 import {
@@ -50,7 +54,7 @@ export type CourseShelf = {
   featured: ShelfCourse | null;
   /** Every other enrolled course, in catalog order. */
   otherEnrolled: ShelfCourse[];
-  /** With no enrollment, the first catalog course, read as if joined; otherwise `null`. */
+  /** With no enrollment, the first level course, read as if joined; otherwise `null`. */
   recommended: ShelfCourse | null;
   /** Every course the learner has not enrolled in, in catalog order, less the recommended one. */
   available: CourseForView[];
@@ -59,7 +63,7 @@ export type CourseShelf = {
 /**
  * Sorts the catalog into the course to lead with, the learner's other courses
  * and the courses still available to them. A learner enrolled in nothing is
- * led by the first catalog course, as a recommendation.
+ * led by the first level course, as a recommendation — never a reference course.
  *
  * @remarks
  * Each enrolled course's progress comes from {@link courseOverviewProgress}
@@ -79,14 +83,13 @@ export function courseShelf(input: CourseShelfInput): CourseShelf {
     .map((view) => shelfCourseOf(view, input));
   const featured = mostRecentlyWatched(enrolled, input.records) ?? enrolled[0] ?? null;
   const notEnrolled = inCatalogOrder.filter((view) => !input.enrolledSlugs.has(view.course.slug));
-  const [firstCourse] = notEnrolled;
-  const recommended = featured === null && firstCourse ? shelfCourseOf(firstCourse, input) : null;
+  const firstLevel = featured === null ? findFirstLevel(notEnrolled) : undefined;
 
   return {
     featured,
     otherEnrolled: enrolled.filter((course) => course !== featured),
-    recommended,
-    available: recommended ? notEnrolled.slice(1) : notEnrolled,
+    recommended: firstLevel ? shelfCourseOf(firstLevel, input) : null,
+    available: notEnrolled.filter((view) => view !== firstLevel),
   };
 }
 
@@ -154,6 +157,8 @@ export type CardPrize = { prize: PrizeId; isClaimed: boolean };
  */
 export type CourseCardModel = {
   course: Course;
+  /** A numbered level, or reference material. */
+  standing: CourseStanding;
   facts: CourseFacts;
   tally: ProgressTally;
   /** The video to open next, or `null` for a course with no videos. */
@@ -185,6 +190,7 @@ export function courseCardModel(
   const target = progress.continueTarget.kind === "none" ? null : progress.continueTarget;
   return {
     course: view.course,
+    standing: view.standing,
     facts: courseFacts(view),
     tally: progress.course,
     target,

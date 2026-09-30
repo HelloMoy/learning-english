@@ -38,7 +38,7 @@ export type CourseShelfCardProps = {
 export function CourseShelfCard({ view }: CourseShelfCardProps) {
   const t = useTranslations("Components.CourseShelfCard");
   const runtimeLabel = useRuntimeLabel();
-  const { course } = view;
+  const { course, standing } = view;
   const facts = courseFacts(view);
 
   return (
@@ -52,7 +52,7 @@ export function CourseShelfCard({ view }: CourseShelfCardProps) {
           sizes="(min-width: 768px) 260px, 100vw"
         />
         <span className="absolute top-2.5 left-2.5 rounded-full border border-white/20 bg-black/55 px-2.5 py-1 text-xs font-bold text-white backdrop-blur">
-          {t("level", { level: course.sequence })}
+          {standing.kind === "level" ? t("level", { level: standing.number }) : t("reference")}
         </span>
       </span>
       <div className="flex min-w-0 flex-col gap-2.5">

@@ -2,7 +2,7 @@ import { enrollInCourseAction } from "@/app/[locale]/learner-actions";
 import { ContinueWatchingLocation } from "@/domain/entities/continue-watching-location/continue-watching-location";
 import { givenLearner } from "@/test-setup/learner-store/learner-store";
 import { renderInLocale } from "@/test-setup/render-in-locale";
-import { aCourseView, lessonOf } from "@/test-setup/stubs/course-views";
+import { aCourseView, asReference, lessonOf } from "@/test-setup/stubs/course-views";
 
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -13,6 +13,7 @@ import { AvailableCoursesView } from "./available-courses-view";
 const basic = aCourseView("basic-course", 1, [1, 3]);
 const advanced = aCourseView("advanced-intermediate-course", 2, [2, 2]);
 const courses = [basic, advanced];
+const atlas = asReference(aCourseView("atlas-of-american-sounds", 3, [2]));
 
 const aPlaceIn = (
   view: typeof basic,
@@ -109,6 +110,33 @@ describe("AvailableCoursesView", () => {
       ).toBeInTheDocument();
       expect(screen.getByTestId("enrolled-course-card")).toHaveTextContent(basic.course.title);
       expect(screen.getByText(/You’re enrolled in every course/)).toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN a learner enrolled in Basic and the reference Atlas", () => {
+    beforeEach(() => {
+      givenLearner.enrolledCourses(["basic-course", "atlas-of-american-sounds"]);
+    });
+
+    test("WHEN the page renders THEN the shelf keeps going after Level 1 AND offers Advanced", () => {
+      renderInLocale(<AvailableCoursesView courses={[...courses, atlas]} />);
+
+      expect(
+        screen.getByRole("heading", { level: 2, name: "Keep going after Level 1" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { level: 3, name: advanced.course.title }),
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN a learner enrolled only in the reference Atlas", () => {
+    test("WHEN the page renders THEN the shelf says start here", () => {
+      givenLearner.enrolledCourses(["atlas-of-american-sounds"]);
+
+      renderInLocale(<AvailableCoursesView courses={[...courses, atlas]} />);
+
+      expect(screen.getByRole("heading", { level: 2, name: "Start here" })).toBeInTheDocument();
     });
   });
 

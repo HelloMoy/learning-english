@@ -8,7 +8,7 @@ TBD - created by archiving change course-enrollment-views. Update Purpose after 
 The route `/[locale]/start/first-course` SHALL render onboarding step 3 for a signed-in learner with a profile. It SHALL show:
 
 - the heading "Your first course, {first name}" and a short intro;
-- the first catalog course (lowest `sequence`) in an artwork hero, with:
+- the first **level** course (derived level 1) in an artwork hero; a reference course SHALL never be recommended here, whatever its `sequence`. The hero shows:
   - its first video's poster;
   - a **Recommended for you** mark;
   - the line "Level N · M modules · V videos";
@@ -24,6 +24,10 @@ It SHALL NOT offer to choose between courses, and SHALL NOT offer a way to dismi
 #### Scenario: No choice between courses
 - **WHEN** step 3 renders
 - **THEN** no other course is offered on it, and no Not now action exists
+
+#### Scenario: A reference course is never recommended first
+- **WHEN** the catalog holds a reference course with a lower `sequence` than every level course
+- **THEN** step 3 still recommends the level-1 course
 
 ### Requirement: Starting the recommended course enrolls and opens its first video
 
