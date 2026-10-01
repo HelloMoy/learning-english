@@ -548,7 +548,9 @@
     },
     "CourseEnrollAction": {
       "enroll": "Inscrever-me",
-      "startCourse": "Começar o curso"
+      "startCourse": "Começar o curso",
+      "continueWhereLeftOff": "Continuar de onde parou",
+      "watchAgain": "Assistir de novo"
     },
     "CourseOutcomes": {
       "eyebrow": "O que você vai aprender",
@@ -573,6 +575,7 @@
       "joinBody": "Ele vai para Meu aprendizado e você pode começar agora mesmo.",
       "enrolledTitle": "Você está inscrito",
       "enrolledBody": "Está em Meu aprendizado. Comece quando quiser.",
+      "goToProgress": "Ir para meu progresso",
       "statsLabel": "Tamanho do curso",
       "videos": "{count, plural, one {vídeo} other {vídeos}}",
       "runtime": "de vídeo",
@@ -631,7 +634,8 @@
       "allWatchedShort": "Tudo assistido",
       "openLessonTile": "Abrir aula {number}: {title}",
       "videoPosition": "Aula {module} · Vídeo {number} de {total}",
-      "viewCourse": "Ver curso"
+      "viewCourse": "Ver curso",
+      "viewCourseDetails": "Ver detalhes do curso"
     },
     "moduleOverview": {
       "title": "{title}",

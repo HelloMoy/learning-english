@@ -103,6 +103,7 @@ function enrollmentStatusOf(shelf: CourseShelfReading): "unknown" | "absent" | "
 }
 
 function LeadingCourse({ model }: { model: CourseCardModel }) {
+  const t = useTranslations("CourseCatalog.courseOverview");
   return (
     <div className="grid grid-cols-1 gap-3 lg:grid-cols-12 lg:gap-4">
       <div className="lg:col-span-8">
@@ -114,7 +115,7 @@ function LeadingCourse({ model }: { model: CourseCardModel }) {
           reading={{ status: "read", tally: model.tally }}
           prizes={model.prizes}
           headingLevel={2}
-          href={courseOverviewPath(model.course)}
+          link={{ href: courseOverviewPath(model.course), label: t("viewCourse") }}
         />
       </div>
     </div>

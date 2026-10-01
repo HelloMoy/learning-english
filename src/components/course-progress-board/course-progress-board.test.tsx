@@ -8,7 +8,7 @@ import { useIsHydrated } from "@/hooks/use-is-hydrated/use-is-hydrated";
 import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -124,6 +124,21 @@ describe("CourseProgressBoard", () => {
       // Assert
       expect(screen.getByTestId("continue-tile")).toHaveAttribute("data-status", "pending");
       expect(tileStatuses()).toEqual(["pending", "pending"]);
+    });
+
+    test("WHEN the board renders THEN the course tile already leads to the course page", () => {
+      // Arrange
+      vi.mocked(useIsHydrated).mockReturnValue(false);
+
+      // Act
+      renderBoard(storedLocation(Promise.resolve(null)));
+
+      // Assert
+      const courseTile = screen.getByTestId("course-progress-tile");
+      expect(within(courseTile).getByRole("link", { name: "viewCourseDetails" })).toHaveAttribute(
+        "href",
+        "/courses/basic-course/about",
+      );
     });
   });
 

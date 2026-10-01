@@ -2,8 +2,9 @@ import { Course } from "@/domain/entities/course/course";
 import { CourseId } from "@/domain/entities/ids/ids";
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { useTranslations } from "next-intl";
 
-import { CourseProgressTile } from "./course-progress-tile";
+import { CourseProgressTile, type CourseProgressTileProps } from "./course-progress-tile";
 
 const course = Course.parse({
   id: CourseId.parse("5b0c4a7e-1f3d-4c1e-9a55-0c8a1e2f3b4d"),
@@ -87,11 +88,43 @@ export const EveryPrizeClaimed: Story = {
   },
 };
 
+/** The tile with a closing link whose label is read from the shipped messages, as callers do. */
+function LinkedTile({
+  labelKey,
+  href,
+  ...props
+}: CourseProgressTileProps & { labelKey: "viewCourse" | "viewCourseDetails"; href: string }) {
+  const t = useTranslations("CourseCatalog.courseOverview");
+  return (
+    <CourseProgressTile
+      {...props}
+      link={{ href, label: t(labelKey) }}
+    />
+  );
+}
+
+/** As the progress board shows it: the title and View course details lead to the course page. */
+export const OnTheBoard: Story = {
+  render: (args) => (
+    <LinkedTile
+      {...args}
+      labelKey="viewCourseDetails"
+      href="/courses/basic-course/about"
+    />
+  ),
+};
+
 /** As My learning shows it: a level-two title and a View course link to the overview. */
 export const OnMyLearning: Story = {
+  render: (args) => (
+    <LinkedTile
+      {...args}
+      labelKey="viewCourse"
+      href="/courses/basic-course"
+    />
+  ),
   args: {
     headingLevel: 2,
-    href: "/courses/basic-course",
     prizes: [
       { prize: "whistle", isClaimed: true },
       { prize: "harmonica", isClaimed: false },

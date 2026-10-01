@@ -81,6 +81,14 @@ describe("CourseEnrollCard", () => {
       // Assert
       expect(screen.getByText("A 20 min al día, terminas en unas 5 semanas.")).toBeInTheDocument();
     });
+
+    test("WHEN it renders THEN it offers no way to a progress board", () => {
+      // Act
+      renderInLocale(<CourseEnrollCard view={course} />);
+
+      // Assert
+      expect(screen.queryByRole("link", { name: "Go to my progress" })).not.toBeInTheDocument();
+    });
   });
 
   describe("GIVEN a learner enrolled in the course", () => {
@@ -96,6 +104,31 @@ describe("CourseEnrollCard", () => {
         screen.getByRole("heading", { level: 2, name: "You’re enrolled" }),
       ).toBeInTheDocument();
       expect(screen.getByRole("link", { name: "Start course" })).toBeInTheDocument();
+    });
+
+    test("WHEN it renders THEN Go to my progress leads to the course's progress board", () => {
+      // Arrange
+      act(() => givenLearner.enrolledCourses(["basic-course"]));
+
+      // Act
+      renderInLocale(<CourseEnrollCard view={course} />);
+
+      // Assert
+      expect(screen.getByRole("link", { name: "Go to my progress" })).toHaveAttribute(
+        "href",
+        "/courses/basic-course",
+      );
+    });
+
+    test("WHEN rendered in es THEN the link reads Ir a mi progreso", () => {
+      // Arrange
+      act(() => givenLearner.enrolledCourses(["basic-course"]));
+
+      // Act
+      renderInLocale(<CourseEnrollCard view={course} />, "es");
+
+      // Assert
+      expect(screen.getByRole("link", { name: "Ir a mi progreso" })).toBeInTheDocument();
     });
   });
 });

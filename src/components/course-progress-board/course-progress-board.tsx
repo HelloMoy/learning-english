@@ -19,6 +19,7 @@ import { useIsHydrated } from "@/hooks/use-is-hydrated/use-is-hydrated";
 import { useCompletedLessons } from "@/hooks/use-lesson-completion/use-lesson-completion";
 import { useClaimedPrizes } from "@/hooks/use-prize-claims/use-prize-claims";
 import { useSavedPlaybackPositions } from "@/hooks/use-saved-playback-positions/use-saved-playback-positions";
+import { courseDetailPath } from "@/i18n/lesson-routes";
 import {
   courseOverviewEntries,
   courseOverviewProgress,
@@ -44,7 +45,7 @@ const UNREAD = undefined;
 
 /**
  * The course overview's progress board: the continue tile and the course
- * progress tile, then one ring tile per lesson.
+ * progress tile, which leads to the course page, then one ring tile per lesson.
  *
  * @remarks
  * This is the page's one client island. It reads the three device stores —
@@ -89,7 +90,7 @@ export function CourseProgressBoard({
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 sm:px-11 lg:gap-4">
       <div className="flex flex-col gap-3 lg:grid lg:grid-cols-12 lg:gap-4">
         {hasVideos && continueReading ? (
-          <div className="lg:col-span-8">
+          <div className="lg:col-span-8 lg:flex lg:flex-col [&>*]:lg:flex-1">
             <ContinueTile
               course={course}
               reading={continueReading}
@@ -101,6 +102,7 @@ export function CourseProgressBoard({
             course={course}
             reading={courseReadingOf(progress)}
             prizes={coursePrizes}
+            link={{ href: courseDetailPath(course), label: t("viewCourseDetails") }}
           />
         </div>
       </div>

@@ -11,6 +11,15 @@ export function courseOverviewPath(course: Pick<Course, "slug">): string {
   return `/courses/${course.slug}`;
 }
 
+/**
+ * The course page's own address: it shows the course page to every learner,
+ * enrolled or not, where {@link courseOverviewPath} gives an enrolled learner
+ * the progress board.
+ */
+export function courseDetailPath(course: Pick<Course, "slug">): string {
+  return `${courseOverviewPath(course)}/about`;
+}
+
 export function moduleOverviewPath(
   course: Pick<Course, "slug">,
   module: Pick<Module, "slug">,
