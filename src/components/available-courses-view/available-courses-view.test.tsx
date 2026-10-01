@@ -4,7 +4,7 @@ import { givenLearner } from "@/test-setup/learner-store/learner-store";
 import { renderInLocale } from "@/test-setup/render-in-locale";
 import { aCourseView, asReference, lessonOf } from "@/test-setup/stubs/course-views";
 
-import { screen, waitFor, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -39,7 +39,6 @@ const posterOf = (title: string) =>
 
 beforeEach(() => {
   vi.mocked(enrollInCourseAction).mockClear();
-  vi.mocked(enrollInCourseAction).mockResolvedValue({ data: { enrolled: true } } as never);
 });
 
 describe("AvailableCoursesView", () => {
@@ -83,38 +82,20 @@ describe("AvailableCoursesView", () => {
       expect(screen.queryByTestId("next-up-bar")).toBeNull();
     });
 
-    test("WHEN Enroll is activated on Advanced THEN its poster reads Enrolled at once", async () => {
+    test("WHEN Enroll is activated on Advanced THEN its poster stays not joined AND the summary still counts one", async () => {
       // Arrange
       const user = userEvent.setup();
       renderInLocale(<AvailableCoursesView courses={courses} />);
 
       // Act
       await user.click(
-        within(posterOf(advanced.course.title)).getByRole("button", { name: "Enroll" }),
+        within(posterOf(advanced.course.title)).getByRole("link", { name: "Enroll" }),
       );
 
       // Assert
-      expect(within(posterOf(advanced.course.title)).getByText("Enrolled")).toBeInTheDocument();
-      expect(screen.getByText("3 courses · you’re enrolled in 2")).toBeInTheDocument();
-    });
-
-    test("WHEN the enrollment is refused THEN Advanced offers Enroll again", async () => {
-      // Arrange
-      vi.mocked(enrollInCourseAction).mockResolvedValue({ serverError: "x" } as never);
-      const user = userEvent.setup();
-      renderInLocale(<AvailableCoursesView courses={courses} />);
-
-      // Act
-      await user.click(
-        within(posterOf(advanced.course.title)).getByRole("button", { name: "Enroll" }),
-      );
-
-      // Assert
-      await waitFor(() =>
-        expect(
-          within(posterOf(advanced.course.title)).getByRole("button", { name: "Enroll" }),
-        ).toBeInTheDocument(),
-      );
+      expect(within(posterOf(advanced.course.title)).queryByText("Enrolled")).toBeNull();
+      expect(screen.getByText("3 courses · you’re enrolled in 1")).toBeInTheDocument();
+      expect(enrollInCourseAction).not.toHaveBeenCalled();
     });
   });
 
@@ -178,21 +159,7 @@ describe("AvailableCoursesView", () => {
         advanced.course.title,
         atlas.course.title,
       ]);
-      expect(screen.getAllByRole("button", { name: "Enroll" })).toHaveLength(3);
-    });
-
-    test("WHEN Enroll is activated on a poster THEN the next-up bar leaves", async () => {
-      // Arrange
-      const user = userEvent.setup();
-      renderInLocale(<AvailableCoursesView courses={courses} />);
-
-      // Act
-      await user.click(
-        within(posterOf(advanced.course.title)).getByRole("button", { name: "Enroll" }),
-      );
-
-      // Assert
-      expect(screen.queryByTestId("next-up-bar")).toBeNull();
+      expect(screen.getAllByRole("link", { name: "Enroll" })).toHaveLength(3);
     });
   });
 

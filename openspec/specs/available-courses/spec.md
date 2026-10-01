@@ -87,18 +87,24 @@ The poster of a course the learner is not enrolled in SHALL show:
 - its module count, video count and total runtime;
 - the course title and its course brief;
 - how many prizes the course awards;
-- **Enroll**;
-- **View details**, which opens its course page at `/[locale]/courses/[courseSlug]/about` (`course-detail-page`) without enrolling.
+- **Enroll**, which opens its course page at `/[locale]/courses/[courseSlug]/about` (`course-detail-page`);
+- **View details**, which opens the same course page.
 
-**Enroll** SHALL enroll the learner through the client enrollment (optimistic): the poster SHALL become an enrolled poster and move among the enrolled courses at once, and SHALL return to a not-joined poster if the server refuses.
+**Enroll** SHALL be a locale-aware link and SHALL NOT enroll the learner: activating it SHALL call no
+enrollment and SHALL leave the learner's enrollments unchanged. The learner enrolls from the course page's
+own enroll action (`course-detail-page`). No action on a not-joined poster SHALL enroll the learner.
 
-#### Scenario: Enrolling turns the poster
-- **WHEN** a learner enrolled only in Basic activates Enroll on the Advanced poster
-- **THEN** the Advanced poster reads Enrolled and offers Start course, and after a reload it is still enrolled
+#### Scenario: Enroll opens the course page
+- **WHEN** a learner enrolled only in Basic activates Enroll on the Advanced poster at `/en/courses`
+- **THEN** `/en/courses/advanced-intermediate-course/about` opens with **Enroll**, and the learner is still not enrolled in the Advanced course
 
-#### Scenario: A refused enrollment returns the poster
-- **WHEN** the enroll action is refused
-- **THEN** the Advanced poster offers Enroll again
+#### Scenario: The learner enrolls from the course page
+- **WHEN** that learner activates **Enroll** on the Advanced course page and returns to `/en/courses`
+- **THEN** the Advanced poster reads Enrolled and offers Start course
+
+#### Scenario: Enroll is locale-aware
+- **WHEN** `/es/courses` renders the poster of a course the learner has not joined
+- **THEN** its **Inscribirme** action links to `/es/courses/<slug>/about`
 
 #### Scenario: Previewing does not enroll
 - **WHEN** the learner activates View details on the Advanced poster
@@ -131,7 +137,7 @@ When the learner is enrolled in no course, a next-up bar SHALL render above the 
 - a progress ring reading 0 %;
 - **Start course**, which opens the first video, and **View course**, which opens the course page at `/[locale]/courses/[courseSlug]/about`.
 
-A reference course SHALL NOT take the bar. The bar SHALL NOT render while the learner is enrolled in any course, and SHALL leave at once when an optimistic enrollment makes them enrolled.
+A reference course SHALL NOT take the bar. The bar SHALL NOT render while the learner is enrolled in any course.
 
 #### Scenario: Nothing enrolled shows the bar
 - **WHEN** a learner with no enrollment opens `/es/courses`
@@ -144,8 +150,4 @@ A reference course SHALL NOT take the bar. The bar SHALL NOT render while the le
 #### Scenario: An enrolled learner sees no bar
 - **WHEN** a learner enrolled in any course opens the page
 - **THEN** no next-up bar renders
-
-#### Scenario: Enrolling removes the bar
-- **WHEN** a learner with no enrollment activates Enroll on a poster
-- **THEN** the next-up bar leaves the page
 

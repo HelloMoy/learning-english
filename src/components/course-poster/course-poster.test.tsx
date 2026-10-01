@@ -175,21 +175,30 @@ describe("CoursePoster", () => {
       );
     });
 
-    test("WHEN Enroll is activated THEN the learner is enrolled at once AND it is saved", async () => {
+    test("WHEN Enroll is read THEN it opens the course page", () => {
+      // Act
+      renderInLocale(<CoursePoster entry={{ kind: "joinable", view: advanced }} />);
+
+      // Assert
+      expect(screen.getByRole("link", { name: "Enroll" })).toHaveAttribute(
+        "href",
+        "/courses/advanced-intermediate-course/about",
+      );
+    });
+
+    test("WHEN Enroll is activated THEN the learner is not enrolled AND nothing is saved", async () => {
       // Arrange
       const user = userEvent.setup();
       renderInLocale(<CoursePoster entry={{ kind: "joinable", view: advanced }} />);
 
       // Act
-      await user.click(screen.getByRole("button", { name: "Enroll" }));
+      await user.click(screen.getByRole("link", { name: "Enroll" }));
 
       // Assert
       expect(learnerStore.getState().enrolledCourses.has("advanced-intermediate-course")).toBe(
-        true,
+        false,
       );
-      expect(enrollInCourseAction).toHaveBeenCalledWith({
-        courseSlug: "advanced-intermediate-course",
-      });
+      expect(enrollInCourseAction).not.toHaveBeenCalled();
     });
 
     test("WHEN rendered in es THEN the copy comes from es.json", () => {
@@ -199,8 +208,18 @@ describe("CoursePoster", () => {
       // Assert
       expect(within(poster()).getByText("Referencia")).toBeInTheDocument();
       expect(poster()).toHaveTextContent("2 premios por ganar");
-      expect(screen.getByRole("button", { name: "Inscribirme" })).toBeInTheDocument();
       expect(screen.getByRole("link", { name: "Ver detalles" })).toBeInTheDocument();
+    });
+
+    test("WHEN rendered in es THEN Inscribirme opens the course page", () => {
+      // Act
+      renderInLocale(<CoursePoster entry={{ kind: "joinable", view: atlas }} />, "es");
+
+      // Assert
+      expect(screen.getByRole("link", { name: "Inscribirme" })).toHaveAttribute(
+        "href",
+        "/courses/atlas-of-american-sounds/about",
+      );
     });
   });
 });

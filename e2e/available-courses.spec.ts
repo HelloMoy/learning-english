@@ -49,23 +49,40 @@ test.describe("Available courses", () => {
     await expect(page.getByTestId("next-up-bar")).toHaveCount(0);
   });
 
-  test("WHEN the learner enrolls from a poster THEN it reads Enrolled AND stays after a reload", async ({
+  test("WHEN the learner activates Enroll on a poster THEN the course page opens AND they are not enrolled until they enroll there", async ({
     page,
     learnerState,
   }) => {
     await page.goto("/en/courses");
     const advancedPoster = page.getByTestId("course-poster").filter({ hasText: ADVANCED.title });
 
-    await advancedPoster.getByRole("button", { name: "Enroll" }).click(COLD_ROUTE);
+    await advancedPoster.getByRole("link", { name: "Enroll" }).click(COLD_ROUTE);
 
-    await expect(advancedPoster.getByText("Enrolled")).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`/en/courses/${ADVANCED.slug}/about$`), COLD_ROUTE);
+    const enrollOnCoursePage = page.getByRole("button", { name: "Enroll" }).first();
+    await expect(enrollOnCoursePage).toBeVisible(COLD_ROUTE);
+    expect(await learnerState.enrolledCourseSlugs()).toEqual([FIRST_COURSE_SLUG]);
+
+    await enrollOnCoursePage.click();
     await expect
       .poll(() => learnerState.enrolledCourseSlugs(), COLD_ROUTE)
       .toEqual([ADVANCED.slug, FIRST_COURSE_SLUG].sort());
 
-    await page.reload();
+    await page.goto("/en/courses");
     await expect(advancedPoster.getByText("Enrolled")).toBeVisible(COLD_ROUTE);
-    await expect(advancedPoster.getByRole("button", { name: "Enroll" })).toHaveCount(0);
+    await expect(advancedPoster.getByRole("link", { name: "Enroll" })).toHaveCount(0);
+  });
+
+  test("WHEN the page is in Spanish THEN Inscribirme opens the Spanish course page", async ({
+    page,
+  }) => {
+    await page.goto("/es/courses");
+    const advancedPoster = page.getByTestId("course-poster").filter({ hasText: ADVANCED.title });
+
+    await advancedPoster.getByRole("link", { name: "Inscribirme" }).click(COLD_ROUTE);
+
+    await expect(page).toHaveURL(new RegExp(`/es/courses/${ADVANCED.slug}/about$`), COLD_ROUTE);
+    await expect(page.getByRole("button", { name: "Inscribirme" }).first()).toBeVisible(COLD_ROUTE);
   });
 
   test("WHEN the reference course is not joined THEN its poster reads Reference with no level", async ({
@@ -139,17 +156,4 @@ signedIn.describe("Available courses for a learner enrolled in nothing", () => {
       await expect(page).toHaveURL(new RegExp(`${BASIC_FIRST_VIDEO.id}$`), COLD_ROUTE);
     },
   );
-
-  signedIn("WHEN they enroll from a poster THEN the next-up bar leaves", async ({ page }) => {
-    await page.goto("/en/courses");
-    await expect(page.getByTestId("next-up-bar")).toBeVisible(COLD_ROUTE);
-
-    await page
-      .getByTestId("course-poster")
-      .filter({ hasText: ADVANCED.title })
-      .getByRole("button", { name: "Enroll" })
-      .click();
-
-    await expect(page.getByTestId("next-up-bar")).toHaveCount(0);
-  });
 });

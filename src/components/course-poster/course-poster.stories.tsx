@@ -90,7 +90,7 @@ export const Completed: Story = {
   },
 };
 
-/** The Advanced course, not joined: its size, prizes to win, Enroll and View details. */
+/** The Advanced course, not joined: its size, prizes to win, and Enroll and View details, which both open its course page. */
 export const Joinable: Story = {
   args: { entry: { kind: "joinable", view: ADVANCED_COURSE_VIEW } },
 };
