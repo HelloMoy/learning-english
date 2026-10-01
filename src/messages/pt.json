@@ -649,9 +649,12 @@
     }
   },
   "PageNotFound": {
+    "eyebrow": "Erro 404",
     "heading": "Página não encontrada",
     "description": "Esta página não existe, ou mudou de lugar. O curso continua aqui.",
-    "goHome": "Ir para o início"
+    "missingPath": "Não há nada em <requested>{path}</requested>",
+    "goHome": "Ir para o início",
+    "viewCourses": "Ver cursos"
   },
   "Layout": {
     "skipToContent": "Pular para o conteúdo principal",
