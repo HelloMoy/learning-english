@@ -1,8 +1,5 @@
-# available-courses Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change course-enrollment-views. Update Purpose after archive.
-## Requirements
 ### Requirement: Available courses is a learner route that lists every catalog course
 
 The route `/[locale]/courses` SHALL render the Available courses page for a signed-in learner with a profile, under the same session and profile requirements as the other course routes. It SHALL show an eyebrow, the heading "Available courses", and a summary stating how many courses the catalog serves and how many of them the learner is enrolled in, with an "all" wording when the learner is enrolled in every one. Below the heading, every catalog course SHALL render as a course poster in one lobby grid: three columns on wide viewports, one column on phones. Until the learner store is seeded, the lobby SHALL render poster-shaped placeholders naming no course state, and no next-up bar.
@@ -25,13 +22,7 @@ The header eyebrow SHALL read `COURSES` on this route.
 - **WHEN** `/en/courses` is requested without a session
 - **THEN** the response redirects to sign in and contains no course content
 
-### Requirement: Available courses copy is localized
-
-Every string on the page SHALL come from the active locale's messages in `en`, `es` and `pt` under `Components.*` namespaces, with ICU plurals for counts, and every link SHALL be locale-aware.
-
-#### Scenario: The page in Spanish
-- **WHEN** `/es/courses` renders
-- **THEN** the heading, summary, section titles, marks and actions render from `es.json`
+## ADDED Requirements
 
 ### Requirement: The lobby orders the learner's courses first
 
@@ -149,3 +140,19 @@ A reference course SHALL NOT take the bar. The bar SHALL NOT render while the le
 - **WHEN** a learner with no enrollment activates Enroll on a poster
 - **THEN** the next-up bar leaves the page
 
+## REMOVED Requirements
+
+### Requirement: The course the learner watched last is featured
+
+**Reason**: The cinema hero is replaced by the poster lobby, where no course dominates the others.
+**Migration**: The last-watched course now leads the lobby as the first poster ("The lobby orders the learner's courses first"); a learner enrolled in nothing is shown the next-up bar instead of the recommended hero.
+
+### Requirement: The learner's other enrolled courses follow in compact cards
+
+**Reason**: Enrolled courses are posters in the lobby rather than a separate section.
+**Migration**: See "An enrolled course's poster carries the way back in".
+
+### Requirement: Courses the learner has not joined are offered in a shelf
+
+**Reason**: Courses not joined are posters in the same lobby rather than a shelf with its own heading.
+**Migration**: See "A course the learner has not joined is offered on its poster"; the optimistic Enroll is unchanged, and the link to the course page now reads **View details**.

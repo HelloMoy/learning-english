@@ -44,7 +44,7 @@ no **Start course** and no progress.
 
 ### Requirement: The course page opens with a cinema hero
 
-The course page SHALL open with a hero in the same frame as the Available courses hero: the course's
+The course page SHALL open with a wide cinema hero: the course's
 first video's poster (or a decorative placeholder), fading into the page background. The hero SHALL show:
 
 - a mark reading `Level N`, or **Reference** for a reference course, which reads **Enrolled** once the
