@@ -461,44 +461,6 @@
       "privacy": "Privacidad",
       "terms": "Términos"
     },
-    "CourseCinemaHero": {
-      "lastWatched": "Visto por última vez",
-      "yourCourse": "Tu curso",
-      "recommended": "Recomendado para ti",
-      "enrolled": "Inscrito",
-      "nextUp": "Lo que sigue",
-      "resumeAt": "Retomar en {time}",
-      "facts": "Nivel {level} · {modules, plural, one {# módulo} other {# módulos}} · {videos, plural, one {# video} other {# videos}}",
-      "referenceFacts": "Referencia · {modules, plural, one {# módulo} other {# módulos}} · {videos, plural, one {# video} other {# videos}}",
-      "percent": "{percent, number, percent}",
-      "progress": "{completed} de {total, plural, one {# video} other {# videos}}",
-      "timeLeft": "faltan {duration}",
-      "allWatched": "Todo visto",
-      "prizes": "{claimed} de {total, plural, one {# premio} other {# premios}}",
-      "continueCourse": "Continuar el curso",
-      "startCourse": "Empezar el curso",
-      "watchAgain": "Ver de nuevo",
-      "viewCourse": "Ver curso"
-    },
-    "EnrolledCourseCard": {
-      "enrolled": "Inscrito",
-      "completed": "Completado",
-      "level": "Nivel {level}",
-      "reference": "Referencia",
-      "progress": "{completed} de {total} · {percent, number, percent}",
-      "nextUp": "Lo que sigue: <strong>{title}</strong> · Módulo {module}",
-      "prizes": "{claimed} de {total, plural, one {# premio} other {# premios}}",
-      "continue": "Continuar",
-      "watchAgain": "Ver de nuevo",
-      "viewCourse": "Ver curso"
-    },
-    "CourseShelfCard": {
-      "level": "Nivel {level}",
-      "reference": "Referencia",
-      "facts": "{modules, plural, one {# módulo} other {# módulos}} · {videos, plural, one {# video} other {# videos}} · {runtime}",
-      "enroll": "Inscribirme",
-      "preview": "Ver el curso"
-    },
     "ResumeTile": {
       "pickUp": "Sigue donde te quedaste",
       "startHere": "Empieza aquí",
@@ -519,17 +481,42 @@
       "watchAgain": "Ver de nuevo",
       "viewCourse": "Ver curso"
     },
+    "CourseBrief": {
+      "audience": "Para",
+      "highlights": "Aprenderás"
+    },
+    "CoursePoster": {
+      "level": "Nivel {level}",
+      "reference": "Referencia",
+      "enrolled": "Inscrito",
+      "completed": "Completado",
+      "percent": "{percent, number, percent}",
+      "nextUp": "Lo que sigue · {title}",
+      "resumeAt": "Retomar en {time} · {title}",
+      "progress": "{completed} de {total, plural, one {# video} other {# videos}}",
+      "timeLeft": "faltan {duration}",
+      "allWatched": "Todo visto",
+      "facts": "{modules, plural, one {# módulo} other {# módulos}} · {videos, plural, one {# video} other {# videos}} · {runtime}",
+      "prizesToWin": "{count, plural, one {# premio} other {# premios}} por ganar",
+      "continueCourse": "Continuar el curso",
+      "startCourse": "Empezar el curso",
+      "watchAgain": "Ver de nuevo",
+      "viewProgress": "Ver avance",
+      "enroll": "Inscribirme",
+      "viewDetails": "Ver detalles"
+    },
+    "NextUpBar": {
+      "eyebrow": "Lo que sigue · {course}",
+      "position": "Módulo {module} · {completed} de {total, plural, one {# video} other {# videos}} · faltan {duration}",
+      "percent": "{percent, number, percent}",
+      "startCourse": "Empezar el curso",
+      "viewCourse": "Ver curso"
+    },
     "AvailableCoursesView": {
       "eyebrow": "Cursos",
       "heading": "Cursos disponibles",
       "summary": "{total, plural, one {# curso} other {# cursos}} · {enrolled, plural, =0 {aún no estás inscrito} other {estás inscrito en #}}",
-      "summaryAll": "{total, plural, one {# curso} other {# cursos}} · estás inscrito en {total, plural, one {él} other {todos}}",
-      "otherCoursesEyebrow": "Tus otros cursos",
-      "otherCoursesHeading": "{count, plural, one {# curso más} other {# cursos más}}",
-      "moreCoursesEyebrow": "Más cursos",
-      "moreCoursesHeading": "Sigue después del Nivel {level}",
-      "moreCoursesStartHere": "Empieza aquí",
-      "everyCourseJoined": "<strong>Estás inscrito en todos los cursos.</strong> Los cursos nuevos aparecerán aquí."
+      "summaryAll": "{total, plural, one {# curso} other {# cursos}} · estás inscrito en {total, plural, one {él} other {todos}}"
     },
     "FirstCourseStep": {
       "heading": "Tu primer curso, {name}",

@@ -24,6 +24,17 @@ export const CourseOutcomes = z.array(z.string().min(1));
 
 export type CourseOutcomes = z.infer<typeof CourseOutcomes>;
 
+/** Who a course is for, in one sentence, so a learner can tell whether it suits them. */
+export const CourseAudience = z.string().min(1);
+
+/**
+ * What a course teaches, cut to a few short points for a glance — the long
+ * {@link CourseOutcomes} stay on the course page.
+ */
+export const CourseHighlights = z.array(z.string().min(1));
+
+export type CourseHighlights = z.infer<typeof CourseHighlights>;
+
 /**
  * The sounds a course teaches, as IPA symbols. Vowels include diphthongs and
  * r-coloured vowels; they are kept apart from consonants because a learner
@@ -40,13 +51,15 @@ export type CourseSounds = z.infer<typeof CourseSounds>;
 export const CourseTranslation = z.object({
   description: z.string().min(1).optional(),
   outcomes: CourseOutcomes.optional(),
+  audience: CourseAudience.optional(),
+  highlights: CourseHighlights.optional(),
 });
 
 export type CourseTranslation = z.infer<typeof CourseTranslation>;
 
 /**
  * A course's prose in other languages, keyed by ISO 639-1 code (`es`, `pt`).
- * Titles are never translated: only the description and the outcomes.
+ * Titles are never translated: only the description, outcomes, audience and highlights.
  */
 export const CourseTranslations = z.record(
   z.string().regex(/^[a-z]{2}$/, "ISO 639-1 lower-case"),
@@ -81,9 +94,13 @@ export const Course = z.object({
   track: CourseTrack,
   /** Absent when the course declares none; a surface then shows no outcomes section. */
   outcomes: CourseOutcomes.optional(),
+  /** Absent when the course declares none; a surface then shows no audience line. */
+  audience: CourseAudience.optional(),
+  /** Absent when the course declares none; a surface then shows no highlights. */
+  highlights: CourseHighlights.optional(),
   /** Absent for courses that are not about single sounds. */
   sounds: CourseSounds.optional(),
-  /** The description and outcomes in other languages; absent when the course declares none. */
+  /** The course's prose in other languages; absent when the course declares none. */
   translations: CourseTranslations.optional(),
 });
 

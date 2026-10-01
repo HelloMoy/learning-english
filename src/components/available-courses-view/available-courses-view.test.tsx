@@ -12,8 +12,8 @@ import { AvailableCoursesView } from "./available-courses-view";
 
 const basic = aCourseView("basic-course", 1, [1, 3]);
 const advanced = aCourseView("advanced-intermediate-course", 2, [2, 2]);
-const courses = [basic, advanced];
 const atlas = asReference(aCourseView("atlas-of-american-sounds", 3, [2]));
+const courses = [basic, advanced, atlas];
 
 const aPlaceIn = (
   view: typeof basic,
@@ -29,20 +29,31 @@ const aPlaceIn = (
   watchedAt,
 });
 
+const posterTitles = () =>
+  screen
+    .getAllByTestId("course-poster")
+    .map((poster) => within(poster).getByRole("heading", { level: 2 }).textContent);
+
+const posterOf = (title: string) =>
+  screen.getAllByTestId("course-poster").find((poster) => poster.textContent?.includes(title))!;
+
 beforeEach(() => {
   vi.mocked(enrollInCourseAction).mockClear();
   vi.mocked(enrollInCourseAction).mockResolvedValue({ data: { enrolled: true } } as never);
 });
 
 describe("AvailableCoursesView", () => {
-  test("WHEN the learner's state is not read yet THEN the heading renders AND the sections wait", () => {
+  test("WHEN the learner's state is not read yet THEN the heading renders AND the posters wait", () => {
+    // Act
     renderInLocale(<AvailableCoursesView courses={courses} />);
 
+    // Assert
     expect(
       screen.getByRole("heading", { level: 1, name: "Available courses" }),
     ).toBeInTheDocument();
     expect(screen.getByTestId("available-courses-pending")).toBeInTheDocument();
-    expect(screen.queryByTestId("course-cinema-hero")).toBeNull();
+    expect(screen.queryByTestId("course-poster")).toBeNull();
+    expect(screen.queryByTestId("next-up-bar")).toBeNull();
   });
 
   describe("GIVEN a learner enrolled in Basic only", () => {
@@ -50,117 +61,152 @@ describe("AvailableCoursesView", () => {
       givenLearner.enrolledCourses(["basic-course"]);
     });
 
-    test("WHEN the page renders THEN the summary counts one enrollment AND Basic leads as your course", () => {
+    test("WHEN the page renders THEN the summary counts one enrollment AND every course is a poster, Basic first", () => {
+      // Act
       renderInLocale(<AvailableCoursesView courses={courses} />);
 
-      expect(screen.getByText("2 courses · you’re enrolled in 1")).toBeInTheDocument();
-      const hero = screen.getByTestId("course-cinema-hero");
-      expect(within(hero).getByText("Your course")).toBeInTheDocument();
-      expect(within(hero).getByRole("heading", { name: basic.course.title })).toBeInTheDocument();
+      // Assert
+      expect(screen.getByText("3 courses · you’re enrolled in 1")).toBeInTheDocument();
+      expect(posterTitles()).toEqual([
+        basic.course.title,
+        advanced.course.title,
+        atlas.course.title,
+      ]);
+      expect(within(posterOf(basic.course.title)).getByText("Enrolled")).toBeInTheDocument();
     });
 
-    test("WHEN the page renders THEN there is no other-courses section AND Advanced is on the shelf", () => {
+    test("WHEN the page renders THEN there is no next-up bar", () => {
+      // Act
       renderInLocale(<AvailableCoursesView courses={courses} />);
 
-      expect(screen.queryByRole("heading", { name: /more course/ })).toBeNull();
-      expect(
-        screen.getByRole("heading", { level: 2, name: "Keep going after Level 1" }),
-      ).toBeInTheDocument();
-      expect(screen.getByTestId("course-shelf-card")).toHaveTextContent(advanced.course.title);
+      // Assert
+      expect(screen.queryByTestId("next-up-bar")).toBeNull();
     });
 
-    test("WHEN Enroll is activated on Advanced THEN it moves to the learner's other courses at once", async () => {
+    test("WHEN Enroll is activated on Advanced THEN its poster reads Enrolled at once", async () => {
+      // Arrange
       const user = userEvent.setup();
       renderInLocale(<AvailableCoursesView courses={courses} />);
 
-      await user.click(screen.getByRole("button", { name: "Enroll" }));
+      // Act
+      await user.click(
+        within(posterOf(advanced.course.title)).getByRole("button", { name: "Enroll" }),
+      );
 
-      expect(screen.getByRole("heading", { level: 2, name: "1 more course" })).toBeInTheDocument();
-      expect(screen.getByTestId("enrolled-course-card")).toHaveTextContent(advanced.course.title);
-      expect(screen.queryByTestId("course-shelf-card")).toBeNull();
-      expect(screen.getByText(/You’re enrolled in every course/)).toBeInTheDocument();
+      // Assert
+      expect(within(posterOf(advanced.course.title)).getByText("Enrolled")).toBeInTheDocument();
+      expect(screen.getByText("3 courses · you’re enrolled in 2")).toBeInTheDocument();
     });
 
-    test("WHEN the enrollment is refused THEN Advanced returns to the shelf", async () => {
+    test("WHEN the enrollment is refused THEN Advanced offers Enroll again", async () => {
+      // Arrange
       vi.mocked(enrollInCourseAction).mockResolvedValue({ serverError: "x" } as never);
       const user = userEvent.setup();
       renderInLocale(<AvailableCoursesView courses={courses} />);
 
-      await user.click(screen.getByRole("button", { name: "Enroll" }));
+      // Act
+      await user.click(
+        within(posterOf(advanced.course.title)).getByRole("button", { name: "Enroll" }),
+      );
 
-      await waitFor(() => expect(screen.getByTestId("course-shelf-card")).toBeInTheDocument());
+      // Assert
+      await waitFor(() =>
+        expect(
+          within(posterOf(advanced.course.title)).getByRole("button", { name: "Enroll" }),
+        ).toBeInTheDocument(),
+      );
     });
   });
 
-  describe("GIVEN a learner enrolled in both who last watched Advanced", () => {
-    test("WHEN the page renders THEN Advanced leads as last watched AND Basic is the other course", () => {
+  describe("GIVEN a learner enrolled in Basic and Advanced who last watched Advanced", () => {
+    test("WHEN the page renders THEN Advanced leads, Basic follows AND the Atlas closes the lobby", () => {
+      // Arrange
       givenLearner.enrolledCourses(["basic-course", "advanced-intermediate-course"]);
       givenLearner.continueWatchingByCourse([
         aPlaceIn(advanced, 1, 0, 2),
         aPlaceIn(basic, 1, 1, 1),
       ]);
 
+      // Act
       renderInLocale(<AvailableCoursesView courses={courses} />);
 
-      expect(screen.getByText("2 courses · you’re enrolled in all of them")).toBeInTheDocument();
-      const hero = screen.getByTestId("course-cinema-hero");
-      expect(within(hero).getByText("Last watched")).toBeInTheDocument();
-      expect(
-        within(hero).getByRole("heading", { name: advanced.course.title }),
-      ).toBeInTheDocument();
-      expect(screen.getByTestId("enrolled-course-card")).toHaveTextContent(basic.course.title);
-      expect(screen.getByText(/You’re enrolled in every course/)).toBeInTheDocument();
+      // Assert
+      expect(posterTitles()).toEqual([
+        advanced.course.title,
+        basic.course.title,
+        atlas.course.title,
+      ]);
     });
   });
 
-  describe("GIVEN a learner enrolled in Basic and the reference Atlas", () => {
-    beforeEach(() => {
-      givenLearner.enrolledCourses(["basic-course", "atlas-of-american-sounds"]);
-    });
+  describe("GIVEN a learner enrolled in every course", () => {
+    test("WHEN the page renders THEN the summary says so", () => {
+      // Arrange
+      givenLearner.enrolledCourses(courses.map((view) => view.course.slug));
 
-    test("WHEN the page renders THEN the shelf keeps going after Level 1 AND offers Advanced", () => {
-      renderInLocale(<AvailableCoursesView courses={[...courses, atlas]} />);
+      // Act
+      renderInLocale(<AvailableCoursesView courses={courses} />);
 
-      expect(
-        screen.getByRole("heading", { level: 2, name: "Keep going after Level 1" }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("heading", { level: 3, name: advanced.course.title }),
-      ).toBeInTheDocument();
-    });
-  });
-
-  describe("GIVEN a learner enrolled only in the reference Atlas", () => {
-    test("WHEN the page renders THEN the shelf says start here", () => {
-      givenLearner.enrolledCourses(["atlas-of-american-sounds"]);
-
-      renderInLocale(<AvailableCoursesView courses={[...courses, atlas]} />);
-
-      expect(screen.getByRole("heading", { level: 2, name: "Start here" })).toBeInTheDocument();
+      // Assert
+      expect(screen.getByText("3 courses · you’re enrolled in all of them")).toBeInTheDocument();
     });
   });
 
   describe("GIVEN a learner enrolled in nothing", () => {
-    test("WHEN the page renders THEN Basic is recommended AND the shelf says start here", () => {
+    beforeEach(() => {
       givenLearner.enrolledCourses([]);
+    });
 
+    test("WHEN the page renders THEN the next-up bar for Basic comes before the heading", () => {
+      // Act
       renderInLocale(<AvailableCoursesView courses={courses} />);
 
-      const hero = screen.getByTestId("course-cinema-hero");
-      expect(within(hero).getByText("Recommended for you")).toBeInTheDocument();
-      expect(within(hero).getByRole("heading", { name: basic.course.title })).toBeInTheDocument();
-      expect(screen.getByRole("heading", { level: 2, name: "Start here" })).toBeInTheDocument();
-      expect(screen.getByTestId("course-shelf-card")).toHaveTextContent(advanced.course.title);
+      // Assert
+      const bar = screen.getByTestId("next-up-bar");
+      const heading = screen.getByRole("heading", { level: 1, name: "Available courses" });
+      expect(bar).toHaveTextContent(`Next up · ${basic.course.title}`);
+      expect(bar.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    test("WHEN the page renders THEN every course is a joinable poster in catalog order", () => {
+      // Act
+      renderInLocale(<AvailableCoursesView courses={[atlas, advanced, basic]} />);
+
+      // Assert
+      expect(posterTitles()).toEqual([
+        basic.course.title,
+        advanced.course.title,
+        atlas.course.title,
+      ]);
+      expect(screen.getAllByRole("button", { name: "Enroll" })).toHaveLength(3);
+    });
+
+    test("WHEN Enroll is activated on a poster THEN the next-up bar leaves", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      renderInLocale(<AvailableCoursesView courses={courses} />);
+
+      // Act
+      await user.click(
+        within(posterOf(advanced.course.title)).getByRole("button", { name: "Enroll" }),
+      );
+
+      // Assert
+      expect(screen.queryByTestId("next-up-bar")).toBeNull();
     });
   });
 
   test("WHEN rendered in es THEN the page copy comes from es.json", () => {
-    givenLearner.enrolledCourses(["basic-course"]);
+    // Arrange
+    givenLearner.enrolledCourses([]);
 
+    // Act
     renderInLocale(<AvailableCoursesView courses={courses} />, "es");
 
+    // Assert
     expect(
       screen.getByRole("heading", { level: 1, name: "Cursos disponibles" }),
     ).toBeInTheDocument();
+    expect(screen.getByTestId("next-up-bar")).toHaveTextContent("Lo que sigue · ");
   });
 });

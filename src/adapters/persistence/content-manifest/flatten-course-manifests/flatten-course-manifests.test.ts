@@ -87,6 +87,20 @@ describe("flattenCourseManifests", () => {
       expect(courses[0]).toMatchObject({ outcomes, sounds });
     });
 
+    test("WHEN the manifest declares an audience and highlights THEN the course carries both", () => {
+      // Arrange
+      const audience = faker.lorem.sentence();
+      const highlights = faker.helpers.multiple(() => faker.lorem.words(3), { count: 3 });
+
+      // Act
+      const { courses } = flattenCourseManifests(
+        catalogOf([videoLesson()], { audience, highlights }),
+      );
+
+      // Assert
+      expect(courses[0]).toMatchObject({ audience, highlights });
+    });
+
     test("WHEN the manifest declares translations THEN the course carries them", () => {
       // Arrange
       const translations = { es: { description: faker.lorem.sentence() } };
@@ -108,6 +122,8 @@ describe("flattenCourseManifests", () => {
       // Assert
       expect(courses[0]).not.toHaveProperty("outcomes");
       expect(courses[0]).not.toHaveProperty("sounds");
+      expect(courses[0]).not.toHaveProperty("audience");
+      expect(courses[0]).not.toHaveProperty("highlights");
     });
 
     test("WHEN it is flattened THEN parent ids are propagated down the tree", () => {

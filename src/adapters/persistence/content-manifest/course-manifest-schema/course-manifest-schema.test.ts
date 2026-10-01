@@ -175,6 +175,31 @@ describe("parseCourseManifests", () => {
       expect(course!.outcomes).toEqual(outcomes);
     });
 
+    test("WHEN an `audience` and `highlights` are declared THEN they survive the parse in order", () => {
+      // Arrange
+      const audience = faker.lorem.sentence();
+      const highlights = faker.helpers.multiple(() => faker.lorem.words(4), { count: 3 });
+
+      // Act
+      const [course] = parseCourseManifests([courseManifest({ audience, highlights })]);
+
+      // Assert
+      expect(course!.audience).toBe(audience);
+      expect(course!.highlights).toEqual(highlights);
+    });
+
+    test("WHEN neither `audience` nor `highlights` is declared THEN the course carries neither", () => {
+      // Arrange
+      const manifest = courseManifest();
+
+      // Act
+      const [course] = parseCourseManifests([manifest]);
+
+      // Assert
+      expect(course!.audience).toBeUndefined();
+      expect(course!.highlights).toBeUndefined();
+    });
+
     test("WHEN `sounds` are declared THEN vowels and consonants survive the parse", () => {
       // Arrange
       const sounds = { vowels: ["ə", "ɪ", "aɪ"], consonants: ["θ", "ð"] };
@@ -188,6 +213,8 @@ describe("parseCourseManifests", () => {
 
     test.each([
       ["an empty outcome", { outcomes: [""] }],
+      ["an empty audience", { audience: "" }],
+      ["an empty highlight", { highlights: [""] }],
       ["an empty vowel", { sounds: { vowels: [""], consonants: [] } }],
       ["sounds without consonants", { sounds: { vowels: ["ə"] } }],
     ])("WHEN it declares %s THEN it is rejected naming the course", (_label, overrides) => {
@@ -208,7 +235,11 @@ describe("parseCourseManifests", () => {
       // Arrange
       const translations = {
         es: { description: faker.lorem.sentence(), outcomes: [faker.lorem.sentence()] },
-        pt: { description: faker.lorem.sentence() },
+        pt: {
+          description: faker.lorem.sentence(),
+          audience: faker.lorem.sentence(),
+          highlights: [faker.lorem.words(3)],
+        },
       };
 
       // Act
@@ -222,6 +253,8 @@ describe("parseCourseManifests", () => {
       ["a key that is not a language code", { translations: { spanish: { description: "Hola" } } }],
       ["an empty description", { translations: { es: { description: "" } } }],
       ["an empty outcome", { translations: { es: { outcomes: [""] } } }],
+      ["an empty audience", { translations: { es: { audience: "" } } }],
+      ["an empty highlight", { translations: { es: { highlights: [""] } } }],
     ])("WHEN it declares %s THEN it is rejected naming the course", (_label, overrides) => {
       // Arrange
       const manifest = courseManifest({ ...overrides, slug: "translated-course" });
