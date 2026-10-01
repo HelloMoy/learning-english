@@ -396,6 +396,38 @@ describe("what the tracked courses teach", () => {
       },
     );
 
+    test("WHEN parsed THEN every course declares an audience AND three highlights", () => {
+      // Arrange
+      const courses = declared;
+
+      // Act
+      const withoutBrief = courses.filter(
+        (course) => !course.audience || course.highlights?.length !== 3,
+      );
+
+      // Assert
+      expect(withoutBrief.map((course) => course.slug)).toEqual([]);
+    });
+
+    test.each(["es", "pt"])(
+      "WHEN parsed THEN every course translates its audience AND each highlight into %s",
+      (locale) => {
+        // Arrange
+        const courses = declared;
+
+        // Act
+        const untranslated = courses.filter((course) => {
+          const translation = course.translations?.[locale];
+          return (
+            !translation?.audience || translation.highlights?.length !== course.highlights?.length
+          );
+        });
+
+        // Assert
+        expect(untranslated.map((course) => course.slug)).toEqual([]);
+      },
+    );
+
     test("WHEN the Advanced Intermediate Course is parsed THEN it declares no sounds", () => {
       // Arrange
       const advanced = courseOf("advanced-intermediate-course");

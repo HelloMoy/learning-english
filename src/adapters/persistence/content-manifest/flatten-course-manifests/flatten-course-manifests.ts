@@ -48,6 +48,8 @@ function toCourse(course: CourseManifest): Course {
     sequence: course.sequence,
     track: course.track,
     ...(course.outcomes && { outcomes: course.outcomes }),
+    ...(course.audience && { audience: course.audience }),
+    ...(course.highlights && { highlights: course.highlights }),
     ...(course.sounds && { sounds: course.sounds }),
     ...(course.translations && { translations: course.translations }),
   });

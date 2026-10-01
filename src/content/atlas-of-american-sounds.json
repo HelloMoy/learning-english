@@ -13,6 +13,12 @@
     "Pronounce every consonant, including the flap T in “water” and the glottal T in “button”.",
     "Go straight to the one sound you struggle with and drill it in a short lesson."
   ],
+  "audience": "Any level: go straight to the sound you struggle with.",
+  "highlights": [
+    "Every vowel, diphthong and r-colored vowel on its own",
+    "Minimal pairs: sheep / ship, thin / thing",
+    "Every consonant, including the flap T and the glottal T"
+  ],
   "sounds": {
     "vowels": [
       "i",
@@ -77,6 +83,12 @@
         "Distinguir pares mínimos como sheep y ship, bus y boss, thin y thing, pray y play.",
         "Pronunciar cada consonante, incluida la T flap de “water” y la T glotal de “button”.",
         "Ir directo al sonido que te cuesta y practicarlo en una lección corta."
+      ],
+      "audience": "Cualquier nivel: para ir directo al sonido que te cuesta.",
+      "highlights": [
+        "Cada vocal, diptongo y vocal con r por separado",
+        "Pares mínimos: sheep / ship, thin / thing",
+        "Cada consonante, incluida la flap T y la T glotal"
       ]
     },
     "pt": {
@@ -87,6 +99,12 @@
         "Distinguir pares mínimos como sheep e ship, bus e boss, thin e thing, pray e play.",
         "Pronunciar cada consoante, incluindo o T flap de “water” e o T glotal de “button”.",
         "Ir direto ao som que é difícil para você e treiná-lo em uma aula curta."
+      ],
+      "audience": "Qualquer nível: para ir direto ao som que você acha difícil.",
+      "highlights": [
+        "Cada vogal, ditongo e vogal com r separadamente",
+        "Pares mínimos: sheep / ship, thin / thing",
+        "Cada consoante, incluindo o flap T e o T glotal"
       ]
     }
   },

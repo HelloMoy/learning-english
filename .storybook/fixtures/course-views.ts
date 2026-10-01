@@ -31,8 +31,13 @@ type Manifest = {
   sequence: number;
   track?: "level" | "reference";
   outcomes?: string[];
+  audience?: string;
+  highlights?: string[];
   sounds?: { vowels: string[]; consonants: string[] };
-  translations?: Record<string, { description?: string; outcomes?: string[] }>;
+  translations?: Record<
+    string,
+    { description?: string; outcomes?: string[]; audience?: string; highlights?: string[] }
+  >;
   modules: ManifestModule[];
 };
 
@@ -61,6 +66,8 @@ function courseViewOf<Standing extends CourseStanding>(
     track: manifest.track ?? "level",
     sequence: manifest.sequence,
     ...(manifest.outcomes && { outcomes: manifest.outcomes }),
+    ...(manifest.audience && { audience: manifest.audience }),
+    ...(manifest.highlights && { highlights: manifest.highlights }),
     ...(manifest.sounds && { sounds: manifest.sounds }),
     ...(manifest.translations && { translations: manifest.translations }),
   });

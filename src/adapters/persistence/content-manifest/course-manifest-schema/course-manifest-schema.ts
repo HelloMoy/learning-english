@@ -1,5 +1,7 @@
 import { assertSafeKey } from "@/adapters/persistence/blob-store/blob-key/blob-key";
 import {
+  CourseAudience,
+  CourseHighlights,
   CourseOutcomes,
   CourseSounds,
   CourseTrack,
@@ -156,9 +158,13 @@ export const CourseManifest = z.object({
   track: CourseTrack.default("level"),
   /** What the course teaches, for learners deciding whether to join. Absent means none declared. */
   outcomes: CourseOutcomes.optional(),
+  /** Who the course is for, in one sentence. Absent means none declared. */
+  audience: CourseAudience.optional(),
+  /** What the course teaches, in a few short points. Absent means none declared. */
+  highlights: CourseHighlights.optional(),
   /** The IPA sounds the course teaches. Absent for courses that are not about single sounds. */
   sounds: CourseSounds.optional(),
-  /** The description and outcomes in other languages, keyed by ISO 639-1 code. */
+  /** The course's prose in other languages, keyed by ISO 639-1 code. */
   translations: CourseTranslations.optional(),
   modules: z.array(ManifestModule).min(1),
 });

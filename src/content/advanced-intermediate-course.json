@@ -13,6 +13,12 @@
     "Understand and use common everyday expressions in context.",
     "Build speaking confidence with a 30-day plan and step-by-step practice exercises."
   ],
+  "audience": "Anyone who can already say the single sounds and wants to speak fast and naturally.",
+  "highlights": [
+    "Contractions and reductions like I’m, you’ll, would’ve",
+    "American intonation and linking words together",
+    "Everyday phrases and a 30-day plan"
+  ],
   "translations": {
     "es": {
       "description": "De los sonidos sueltos al habla real: contracciones y reducciones, entonación americana, las reglas del inglés rápido y natural, y frases cotidianas.",
@@ -23,6 +29,12 @@
         "Enlazar palabras con las reglas del inglés rápido y natural.",
         "Entender y usar expresiones cotidianas comunes en contexto.",
         "Ganar confianza al hablar con un plan de 30 días y ejercicios de práctica paso a paso."
+      ],
+      "audience": "Quien ya pronuncia los sonidos sueltos y quiere hablar rápido y natural.",
+      "highlights": [
+        "Contracciones y reducciones como I’m, you’ll, would’ve",
+        "Entonación americana y enlace de palabras",
+        "Frases cotidianas y un plan de 30 días"
       ]
     },
     "pt": {
@@ -34,6 +46,12 @@
         "Ligar as palavras com as regras do inglês rápido e natural.",
         "Entender e usar expressões comuns do dia a dia em contexto.",
         "Ganhar confiança para falar com um plano de 30 dias e exercícios práticos passo a passo."
+      ],
+      "audience": "Quem já pronuncia os sons isolados e quer falar rápido e com naturalidade.",
+      "highlights": [
+        "Contrações e reduções como I’m, you’ll, would’ve",
+        "Entonação americana e ligação entre palavras",
+        "Frases do dia a dia e um plano de 30 dias"
       ]
     }
   },
