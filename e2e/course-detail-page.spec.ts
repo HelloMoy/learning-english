@@ -1,6 +1,6 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
-import { modulesOfCourse } from "./content-seed-fixtures";
+import { lessonsOfModule, modulesOfCourse } from "./content-seed-fixtures";
 import { expect, FIRST_COURSE_SLUG, test } from "./learner-profile-fixture";
 
 /**
@@ -21,6 +21,7 @@ const ADVANCED = COURSES.find((course) => course.slug === "advanced-intermediate
 const ATLAS = COURSES.find((course) => course.track === "reference")!;
 
 const courseUrl = (slug: string) => `/en/courses/${slug}`;
+const courseDetailUrl = (slug: string) => `${courseUrl(slug)}/about`;
 
 test.describe("Course page", () => {
   test.describe("GIVEN a learner who has not joined the Advanced course", () => {
@@ -134,6 +135,91 @@ test.describe("Course page", () => {
         COLD_ROUTE,
       );
       await expect(page.getByTestId("course-detail-view")).toHaveCount(0);
+    });
+  });
+
+  test.describe("GIVEN a learner enrolled in the Basic Course on its progress board", () => {
+    test("WHEN they follow View course details THEN the course page opens AND Go to my progress returns to the board", async ({
+      page,
+    }) => {
+      // Arrange
+      await page.goto(courseUrl(FIRST_COURSE_SLUG));
+      const courseTile = page.getByTestId("course-progress-tile");
+
+      // Act
+      await courseTile.getByRole("link", { name: "View course details" }).click(COLD_ROUTE);
+
+      // Assert
+      await expect(page).toHaveURL(courseDetailUrl(FIRST_COURSE_SLUG), COLD_ROUTE);
+      await expect(page.getByTestId("course-detail-view")).toBeVisible(COLD_ROUTE);
+      await expect(page.getByRole("heading", { level: 2, name: "You’re enrolled" })).toBeVisible();
+      await expect(page.getByTestId("lesson-ring-tile")).toHaveCount(0);
+
+      // Act
+      await page.getByRole("link", { name: "Go to my progress" }).click();
+
+      // Assert
+      await expect(page).toHaveURL(courseUrl(FIRST_COURSE_SLUG), COLD_ROUTE);
+      await expect(page.getByTestId("lesson-ring-tile")).toHaveCount(
+        modulesOfCourse(FIRST_COURSE_SLUG).length,
+        COLD_ROUTE,
+      );
+    });
+
+    test("WHEN they have finished the first video THEN the course page continues where the board does", async ({
+      page,
+      learnerState,
+    }) => {
+      // Arrange
+      const [firstModule] = modulesOfCourse(FIRST_COURSE_SLUG);
+      const [firstVideo] = lessonsOfModule(firstModule!.id);
+      await learnerState.completed([firstVideo!.id]);
+      await learnerState.continueWatching({
+        courseSlug: FIRST_COURSE_SLUG,
+        moduleSlug: firstModule!.slug,
+        lessonId: firstVideo!.id,
+      });
+      await page.goto(courseUrl(FIRST_COURSE_SLUG));
+      const boardAction = page.getByTestId("continue-tile").getByRole("link", {
+        name: "Continue where you left off",
+      });
+      await expect(boardAction).toBeVisible(COLD_ROUTE);
+      const boardHref = await boardAction.getAttribute("href");
+
+      // Act
+      await page.goto(courseDetailUrl(FIRST_COURSE_SLUG));
+
+      // Assert
+      const pageAction = page
+        .getByTestId("course-detail-hero")
+        .getByRole("link", { name: "Continue where you left off" });
+      await expect(pageAction).toHaveAttribute("href", boardHref!, COLD_ROUTE);
+      await expect(page.getByRole("link", { name: "Start course" })).toHaveCount(0);
+    });
+
+    test("WHEN they reload the course page THEN it stays the course page", async ({ page }) => {
+      // Arrange
+      await page.goto(courseDetailUrl(FIRST_COURSE_SLUG));
+      await expect(page.getByTestId("course-detail-view")).toBeVisible(COLD_ROUTE);
+
+      // Act
+      await page.reload();
+
+      // Assert
+      await expect(page.getByTestId("course-detail-view")).toBeVisible(COLD_ROUTE);
+      await expect(page.getByTestId("lesson-ring-tile")).toHaveCount(0);
+    });
+  });
+
+  test.describe("GIVEN a course page address that names no course", () => {
+    test("WHEN it is opened THEN the course route's error state renders", async ({ page }) => {
+      // Act
+      await page.goto(courseDetailUrl("no-such-course"));
+
+      // Assert
+      await expect(
+        page.getByRole("alert").getByRole("heading", { name: "We couldn't find this course." }),
+      ).toBeVisible(COLD_ROUTE);
     });
   });
 
