@@ -28,15 +28,11 @@ export type CourseShelfReading =
       status: "read";
       /** The enrolled course to lead with, or `null` with no enrollment. */
       featured: CourseCardModel | null;
-      /** Whether the learner has been in the featured course at all. */
-      isFeaturedWatched: boolean;
       otherEnrolled: CourseCardModel[];
       /** With no enrollment, the first level course; otherwise `null`. */
       recommended: CourseCardModel | null;
       available: CourseForView[];
       enrolledCount: number;
-      /** The highest derived level enrolled in, or `null` when no level course is enrolled. */
-      highestEnrolledLevel: number | null;
     };
 
 const isSeeded = () => learnerStore.getState().isSeeded;
@@ -75,18 +71,9 @@ export function useCourseShelf(courses: ReadonlyArray<CourseForView>): CourseShe
   return {
     status: "read",
     featured: shelf.featured ? modelOf(shelf.featured) : null,
-    isFeaturedWatched: Boolean(shelf.featured?.record),
     otherEnrolled: shelf.otherEnrolled.map(modelOf),
     recommended: shelf.recommended ? modelOf(shelf.recommended) : null,
     available: shelf.available,
     enrolledCount: enrolled.length,
-    highestEnrolledLevel: highestLevelOf(enrolled),
   };
-}
-
-function highestLevelOf(enrolled: ReadonlyArray<ShelfCourse>): number | null {
-  const levels = enrolled.flatMap(({ view: { standing } }) =>
-    standing.kind === "level" ? [standing.number] : [],
-  );
-  return levels.length > 0 ? Math.max(...levels) : null;
 }

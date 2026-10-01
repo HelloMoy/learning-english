@@ -30,8 +30,8 @@ export type CourseDetailHeroProps = {
  * kind of course it is, how big it is, and the enroll action.
  *
  * @remarks
- * It shares Available courses' cinema frame ({@link CinemaHeroArtwork}), so
- * following **Preview course** keeps the same picture. The mark reads `Level N`
+ * It draws its artwork with {@link CinemaHeroArtwork}, and shows the same first
+ * video as the poster's **View details** on Available courses. The mark reads `Level N`
  * or **Reference**, and **Enrolled** once the learner joins. On wide screens a
  * chip names the first video; it is deliberately not a link, because opening
  * a video enrolls the learner (capability `course-enrollment`). The facts line

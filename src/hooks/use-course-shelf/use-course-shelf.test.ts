@@ -36,12 +36,10 @@ describe("useCourseShelf", () => {
 
     if (result.current.status !== "read") throw new Error("expected a read shelf");
     expect(result.current.featured?.course.slug).toBe("advanced-intermediate-course");
-    expect(result.current.isFeaturedWatched).toBe(true);
     expect(result.current.otherEnrolled.map((model) => model.course.slug)).toEqual([
       "basic-course",
     ]);
     expect(result.current.enrolledCount).toBe(2);
-    expect(result.current.highestEnrolledLevel).toBe(2);
   });
 
   test("WHEN the learner is enrolled in nothing THEN the first course is recommended", () => {
@@ -55,25 +53,14 @@ describe("useCourseShelf", () => {
     expect(result.current.available.map((view) => view.course.slug)).toEqual([
       "advanced-intermediate-course",
     ]);
-    expect(result.current.highestEnrolledLevel).toBeNull();
   });
 
-  test("WHEN the learner is enrolled in Basic and a reference course THEN the highest level is still 1", () => {
-    givenLearner.enrolledCourses(["basic-course", "atlas-of-american-sounds"]);
-
-    const { result } = renderHook(() => useCourseShelf([...courses, atlas]));
-
-    if (result.current.status !== "read") throw new Error("expected a read shelf");
-    expect(result.current.highestEnrolledLevel).toBe(1);
-  });
-
-  test("WHEN the learner is enrolled only in a reference course THEN no level is enrolled", () => {
+  test("WHEN the learner is enrolled only in a reference course THEN it counts as one enrollment", () => {
     givenLearner.enrolledCourses(["atlas-of-american-sounds"]);
 
     const { result } = renderHook(() => useCourseShelf([...courses, atlas]));
 
     if (result.current.status !== "read") throw new Error("expected a read shelf");
     expect(result.current.enrolledCount).toBe(1);
-    expect(result.current.highestEnrolledLevel).toBeNull();
   });
 });

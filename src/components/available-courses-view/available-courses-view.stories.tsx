@@ -50,10 +50,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Enrolled in the Basic Course: it leads, and the Advanced course waits on the shelf. */
+/** Enrolled in the Basic Course: its poster leads, the Advanced course and the Atlas wait to be joined. */
 export const EnrolledInBasic: Story = {};
 
-/** Enrolled in both, the Advanced course watched last: it leads and Basic follows. */
+/** Enrolled in both levels, the Advanced course watched last: its poster leads and Basic follows. */
 export const EnrolledInBoth: Story = {
   beforeEach: () => {
     givenLearner.enrolledCourses([ADVANCED_COURSE_VIEW.course.slug]);
@@ -65,7 +65,7 @@ export const EnrolledInBoth: Story = {
   },
 };
 
-/** Enrolled in nothing: the Basic Course is recommended. */
+/** Enrolled in nothing: the next-up bar offers the Basic Course's first video above the heading. */
 export const EnrolledInNothing: Story = {
   beforeEach: () => {
     resetLearnerStore();
@@ -75,6 +75,12 @@ export const EnrolledInNothing: Story = {
 
 /** Spanish copy. */
 export const InSpanish: Story = {
+  parameters: { locale: "es" },
+};
+
+/** A new learner in Spanish: the bar reads "Lo que sigue · Basic Course". */
+export const EnrolledInNothingInSpanish: Story = {
+  ...EnrolledInNothing,
   parameters: { locale: "es" },
 };
 
