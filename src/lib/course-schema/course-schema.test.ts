@@ -37,7 +37,7 @@ describe("courseSchema", () => {
       name: course.title,
       description: course.description,
       inLanguage: course.language,
-      url: `${SITE}/en/courses/basic-course`,
+      url: `${SITE}/en/courses/basic-course/progress`,
     });
     expect(schema.provider).toMatchObject({ "@type": "Organization", name: "English Course" });
   });

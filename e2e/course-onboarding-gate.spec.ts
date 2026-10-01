@@ -86,7 +86,7 @@ test.describe("Course routes require a learner card", () => {
   test("WHEN a signed-in request renders a course route THEN the course content is in the HTML", async ({
     context,
   }) => {
-    const response = await context.request.get(`/en/courses/${COURSE.slug}`);
+    const response = await context.request.get(`/en/courses/${COURSE.slug}/progress`);
 
     expect(await response.text()).toContain(COURSE.title);
   });

@@ -74,10 +74,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Enrolled in both, the Advanced course watched last: it leads, and both courses are listed. */
+/** Enrolled in both, the Advanced course watched last: it leads, both courses are listed and the catalog card teases the Atlas. */
 export const EnrolledInBoth: Story = {};
 
-/** Enrolled in the Basic Course and never started: Start here. */
+/** Enrolled in the Basic Course and never started: Start here, and the catalog card teases the Advanced course. */
 export const JustEnrolled: Story = {
   beforeEach: () => {
     resetLearnerStore();

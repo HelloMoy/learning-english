@@ -3,13 +3,13 @@
 ## Purpose
 Give a learner who has not joined a course a page that says what the course teaches, what is in it
 and how long it takes, and lets them enroll from it. The page lives on the course route
-(`/[locale]/courses/[courseSlug]`) and gives way to the progress board (`cinema-course-overview`) once
+(`/[locale]/courses/[courseSlug]/progress`) and gives way to the progress board (`cinema-course-overview`) once
 the learner is enrolled on arrival; its own route, `/[locale]/courses/[courseSlug]/about`, shows it to
 every learner, which is where the board links to it.
 ## Requirements
 ### Requirement: The course route shows the course page until the learner has joined
 
-`/[locale]/courses/[courseSlug]` SHALL decide what to render from the learner's enrollments once the
+`/[locale]/courses/[courseSlug]/progress` SHALL decide what to render from the learner's enrollments once the
 learner store is seeded:
 
 - a learner **not enrolled** in the course SHALL see the **course page**;
@@ -23,11 +23,11 @@ contains the course title as the page's level-one heading and names no enrollmen
 no **Start course** and no progress.
 
 #### Scenario: A learner who has not joined sees the course page
-- **WHEN** a learner enrolled only in `basic-course` opens `/en/courses/advanced-intermediate-course`
+- **WHEN** a learner enrolled only in `basic-course` opens `/en/courses/advanced-intermediate-course/progress`
 - **THEN** the course page renders with **Enroll**, and no progress ring or continue tile renders
 
 #### Scenario: An enrolled learner keeps the progress board
-- **WHEN** a learner enrolled in `basic-course` opens `/en/courses/basic-course`
+- **WHEN** a learner enrolled in `basic-course` opens `/en/courses/basic-course/progress`
 - **THEN** the progress board renders and the course page does not
 
 #### Scenario: Enrolling keeps the learner on the course page
@@ -190,7 +190,7 @@ seeded, including on the server, it SHALL render the same pending shape as the c
 course title as the level-one heading and no enrollment state. A slug that names no course SHALL
 render the course route's error state.
 
-The course route (`/[locale]/courses/[courseSlug]`) SHALL keep deciding between the course page
+The course route (`/[locale]/courses/[courseSlug]/progress`) SHALL keep deciding between the course page
 and the progress board as before.
 
 #### Scenario: An enrolled learner opens the course page
@@ -216,12 +216,12 @@ and the progress board as before.
 ### Requirement: The enrolled enroll card leads back to the progress board
 
 Once the learner is enrolled, the enroll card SHALL end with a **Go to my progress** link to the
-course route (`/[locale]/courses/[courseSlug]`) through the locale-aware path. While the learner is
+course route (`/[locale]/courses/[courseSlug]/progress`) through the locale-aware path. While the learner is
 not enrolled the card SHALL offer no such link. The link text SHALL come from `en`, `es` and `pt`.
 
 #### Scenario: Enrolled
 - **WHEN** an enrolled learner views the Basic Course's page
-- **THEN** the enroll card shows **Go to my progress** linking to `/en/courses/basic-course`
+- **THEN** the enroll card shows **Go to my progress** linking to `/en/courses/basic-course/progress`
 
 #### Scenario: Not enrolled
 - **WHEN** a learner who has not joined views the Advanced course's page
@@ -229,5 +229,5 @@ not enrolled the card SHALL offer no such link. The link text SHALL come from `e
 
 #### Scenario: Spanish
 - **WHEN** an enrolled learner views the Basic Course's page under `/es`
-- **THEN** the link reads **Ir a mi progreso** and points to `/es/courses/basic-course`
+- **THEN** the link reads **Ir a mi progreso** and points to `/es/courses/basic-course/progress`
 

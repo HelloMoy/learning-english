@@ -36,7 +36,7 @@ The locale set and the default locale SHALL be read from the routing configurati
 The shape of the locale prefix SHALL be asserted by a test rather than assumed. `getPathname` from the navigation wrappers cannot serve this purpose: outside a Next request it resolves to its client build and returns `/` for every input, which would make the one function every canonical depends on untestable.
 
 #### Scenario: A course page declares all three locales
-- **WHEN** `/es/courses/basic-course` renders
+- **WHEN** `/es/courses/basic-course/progress` renders
 - **THEN** its canonical is the `es` URL, and it declares alternates for the `en`, `es` and `pt` equivalents of the same course, plus `x-default` pointing at the `en` one
 
 #### Scenario: Alternates follow the routing config

@@ -13,6 +13,7 @@
  * @category Metadata
  */
 import type { Course } from "@/domain/entities/course/course";
+import { courseOverviewPath } from "@/i18n/lesson-routes";
 import { courseCopy } from "@/lib/course-copy/course-copy";
 
 /** The brand, matching `og:site_name` and the header wordmark. */
@@ -63,7 +64,7 @@ export function courseSchema(input: {
     "@type": "Course" as const,
     name: course.title,
     description: courseCopy(course, locale).description,
-    url: `${siteUrl}/${locale}/courses/${course.slug}`,
+    url: `${siteUrl}/${locale}${courseOverviewPath(course)}`,
     // What the course teaches, not the locale it is presented in.
     inLanguage: course.language,
     provider: PUBLISHER,

@@ -10,7 +10,7 @@ import { siteUrl } from "@/lib/site-url/site-url";
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 
-import { courseRouteMetadata, loadCourseView } from "./course-route";
+import { courseRouteMetadata, loadCourseView } from "../course-route";
 
 type Props = {
   params: Promise<{ locale: string; courseSlug: string }>;
@@ -30,7 +30,7 @@ export default async function CourseOverviewPage({ params }: Props) {
   }
   const { course } = view;
   const origin = siteUrl();
-  const courseUrl = `${origin}/${locale}/courses/${course.slug}`;
+  const courseUrl = `${origin}/${locale}${courseOverviewPath(course)}`;
 
   return (
     <main

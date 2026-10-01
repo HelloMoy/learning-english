@@ -1284,7 +1284,7 @@ the manifest declares.
 - **THEN** each course declares `es` and `pt` translations with a description, an audience, as many outcomes as its own and as many highlights as its own
 
 #### Scenario: The share surfaces follow the locale
-- **WHEN** `/pt/courses/basic-course` is shared
+- **WHEN** `/pt/courses/basic-course/progress` is shared
 - **THEN** the metadata description, the share image headline and the structured data describe the course in Portuguese
 
 ### Requirement: A manifest may declare who its course is for and its highlights

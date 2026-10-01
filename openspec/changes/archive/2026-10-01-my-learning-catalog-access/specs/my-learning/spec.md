@@ -1,26 +1,4 @@
-# my-learning Specification
-
-## Purpose
-TBD - created by archiving change learner-onboarding. Update Purpose after archive.
-## Requirements
-### Requirement: My learning is the learner's own page
-
-The route `/[locale]/learning` SHALL render the learner's page. After hydration it SHALL replace itself with `/[locale]/start` when no profile exists, and with `/[locale]/start/first-course?from=learning` when a profile exists but the learner is enrolled in no course. Until storage has been read it SHALL render a placeholder of the page's shape, and it SHALL decide neither redirect while the profile or the enrollments are unknown.
-
-The page SHALL greet the learner with their avatar and a localized welcome that uses the first word of
-their name.
-
-#### Scenario: The greeting uses the learner's name
-- **WHEN** a learner named `Ana García` opens My learning
-- **THEN** the page shows their avatar and `Welcome back, Ana.`
-
-#### Scenario: No profile sends the learner to onboarding
-- **WHEN** a device without a profile opens `/en/learning`
-- **THEN** it lands on `/en/start`
-
-#### Scenario: No enrollment sends the learner to the first-course step
-- **WHEN** a learner with a profile and no enrolled course opens `/en/learning`
-- **THEN** it lands on `/en/start/first-course?from=learning`
+## MODIFIED Requirements
 
 ### Requirement: My learning resumes the last lesson or starts the first
 
@@ -61,15 +39,6 @@ The progress panel SHALL be the course overview's course panel: the course title
 - **WHEN** the pointer rests on the hero's poster, away from its action
 - **THEN** the hero's link stays under the pointer, so the cursor and the hover style do not flicker
 
-### Requirement: My learning copy is localized
-
-Every string on My learning SHALL come from the active locale's messages in `en`, `es` and `pt`, with ICU
-plurals for counts, and every link SHALL be locale-aware.
-
-#### Scenario: My learning in Spanish
-- **WHEN** `/es/learning` renders for a learner
-- **THEN** the greeting, panel actions, row labels and table copy render from `es.json`
-
 ### Requirement: Your courses lists every enrolled course with its own next video
 
 Below the hero, My learning SHALL show **Your courses**: a heading stating how many courses the learner is enrolled in and one card per enrolled course in `sequence` order, followed by the **catalog card**. The cards SHALL sit in three columns on wide screens, two on tablets and one on phones. Each card SHALL show a ring with the course's completed share, its title, the completed and total videos, a **Next up** row with the course's continue target (thumbnail with its saved progress when there is one, title, module ordinal and title, position and duration), one primary action across the card's width that opens that target — reading **Start** for a course never opened, **Continue** for one under way and **Watch again** for a finished one — and, closing the card, a bar split between a **Progress** link to the course overview (`/[locale]/courses/[courseSlug]/progress`) and a **Details** link to the course page (`/[locale]/courses/[courseSlug]/about`). The card's ring and title SHALL open the course overview too, left out of the tab order so keyboard users meet **Progress** once. The card of the course the hero leads with SHALL be marked visually as the current one.
@@ -105,6 +74,8 @@ once, and the heading SHALL keep its level and text.
 - **WHEN** a keyboard user tabs through the progress panel
 - **THEN** focus lands on **View course details** once and not on the title
 
+## ADDED Requirements
+
 ### Requirement: My learning keeps the catalog in reach
 
 My learning SHALL show a **See all courses** button that opens `/[locale]/courses`. On wide screens it SHALL sit at the end of the greeting's row; on phones it SHALL be hidden, the catalog card being the way to the catalog there.
@@ -137,3 +108,7 @@ The **catalog card** SHALL open `/[locale]/courses` from anywhere on it except i
 - **WHEN** a learner enrolled in every catalog course opens My learning
 - **THEN** the catalog card says they are enrolled in all of them and shows no teaser
 
+## RENAMED Requirements
+
+- FROM: `### Requirement: The progress panel's course title opens the course overview`
+- TO: `### Requirement: The progress panel's course title opens the course page`

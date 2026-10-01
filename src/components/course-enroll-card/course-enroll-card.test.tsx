@@ -116,7 +116,7 @@ describe("CourseEnrollCard", () => {
       // Assert
       expect(screen.getByRole("link", { name: "Go to my progress" })).toHaveAttribute(
         "href",
-        "/courses/basic-course",
+        "/courses/basic-course/progress",
       );
     });
 

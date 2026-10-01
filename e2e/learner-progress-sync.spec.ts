@@ -94,14 +94,14 @@ test.describe("Progress follows the learner", () => {
 
     const laptop = await anotherDevice(browser, learnerAccount);
     const other = await laptop.newPage();
-    await other.goto(`/en/courses/${BASIC.slug}`);
+    await other.goto(`/en/courses/${BASIC.slug}/progress`);
 
     // The card alone enrolls in nothing, so the course route opens its course page
     // (`course-detail-page`); what matters is that it is not the onboarding.
     await expect(other.getByRole("heading", { level: 1, name: BASIC.title })).toBeVisible(
       COLD_ROUTE,
     );
-    await expect(other).toHaveURL(`/en/courses/${BASIC.slug}`);
+    await expect(other).toHaveURL(`/en/courses/${BASIC.slug}/progress`);
     await laptop.close();
   });
 

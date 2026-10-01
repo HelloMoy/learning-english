@@ -40,7 +40,7 @@ const PHONE_WIDTHS = [
 /** Every route the app serves, relative to a locale prefix. */
 const routesFor = (locale: string) => [
   { name: "home", path: `/${locale}` },
-  { name: "course overview", path: `/${locale}/courses/${COURSE_SLUG}` },
+  { name: "course overview", path: `/${locale}/courses/${COURSE_SLUG}/progress` },
   {
     name: "module overview",
     path: `/${locale}/courses/${COURSE_SLUG}/modules/${FIRST_MODULE.slug}`,

@@ -65,6 +65,20 @@ test.describe("unknown routes", () => {
     await expect(page).toHaveURL(/\/pt$/);
   });
 
+  // Only what the learner sees is pinned: under `/courses` a missing page
+  // renders the not-found page with a 200 (the async session layout streams
+  // first), the same as every other unknown path below that segment.
+  test("a course's bare address is a missing page; its progress board lives at /progress", async ({
+    page,
+  }) => {
+    await page.goto("/es/courses/basic-course");
+    await expect(page.getByRole("heading", { name: /página no encontrada/i })).toBeVisible();
+
+    const board = await page.goto("/es/courses/basic-course/progress");
+    expect(board?.status()).toBe(200);
+    await expect(page.getByRole("heading", { name: /página no encontrada/i })).toHaveCount(0);
+  });
+
   test("the page names the path that was requested", async ({ page }) => {
     await page.goto("/es/leccion-perdida");
 

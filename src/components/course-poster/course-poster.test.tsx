@@ -64,7 +64,7 @@ describe("CoursePoster", () => {
       );
       expect(screen.getByRole("link", { name: "View progress" })).toHaveAttribute(
         "href",
-        "/courses/advanced-intermediate-course",
+        "/courses/advanced-intermediate-course/progress",
       );
     });
 
@@ -104,7 +104,7 @@ describe("CoursePoster", () => {
       // Assert
       expect(screen.getByRole("link", { name: "Ver avance" })).toHaveAttribute(
         "href",
-        "/courses/advanced-intermediate-course",
+        "/courses/advanced-intermediate-course/progress",
       );
     });
   });

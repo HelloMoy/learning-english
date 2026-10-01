@@ -134,7 +134,7 @@ Step 2's name field SHALL take its accessible name and placeholder from the same
 
 ### Requirement: Course routes require a learner profile
 
-Every course route SHALL first require a session, as the `learner-account` capability's "Personal routes require a session" defines. A signed-in learner SHALL then, after hydration, be replaced to `/[locale]/start?next=<path>` when the device holds no learner profile. Course routes are `/[locale]/courses/[courseSlug]`,
+Every course route SHALL first require a session, as the `learner-account` capability's "Personal routes require a session" defines. A signed-in learner SHALL then, after hydration, be replaced to `/[locale]/start?next=<path>` when the device holds no learner profile. Course routes are `/[locale]/courses/[courseSlug]/progress`,
 `/[locale]/courses/[courseSlug]/modules/[moduleSlug]` and
 `/[locale]/courses/[courseSlug]/modules/[moduleSlug]/lessons/[lessonId]`. `<path>` is the
 requested route's path without the locale prefix. The redirect SHALL apply however the route was

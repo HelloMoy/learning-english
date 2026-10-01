@@ -48,7 +48,7 @@ describe("EnrolledCourseSummaryCard", () => {
       );
     });
 
-    test("WHEN it renders THEN Continue opens the video AND View course the overview", () => {
+    test("WHEN it renders THEN Continue opens the video, Progress the board AND Details the course page", () => {
       renderInLocale(
         <EnrolledCourseSummaryCard
           model={model}
@@ -60,10 +60,30 @@ describe("EnrolledCourseSummaryCard", () => {
         "href",
         `/courses/basic-course/modules/module-2/lessons/${next.id}`,
       );
-      expect(screen.getByRole("link", { name: "View course" })).toHaveAttribute(
+      expect(screen.getByRole("link", { name: "Progress" })).toHaveAttribute(
         "href",
-        "/courses/basic-course",
+        "/courses/basic-course/progress",
       );
+      expect(screen.getByRole("link", { name: "Details" })).toHaveAttribute(
+        "href",
+        "/courses/basic-course/about",
+      );
+    });
+
+    test("WHEN it renders THEN the ring AND title open the board without a second tab stop", () => {
+      renderInLocale(
+        <EnrolledCourseSummaryCard
+          model={model}
+          isCurrent={false}
+        />,
+      );
+
+      const header = screen
+        .getByRole("heading", { level: 3, name: basic.course.title })
+        .closest("a");
+      expect(header).toHaveAttribute("href", "/courses/basic-course/progress");
+      expect(header).toHaveAttribute("tabindex", "-1");
+      expect(header).toContainElement(screen.getByText("46%"));
     });
   });
 
@@ -80,6 +100,23 @@ describe("EnrolledCourseSummaryCard", () => {
         "data-current",
         "true",
       );
+    });
+  });
+
+  describe("GIVEN a course never opened", () => {
+    test("WHEN it renders THEN it offers Start, opening the first video", () => {
+      renderInLocale(
+        <EnrolledCourseSummaryCard
+          model={aCardModel(basic)}
+          isCurrent={false}
+        />,
+      );
+
+      expect(screen.getByRole("link", { name: "Start" })).toHaveAttribute(
+        "href",
+        `/courses/basic-course/modules/module-1/lessons/${lessonOf(basic, 0, 0).id}`,
+      );
+      expect(screen.queryByRole("link", { name: "Continue" })).not.toBeInTheDocument();
     });
   });
 
@@ -107,7 +144,9 @@ describe("EnrolledCourseSummaryCard", () => {
       );
 
       expect(screen.getByText("Lo que sigue")).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "Ver curso" })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Empezar" })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Progreso" })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Detalles" })).toBeInTheDocument();
     });
   });
 });
