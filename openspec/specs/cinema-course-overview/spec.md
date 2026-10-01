@@ -2,11 +2,11 @@
 
 ## Purpose
 
-Define the Immersion Cinema presentation of the course overview route (`/[locale]/courses/[courseSlug]`). The course is presented as a numbered index of its modules: a course header with gold count pills, then one full-width showcase card per module, each preceded by its ordinal. A card pairs the module's title, an explicit video count and duration, and a call to action with a receding gallery of that module's leading lesson artwork, so a module reads as a container of several videos rather than as one video to play. A primary "Start course" action targets the deterministic first lesson. Neither the earlier interactive practice track nor the poster grid that replaced it remains in this view.
+Define the Immersion Cinema presentation of the course overview route (`/[locale]/courses/[courseSlug]/progress`). The course is presented as a numbered index of its modules: a course header with gold count pills, then one full-width showcase card per module, each preceded by its ordinal. A card pairs the module's title, an explicit video count and duration, and a call to action with a receding gallery of that module's leading lesson artwork, so a module reads as a container of several videos rather than as one video to play. A primary "Start course" action targets the deterministic first lesson. Neither the earlier interactive practice track nor the poster grid that replaced it remains in this view.
 ## Requirements
 ### Requirement: The course overview opens with a continue tile and the course's progress
 
-The course overview (`/[locale]/courses/[courseSlug]`) SHALL open with two tiles, side by side
+The course overview (`/[locale]/courses/[courseSlug]/progress`) SHALL open with two tiles, side by side
 on wide viewports and stacked on narrow ones:
 
 - a **continue tile** presenting the video the learner continues with — its artwork (or a
@@ -91,6 +91,10 @@ When the course has no lessons, the page SHALL render no continue tile.
 - **WHEN** the course has no lessons
 - **THEN** no continue tile and no continue action render
 
+#### Scenario: A pointer resting on the continue tile keeps its link
+- **WHEN** the pointer rests on the continue tile's poster, away from its action
+- **THEN** the tile's link stays under the pointer, so the cursor and the hover style do not flicker
+
 ### Requirement: Every lesson is a progress-ring tile that opens its lesson
 
 Below the opening tiles the course overview SHALL render one tile per lesson (module) in
@@ -167,7 +171,7 @@ tiles. Any other learner SHALL see the course page (`course-detail-page`) instea
 board's own requirements are unchanged when it renders.
 
 #### Scenario: Enrolled on arrival
-- **WHEN** a learner enrolled in `basic-course` opens `/en/courses/basic-course`
+- **WHEN** a learner enrolled in `basic-course` opens `/en/courses/basic-course/progress`
 - **THEN** the continue tile, the course progress tile and one ring tile per lesson render
 
 #### Scenario: Not enrolled on arrival
@@ -185,7 +189,7 @@ depend on no progress. The link text SHALL read **Ver detalle del curso** in `es
 do curso** in `pt`.
 
 #### Scenario: The board links to the course page
-- **WHEN** a learner enrolled in `basic-course` opens `/en/courses/basic-course`
+- **WHEN** a learner enrolled in `basic-course` opens `/en/courses/basic-course/progress`
 - **THEN** the course progress tile shows **View course details** linking to `/en/courses/basic-course/about`
 
 #### Scenario: The title links to the course page
@@ -203,4 +207,24 @@ do curso** in `pt`.
 #### Scenario: Before progress is read
 - **WHEN** the board renders on the server
 - **THEN** **View course details** is present while the ring shows no percentage
+
+### Requirement: The progress board has its own address
+
+The course's progress board SHALL be served at `/[locale]/courses/[courseSlug]/progress`. The bare course address `/[locale]/courses/[courseSlug]` SHALL have no page and SHALL render the localized page-not-found state; it SHALL NOT redirect. Every link to the board SHALL be built with the course overview path helper, so no screen links to the bare address. The board's sharing image SHALL be served at `/[locale]/courses/[courseSlug]/progress/opengraph-image`, and its loading shell SHALL apply to the board only.
+
+#### Scenario: The board opens at /progress
+- **WHEN** a learner enrolled in `basic-course` opens `/es/courses/basic-course/progress`
+- **THEN** the progress board renders
+
+#### Scenario: The bare address is a missing page
+- **WHEN** a learner opens `/es/courses/basic-course`
+- **THEN** the page-not-found state renders, and the learner is not redirected
+
+#### Scenario: Links lead to /progress
+- **WHEN** My learning, the course page, the lesson breadcrumb or the levels table link to a course's board
+- **THEN** the link points to `/[locale]/courses/[courseSlug]/progress`
+
+#### Scenario: The board's sharing image
+- **WHEN** `/en/courses/basic-course/progress` renders
+- **THEN** its `og:image` is `/en/courses/basic-course/progress/opengraph-image`, which answers an image
 

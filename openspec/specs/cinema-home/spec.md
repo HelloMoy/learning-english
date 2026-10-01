@@ -38,7 +38,7 @@ At every width the locale control, the account control and the avatar trigger SH
 
 #### Scenario: Section label names the Available courses route
 - **WHEN** the user is on `/en/courses`
-- **THEN** the header eyebrow reads `COURSES`, while `/en/courses/basic-course` still reads `COURSE`
+- **THEN** the header eyebrow reads `COURSES`, while `/en/courses/basic-course/progress` still reads `COURSE`
 
 #### Scenario: Eyebrow carries no tagline
 - **WHEN** the header renders on any route in any locale
