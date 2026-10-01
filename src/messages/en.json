@@ -658,9 +658,12 @@
     }
   },
   "PageNotFound": {
+    "eyebrow": "Error 404",
     "heading": "Page not found",
     "description": "This page doesn't exist, or it moved. The course is still here.",
-    "goHome": "Go to home"
+    "missingPath": "There's nothing at <requested>{path}</requested>",
+    "goHome": "Go to home",
+    "viewCourses": "View courses"
   },
   "Layout": {
     "skipToContent": "Skip to main content",
