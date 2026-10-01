@@ -140,16 +140,22 @@ function ResumeCopy({ model, target }: { model: CourseCardModel; target: TargetV
           watchedAt={model.watchedAt}
         />
       ) : null}
+      {/* The link stretches over the tile, so it must not move or filter on
+          hover: either would make it the containing block of its own stretched
+          area, shrinking that area to the button and flickering the hover. The
+          lift lives on the span inside. */}
       <Link
         href={lessonPath(course, target.module, target.lesson) as never}
-        className="mt-1.5 inline-flex min-h-13 items-center gap-2.5 self-start rounded-[14px] bg-primary px-5.5 text-base font-extrabold text-primary-foreground shadow-[0_12px_40px_-8px_color-mix(in_oklab,var(--primary)_60%,transparent)] transition-[filter,transform] after:absolute after:inset-0 after:content-[''] hover:-translate-y-px hover:brightness-105 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none motion-reduce:transition-none"
+        className="group/action mt-1.5 inline-flex self-start rounded-[14px] after:absolute after:inset-0 after:content-[''] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
       >
-        <Play
-          aria-hidden="true"
-          className="size-4"
-          fill="currentColor"
-        />
-        {t(ACTION_KEY[target.kind])}
+        <span className="inline-flex min-h-13 items-center gap-2.5 rounded-[14px] bg-primary px-5.5 text-base font-extrabold text-primary-foreground shadow-[0_12px_40px_-8px_color-mix(in_oklab,var(--primary)_60%,transparent)] transition-[filter,transform] group-hover/action:-translate-y-px group-hover/action:brightness-105 motion-reduce:transition-none">
+          <Play
+            aria-hidden="true"
+            className="size-4"
+            fill="currentColor"
+          />
+          {t(ACTION_KEY[target.kind])}
+        </span>
       </Link>
     </>
   );
