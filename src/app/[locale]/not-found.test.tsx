@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { NextIntlClientProvider, useTranslations } from "next-intl";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -11,6 +11,12 @@ vi.mock("next-intl", async (importOriginal) => {
   const actual = await importOriginal<typeof import("next-intl")>();
   return { ...actual, useTranslations: vi.fn() };
 });
+
+// The path line reads the locale and the pathname from context this file does
+// not set up; its own test covers what it says. Here it only has to be placed.
+vi.mock("./missing-path", () => ({
+  MissingPath: () => <p>missing-path</p>,
+}));
 
 const mockUseTranslations = vi.mocked(useTranslations);
 
@@ -28,6 +34,45 @@ describe("PageNotFound", () => {
     expect(screen.getByRole("heading", { name: "heading" })).toBeInTheDocument();
     expect(screen.getByText("description")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "goHome" })).toHaveAttribute("href", "/");
+  });
+
+  test("WHEN rendered THEN the eyebrow names the error above the heading", () => {
+    render(<PageNotFound />);
+
+    const eyebrow = screen.getByText("eyebrow");
+    const heading = screen.getByRole("heading", { level: 1 });
+
+    expect(eyebrow.compareDocumentPosition(heading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  test("WHEN rendered THEN the alert names the missing path", () => {
+    render(<PageNotFound />);
+
+    expect(within(screen.getByRole("alert")).getByText("missing-path")).toBeInTheDocument();
+  });
+
+  test("WHEN rendered THEN the course lobby is the second way out", () => {
+    render(<PageNotFound />);
+
+    const [first, second] = screen.getAllByRole("link");
+
+    expect(first).toHaveAccessibleName("goHome");
+    expect(second).toHaveAccessibleName("viewCourses");
+    expect(second).toHaveAttribute("href", "/courses");
+  });
+
+  test("WHEN rendered THEN the skip link's target is the page's main landmark", () => {
+    render(<PageNotFound />);
+
+    expect(screen.getByRole("main")).toHaveAttribute("id", "main");
+  });
+
+  test("WHEN rendered THEN no colour comes from outside the theme", () => {
+    const { container } = render(<PageNotFound />);
+
+    // `slate-*` is what this page wore before it joined the theme; the tokens
+    // are what follow the light and dark variants.
+    expect(container.innerHTML).not.toMatch(/slate-/);
   });
 
   test("WHEN it reads its copy THEN it reads the page-not-found namespace", () => {
@@ -63,6 +108,18 @@ describe("PageNotFound", () => {
         expect(screen.getByRole("heading").textContent).toMatch(
           /page not found|página no encontrada|página não encontrada/i,
         );
+      },
+    );
+
+    test.each(Object.entries(MESSAGES))(
+      "WHEN %s is read THEN it names the error, the missing path and the course lobby",
+      (_locale, messages) => {
+        const copy: Record<string, string> = messages.PageNotFound;
+
+        expect(copy.eyebrow).toMatch(/404/);
+        // The path sits inside the sentence, wherever the language puts it.
+        expect(copy.missingPath).toContain("<requested>{path}</requested>");
+        expect(copy.viewCourses).toMatch(/courses|cursos/i);
       },
     );
   });
