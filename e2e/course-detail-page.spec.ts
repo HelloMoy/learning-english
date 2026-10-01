@@ -65,7 +65,7 @@ test.describe("Course page", () => {
       );
     });
 
-    test("WHEN they preview it from Available courses THEN the course page opens AND they are still not enrolled", async ({
+    test("WHEN they open its details from Available courses THEN the course page opens at /about AND they are still not enrolled", async ({
       page,
       learnerState,
     }) => {
@@ -74,12 +74,13 @@ test.describe("Course page", () => {
 
       // Act
       await page
-        .getByTestId("course-shelf-card")
+        .getByTestId("course-poster")
         .filter({ hasText: ADVANCED.title })
-        .getByRole("link", { name: "Preview course" })
+        .getByRole("link", { name: "View details" })
         .click(COLD_ROUTE);
 
       // Assert
+      await expect(page).toHaveURL(new RegExp(`/en/courses/${ADVANCED.slug}/about$`), COLD_ROUTE);
       await expect(page.getByTestId("course-detail-view")).toBeVisible(COLD_ROUTE);
       expect(await learnerState.enrolledCourseSlugs()).toEqual([FIRST_COURSE_SLUG]);
     });
