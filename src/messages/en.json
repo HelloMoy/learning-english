@@ -544,10 +544,20 @@
       "close": "Close"
     },
     "CourseEnrollAction": {
-      "enroll": "Enroll",
+      "enroll": "Enroll"
+    },
+    "CourseStartLink": {
       "startCourse": "Start course",
       "continueWhereLeftOff": "Continue where you left off",
       "watchAgain": "Watch again"
+    },
+    "EnrollmentWelcomeModal": {
+      "mark": "Enrolled",
+      "title": "You’re in!",
+      "description": "<b>{course}</b> is now in My learning. Start with <b>{video}</b> ({duration}), or come back whenever you like.",
+      "descriptionWithoutVideo": "<b>{course}</b> is now in My learning.",
+      "keepExploring": "Keep exploring",
+      "close": "Close"
     },
     "CourseOutcomes": {
       "eyebrow": "What you’ll learn",

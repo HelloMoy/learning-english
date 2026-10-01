@@ -1,6 +1,7 @@
 import { resetLearnerStore } from "@/lib/learner-store/learner-store";
 import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
+import NiceModal from "@ebay/nice-modal-react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { ADVANCED_COURSE_VIEW } from "../../../.storybook/fixtures/course-views";
@@ -10,6 +11,13 @@ const meta = {
   title: "Components/CourseEnrollAction",
   component: CourseEnrollAction,
   parameters: { layout: "centered" },
+  decorators: [
+    (Story) => (
+      <NiceModal.Provider>
+        <Story />
+      </NiceModal.Provider>
+    ),
+  ],
   args: { view: ADVANCED_COURSE_VIEW },
   beforeEach: () => {
     resetLearnerStore();

@@ -2,6 +2,7 @@ import { CourseDetailView } from "@/components/course-detail-view/course-detail-
 import { resetLearnerStore } from "@/lib/learner-store/learner-store";
 import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
+import NiceModal from "@ebay/nice-modal-react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { BASIC_COURSE_VIEW } from "../../../.storybook/fixtures/course-views";
@@ -13,6 +14,13 @@ const meta = {
   title: "Components/CoursePageGate",
   component: CoursePageGate,
   parameters: { layout: "fullscreen" },
+  decorators: [
+    (Story) => (
+      <NiceModal.Provider>
+        <Story />
+      </NiceModal.Provider>
+    ),
+  ],
   args: {
     title: course.title,
     children: <CourseDetailView view={BASIC_COURSE_VIEW} />,

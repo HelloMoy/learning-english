@@ -544,10 +544,20 @@
       "close": "Cerrar"
     },
     "CourseEnrollAction": {
-      "enroll": "Inscribirme",
+      "enroll": "Inscribirme"
+    },
+    "CourseStartLink": {
       "startCourse": "Empezar el curso",
       "continueWhereLeftOff": "Continuar donde lo dejaste",
       "watchAgain": "Ver de nuevo"
+    },
+    "EnrollmentWelcomeModal": {
+      "mark": "Inscrito",
+      "title": "¡Ya estás dentro!",
+      "description": "<b>{course}</b> ya está en Mi aprendizaje. Empieza con <b>{video}</b> ({duration}) o vuelve cuando quieras.",
+      "descriptionWithoutVideo": "<b>{course}</b> ya está en Mi aprendizaje.",
+      "keepExploring": "Seguir explorando",
+      "close": "Cerrar"
     },
     "CourseOutcomes": {
       "eyebrow": "Lo que vas a aprender",
