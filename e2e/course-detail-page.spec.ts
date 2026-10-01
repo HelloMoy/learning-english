@@ -20,8 +20,8 @@ const COURSES = contentCatalog.courses;
 const ADVANCED = COURSES.find((course) => course.slug === "advanced-intermediate-course")!;
 const ATLAS = COURSES.find((course) => course.track === "reference")!;
 
-const courseUrl = (slug: string) => `/en/courses/${slug}`;
-const courseDetailUrl = (slug: string) => `${courseUrl(slug)}/about`;
+const courseUrl = (slug: string) => `/en/courses/${slug}/progress`;
+const courseDetailUrl = (slug: string) => `/en/courses/${slug}/about`;
 
 test.describe("Course page", () => {
   test.describe("GIVEN a learner who has not joined the Advanced course", () => {
@@ -94,7 +94,7 @@ test.describe("Course page", () => {
       const portuguese = ADVANCED.translations!.pt!;
 
       // Act
-      await page.goto(`/pt/courses/${ADVANCED.slug}`);
+      await page.goto(`/pt/courses/${ADVANCED.slug}/progress`);
 
       // Assert
       await expect(page.getByText(portuguese.description!)).toBeVisible(COLD_ROUTE);

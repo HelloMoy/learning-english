@@ -90,7 +90,7 @@ test.describe("Landing", () => {
 
     await atlas.getByRole("link", { name: "View course" }).click();
 
-    await page.waitForURL(/\/en\/courses\/atlas-of-american-sounds$/, COLD_ROUTE);
+    await page.waitForURL(/\/en\/courses\/atlas-of-american-sounds\/progress$/, COLD_ROUTE);
   });
 
   test("WHEN the landing is visited in /es THEN the editorial copy is Spanish", async ({
@@ -288,7 +288,7 @@ test.describe("My learning", () => {
       COLD_ROUTE,
     );
 
-    await page.goto(`/en/courses/${FIRST_COURSE.slug}`);
+    await page.goto(`/en/courses/${FIRST_COURSE.slug}/progress`);
     await expect(page.getByTestId("continue-tile").getByRole("link")).toHaveAttribute(
       "href",
       new RegExp(`${nextLesson.id}$`),
@@ -328,6 +328,166 @@ test.describe("My learning", () => {
     await expect(cards).toHaveCount(2);
     await expect(cards.nth(0)).toContainText(basicLesson.title);
     await expect(cards.nth(1)).toHaveAttribute("data-current", "true");
+  });
+
+  test("WHEN the learner uses an enrolled course card THEN its header AND Progress open the board, Details the course page", async ({
+    page,
+    learnerState,
+  }) => {
+    await learnerState.profile(CARD);
+    await learnerState.enrolled([FIRST_COURSE.slug]);
+    const card = page.getByTestId("enrolled-course-summary-card");
+    const board = new RegExp(`/en/courses/${FIRST_COURSE.slug}/progress$`);
+
+    await page.goto("/en/learning");
+    await card.getByRole("heading", { level: 3, name: FIRST_COURSE.title }).click(COLD_ROUTE);
+    await expect(page).toHaveURL(board, COLD_ROUTE);
+
+    await page.goto("/en/learning");
+    await expect(card.getByRole("link", { name: "Progress" })).toHaveAttribute(
+      "href",
+      `/en/courses/${FIRST_COURSE.slug}/progress`,
+      COLD_ROUTE,
+    );
+    await card.getByRole("link", { name: "Details" }).click();
+    await expect(page).toHaveURL(new RegExp(`/en/courses/${FIRST_COURSE.slug}/about$`), COLD_ROUTE);
+  });
+
+  test("WHEN the learner opens the catalog card THEN Available courses opens", async ({
+    page,
+    learnerState,
+  }) => {
+    const firstNotJoined = [...COURSES]
+      .sort((a, b) => a.sequence - b.sequence)
+      .find((course) => course.slug !== FIRST_COURSE.slug)!;
+    await learnerState.profile(CARD);
+    await learnerState.enrolled([FIRST_COURSE.slug]);
+
+    await page.goto("/en/learning");
+
+    const catalogCard = page.getByTestId("catalog-card");
+    await expect(catalogCard).toContainText(`Catalog · ${COURSES.length} courses`, COLD_ROUTE);
+    await expect(page.getByTestId("catalog-card-teaser")).toContainText(firstNotJoined.title);
+    // The call to action is drawn under the heading's stretched link, so a pointer
+    // aimed at it lands on that link; click where the learner would.
+    await catalogCard.scrollIntoViewIfNeeded();
+    const callToAction = await catalogCard.getByText("See all courses").boundingBox();
+    await page.mouse.click(
+      callToAction!.x + callToAction!.width / 2,
+      callToAction!.y + callToAction!.height / 2,
+    );
+    await expect(page).toHaveURL(/\/en\/courses$/, COLD_ROUTE);
+  });
+
+  test("WHEN the learner opens the teased course THEN its course page opens", async ({
+    page,
+    learnerState,
+  }) => {
+    const firstNotJoined = [...COURSES]
+      .sort((a, b) => a.sequence - b.sequence)
+      .find((course) => course.slug !== FIRST_COURSE.slug)!;
+    await learnerState.profile(CARD);
+    await learnerState.enrolled([FIRST_COURSE.slug]);
+
+    await page.goto("/en/learning");
+    await page.getByTestId("catalog-card-teaser").click(COLD_ROUTE);
+
+    await expect(page).toHaveURL(
+      new RegExp(`/en/courses/${firstNotJoined.slug}/about$`),
+      COLD_ROUTE,
+    );
+    await expect(page.getByRole("heading", { level: 1, name: firstNotJoined.title })).toBeVisible(
+      COLD_ROUTE,
+    );
+  });
+
+  test("WHEN the learner uses See all courses THEN Available courses opens", async ({
+    page,
+    learnerState,
+  }) => {
+    await learnerState.profile(CARD);
+    await learnerState.enrolled([FIRST_COURSE.slug]);
+
+    await page.goto("/en/learning");
+    await page.getByRole("link", { name: "See all courses", exact: true }).click(COLD_ROUTE);
+
+    await expect(page).toHaveURL(/\/en\/courses$/, COLD_ROUTE);
+  });
+
+  test("WHEN My learning opens THEN See all courses sits beside the greeting on a wide screen AND is hidden on a phone", async ({
+    page,
+    learnerState,
+  }) => {
+    await learnerState.profile(CARD);
+    await learnerState.enrolled([FIRST_COURSE.slug]);
+    const button = page.getByRole("link", { name: "See all courses", exact: true });
+    const greeting = page.getByRole("heading", { level: 1 });
+
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.goto("/en/learning");
+    await expect(button).toBeVisible(COLD_ROUTE);
+    const [wideButton, wideGreeting] = await Promise.all([
+      button.boundingBox(),
+      greeting.boundingBox(),
+    ]);
+    expect(wideButton!.y).toBeLessThan(wideGreeting!.y + wideGreeting!.height);
+    expect(wideButton!.x).toBeGreaterThan(wideGreeting!.x + wideGreeting!.width);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(button).toBeHidden();
+    await expect(page.getByTestId("catalog-card")).toBeVisible();
+  });
+
+  // A stretched link whose own hover style moves it shrinks its hit area to
+  // the button, so a pointer over the poster flips hover on and off forever.
+  for (const tile of [
+    { name: "My learning's hero", path: "/en/learning", testId: "resume-tile" },
+    {
+      name: "the board's continue tile",
+      path: `/en/courses/${FIRST_COURSE.slug}/progress`,
+      testId: "continue-tile",
+    },
+  ]) {
+    test(`WHEN the pointer rests on the poster of ${tile.name} THEN its link stays under the pointer`, async ({
+      page,
+      learnerState,
+    }) => {
+      await page.setViewportSize({ width: 1440, height: 1000 });
+      await learnerState.profile(CARD);
+      await learnerState.enrolled([FIRST_COURSE.slug]);
+      await page.goto(tile.path);
+      const box = (await page.getByTestId(tile.testId).boundingBox(COLD_ROUTE))!;
+      const onThePoster = { x: box.x + box.width / 2, y: box.y + 40 };
+
+      await page.mouse.move(onThePoster.x, onThePoster.y);
+      const framesOverTheLink = await page.evaluate(async ({ x, y }) => {
+        const samples: boolean[] = [];
+        for (let frame = 0; frame < 30; frame++) {
+          await new Promise((resolve) => setTimeout(resolve, 30));
+          samples.push(document.elementFromPoint(x, y)?.closest("a") !== null);
+        }
+        return samples;
+      }, onThePoster);
+
+      expect(framesOverTheLink).not.toContain(false);
+    });
+  }
+
+  test("WHEN My learning opens on a wide screen THEN the hero AND the progress panel share one height", async ({
+    page,
+    learnerState,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await learnerState.profile(CARD);
+    await learnerState.enrolled([FIRST_COURSE.slug]);
+
+    await page.goto("/en/learning");
+
+    const hero = page.getByTestId("resume-tile");
+    const panel = page.getByTestId("course-progress-tile");
+    await expect(panel).toBeVisible(COLD_ROUTE);
+    const [heroBox, panelBox] = await Promise.all([hero.boundingBox(), panel.boundingBox()]);
+    expect(heroBox!.height).toBeCloseTo(panelBox!.height, 0);
   });
 });
 

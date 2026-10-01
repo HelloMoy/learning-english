@@ -91,7 +91,7 @@ test.describe("structured data", () => {
   test("WHEN a course page renders THEN it describes the course and its trail", async ({
     page,
   }) => {
-    await page.goto(`/en/courses/${COURSE_SLUG}`);
+    await page.goto(`/en/courses/${COURSE_SLUG}/progress`);
     const data = await linkedData(page);
 
     const course = data.find((entry) => (entry as { "@type": string })["@type"] === "Course");
@@ -122,7 +122,7 @@ test.describe("structured data", () => {
   });
 
   test("WHEN structured data is read THEN nothing is invented", async ({ page }) => {
-    await page.goto(`/en/courses/${COURSE_SLUG}`);
+    await page.goto(`/en/courses/${COURSE_SLUG}/progress`);
     const serialized = JSON.stringify(await linkedData(page));
 
     for (const forbidden of ["aggregateRating", "review", "offers", "price"]) {

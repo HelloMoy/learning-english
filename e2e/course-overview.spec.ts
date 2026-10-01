@@ -19,7 +19,7 @@ const MODULES = modulesOfCourse(COURSE_SLUG);
 /** Compiling a route on a cold `pnpm dev` overruns the default 5s timeout. */
 const COLD_ROUTE = { timeout: 60_000 };
 
-const courseUrl = (locale: string) => `/${locale}/courses/${COURSE_SLUG}`;
+const courseUrl = (locale: string) => `/${locale}/courses/${COURSE_SLUG}/progress`;
 const moduleUrl = (moduleSlug: string, locale = "en") =>
   `/${locale}/courses/${COURSE_SLUG}/modules/${moduleSlug}`;
 const lessonUrl = (moduleSlug: string, lessonId: string, locale = "en") =>

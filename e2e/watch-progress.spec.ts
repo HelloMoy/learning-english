@@ -46,7 +46,7 @@ const PARTLY_WATCHED_LESSON = MODULE_LESSONS[1]!;
 const moduleUrl = (locale: string): string =>
   `/${locale}/courses/${COURSE_SLUG}/modules/${MODULE.slug}`;
 
-const courseUrl = (locale: string): string => `/${locale}/courses/${COURSE_SLUG}`;
+const courseUrl = (locale: string): string => `/${locale}/courses/${COURSE_SLUG}/progress`;
 
 /**
  * Seeds two positions before the first load: one past the finish threshold,

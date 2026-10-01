@@ -27,9 +27,10 @@ const FIRST_LESSON = contentCatalog.lessonRows
 
 const NOTES_MODULE = moduleOfCourse(COURSE_SLUG, "3-contractions-reductions");
 
-const COURSE_PATH = `/courses/${COURSE_SLUG}`;
-const MODULE_PATH = `${COURSE_PATH}/modules/${NOTES_MODULE.slug}`;
-const LESSON_PATH = `${COURSE_PATH}/modules/${FIRST_MODULE.slug}/lessons/${FIRST_LESSON.id}`;
+const COURSE_ROOT = `/courses/${COURSE_SLUG}`;
+const COURSE_PATH = `${COURSE_ROOT}/progress`;
+const MODULE_PATH = `${COURSE_ROOT}/modules/${NOTES_MODULE.slug}`;
+const LESSON_PATH = `${COURSE_ROOT}/modules/${FIRST_MODULE.slug}/lessons/${FIRST_LESSON.id}`;
 
 /** The `content` of a `<meta>` addressed by `property` or `name`. */
 async function metaContent(
@@ -164,7 +165,7 @@ test.describe("site metadata — withheld courses", () => {
   test("WHEN a course is withheld from its page THEN its image route is withheld too", async ({
     request,
   }) => {
-    const draftCourse = "/en/courses/advanced-intermediate-course";
+    const draftCourse = "/en/courses/advanced-intermediate-course/progress";
 
     const page = await request.get(draftCourse);
     const image = await request.get(`${draftCourse}/opengraph-image`);
@@ -173,7 +174,7 @@ test.describe("site metadata — withheld courses", () => {
   });
 
   test("WHEN a course does not exist THEN its image route refuses", async ({ request }) => {
-    const response = await request.get("/en/courses/no-such-course/opengraph-image");
+    const response = await request.get("/en/courses/no-such-course/progress/opengraph-image");
 
     expect(response.status()).toBe(404);
   });

@@ -25,7 +25,7 @@ function homeUrl(locale: string): string {
   return `/${locale}`;
 }
 function courseUrl(locale: string, courseSlug: string = COURSE_SLUG): string {
-  return `/${locale}/courses/${courseSlug}`;
+  return `/${locale}/courses/${courseSlug}/progress`;
 }
 function moduleUrl(locale: string, courseSlug: string, moduleSlug: string): string {
   return `/${locale}/courses/${courseSlug}/modules/${moduleSlug}`;

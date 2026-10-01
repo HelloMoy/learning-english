@@ -54,7 +54,7 @@ test.describe("Home and My learning — one click to the course, one to the less
       .getByRole("link")
       .click(COLD_ROUTE);
 
-    await page.waitForURL(`**/en/courses/${FIRST_COURSE.slug}`, COLD_ROUTE);
+    await page.waitForURL(`**/en/courses/${FIRST_COURSE.slug}/progress`, COLD_ROUTE);
     await expect(page.getByTestId("course-overview")).toBeVisible(COLD_ROUTE);
   });
 
@@ -86,7 +86,7 @@ test.describe("Home and My learning — one click to the course, one to the less
     await page.waitForURL(new RegExp(`${SECOND_COURSE_START.lesson.id}$`), COLD_ROUTE);
   });
 
-  test("WHEN a lesson has been opened THEN My learning's View course opens that course", async ({
+  test("WHEN a lesson has been opened THEN My learning's View course details opens that course's page", async ({
     page,
     learnerState,
   }) => {
@@ -103,11 +103,13 @@ test.describe("Home and My learning — one click to the course, one to the less
 
     await page.goto("/en/learning");
 
-    // The first View course is the leading course's progress panel.
-    await page.getByRole("link", { name: "View course" }).first().click(COLD_ROUTE);
+    // Only the leading course's progress panel carries View course details.
+    await page.getByRole("link", { name: "View course details", exact: true }).click(COLD_ROUTE);
 
-    await page.waitForURL(`**/en/courses/${SECOND_COURSE.slug}`, COLD_ROUTE);
-    await expect(page.getByTestId("course-overview")).toBeVisible(COLD_ROUTE);
+    await page.waitForURL(`**/en/courses/${SECOND_COURSE.slug}/about`, COLD_ROUTE);
+    await expect(page.getByRole("heading", { level: 1, name: SECOND_COURSE.title })).toBeVisible(
+      COLD_ROUTE,
+    );
   });
 });
 
@@ -115,7 +117,7 @@ test.describe("Lesson tile — one click from the course overview to the module"
   test("WHEN a lesson tile's body is clicked THEN its module overview opens", async ({ page }) => {
     const modules = modulesOfCourse(FIRST_COURSE.slug);
     const moduleIndex = 0;
-    await page.goto(`/en/courses/${FIRST_COURSE.slug}`);
+    await page.goto(`/en/courses/${FIRST_COURSE.slug}/progress`);
 
     await page
       .getByRole("link", { name: `Open lesson ${moduleIndex + 1}: ${modules[moduleIndex]!.title}` })
