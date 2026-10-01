@@ -62,7 +62,7 @@ describe("EnrolledCourseSummaryCard", () => {
       );
       expect(screen.getByRole("link", { name: "View course" })).toHaveAttribute(
         "href",
-        "/courses/basic-course",
+        "/courses/basic-course/progress",
       );
     });
   });

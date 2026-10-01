@@ -1,3 +1,4 @@
+import { courseOverviewPath } from "@/i18n/lesson-routes";
 import { Link } from "@/i18n/navigation";
 
 import { useTranslations } from "next-intl";
@@ -18,7 +19,7 @@ export function ModuleOverviewError({ courseSlug }: { courseSlug?: string }) {
       <div className="flex flex-wrap justify-center gap-3">
         {courseSlug ? (
           <Link
-            href={`/courses/${courseSlug}` as never}
+            href={courseOverviewPath({ slug: courseSlug }) as never}
             className="inline-flex min-h-11 items-center justify-center rounded-full border border-border bg-card px-5 text-sm font-semibold hover:border-practice-blue/60 focus-visible:ring-3 focus-visible:ring-practice-blue/40 focus-visible:outline-ring"
           >
             {t("backToCourse")}

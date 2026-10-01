@@ -1,14 +1,20 @@
-import type { Course } from "@/domain/entities/course/course";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
 import type { Module } from "@/domain/entities/module/module";
+
+/** Anything that names a course by its slug, branded or not. */
+type CourseRef = { slug: string };
 
 /**
  * Centralised URL builders for the catalog and lesson pages. Pages and
  * components import these instead of concatenating URL strings, so
  * future routing changes happen in one place.
+ *
+ * @remarks
+ * `/courses/<slug>` itself has no page: every course route names what it
+ * shows (`/progress`, `/about`, `/modules/...`).
  */
-export function courseOverviewPath(course: Pick<Course, "slug">): string {
-  return `/courses/${course.slug}`;
+export function courseOverviewPath(course: CourseRef): string {
+  return `${courseRootOf(course)}/progress`;
 }
 
 /**
@@ -16,21 +22,22 @@ export function courseOverviewPath(course: Pick<Course, "slug">): string {
  * enrolled or not, where {@link courseOverviewPath} gives an enrolled learner
  * the progress board.
  */
-export function courseDetailPath(course: Pick<Course, "slug">): string {
-  return `${courseOverviewPath(course)}/about`;
+export function courseDetailPath(course: CourseRef): string {
+  return `${courseRootOf(course)}/about`;
 }
 
-export function moduleOverviewPath(
-  course: Pick<Course, "slug">,
-  module: Pick<Module, "slug">,
-): string {
-  return `/courses/${course.slug}/modules/${module.slug}`;
+export function moduleOverviewPath(course: CourseRef, module: Pick<Module, "slug">): string {
+  return `${courseRootOf(course)}/modules/${module.slug}`;
 }
 
 export function lessonPath(
-  course: Pick<Course, "slug">,
+  course: CourseRef,
   module: Pick<Module, "slug">,
   lesson: Pick<Lesson, "id">,
 ): string {
-  return `/courses/${course.slug}/modules/${module.slug}/lessons/${lesson.id}`;
+  return `${moduleOverviewPath(course, module)}/lessons/${lesson.id}`;
+}
+
+function courseRootOf(course: CourseRef): string {
+  return `/courses/${course.slug}`;
 }

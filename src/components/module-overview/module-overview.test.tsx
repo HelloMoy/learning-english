@@ -106,7 +106,7 @@ describe("ModuleOverview — header", () => {
 
       expect(screen.getByRole("link", { name: "← Course 1" })).toHaveAttribute(
         "href",
-        "/courses/course-1",
+        "/courses/course-1/progress",
       );
     });
 

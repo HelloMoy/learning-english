@@ -111,7 +111,7 @@ describe("MyLearningView", () => {
       ).toBeInTheDocument();
       expect(within(panel).getByRole("link", { name: /View course/ })).toHaveAttribute(
         "href",
-        "/courses/advanced-intermediate-course",
+        "/courses/advanced-intermediate-course/progress",
       );
     });
 
@@ -122,7 +122,7 @@ describe("MyLearningView", () => {
       const heading = within(panel).getByRole("heading", { level: 2, name: advanced.course.title });
       expect(within(heading).getByRole("link")).toHaveAttribute(
         "href",
-        "/courses/advanced-intermediate-course",
+        "/courses/advanced-intermediate-course/progress",
       );
     });
 

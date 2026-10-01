@@ -2,7 +2,7 @@ import { Slug } from "@/domain/entities/slug/slug";
 
 import { describe, expect, test } from "vitest";
 
-import { courseDetailPath, moduleOverviewPath } from "./lesson-routes";
+import { courseDetailPath, courseOverviewPath, moduleOverviewPath } from "./lesson-routes";
 
 describe("moduleOverviewPath", () => {
   test("WHEN given a course and one of its lessons (modules) THEN it builds the module overview path", () => {
@@ -20,5 +20,13 @@ describe("courseDetailPath", () => {
     const course = { slug: Slug.parse("basic-course") };
 
     expect(courseDetailPath(course)).toBe("/courses/basic-course/about");
+  });
+});
+
+describe("courseOverviewPath", () => {
+  test("WHEN given a course THEN it builds the path of its progress board", () => {
+    const course = { slug: Slug.parse("basic-course") };
+
+    expect(courseOverviewPath(course)).toBe("/courses/basic-course/progress");
   });
 });
