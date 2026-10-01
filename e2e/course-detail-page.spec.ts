@@ -20,6 +20,9 @@ const COURSES = contentCatalog.courses;
 const ADVANCED = COURSES.find((course) => course.slug === "advanced-intermediate-course")!;
 const ATLAS = COURSES.find((course) => course.track === "reference")!;
 
+const ADVANCED_FIRST_MODULE = modulesOfCourse(ADVANCED.slug)[0]!;
+const ADVANCED_FIRST_VIDEO = lessonsOfModule(ADVANCED_FIRST_MODULE.id)[0]!;
+
 const courseUrl = (slug: string) => `/en/courses/${slug}/progress`;
 const courseDetailUrl = (slug: string) => `/en/courses/${slug}/about`;
 
@@ -42,7 +45,7 @@ test.describe("Course page", () => {
       await expect(page.getByTestId("lesson-ring-tile")).toHaveCount(0);
     });
 
-    test("WHEN they enroll from the page THEN it offers Start course AND the next visit opens the board", async ({
+    test("WHEN they enroll from the page THEN the welcome opens AND Keep exploring leaves the page offering Start course AND the next visit opens the board", async ({
       page,
       learnerState,
     }) => {
@@ -54,7 +57,17 @@ test.describe("Course page", () => {
       await hero.getByRole("button", { name: "Enroll" }).click(COLD_ROUTE);
 
       // Assert
-      await expect(hero.getByRole("link", { name: "Start course" })).toBeVisible();
+      const welcome = page.getByRole("dialog", { name: "You’re in!" });
+      await expect(welcome).toBeVisible();
+      await expect(welcome).toContainText(`${ADVANCED.title} is now in My learning.`);
+      await expect(welcome).toContainText(`Start with ${ADVANCED_FIRST_VIDEO.title}`);
+
+      // Act
+      await welcome.getByRole("button", { name: "Keep exploring" }).click();
+
+      // Assert
+      await expect(welcome).toBeHidden();
+      await expect(hero.getByRole("link", { name: "Start course" })).toBeFocused();
       await expect
         .poll(() => learnerState.enrolledCourseSlugs(), COLD_ROUTE)
         .toEqual([ADVANCED.slug, FIRST_COURSE_SLUG].sort());
@@ -63,6 +76,30 @@ test.describe("Course page", () => {
         modulesOfCourse(ADVANCED.slug).length,
         COLD_ROUTE,
       );
+    });
+
+    test("WHEN they choose Start course in the welcome THEN the course's first video opens", async ({
+      page,
+    }) => {
+      // Arrange
+      await page.goto(courseDetailUrl(ADVANCED.slug));
+      await page
+        .getByTestId("course-detail-hero")
+        .getByRole("button", { name: "Enroll" })
+        .click(COLD_ROUTE);
+
+      // Act
+      await page
+        .getByRole("dialog", { name: "You’re in!" })
+        .getByRole("link", { name: "Start course" })
+        .click();
+
+      // Assert
+      await expect(page).toHaveURL(
+        `/en/courses/${ADVANCED.slug}/modules/${ADVANCED_FIRST_MODULE.slug}/lessons/${ADVANCED_FIRST_VIDEO.id}`,
+        COLD_ROUTE,
+      );
+      await expect(page.getByRole("dialog")).toHaveCount(0);
     });
 
     test("WHEN they open its details from Available courses THEN the course page opens at /about AND they are still not enrolled", async ({
@@ -240,6 +277,23 @@ test.describe("Course page", () => {
 
       // Assert
       await expect(bar.getByRole("button", { name: "Enroll" })).toBeInViewport();
+    });
+
+    test("WHEN the learner enrolls from the bottom bar THEN the welcome opens in Spanish", async ({
+      page,
+    }) => {
+      // Arrange
+      await page.goto(`/es/courses/${ADVANCED.slug}/about`);
+      const bar = page.getByRole("complementary", { name: "Únete a este curso" });
+
+      // Act
+      await bar.getByRole("button", { name: "Inscribirme" }).click(COLD_ROUTE);
+
+      // Assert
+      const welcome = page.getByRole("dialog", { name: "¡Ya estás dentro!" });
+      await expect(welcome).toBeVisible();
+      await expect(welcome.getByRole("link", { name: "Empezar el curso" })).toBeInViewport();
+      await expect(welcome.getByRole("button", { name: "Seguir explorando" })).toBeInViewport();
     });
   });
 });
