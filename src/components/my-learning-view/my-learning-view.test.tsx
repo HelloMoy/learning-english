@@ -102,27 +102,27 @@ describe("MyLearningView", () => {
       expect(router.replace).not.toHaveBeenCalled();
     });
 
-    test("WHEN the page renders THEN Advanced's progress panel sits beside it with View course", async () => {
+    test("WHEN the page renders THEN Advanced's progress panel sits beside it with View course details", async () => {
       renderPage();
 
       const panel = await screen.findByTestId("course-progress-tile");
       expect(
         within(panel).getByRole("heading", { level: 2, name: advanced.course.title }),
       ).toBeInTheDocument();
-      expect(within(panel).getByRole("link", { name: /View course/ })).toHaveAttribute(
+      expect(within(panel).getByRole("link", { name: "View course details" })).toHaveAttribute(
         "href",
-        "/courses/advanced-intermediate-course/progress",
+        "/courses/advanced-intermediate-course/about",
       );
     });
 
-    test("WHEN the page renders THEN the panel's course title leads to the course overview too", async () => {
+    test("WHEN the page renders THEN the panel's course title leads to the course page too", async () => {
       renderPage();
 
       const panel = await screen.findByTestId("course-progress-tile");
       const heading = within(panel).getByRole("heading", { level: 2, name: advanced.course.title });
       expect(within(heading).getByRole("link")).toHaveAttribute(
         "href",
-        "/courses/advanced-intermediate-course/progress",
+        "/courses/advanced-intermediate-course/about",
       );
     });
 
@@ -141,13 +141,23 @@ describe("MyLearningView", () => {
       expect(cards[0]).toHaveTextContent(lessonOf(basic, 1, 1).title);
     });
 
-    test("WHEN the page renders THEN Browse courses opens Available courses", async () => {
+    test("WHEN the page renders THEN See all courses opens Available courses", async () => {
       renderPage();
 
-      expect(await screen.findByRole("link", { name: /Browse courses/ })).toHaveAttribute(
+      expect(await screen.findByRole("link", { name: "See all courses" })).toHaveAttribute(
         "href",
         "/courses",
       );
+      expect(screen.queryByRole("link", { name: /Browse courses/ })).not.toBeInTheDocument();
+    });
+
+    test("WHEN the page renders THEN the catalog card says they joined every course", async () => {
+      renderPage();
+
+      expect(await screen.findByTestId("catalog-card")).toHaveTextContent(
+        "You’re enrolled in all of them.",
+      );
+      expect(screen.queryByTestId("catalog-card-teaser")).not.toBeInTheDocument();
     });
   });
 
@@ -162,6 +172,21 @@ describe("MyLearningView", () => {
         screen.getByRole("heading", { level: 2, name: "1 course you’re enrolled in" }),
       ).toBeInTheDocument();
     });
+
+    test("WHEN the page renders THEN the catalog card follows the course AND teases Advanced", async () => {
+      givenLearner.enrolledCourses(["basic-course"]);
+
+      renderPage();
+
+      const catalogCard = await screen.findByTestId("catalog-card");
+      const [basicCard] = screen.getAllByTestId("enrolled-course-summary-card");
+      expect(basicCard!.compareDocumentPosition(catalogCard)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING,
+      );
+      expect(catalogCard).toHaveTextContent("Catalog · 2 courses");
+      expect(catalogCard).toHaveTextContent("You haven’t joined 1 of them yet.");
+      expect(screen.getByTestId("catalog-card-teaser")).toHaveTextContent(advanced.course.title);
+    });
   });
 
   test("WHEN rendered in es THEN the page copy comes from es.json", async () => {
@@ -172,6 +197,9 @@ describe("MyLearningView", () => {
     expect(
       await screen.findByRole("heading", { level: 1, name: "Hola de nuevo, Ana." }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Explorar cursos/ })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ver todos los cursos" })).toHaveAttribute(
+      "href",
+      "/courses",
+    );
   });
 });

@@ -471,15 +471,25 @@
       "start": "Start",
       "watchAgain": "Watch again"
     },
+    "CatalogCard": {
+      "eyebrow": "Catalog · {count, plural, one {# course} other {# courses}}",
+      "heading": "All available courses",
+      "notJoined": "{count, plural, =0 {You’re enrolled in all of them.} other {You haven’t joined # of them yet.}}",
+      "levelFacts": "Level {level} · {count, plural, one {# video} other {# videos}}",
+      "referenceFacts": "Reference · {count, plural, one {# video} other {# videos}}",
+      "cta": "See all courses"
+    },
     "EnrolledCourseSummaryCard": {
       "percent": "{percent, number, percent}",
       "progress": "{completed} of {total, plural, one {# video} other {# videos}}",
       "nextUp": "Next up",
       "startOver": "Start over",
       "position": "Module {module} · {moduleTitle} · Video {number} of {total} · {duration}",
+      "start": "Start",
       "continue": "Continue",
       "watchAgain": "Watch again",
-      "viewCourse": "View course"
+      "viewProgress": "Progress",
+      "viewDetails": "Details"
     },
     "CourseBrief": {
       "audience": "For",
@@ -621,7 +631,6 @@
       "allWatchedShort": "All watched",
       "openLessonTile": "Open lesson {number}: {title}",
       "videoPosition": "Lesson {module} · Video {number} of {total}",
-      "viewCourse": "View course",
       "viewCourseDetails": "View course details"
     },
     "moduleOverview": {
@@ -688,7 +697,7 @@
     "coursesEyebrow": "Your courses",
     "coursesHeading": "{count, plural, one {# course you’re enrolled in} other {# courses you’re enrolled in}}",
     "catalogEmpty": "No courses are available right now.",
-    "browseCourses": "Browse courses"
+    "allCourses": "See all courses"
   },
   "Onboarding": {
     "stepLabel": "Step {step} of {total}",

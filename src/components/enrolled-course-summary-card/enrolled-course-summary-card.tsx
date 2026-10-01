@@ -1,13 +1,20 @@
 import { ProgressRing } from "@/components/progress-ring/progress-ring";
 import { useRuntimeLabel } from "@/hooks/use-runtime-label/use-runtime-label";
-import { courseOverviewPath, lessonPath } from "@/i18n/lesson-routes";
+import { courseDetailPath, courseOverviewPath, lessonPath } from "@/i18n/lesson-routes";
 import { Link } from "@/i18n/navigation";
 import type { CourseCardModel, TargetVideo } from "@/lib/course-shelf/course-shelf";
 import { cn } from "@/lib/utils/utils";
 import { watchedFraction } from "@/lib/watch-progress/watch-progress";
 
+import { ChartNoAxesColumn, Info, Play } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+
+const ACTION_KEY: Record<TargetVideo["kind"], "start" | "continue" | "watchAgain"> = {
+  start: "start",
+  continue: "continue",
+  rewatch: "watchAgain",
+};
 
 /** Props for {@link EnrolledCourseSummaryCard}. */
 export type EnrolledCourseSummaryCardProps = {
@@ -22,9 +29,13 @@ export type EnrolledCourseSummaryCardProps = {
  *
  * @remarks
  * Each course keeps its own place (capability `course-enrollment`), so every
- * card names its own next video. A finished course's card offers **Watch
- * again** instead of **Continue**. The card of the course the page leads with
- * is marked current.
+ * card names its own next video. Its one gold action reads **Start**,
+ * **Continue** or **Watch again** by the target's kind, as the resume hero
+ * does. The card closes with a split bar: **Progress** opens the course's
+ * progress board and **Details** its course page (`/courses/<slug>/about`). The
+ * ring and title lead to the board too, kept out of the tab order so keyboard
+ * users meet **Progress** once. The card of the course the page leads with is
+ * marked current.
  *
  * @example
  * ```tsx
@@ -32,59 +43,117 @@ export type EnrolledCourseSummaryCardProps = {
  * ```
  */
 export function EnrolledCourseSummaryCard({ model, isCurrent }: EnrolledCourseSummaryCardProps) {
-  const t = useTranslations("Components.EnrolledCourseSummaryCard");
-  const { course, tally, target, isCompleted } = model;
+  const { target } = model;
 
   return (
     <article
       data-testid="enrolled-course-summary-card"
       data-current={isCurrent}
       className={cn(
-        "flex flex-col gap-4 rounded-[22px] border bg-card p-4.5",
+        "flex flex-col gap-4 overflow-hidden rounded-[22px] border bg-card p-4.5",
         isCurrent ? "border-gold/60" : "border-border",
       )}
     >
-      <div className="grid grid-cols-[3.5rem_minmax(0,1fr)] items-center gap-3.5">
-        <ProgressRing
-          size={56}
-          fraction={tally.completedFraction}
-        >
-          <span className="text-xs font-black">
-            {t("percent", { percent: tally.completedFraction })}
-          </span>
-        </ProgressRing>
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <h3 className="text-lg leading-tight font-black tracking-[-0.02em] text-foreground">
-            {course.title}
-          </h3>
-          <span className="font-mono text-xs text-muted-foreground tabular-nums">
-            {t("progress", { completed: tally.completedCount, total: tally.lessonCount })}
-          </span>
-        </div>
-      </div>
+      <CardHeader model={model} />
       {target ? (
         <NextUpRow
           model={model}
           target={target}
         />
       ) : null}
-      <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2">
-        {target ? (
-          <Link
-            href={lessonPath(course, target.module, target.lesson) as never}
-            className="inline-flex min-h-11 items-center rounded-[11px] border border-border bg-card px-4 text-sm font-bold text-foreground transition-colors hover:bg-secondary focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-          >
-            {t(isCompleted ? "watchAgain" : "continue")}
-          </Link>
-        ) : null}
-        <Link
-          href={courseOverviewPath(course) as never}
-          className="inline-flex min-h-11 items-center rounded-md text-sm font-bold text-gold hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-        >
-          {t("viewCourse")}
-        </Link>
-      </div>
+      {target ? (
+        <WatchAction
+          model={model}
+          target={target}
+        />
+      ) : null}
+      <CourseLinks course={model.course} />
     </article>
+  );
+}
+
+// The ring and title repeat the Progress link for the pointer, so they stay
+// out of the tab order.
+function CardHeader({ model }: { model: CourseCardModel }) {
+  const t = useTranslations("Components.EnrolledCourseSummaryCard");
+  const { course, tally } = model;
+
+  return (
+    <Link
+      href={courseOverviewPath(course) as never}
+      tabIndex={-1}
+      className="group/header grid grid-cols-[3.5rem_minmax(0,1fr)] items-center gap-3.5"
+    >
+      <ProgressRing
+        size={56}
+        fraction={tally.completedFraction}
+      >
+        <span className="text-xs font-black">
+          {t("percent", { percent: tally.completedFraction })}
+        </span>
+      </ProgressRing>
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <h3 className="text-lg leading-tight font-black tracking-[-0.02em] text-foreground decoration-gold/60 underline-offset-4 group-hover/header:underline">
+          {course.title}
+        </h3>
+        <span className="font-mono text-xs text-muted-foreground tabular-nums">
+          {t("progress", { completed: tally.completedCount, total: tally.lessonCount })}
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+function WatchAction({ model, target }: { model: CourseCardModel; target: TargetVideo }) {
+  const t = useTranslations("Components.EnrolledCourseSummaryCard");
+
+  return (
+    <Link
+      href={lessonPath(model.course, target.module, target.lesson) as never}
+      className="mt-auto inline-flex min-h-11 items-center justify-center gap-2 rounded-[11px] bg-primary px-4 text-sm font-extrabold text-primary-foreground shadow-[0_12px_40px_-8px_color-mix(in_oklab,var(--primary)_60%,transparent)] transition-[filter,transform] hover:-translate-y-px hover:brightness-105 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none motion-reduce:transition-none"
+    >
+      <Play
+        aria-hidden="true"
+        className="size-4"
+        fill="currentColor"
+      />
+      {t(ACTION_KEY[target.kind])}
+    </Link>
+  );
+}
+
+// The bar bleeds to the card's edges, so it undoes the card's padding.
+function CourseLinks({ course }: { course: CourseCardModel["course"] }) {
+  const t = useTranslations("Components.EnrolledCourseSummaryCard");
+
+  return (
+    <div className="-mx-4.5 -mb-4.5 grid grid-cols-2 divide-x divide-border border-t border-border">
+      <BarLink href={courseOverviewPath(course)}>
+        <ChartNoAxesColumn
+          aria-hidden="true"
+          className="size-4"
+        />
+        {t("viewProgress")}
+      </BarLink>
+      <BarLink href={courseDetailPath(course)}>
+        <Info
+          aria-hidden="true"
+          className="size-4"
+        />
+        {t("viewDetails")}
+      </BarLink>
+    </div>
+  );
+}
+
+function BarLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href as never}
+      className="inline-flex min-h-12 items-center justify-center gap-2 text-[0.8125rem] font-extrabold text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-gold focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none focus-visible:ring-inset"
+    >
+      {children}
+    </Link>
   );
 }
 

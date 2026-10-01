@@ -1,5 +1,6 @@
 "use client";
 
+import { CatalogCard } from "@/components/catalog-card/catalog-card";
 import { CourseProgressTile } from "@/components/course-progress-tile/course-progress-tile";
 import { EnrolledCourseSummaryCard } from "@/components/enrolled-course-summary-card/enrolled-course-summary-card";
 import { Eyebrow } from "@/components/eyebrow/eyebrow";
@@ -15,11 +16,11 @@ import type { CourseForView } from "@/domain/use-cases/find-course-for-view/find
 import { useCourseShelf, type CourseShelfReading } from "@/hooks/use-course-shelf/use-course-shelf";
 import { useLearnerProfile } from "@/hooks/use-learner-profile/use-learner-profile";
 import { useLearnerRedirect } from "@/hooks/use-learner-redirect/use-learner-redirect";
-import { courseOverviewPath } from "@/i18n/lesson-routes";
+import { courseDetailPath } from "@/i18n/lesson-routes";
 import { Link } from "@/i18n/navigation";
 import type { CourseCardModel } from "@/lib/course-shelf/course-shelf";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, LayoutGrid } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 const ONBOARDING_PATH = "/start";
@@ -50,7 +51,12 @@ export type MyLearningViewProps = {
  * {@link useCourseShelf}): the enrolled course watched most recently leads,
  * with its continue target in a {@link ResumeTile} beside that course's
  * progress panel, and **Your courses** lists every enrolled course with its
- * own next video.
+ * own next video, three to a row on wide screens.
+ *
+ * The catalog stays in reach in two places: a **See all courses** button
+ * beside the greeting (wide screens only), and a {@link CatalogCard} closing
+ * Your courses that teases the first course, in catalog order, the learner has
+ * not joined.
  *
  * @example
  * ```tsx
@@ -82,15 +88,25 @@ function LearnerPage({
 
   return (
     <>
-      <section className="flex flex-col gap-8">
-        <Greeting profile={profile} />
+      <section className="grid grid-cols-1 gap-3 lg:grid-cols-12 lg:gap-4">
+        <div className="mb-5 lg:col-span-8 lg:mb-4">
+          <Greeting profile={profile} />
+        </div>
         {shelf.status === "read" && shelf.featured ? (
           <LeadingCourse model={shelf.featured} />
         ) : (
-          <ResumeTile reading={{ status: "pending" }} />
+          <div className="lg:col-span-12">
+            <ResumeTile reading={{ status: "pending" }} />
+          </div>
         )}
+        <AllCoursesButton />
       </section>
-      {shelf.status === "read" && shelf.featured ? <YourCourses shelf={shelf} /> : null}
+      {shelf.status === "read" && shelf.featured ? (
+        <YourCourses
+          shelf={shelf}
+          courseCount={courses.length}
+        />
+      ) : null}
     </>
   );
 }
@@ -105,8 +121,8 @@ function enrollmentStatusOf(shelf: CourseShelfReading): "unknown" | "absent" | "
 function LeadingCourse({ model }: { model: CourseCardModel }) {
   const t = useTranslations("CourseCatalog.courseOverview");
   return (
-    <div className="grid grid-cols-1 gap-3 lg:grid-cols-12 lg:gap-4">
-      <div className="lg:col-span-8">
+    <>
+      <div className="lg:col-span-8 lg:flex lg:flex-col [&>section]:lg:flex-1">
         <ResumeTile reading={{ status: "read", model }} />
       </div>
       <div className="lg:col-span-4 lg:flex lg:flex-col [&>section]:lg:flex-1">
@@ -115,14 +131,14 @@ function LeadingCourse({ model }: { model: CourseCardModel }) {
           reading={{ status: "read", tally: model.tally }}
           prizes={model.prizes}
           headingLevel={2}
-          link={{ href: courseOverviewPath(model.course), label: t("viewCourse") }}
+          link={{ href: courseDetailPath(model.course), label: t("viewCourseDetails") }}
         />
       </div>
-    </div>
+    </>
   );
 }
 
-function YourCourses({ shelf }: { shelf: ReadShelf }) {
+function YourCourses({ shelf, courseCount }: { shelf: ReadShelf; courseCount: number }) {
   const t = useTranslations("MyLearning");
   const enrolled = [shelf.featured, ...shelf.otherEnrolled].flatMap((model) =>
     model ? [model] : [],
@@ -131,25 +147,13 @@ function YourCourses({ shelf }: { shelf: ReadShelf }) {
 
   return (
     <section className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
-        <div className="flex flex-col gap-2">
-          <Eyebrow>{t("coursesEyebrow")}</Eyebrow>
-          <h2 className="font-sans text-3xl font-black tracking-tight text-foreground sm:text-4xl">
-            {t("coursesHeading", { count: enrolled.length })}
-          </h2>
-        </div>
-        <Link
-          href="/courses"
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-md text-sm font-bold text-gold hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-        >
-          {t("browseCourses")}
-          <ArrowRight
-            aria-hidden="true"
-            className="size-4"
-          />
-        </Link>
+      <div className="flex flex-col gap-2">
+        <Eyebrow>{t("coursesEyebrow")}</Eyebrow>
+        <h2 className="font-sans text-3xl font-black tracking-tight text-foreground sm:text-4xl">
+          {t("coursesHeading", { count: enrolled.length })}
+        </h2>
       </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {inCatalogOrder.map((model) => (
           <EnrolledCourseSummaryCard
             key={model.course.id}
@@ -157,8 +161,36 @@ function YourCourses({ shelf }: { shelf: ReadShelf }) {
             isCurrent={model === shelf.featured}
           />
         ))}
+        <CatalogCard
+          courseCount={courseCount}
+          notJoinedCount={shelf.available.length}
+          teaser={shelf.available[0]}
+        />
       </div>
     </section>
+  );
+}
+
+// Wide screens only: on a phone the catalog card closing Your courses is the
+// way to the catalog, so the leading block stays the hero and its panel.
+function AllCoursesButton() {
+  const t = useTranslations("MyLearning");
+
+  return (
+    <Link
+      href="/courses"
+      className="hidden min-h-11 items-center gap-2 rounded-[11px] border border-gold/55 bg-[color-mix(in_oklab,var(--glow)_8%,var(--card))] px-4 text-sm font-extrabold text-gold transition-transform hover:-translate-y-px focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none motion-reduce:transition-none lg:col-span-4 lg:col-start-9 lg:row-start-1 lg:mb-4 lg:inline-flex lg:self-center lg:justify-self-end"
+    >
+      <LayoutGrid
+        aria-hidden="true"
+        className="size-4"
+      />
+      {t("allCourses")}
+      <ArrowRight
+        aria-hidden="true"
+        className="size-4"
+      />
+    </Link>
   );
 }
 
