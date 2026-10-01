@@ -1,323 +1,205 @@
-import type { ContinueWatchingPanel } from "@/app/[locale]/actions";
-import type { HomeLevel } from "@/components/home-view/home-view";
 import { ContinueWatchingLocation } from "@/domain/entities/continue-watching-location/continue-watching-location";
-import { Course } from "@/domain/entities/course/course";
-import { LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
-import { Module } from "@/domain/entities/module/module";
-import type { ContinueWatchingRepository } from "@/domain/ports/continue-watching-repository/continue-watching-repository";
-import type { PlaybackPositionRepository } from "@/domain/ports/playback-position-repository/playback-position-repository";
+import type { CourseForView } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
 import { useRouter } from "@/i18n/navigation";
 import { givenLearner } from "@/test-setup/learner-store/learner-store";
 import { renderInLocale } from "@/test-setup/render-in-locale";
+import { aCourseView, lessonOf } from "@/test-setup/stubs/course-views";
 import { makeStubLearnerProfileRepository } from "@/test-setup/stubs/domain-repos";
 
-import { faker } from "@faker-js/faker";
 import { screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { MyLearningView } from "./my-learning-view";
 
-const buildCourse = (slug: string, title: string, sequence: number) =>
-  Course.parse({
-    id: faker.string.uuid(),
-    slug,
-    title,
-    description: faker.lorem.sentence(),
-    language: "en",
-    sequence,
-    lessonCount: 3,
-    moduleCount: 2,
-  });
-
-const basic = buildCourse("basic-course", "Basic Course", 1);
-const advanced = buildCourse("advanced-intermediate-course", "Advanced Intermediate Course", 2);
-
-const buildModule = (sequence: number, title: string) =>
-  Module.parse({
-    id: ModuleId.parse(faker.string.uuid()),
-    courseId: basic.id,
-    slug: `module-${sequence}`,
-    title,
-    sequence,
-  });
-
-const introduction = buildModule(1, "Introduction");
-const vowels = buildModule(2, "Vowels");
-
-const slice = (moduleId: ModuleId) => ({
-  id: LessonId.parse(faker.string.uuid()),
-  moduleId,
-  durationSeconds: 480,
-  title: faker.lorem.words(3),
-  sequence: faker.number.int({ min: 1, max: 30 }),
-});
-
-const introductionLesson = slice(introduction.id);
-const vowelLessons = [slice(vowels.id), slice(vowels.id)];
-
-const levels: HomeLevel[] = [
-  {
-    course: basic,
-    modules: [introduction, vowels],
-    lessonRuntimes: [introductionLesson, ...vowelLessons],
-  },
-  { course: advanced, modules: [], lessonRuntimes: [] },
-];
-
-const firstLesson = {
-  href: `/courses/basic-course/modules/module-1/lessons/${introductionLesson.id}`,
-  minutes: 8,
-  courseTitle: "Basic Course",
-};
-
-const continuedLesson = vowelLessons[0]!;
-
-const location = ContinueWatchingLocation.parse({
-  courseSlug: basic.slug,
-  moduleSlug: vowels.slug,
-  lessonId: continuedLesson.id,
-});
-
-const panel: ContinueWatchingPanel = {
-  courseSlug: basic.slug,
-  courseTitle: basic.title,
-  moduleId: vowels.id,
-  moduleSequence: vowels.sequence,
-  moduleTitle: vowels.title,
-  lessonSequence: 1,
-  lessonTitle: "The Vowel Sound Schwa",
-  lessonHref: `/courses/basic-course/modules/module-2/lessons/${continuedLesson.id}`,
-  durationSeconds: 480,
-};
+const basic = aCourseView("basic-course", 1, [1, 3]);
+const advanced = aCourseView("advanced-intermediate-course", 2, [2, 10]);
+const courses = [basic, advanced];
 
 const profile = LearnerProfile.parse({ name: "Ana García", avatar: { kind: "initials" } });
-
-const storing = (stored: ContinueWatchingLocation | null): ContinueWatchingRepository => ({
-  get: async () => stored,
-  set: async () => {},
-});
-
-const watchedFor = (seconds: number | null): PlaybackPositionRepository => ({
-  getPosition: async () => seconds,
-  setPosition: async () => {},
-});
-
-const neverAnswers = () => new Promise<ContinueWatchingPanel | null>(() => {});
-
 const router = { replace: vi.fn(), push: vi.fn() };
 
+const placeIn = (
+  view: CourseForView,
+  moduleIndex: number,
+  lessonIndex: number,
+  watchedAt: number,
+) => ({
+  location: ContinueWatchingLocation.parse({
+    courseSlug: view.course.slug,
+    moduleSlug: view.modules[moduleIndex]!.slug,
+    lessonId: lessonOf(view, moduleIndex, lessonIndex).id,
+  }),
+  watchedAt,
+});
+
 beforeEach(() => {
-  window.localStorage.clear();
   router.replace.mockClear();
   vi.mocked(useRouter).mockReturnValue(router as never);
 });
 
+const renderPage = (
+  profiles = makeStubLearnerProfileRepository({ profile }),
+  locale: "en" | "es" = "en",
+) =>
+  renderInLocale(
+    <MyLearningView
+      courses={courses}
+      profiles={profiles}
+    />,
+    locale,
+  );
+
 describe("MyLearningView", () => {
-  describe("GIVEN storage has not answered yet", () => {
-    test("WHEN first rendered THEN a shell stands in and no learner is greeted", () => {
-      renderInLocale(
-        <MyLearningView
-          levels={levels}
-          firstLesson={firstLesson}
-          profiles={makeStubLearnerProfileRepository({ profile })}
-          continueWatching={storing(null)}
-        />,
-      );
+  test("WHEN storage has not answered THEN a shell stands in for the page", () => {
+    renderPage();
 
-      expect(screen.getByTestId("my-learning-shell")).toBeInTheDocument();
-      expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
-    });
+    expect(screen.getByTestId("my-learning-shell")).toBeInTheDocument();
   });
 
-  describe("GIVEN a device without a learner profile", () => {
-    test("WHEN rendered THEN the learner is sent to the onboarding", async () => {
-      renderInLocale(
-        <MyLearningView
-          levels={levels}
-          firstLesson={firstLesson}
-          profiles={makeStubLearnerProfileRepository()}
-          continueWatching={storing(null)}
-        />,
-      );
+  test("WHEN the device has no profile THEN the learner is sent to the onboarding", async () => {
+    renderPage(makeStubLearnerProfileRepository());
 
-      await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/start"));
-    });
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/start"));
   });
 
-  describe("GIVEN a learner with nothing watched", () => {
-    const renderFresh = () =>
-      renderInLocale(
-        <MyLearningView
-          levels={levels}
-          firstLesson={firstLesson}
-          profiles={makeStubLearnerProfileRepository({ profile })}
-          continueWatching={storing(null)}
-        />,
-      );
+  test("WHEN the learner is enrolled in nothing THEN they are sent to the first-course step", async () => {
+    givenLearner.enrolledCourses([]);
 
-    test("WHEN rendered THEN it greets the learner by first name beside their avatar", async () => {
-      renderFresh();
+    renderPage();
+
+    await waitFor(() =>
+      expect(router.replace).toHaveBeenCalledWith("/start/first-course?from=learning"),
+    );
+  });
+
+  describe("GIVEN a learner enrolled in both who last watched Advanced", () => {
+    const resumed = lessonOf(advanced, 1, 2);
+
+    beforeEach(() => {
+      givenLearner.enrolledCourses(["basic-course", "advanced-intermediate-course"]);
+      givenLearner.positions({ [resumed.id]: 365 });
+      givenLearner.continueWatchingByCourse([
+        placeIn(advanced, 1, 2, Date.now() - 60_000),
+        placeIn(basic, 1, 1, Date.now() - 86_400_000),
+      ]);
+    });
+
+    test("WHEN the page renders THEN it greets the learner AND resumes the Advanced video", async () => {
+      renderPage();
 
       expect(
         await screen.findByRole("heading", { level: 1, name: "Welcome back, Ana." }),
       ).toBeInTheDocument();
-      expect(screen.getByRole("img", { name: "Avatar: Ana García" })).toBeInTheDocument();
+      const tile = screen.getByTestId("resume-tile");
+      expect(
+        within(tile).getByRole("heading", { level: 2, name: resumed.title }),
+      ).toBeInTheDocument();
+      expect(within(tile).getByRole("link", { name: /Resume/ })).toHaveAttribute(
+        "href",
+        `/courses/advanced-intermediate-course/modules/module-2/lessons/${resumed.id}`,
+      );
       expect(router.replace).not.toHaveBeenCalled();
     });
 
-    test("WHEN rendered THEN the panel offers the first video and the first course's progress is listed", async () => {
-      renderFresh();
+    test("WHEN the page renders THEN Advanced's progress panel sits beside it with View course details", async () => {
+      renderPage();
 
-      expect(await screen.findByRole("link", { name: "Watch the first video" })).toHaveAttribute(
-        "href",
-        expect.stringContaining(firstLesson.href),
-      );
-      const lessons = screen.getByRole("list", { name: "Lessons in Basic Course" });
-      expect(within(lessons).queryByRole("link", { name: "Continue" })).not.toBeInTheDocument();
-    });
-
-    test("WHEN rendered THEN every course is listed and none is marked in progress", async () => {
-      renderFresh();
-
-      const table = await screen.findByRole("list", { name: "Available courses, in order" });
-      for (const link of within(table).getAllByRole("link")) {
-        expect(link).toHaveAccessibleName("View course");
-      }
-    });
-  });
-
-  describe("GIVEN a stored record that has not resolved yet", () => {
-    test("WHEN rendered THEN the panel is reserved and names no lesson", async () => {
-      renderInLocale(
-        <MyLearningView
-          levels={levels}
-          firstLesson={firstLesson}
-          profiles={makeStubLearnerProfileRepository({ profile })}
-          continueWatching={storing(location)}
-          resolve={neverAnswers}
-        />,
-      );
-
-      await screen.findByRole("heading", { level: 1, name: "Welcome back, Ana." });
-      await waitFor(() => expect(screen.getByTestId("resume-panel-skeleton")).toBeInTheDocument());
-      expect(screen.queryByRole("link", { name: "Resume" })).not.toBeInTheDocument();
-      expect(screen.queryByRole("link", { name: "Watch the first video" })).not.toBeInTheDocument();
-    });
-  });
-
-  describe("GIVEN a stored record that resolves to a live lesson", () => {
-    const renderReturning = (positions = watchedFor(null)) =>
-      renderInLocale(
-        <MyLearningView
-          levels={levels}
-          firstLesson={firstLesson}
-          profiles={makeStubLearnerProfileRepository({ profile })}
-          continueWatching={storing(location)}
-          resolve={async () => panel}
-          positions={positions}
-        />,
-      );
-
-    test("WHEN rendered THEN Resume returns to the lesson and states its position", async () => {
-      renderReturning();
-
-      expect(await screen.findByRole("link", { name: "Resume" })).toHaveAttribute(
-        "href",
-        expect.stringContaining(panel.lessonHref),
-      );
+      const panel = await screen.findByTestId("course-progress-tile");
       expect(
-        screen.getByText("Basic Course · Lesson 2 · Vowels · Video 1 of 2"),
+        within(panel).getByRole("heading", { level: 2, name: advanced.course.title }),
+      ).toBeInTheDocument();
+      expect(within(panel).getByRole("link", { name: "View course details" })).toHaveAttribute(
+        "href",
+        "/courses/advanced-intermediate-course/about",
+      );
+    });
+
+    test("WHEN the page renders THEN the panel's course title leads to the course page too", async () => {
+      renderPage();
+
+      const panel = await screen.findByTestId("course-progress-tile");
+      const heading = within(panel).getByRole("heading", { level: 2, name: advanced.course.title });
+      expect(within(heading).getByRole("link")).toHaveAttribute(
+        "href",
+        "/courses/advanced-intermediate-course/about",
+      );
+    });
+
+    test("WHEN the page renders THEN Your courses lists both, Advanced as current", async () => {
+      renderPage();
+
+      expect(
+        await screen.findByRole("heading", { level: 2, name: "2 courses you’re enrolled in" }),
+      ).toBeInTheDocument();
+      const cards = screen.getAllByTestId("enrolled-course-summary-card");
+      expect(cards.map((card) => within(card).getByRole("heading").textContent)).toEqual([
+        basic.course.title,
+        advanced.course.title,
+      ]);
+      expect(cards.map((card) => card.dataset.current)).toEqual(["false", "true"]);
+      expect(cards[0]).toHaveTextContent(lessonOf(basic, 1, 1).title);
+    });
+
+    test("WHEN the page renders THEN See all courses opens Available courses", async () => {
+      renderPage();
+
+      expect(await screen.findByRole("link", { name: "See all courses" })).toHaveAttribute(
+        "href",
+        "/courses",
+      );
+      expect(screen.queryByRole("link", { name: /Browse courses/ })).not.toBeInTheDocument();
+    });
+
+    test("WHEN the page renders THEN the catalog card says they joined every course", async () => {
+      renderPage();
+
+      expect(await screen.findByTestId("catalog-card")).toHaveTextContent(
+        "You’re enrolled in all of them.",
+      );
+      expect(screen.queryByTestId("catalog-card-teaser")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN a learner enrolled in Basic who never opened a lesson", () => {
+    test("WHEN the page renders THEN it offers to start the Basic Course", async () => {
+      givenLearner.enrolledCourses(["basic-course"]);
+
+      renderPage();
+
+      expect(await screen.findByText("Start here")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { level: 2, name: "1 course you’re enrolled in" }),
       ).toBeInTheDocument();
     });
 
-    test("WHEN rendered THEN the continued lesson's card leads and continues that video", async () => {
-      renderReturning();
+    test("WHEN the page renders THEN the catalog card follows the course AND teases Advanced", async () => {
+      givenLearner.enrolledCourses(["basic-course"]);
 
-      await screen.findByRole("link", { name: "Resume" });
-      const [lead] = within(
-        screen.getByRole("list", { name: "Lessons in Basic Course" }),
-      ).getAllByRole("listitem");
-      expect(lead).toHaveTextContent(`Last watched: ${panel.lessonTitle}`);
-      expect(within(lead!).getByRole("link", { name: "Continue" })).toHaveAttribute(
-        "href",
-        expect.stringContaining(panel.lessonHref),
+      renderPage();
+
+      const catalogCard = await screen.findByTestId("catalog-card");
+      const [basicCard] = screen.getAllByTestId("enrolled-course-summary-card");
+      expect(basicCard!.compareDocumentPosition(catalogCard)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING,
       );
-    });
-
-    test("WHEN the recorded video is already finished THEN Resume AND the lead card open the next video instead", async () => {
-      givenLearner.completed([continuedLesson.id]);
-      const nextVideo = vowelLessons[1]!;
-      const nextPanel: ContinueWatchingPanel = {
-        ...panel,
-        lessonSequence: 2,
-        lessonTitle: "The Vowel Sound Ih",
-        lessonHref: `/courses/basic-course/modules/module-2/lessons/${nextVideo.id}`,
-      };
-      renderInLocale(
-        <MyLearningView
-          levels={levels}
-          firstLesson={firstLesson}
-          profiles={makeStubLearnerProfileRepository({ profile })}
-          continueWatching={storing(location)}
-          resolve={async (asked) => (asked.lessonId === nextVideo.id ? nextPanel : panel)}
-          positions={watchedFor(null)}
-        />,
-      );
-
-      await waitFor(() =>
-        expect(screen.getByRole("link", { name: "Resume" })).toHaveAttribute(
-          "href",
-          expect.stringContaining(nextPanel.lessonHref),
-        ),
-      );
-      expect(
-        screen.getByText("Basic Course · Lesson 2 · Vowels · Video 2 of 2"),
-      ).toBeInTheDocument();
-      const [lead] = within(
-        screen.getByRole("list", { name: "Lessons in Basic Course" }),
-      ).getAllByRole("listitem");
-      expect(lead).toHaveTextContent(nextPanel.lessonTitle);
-      expect(within(lead!).getByRole("link", { name: "Continue" })).toHaveAttribute(
-        "href",
-        expect.stringContaining(nextPanel.lessonHref),
-      );
-    });
-
-    test("WHEN rendered THEN only the continued course invites the learner to continue", async () => {
-      renderReturning();
-
-      await screen.findByRole("link", { name: "Resume" });
-      const table = screen.getByRole("list", { name: "Available courses, in order" });
-      const [basicRow, advancedRow] = within(table).getAllByRole("listitem");
-      expect(within(basicRow!).getByRole("link")).toHaveAccessibleName("Continue course");
-      expect(within(advancedRow!).getByRole("link")).toHaveAccessibleName("View course");
-    });
-
-    test("WHEN a playback position is saved THEN the panel draws how far in the learner got", async () => {
-      renderReturning(watchedFor(240));
-
-      expect(await screen.findByRole("progressbar", { name: "Playback progress" })).toHaveAttribute(
-        "aria-valuenow",
-        "50",
-      );
+      expect(catalogCard).toHaveTextContent("Catalog · 2 courses");
+      expect(catalogCard).toHaveTextContent("You haven’t joined 1 of them yet.");
+      expect(screen.getByTestId("catalog-card-teaser")).toHaveTextContent(advanced.course.title);
     });
   });
 
-  describe("GIVEN an empty catalog", () => {
-    test("WHEN rendered THEN a localized empty state is shown", async () => {
-      renderInLocale(
-        <MyLearningView
-          levels={[]}
-          firstLesson={null}
-          profiles={makeStubLearnerProfileRepository({ profile })}
-          continueWatching={storing(null)}
-        />,
-      );
+  test("WHEN rendered in es THEN the page copy comes from es.json", async () => {
+    givenLearner.enrolledCourses(["basic-course"]);
 
-      expect(await screen.findByRole("status")).toHaveTextContent(
-        "No courses are available right now.",
-      );
-    });
+    renderPage(makeStubLearnerProfileRepository({ profile }), "es");
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Hola de nuevo, Ana." }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ver todos los cursos" })).toHaveAttribute(
+      "href",
+      "/courses",
+    );
   });
 });

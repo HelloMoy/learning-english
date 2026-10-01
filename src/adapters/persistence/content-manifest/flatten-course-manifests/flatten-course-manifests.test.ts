@@ -25,7 +25,10 @@ function videoLesson(overrides: Record<string, unknown> = {}): Record<string, un
 }
 
 /** One course with one module holding `lessons`, parsed into manifest shape. */
-function catalogOf(lessons: ReadonlyArray<Record<string, unknown>>) {
+function catalogOf(
+  lessons: ReadonlyArray<Record<string, unknown>>,
+  courseOverrides: Record<string, unknown> = {},
+) {
   return parseCourseManifests([
     {
       id: COURSE_ID,
@@ -43,6 +46,7 @@ function catalogOf(lessons: ReadonlyArray<Record<string, unknown>>) {
           lessons,
         },
       ],
+      ...courseOverrides,
     },
   ]);
 }
@@ -55,6 +59,71 @@ describe("flattenCourseManifests", () => {
       );
 
       expect(courses[0]).toMatchObject({ lessonCount: 2, moduleCount: 1 });
+    });
+
+    test("WHEN the manifest declares no track THEN the course is a level", () => {
+      const { courses } = flattenCourseManifests(catalogOf([videoLesson()]));
+
+      expect(courses[0]!.track).toBe("level");
+    });
+
+    test("WHEN the manifest declares the reference track THEN the course carries it", () => {
+      const { courses } = flattenCourseManifests(
+        catalogOf([videoLesson()], { track: "reference" }),
+      );
+
+      expect(courses[0]!.track).toBe("reference");
+    });
+
+    test("WHEN the manifest declares outcomes and sounds THEN the course carries both", () => {
+      // Arrange
+      const outcomes = faker.helpers.multiple(() => faker.lorem.sentence(), { count: 2 });
+      const sounds = { vowels: ["ə", "æ"], consonants: ["ʃ"] };
+
+      // Act
+      const { courses } = flattenCourseManifests(catalogOf([videoLesson()], { outcomes, sounds }));
+
+      // Assert
+      expect(courses[0]).toMatchObject({ outcomes, sounds });
+    });
+
+    test("WHEN the manifest declares an audience and highlights THEN the course carries both", () => {
+      // Arrange
+      const audience = faker.lorem.sentence();
+      const highlights = faker.helpers.multiple(() => faker.lorem.words(3), { count: 3 });
+
+      // Act
+      const { courses } = flattenCourseManifests(
+        catalogOf([videoLesson()], { audience, highlights }),
+      );
+
+      // Assert
+      expect(courses[0]).toMatchObject({ audience, highlights });
+    });
+
+    test("WHEN the manifest declares translations THEN the course carries them", () => {
+      // Arrange
+      const translations = { es: { description: faker.lorem.sentence() } };
+
+      // Act
+      const { courses } = flattenCourseManifests(catalogOf([videoLesson()], { translations }));
+
+      // Assert
+      expect(courses[0]).toMatchObject({ translations });
+    });
+
+    test("WHEN the manifest declares neither THEN the course carries neither", () => {
+      // Arrange
+      const catalog = catalogOf([videoLesson()]);
+
+      // Act
+      const { courses } = flattenCourseManifests(catalog);
+
+      // Assert
+      expect(courses[0]).not.toHaveProperty("outcomes");
+      expect(courses[0]).not.toHaveProperty("sounds");
+      expect(courses[0]).not.toHaveProperty("audience");
+      expect(courses[0]).not.toHaveProperty("highlights");
     });
 
     test("WHEN it is flattened THEN parent ids are propagated down the tree", () => {

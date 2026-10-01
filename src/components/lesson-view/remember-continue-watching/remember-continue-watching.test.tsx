@@ -18,6 +18,7 @@ function makeRepository(): ContinueWatchingRepository & { stored: () => unknown 
     set: async (location) => {
       stored = location;
     },
+    list: async () => (stored ? [{ location: stored, watchedAt: 0 }] : []),
     stored: () => stored,
   };
 }

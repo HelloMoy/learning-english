@@ -1,4 +1,4 @@
-import type { ContinueWatchingLocation } from "@/domain/entities/continue-watching-location/continue-watching-location";
+import type { ContinueWatchingRecord } from "@/domain/entities/continue-watching-record/continue-watching-record";
 import type { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
 
 /**
@@ -16,9 +16,11 @@ export type LearnerSnapshot = {
   profile: LearnerProfile | null;
   completedLessonIds: ReadonlyArray<string>;
   positions: Readonly<Record<string, number>>;
-  continueWatching: ContinueWatchingLocation | null;
+  /** One record per course the learner has opened, the most recently watched first. */
+  continueWatching: ReadonlyArray<ContinueWatchingRecord>;
   earnedTicketLessonIds: ReadonlyArray<string>;
   claimedPrizeModuleSlugs: ReadonlyArray<string>;
+  enrolledCourseSlugs: ReadonlyArray<string>;
 };
 
 /**
@@ -30,7 +32,8 @@ export const EMPTY_LEARNER_SNAPSHOT: LearnerSnapshot = {
   profile: null,
   completedLessonIds: [],
   positions: {},
-  continueWatching: null,
+  continueWatching: [],
   earnedTicketLessonIds: [],
   claimedPrizeModuleSlugs: [],
+  enrolledCourseSlugs: [],
 };

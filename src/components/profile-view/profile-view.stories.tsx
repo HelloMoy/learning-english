@@ -21,6 +21,7 @@ const course = Course.parse({
   language: "en",
   lessonCount: 48,
   moduleCount: 1,
+  track: "level",
   sequence: 1,
 });
 
@@ -97,7 +98,10 @@ type Story = StoryObj<typeof meta>;
 /** The stored card, nothing edited: no save bar at all. */
 export const Default: Story = {};
 
-/** Picking another avatar previews it on the card and raises the save bar. */
+/**
+ * Picking another avatar previews it on the card and raises the save bar,
+ * which sits under the card on a wide screen.
+ */
 export const EditingTheAvatar: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -111,7 +115,13 @@ export const InSpanish: Story = {
   parameters: { locale: "es" },
 };
 
-/** Phone width: the card and its progress lead, the sections follow. */
+/** Phone width: the card and its counts lead, the sections follow. */
 export const OnAPhone: Story = {
+  globals: { viewport: { value: "mobile2" } },
+};
+
+/** Phone width with an edit: the save bar docks to the bottom of the screen. */
+export const EditingOnAPhone: Story = {
+  ...EditingTheAvatar,
   globals: { viewport: { value: "mobile2" } },
 };

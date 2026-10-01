@@ -5,6 +5,84 @@
   "description": "American pronunciation from the ground up: vowel and consonant sounds, rhythm drills, and fluency practice.",
   "language": "en",
   "sequence": 1,
+  "outcomes": [
+    "Hear and say the schwa /ə/, the most common sound in American English.",
+    "Tell apart the vowels Spanish speakers tend to merge, like ship /ɪ/ and sheep /i/, or cup /ʌ/ and hot /ɑ/.",
+    "Pronounce the American /r/, the flap in “water”, the dark L in “feel”, and both th sounds, /θ/ and /ð/.",
+    "Train your ear with rhythm drills and work out how to pronounce any new word.",
+    "Put the vowels and the flap together at speed by singing along."
+  ],
+  "audience": "Spanish speakers starting from zero, or fixing the basics.",
+  "highlights": [
+    "The schwa /ə/ and the vowels that get mixed up (ship / sheep)",
+    "The American /r/, the flap in water and both th sounds",
+    "Rhythm and fluency at natural speed"
+  ],
+  "sounds": {
+    "vowels": ["ə", "ɪ", "ʊ", "ʌ", "æ", "ɑ", "ɔ", "ɛ", "u", "i", "aɪ", "aʊ", "ɔɪ", "eɪ", "ɔʊ"],
+    "consonants": [
+      "p",
+      "b",
+      "t",
+      "d",
+      "k",
+      "g",
+      "r",
+      "ɾ",
+      "ɫ",
+      "ʃ",
+      "tʃ",
+      "ʒ",
+      "dʒ",
+      "θ",
+      "ð",
+      "s",
+      "z",
+      "f",
+      "v",
+      "n",
+      "m",
+      "ŋ",
+      "w",
+      "j",
+      "h",
+      "x"
+    ]
+  },
+  "translations": {
+    "es": {
+      "description": "Pronunciación del inglés americano desde cero: sonidos vocálicos y consonánticos, ejercicios de ritmo y práctica de fluidez.",
+      "outcomes": [
+        "Escuchar y pronunciar la schwa /ə/, el sonido más común del inglés americano.",
+        "Distinguir las vocales que los hispanohablantes suelen confundir, como ship /ɪ/ y sheep /i/, o cup /ʌ/ y hot /ɑ/.",
+        "Pronunciar la /r/ americana, la flap de “water”, la L oscura de “feel” y los dos sonidos de th, /θ/ y /ð/.",
+        "Entrenar tu oído con ejercicios de ritmo y deducir cómo se pronuncia cualquier palabra nueva.",
+        "Juntar las vocales y la flap a velocidad natural cantando."
+      ],
+      "audience": "Hispanohablantes que empiezan desde cero o quieren corregir la base.",
+      "highlights": [
+        "La schwa /ə/ y las vocales que se confunden (ship / sheep)",
+        "La /r/ americana, la flap de water y los dos th",
+        "Ritmo y fluidez a velocidad natural"
+      ]
+    },
+    "pt": {
+      "description": "Pronúncia do inglês americano desde o início: sons de vogais e consoantes, exercícios de ritmo e prática de fluência.",
+      "outcomes": [
+        "Ouvir e pronunciar o schwa /ə/, o som mais comum do inglês americano.",
+        "Distinguir vogais que costumam se confundir, como ship /ɪ/ e sheep /i/, ou cup /ʌ/ e hot /ɑ/.",
+        "Pronunciar o /r/ americano, o flap de “water”, o L escuro de “feel” e os dois sons de th, /θ/ e /ð/.",
+        "Treinar o ouvido com exercícios de ritmo e descobrir como pronunciar qualquer palavra nova.",
+        "Juntar as vogais e o flap em velocidade natural cantando junto."
+      ],
+      "audience": "Quem está começando do zero ou quer corrigir a base.",
+      "highlights": [
+        "O schwa /ə/ e as vogais que se confundem (ship / sheep)",
+        "O /r/ americano, o flap de water e os dois th",
+        "Ritmo e fluência em velocidade natural"
+      ]
+    }
+  },
   "modules": [
     {
       "id": "d19cbe0b-d7d6-593c-8b7c-811e364bbf15",

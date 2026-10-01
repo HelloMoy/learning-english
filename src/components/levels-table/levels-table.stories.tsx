@@ -14,6 +14,7 @@ const courses = [
     language: "en",
     lessonCount: 48,
     moduleCount: 5,
+    track: "level",
     sequence: 1,
   },
   {
@@ -25,9 +26,31 @@ const courses = [
     language: "en",
     lessonCount: 107,
     moduleCount: 10,
+    track: "level",
     sequence: 2,
   },
-].map((course) => Course.parse(course));
+].map((course, index) => ({
+  course: Course.parse(course),
+  standing: { kind: "level", number: index + 1 } as const,
+}));
+
+const referenceCourses = [
+  {
+    course: Course.parse({
+      id: "00000000-0000-4000-8000-000000000303",
+      slug: "atlas-of-american-sounds",
+      title: "Atlas of American Sounds",
+      description:
+        "Every sound of American English, one lesson each: vowels, diphthongs, r-colored vowels and consonants, with overviews and minimal-pair drills. Videos by the Sounds American channel.",
+      language: "en",
+      lessonCount: 63,
+      moduleCount: 12,
+      track: "reference",
+      sequence: 3,
+    }),
+    standing: { kind: "reference" } as const,
+  },
+];
 
 const meta = {
   title: "Components/LevelsTable",
@@ -44,6 +67,11 @@ export const NewVisitor: Story = {};
 /** A returning learner six videos into the Basic Course. */
 export const ContinuingTheBasicCourse: Story = {
   args: { continued: { courseSlug: "basic-course", completedCount: 6 } },
+};
+
+/** The reference courses listed on their own, outside the levels: each row reads Reference. */
+export const ReferenceCourses: Story = {
+  args: { courses: referenceCourses, listing: "reference" },
 };
 
 /** Spanish copy. */

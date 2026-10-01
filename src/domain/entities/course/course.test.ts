@@ -12,6 +12,7 @@ const baseCourseShape = {
   lessonCount: 3,
   moduleCount: 2,
   sequence: 1,
+  track: "level",
 };
 
 describe("Course", () => {
@@ -114,6 +115,41 @@ describe("Course", () => {
 
       // Act + Assert
       expect(() => Course.parse(input)).toThrow();
+    });
+  });
+
+  describe.each(["level", "reference"])("GIVEN a course on the %s track", (track) => {
+    test("WHEN parsed THEN its track is returned", () => {
+      // Arrange
+      const input = { ...baseCourseShape, track };
+
+      // Act
+      const result = Course.parse(input);
+
+      // Assert
+      expect(result.track).toBe(track);
+    });
+  });
+
+  describe("GIVEN a course on a track the catalog does not know", () => {
+    test("WHEN parsed THEN Zod throws", () => {
+      // Arrange
+      const input = { ...baseCourseShape, track: faker.lorem.word() };
+
+      // Act + Assert
+      expect(() => Course.parse(input)).toThrow();
+    });
+  });
+
+  describe("GIVEN a course missing its track", () => {
+    test("WHEN parsed THEN Zod throws", () => {
+      // Arrange
+      // Defaulting the track is the manifest adapter's job; the domain never
+      // guesses whether a course is a rung of the ladder.
+      const missing = { ...baseCourseShape, track: undefined };
+
+      // Act + Assert
+      expect(() => Course.parse(missing)).toThrow();
     });
   });
 });

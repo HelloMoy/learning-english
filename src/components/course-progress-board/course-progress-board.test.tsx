@@ -8,7 +8,7 @@ import { useIsHydrated } from "@/hooks/use-is-hydrated/use-is-hydrated";
 import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
 import { faker } from "@faker-js/faker";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -33,6 +33,7 @@ const course = Course.parse({
   language: "en",
   lessonCount: 5,
   moduleCount: 2,
+  track: "level",
   sequence: 1,
 });
 
@@ -65,11 +66,19 @@ const moduleSummaries: ModuleSummary[] = modules.map((module, moduleIndex) => {
 const videoOf = (moduleIndex: number, lessonIndex: number) =>
   moduleSummaries[moduleIndex]!.lessons[lessonIndex]!;
 
+/** A repository holding the given location as the only course's place. */
 const storedLocation = (
   location: Promise<ContinueWatchingLocation | null>,
+): ContinueWatchingRepository => storedPlaces(location.then((held) => (held ? [held] : [])));
+
+/** A repository holding one place per course, the most recent first. */
+const storedPlaces = (
+  locations: Promise<ContinueWatchingLocation[]>,
 ): ContinueWatchingRepository => ({
-  get: () => location,
+  get: async () => (await locations)[0] ?? null,
   set: vi.fn(),
+  list: async () =>
+    (await locations).map((location, index) => ({ location, watchedAt: 1_000 - index })),
 });
 
 const renderBoard = (continueWatching: ContinueWatchingRepository, summaries = moduleSummaries) =>
@@ -116,6 +125,21 @@ describe("CourseProgressBoard", () => {
       expect(screen.getByTestId("continue-tile")).toHaveAttribute("data-status", "pending");
       expect(tileStatuses()).toEqual(["pending", "pending"]);
     });
+
+    test("WHEN the board renders THEN the course tile already leads to the course page", () => {
+      // Arrange
+      vi.mocked(useIsHydrated).mockReturnValue(false);
+
+      // Act
+      renderBoard(storedLocation(Promise.resolve(null)));
+
+      // Assert
+      const courseTile = screen.getByTestId("course-progress-tile");
+      expect(within(courseTile).getByRole("link", { name: "viewCourseDetails" })).toHaveAttribute(
+        "href",
+        "/courses/basic-course/about",
+      );
+    });
   });
 
   describe("GIVEN the first lesson finished AND a record in the second lesson", () => {
@@ -146,6 +170,33 @@ describe("CourseProgressBoard", () => {
       expect(tiles.map((tile) => tile.getAttribute("data-current"))).toEqual(["false", "true"]);
       expect(screen.getByTestId("course-progress-tile")).toHaveTextContent(
         msg("completedOfTotal", { completed: 2, total: 5 }),
+      );
+    });
+  });
+
+  describe("GIVEN the learner watched another course after this one", () => {
+    test("WHEN the board settles THEN Continue opens this course's own recorded video", async () => {
+      // Arrange
+      const otherCourse = ContinueWatchingLocation.parse({
+        courseSlug: "advanced-intermediate-course",
+        moduleSlug: "module-1",
+        lessonId: faker.string.uuid(),
+      });
+      const thisCourse = ContinueWatchingLocation.parse({
+        courseSlug: course.slug,
+        moduleSlug: "module-2",
+        lessonId: videoOf(1, 2).id,
+      });
+
+      // Act
+      renderBoard(storedPlaces(Promise.resolve([otherCourse, thisCourse])));
+
+      // Assert
+      await waitFor(() =>
+        expect(screen.getByRole("link", { name: /continueWhereLeftOff/ })).toHaveAttribute(
+          "href",
+          `/courses/basic-course/modules/module-2/lessons/${videoOf(1, 2).id}`,
+        ),
       );
     });
   });

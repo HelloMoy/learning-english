@@ -21,7 +21,7 @@ export type SeededProfile = {
   avatar: { kind: "initials" } | { kind: "illustration"; id: string };
 };
 
-/** The one lesson location the learner opened last. */
+/** A lesson location the learner opened last in its course. */
 export type SeededLocation = { courseSlug: string; moduleSlug: string; lessonId: string };
 
 /** One learner's rows, by account. */
@@ -32,10 +32,13 @@ export type LearnerState = {
   continueWatching: (location: SeededLocation) => Promise<void>;
   earnedTickets: (lessonIds: ReadonlyArray<string>) => Promise<void>;
   claimedPrizes: (moduleSlugs: ReadonlyArray<string>) => Promise<void>;
+  enrolled: (courseSlugs: ReadonlyArray<string>) => Promise<void>;
   isPrizeClaimed: (moduleSlug: string) => Promise<boolean>;
   savedPosition: (lessonId: string) => Promise<number | null>;
   isCompleted: (lessonId: string) => Promise<boolean>;
   lastOpenedLessonId: () => Promise<string | null>;
+  openedCourseSlugs: () => Promise<string[]>;
+  enrolledCourseSlugs: () => Promise<string[]>;
 };
 
 /**
@@ -87,8 +90,9 @@ export function learnerStateOf(account: LearnerAccount): LearnerState {
         database.execute({
           sql: `insert into continue_watching (user_id, course_slug, module_slug, lesson_id)
                 values (?, ?, ?, ?)
-                on conflict (user_id) do update set course_slug = excluded.course_slug,
-                  module_slug = excluded.module_slug, lesson_id = excluded.lesson_id`,
+                on conflict (user_id, course_slug) do update set
+                  module_slug = excluded.module_slug, lesson_id = excluded.lesson_id,
+                  updated_at = cast(unixepoch('subsecond') * 1000 as integer)`,
           args: [userId, location.courseSlug, location.moduleSlug, location.lessonId],
         }),
       ).then(() => undefined),
@@ -107,6 +111,15 @@ export function learnerStateOf(account: LearnerAccount): LearnerState {
           await database.execute({
             sql: "insert or ignore into prize_claim (user_id, module_slug) values (?, ?)",
             args: [userId, moduleSlug],
+          });
+        }
+      }),
+    enrolled: (courseSlugs) =>
+      withLearner(async (database, userId) => {
+        for (const courseSlug of courseSlugs) {
+          await database.execute({
+            sql: "insert or ignore into course_enrollment (user_id, course_slug) values (?, ?)",
+            args: [userId, courseSlug],
           });
         }
       }),
@@ -138,11 +151,29 @@ export function learnerStateOf(account: LearnerAccount): LearnerState {
     lastOpenedLessonId: () =>
       withLearner(async (database, userId) => {
         const result = await database.execute({
-          sql: "select lesson_id from continue_watching where user_id = ?",
+          sql: `select lesson_id from continue_watching where user_id = ?
+                order by updated_at desc limit 1`,
           args: [userId],
         });
         const lessonId = result.rows[0]?.lesson_id;
         return typeof lessonId === "string" ? lessonId : null;
+      }),
+    openedCourseSlugs: () =>
+      withLearner(async (database, userId) => {
+        const result = await database.execute({
+          sql: `select course_slug from continue_watching where user_id = ?
+                order by updated_at desc`,
+          args: [userId],
+        });
+        return result.rows.map((row) => String(row.course_slug));
+      }),
+    enrolledCourseSlugs: () =>
+      withLearner(async (database, userId) => {
+        const result = await database.execute({
+          sql: "select course_slug from course_enrollment where user_id = ? order by course_slug",
+          args: [userId],
+        });
+        return result.rows.map((row) => String(row.course_slug));
       }),
   };
 }

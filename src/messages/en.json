@@ -38,6 +38,10 @@
       "eyebrow": "Available courses",
       "heading": "{count, plural, one {One level, in order} other {# levels, in order}}"
     },
+    "reference": {
+      "eyebrow": "Reference",
+      "heading": "{count, plural, one {One course for any level} other {# courses for any level}}"
+    },
     "continueBand": {
       "eyebrow": "Keep going",
       "heading": "Pick up where you left off, {name}."
@@ -61,7 +65,9 @@
     "accountMenuLabel": "Account menu",
     "signIn": "Sign in",
     "signUp": "Create account",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "sectionCourses": "Courses",
+    "courses": "Courses"
   },
   "LocaleSwitcher": {
     "label": "Language",
@@ -307,23 +313,14 @@
     },
     "LevelsTable": {
       "tableLabel": "Available courses, in order",
+      "referenceTableLabel": "Reference courses",
       "levelOrdinal": "Level {number}",
+      "referenceOrdinal": "Reference",
       "counts": "{lessons, plural, one {# lesson} other {# lessons}} · {videos, plural, one {# video} other {# videos}}",
       "viewCourse": "View course",
       "continueCourse": "Continue course",
       "inProgress": "In progress",
       "progress": "{completed} of {total} videos"
-    },
-    "CourseProgressList": {
-      "eyebrow": "Your progress",
-      "watched": "{completed} of {total} videos watched",
-      "listLabel": "Lessons in {course}",
-      "moduleOrdinal": "Lesson {number}",
-      "moduleCount": "{completed} of {total, plural, one {# video} other {# videos}}",
-      "current": "Current",
-      "progressPercent": "{percent, number, percent}",
-      "leftOffAt": "Last watched: <video>{title}</video>",
-      "continue": "Continue"
     },
     "LessonWatchProgress": {
       "ariaLabel": "{percent} watched"
@@ -349,7 +346,7 @@
       "prizeTitle": "Prizes",
       "prizeBody": "Collect every ticket of a module to claim its prize at the counter.",
       "distinctionTitle": "Distinction",
-      "distinctionBody": "Complete a course to turn your card bronze. Complete every course to turn it gold.",
+      "distinctionBody": "Complete a course to turn your card bronze. Complete every level to turn it gold.",
       "close": "Got it"
     },
     "PrizeIcon": {
@@ -369,6 +366,18 @@
         "tinphone": "Tin-can phone",
         "crown": "Crown",
         "robot": "Wind-up robot",
+        "compass": "Compass",
+        "xylophone": "Xylophone",
+        "maracas": "Maracas",
+        "trumpet": "Trumpet",
+        "boomerang": "Boomerang",
+        "skate": "Roller skate",
+        "popper": "Party popper",
+        "pinwheel": "Pinwheel",
+        "jackbox": "Jack-in-the-box",
+        "bell": "Bell",
+        "duck": "Rubber duck",
+        "kite": "Kite",
         "gift": "Gift box"
       }
     },
@@ -429,18 +438,6 @@
       "label": "Start course",
       "continueLabel": "Continue"
     },
-    "ResumePanel": {
-      "position": "{course} · Lesson {moduleNumber} · {moduleTitle} · Video {lessonNumber} of {total}",
-      "resume": "Resume",
-      "viewCourse": "View course content",
-      "progressLabel": "Playback progress"
-    },
-    "StartPanel": {
-      "heading": "Your first video is ready.",
-      "note": "{course} · {minutes, plural, one {# minute} other {# minutes}}",
-      "noteNoDuration": "{course}",
-      "action": "Watch the first video"
-    },
     "TicketToast": {
       "earned": "+1 ticket · {lesson}",
       "progress": "{earned} of {count, plural, one {# ticket} other {# tickets}} for the {module} prize"
@@ -463,6 +460,150 @@
       "navLabel": "Legal",
       "privacy": "Privacy",
       "terms": "Terms"
+    },
+    "ResumeTile": {
+      "pickUp": "Pick up where you left off",
+      "startHere": "Start here",
+      "courseComplete": "Course complete",
+      "position": "{course} · Module {module} · Video {number} of {total}",
+      "watched": "watched {when}",
+      "resume": "Resume",
+      "start": "Start",
+      "watchAgain": "Watch again"
+    },
+    "CatalogCard": {
+      "eyebrow": "Catalog · {count, plural, one {# course} other {# courses}}",
+      "heading": "All available courses",
+      "notJoined": "{count, plural, =0 {You’re enrolled in all of them.} other {You haven’t joined # of them yet.}}",
+      "levelFacts": "Level {level} · {count, plural, one {# video} other {# videos}}",
+      "referenceFacts": "Reference · {count, plural, one {# video} other {# videos}}",
+      "cta": "See all courses"
+    },
+    "EnrolledCourseSummaryCard": {
+      "percent": "{percent, number, percent}",
+      "progress": "{completed} of {total, plural, one {# video} other {# videos}}",
+      "nextUp": "Next up",
+      "startOver": "Start over",
+      "position": "Module {module} · {moduleTitle} · Video {number} of {total} · {duration}",
+      "start": "Start",
+      "continue": "Continue",
+      "watchAgain": "Watch again",
+      "viewProgress": "Progress",
+      "viewDetails": "Details"
+    },
+    "CourseBrief": {
+      "audience": "For",
+      "highlights": "You’ll learn"
+    },
+    "CoursePoster": {
+      "level": "Level {level}",
+      "reference": "Reference",
+      "enrolled": "Enrolled",
+      "completed": "Completed",
+      "percent": "{percent, number, percent}",
+      "nextUp": "Next up · {title}",
+      "resumeAt": "Resume at {time} · {title}",
+      "progress": "{completed} of {total, plural, one {# video} other {# videos}}",
+      "timeLeft": "{duration} left",
+      "allWatched": "All watched",
+      "facts": "{modules, plural, one {# module} other {# modules}} · {videos, plural, one {# video} other {# videos}} · {runtime}",
+      "prizesToWin": "{count, plural, one {# prize} other {# prizes}} to win",
+      "continueCourse": "Continue course",
+      "startCourse": "Start course",
+      "watchAgain": "Watch again",
+      "viewProgress": "View progress",
+      "enroll": "Enroll",
+      "viewDetails": "View details"
+    },
+    "NextUpBar": {
+      "eyebrow": "Next up · {course}",
+      "position": "Module {module} · {completed} of {total, plural, one {# video} other {# videos}} · {duration} left",
+      "percent": "{percent, number, percent}",
+      "startCourse": "Start course",
+      "viewCourse": "View course"
+    },
+    "AvailableCoursesView": {
+      "eyebrow": "Courses",
+      "heading": "Available courses",
+      "summary": "{total, plural, one {# course} other {# courses}} · {enrolled, plural, =0 {you’re not enrolled yet} other {you’re enrolled in #}}",
+      "summaryAll": "{total, plural, one {# course} other {# courses}} · you’re enrolled in {total, plural, one {it} other {all of them}}"
+    },
+    "FirstCourseStep": {
+      "heading": "Your first course, {name}",
+      "intro": "Every new learner starts here: the sounds of American English, one at a time.",
+      "recommended": "Recommended for you",
+      "facts": "Level {level} · {modules, plural, one {# module} other {# modules}} · {videos, plural, one {# video} other {# videos}}",
+      "syllabusHeading": "What you’ll learn",
+      "syllabusFacts": "{videos, plural, one {# video} other {# videos}} · {runtime} · {prizes, plural, one {# prize} other {# prizes}}",
+      "start": "Start the {course}",
+      "seeAll": "See all courses",
+      "note": "Starting the course adds it to My learning. You can join other courses any time."
+    },
+    "AccountRow": {
+      "change": "Change",
+      "close": "Close"
+    },
+    "CourseEnrollAction": {
+      "enroll": "Enroll"
+    },
+    "CourseStartLink": {
+      "startCourse": "Start course",
+      "continueWhereLeftOff": "Continue where you left off",
+      "watchAgain": "Watch again"
+    },
+    "EnrollmentWelcomeModal": {
+      "mark": "Enrolled",
+      "title": "You’re in!",
+      "description": "<b>{course}</b> is now in My learning. Start with <b>{video}</b> ({duration}), or come back whenever you like.",
+      "descriptionWithoutVideo": "<b>{course}</b> is now in My learning.",
+      "keepExploring": "Keep exploring",
+      "close": "Close"
+    },
+    "CourseOutcomes": {
+      "eyebrow": "What you’ll learn",
+      "heading": "By the last video you’ll be able to"
+    },
+    "CourseSoundStrip": {
+      "eyebrow": "Sounds",
+      "heading": "{count, plural, one {# sound} other {# sounds}} you’ll master",
+      "vowels": "Vowels",
+      "consonants": "Consonants"
+    },
+    "CourseSyllabus": {
+      "eyebrow": "Syllabus",
+      "heading": "{count, plural, one {# lesson, one prize} other {# lessons, one prize each}}",
+      "listLabel": "Lessons in order",
+      "lessonOrdinal": "Lesson {number}",
+      "videoOrdinal": "Video {number}",
+      "lessonFacts": "{videos, plural, one {# video} other {# videos}} · {runtime}"
+    },
+    "CourseEnrollCard": {
+      "joinTitle": "Join this course",
+      "joinBody": "It goes to My learning, and you can start right away.",
+      "enrolledTitle": "You’re enrolled",
+      "enrolledBody": "It’s in My learning. Start whenever you like.",
+      "goToProgress": "Go to my progress",
+      "statsLabel": "Course size",
+      "videos": "{count, plural, one {video} other {videos}}",
+      "runtime": "of video",
+      "lessons": "{count, plural, one {lesson} other {lessons}}",
+      "prizes": "{count, plural, one {prize to redeem} other {prizes to redeem}}",
+      "paceLabel": "Your pace",
+      "paceOption": "{minutes} min",
+      "paceLine": "At {minutes} min a day, you finish in about {weeks, plural, one {# week} other {# weeks}}."
+    },
+    "CourseDetailHero": {
+      "level": "Level {level}",
+      "reference": "Reference",
+      "enrolled": "Enrolled",
+      "firstVideo": "First video",
+      "facts": "Level {level} · {lessons, plural, one {# lesson} other {# lessons}} · {videos, plural, one {# video} other {# videos}} · {runtime}",
+      "referenceFacts": "Reference · {lessons, plural, one {# lesson} other {# lessons}} · {videos, plural, one {# video} other {# videos}} · {runtime}",
+      "prizes": "{count, plural, one {# prize} other {# prizes}}"
+    },
+    "CourseEnrollBar": {
+      "label": "Join this course",
+      "facts": "{videos, plural, one {# video} other {# videos}} · {runtime}"
     }
   },
   "CourseCatalog": {
@@ -499,7 +640,8 @@
       "lessonTally": "{completed}/{total}",
       "allWatchedShort": "All watched",
       "openLessonTile": "Open lesson {number}: {title}",
-      "videoPosition": "Lesson {module} · Video {number} of {total}"
+      "videoPosition": "Lesson {module} · Video {number} of {total}",
+      "viewCourseDetails": "View course details"
     },
     "moduleOverview": {
       "title": "{title}",
@@ -526,9 +668,12 @@
     }
   },
   "PageNotFound": {
+    "eyebrow": "Error 404",
     "heading": "Page not found",
     "description": "This page doesn't exist, or it moved. The course is still here.",
-    "goHome": "Go to home"
+    "missingPath": "There's nothing at <requested>{path}</requested>",
+    "goHome": "Go to home",
+    "viewCourses": "View courses"
   },
   "Layout": {
     "skipToContent": "Skip to main content",
@@ -543,6 +688,7 @@
     "moduleFact": "{count, plural, one {# module} other {# modules}}",
     "lessonFact": "{count, plural, one {# lesson} other {# lessons}}",
     "levelFact": "Level {level}",
+    "referenceFact": "Reference",
     "imageAlt": "{title} — English Course",
     "lessonBadge": "Lesson {sequence}",
     "startTitle": "Make your learner card",
@@ -552,14 +698,19 @@
     "achievementsTitle": "Achievements",
     "achievementsDescription": "The tickets, prizes and distinction you have earned.",
     "profileTitle": "Profile",
-    "profileDescription": "Change the name and avatar on your learner card."
+    "profileDescription": "Change the name and avatar on your learner card.",
+    "coursesTitle": "Available courses",
+    "coursesDescription": "Every course, the ones you are enrolled in, and where to continue.",
+    "firstCourseTitle": "Your first course",
+    "firstCourseDescription": "Start with the course every new learner begins with."
   },
   "MyLearning": {
     "eyebrow": "My learning",
     "greeting": "Welcome back, {name}.",
     "coursesEyebrow": "Your courses",
-    "coursesHeading": "{count, plural, one {One course, in order} other {# courses, in order}}",
-    "catalogEmpty": "No courses are available right now."
+    "coursesHeading": "{count, plural, one {# course you’re enrolled in} other {# courses you’re enrolled in}}",
+    "catalogEmpty": "No courses are available right now.",
+    "allCourses": "See all courses"
   },
   "Onboarding": {
     "stepLabel": "Step {step} of {total}",
@@ -585,16 +736,14 @@
   },
   "Profile": {
     "eyebrow": "Profile",
+    "title": "Your profile",
     "intro": "Your card, your account and your preferences.",
     "sections": {
-      "identity": "Identity",
+      "identity": "Your card",
       "identityNote": "Changes show on your card as you edit.",
       "preferences": "Preferences"
     },
     "progress": {
-      "heading": "Your progress in {course}",
-      "videos": "{completed} of {total, plural, one {# video} other {# videos}}",
-      "percent": "{percent, number, percent}",
       "ticketsLabel": "Tickets earned",
       "prizesLabel": "Prizes claimed"
     },
@@ -611,12 +760,13 @@
       "unsaved": "You have unsaved changes"
     },
     "account": {
-      "heading": "Account",
+      "heading": "Sign-in and security",
       "emailLabel": "Email address",
       "methodsLabel": "How you sign in",
       "methodPassword": "Email and password",
       "methodGoogle": "Google",
-      "googleManaged": "Your address comes from Google, so it is changed there and this account has no password."
+      "googleManaged": "Your address comes from Google, so it is changed there and this account has no password.",
+      "passwordLabel": "Password"
     },
     "password": {
       "heading": "Change your password",

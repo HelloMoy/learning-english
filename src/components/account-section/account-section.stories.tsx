@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, userEvent, within } from "storybook/test";
 
 import { AccountSection } from "./account-section";
 
@@ -24,13 +25,22 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** An account created with an email and a password: both forms are offered. */
+/** An account created with an email and a password: the address and password rows, both closed. */
 export const WithPassword: Story = {};
+
+/** The password row opened: the change-password form shows under it. */
+export const PasswordRowOpen: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: "Change Password" }));
+    await expect(canvas.getByLabelText("Current password")).toBeVisible();
+  },
+};
 
 /**
  * An account that only ever signed in with Google: the address belongs to the
- * provider and there is no password to authorize a change with, so the section
- * explains and offers nothing.
+ * provider and there is no password to authorize a change with, so the address
+ * is a plain row and the section explains why.
  */
 export const GoogleOnly: Story = {
   args: {
@@ -42,7 +52,7 @@ export const GoogleOnly: Story = {
   },
 };
 
-/** A password account that later linked Google: both methods, both forms. */
+/** A password account that later linked Google: both methods, both rows. */
 export const BothMethods: Story = {
   args: {
     account: {

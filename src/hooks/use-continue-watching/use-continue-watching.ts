@@ -3,6 +3,7 @@
 import { LearnerStoreContinueWatchingRepository } from "@/adapters/persistence/learner-store/learner-store-continue-watching-repository/learner-store-continue-watching-repository";
 import { recordContinueWatchingAction } from "@/app/[locale]/learner-actions";
 import { ContinueWatchingLocation } from "@/domain/entities/continue-watching-location/continue-watching-location";
+import type { ContinueWatchingRecord } from "@/domain/entities/continue-watching-record/continue-watching-record";
 import type { ContinueWatchingRepository } from "@/domain/ports/continue-watching-repository/continue-watching-repository";
 
 import { useMemo } from "react";
@@ -14,7 +15,7 @@ const learnerLocations = new LearnerStoreContinueWatchingRepository({
 });
 
 /**
- * Client hook: reads and writes the one location the learner was last at.
+ * Client hook: reads and writes where the learner was in each course.
  *
  * @remarks
  * This hook is the client's composition root for the continue-watching
@@ -37,11 +38,13 @@ const learnerLocations = new LearnerStoreContinueWatchingRepository({
  * Browser-side only — do NOT call from a Server Component or Server Action.
  *
  * @param repository - Overrides the adapter; tests inject a fake here
- * @returns `get` resolving to the stored location (or `null`), and `set`
+ * @returns `get` resolving to the most recent location (or `null`), `list`
+ *          resolving to one record per course (latest first), and `set`
  *          resolving to whether the value passed validation and persisted
  */
 export function useContinueWatching(repository?: ContinueWatchingRepository): {
   get: () => Promise<ContinueWatchingLocation | null>;
+  list: () => Promise<ReadonlyArray<ContinueWatchingRecord>>;
   set: (location: unknown) => Promise<boolean>;
 } {
   const locations = repository ?? learnerLocations;
@@ -49,6 +52,7 @@ export function useContinueWatching(repository?: ContinueWatchingRepository): {
   return useMemo(
     () => ({
       get: () => locations.get(),
+      list: () => locations.list(),
       set: async (location: unknown) => {
         const parsed = ContinueWatchingLocation.safeParse(location);
         if (!parsed.success) {

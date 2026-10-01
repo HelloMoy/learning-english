@@ -52,15 +52,34 @@ describe.skipIf(!DOCKER_AVAILABLE)("loadLearnerSnapshot (integration)", () => {
     await repositories.profiles.set(profile);
     await repositories.tickets.earn([done]);
     await repositories.prizeClaims.claim(Slug.parse("1-introduction"));
+    await repositories.enrollments.enroll(Slug.parse("basic-course"));
 
     expect(await loadLearnerSnapshot(libsql.database, learnerId)).toEqual({
       profile,
       completedLessonIds: [done],
       positions: { [watching]: 61.5 },
-      continueWatching: location,
+      continueWatching: [{ location, watchedAt: expect.any(Number) }],
       earnedTicketLessonIds: [done],
       claimedPrizeModuleSlugs: ["1-introduction"],
+      enrolledCourseSlugs: ["basic-course"],
     });
+  });
+
+  test("every course's place comes back, the most recently watched first", async () => {
+    const learnerId = await insertTestUser(libsql.database);
+    const locations = createLearnerRepositories(libsql.database, learnerId).continueWatching;
+    const locationIn = (courseSlug: string) =>
+      ContinueWatchingLocation.parse({ courseSlug, moduleSlug: "2-vowels", lessonId: aLesson() });
+    const [basic, advanced] = [
+      locationIn("basic-course"),
+      locationIn("advanced-intermediate-course"),
+    ];
+    await locations.set(basic);
+    await locations.set(advanced);
+
+    const snapshot = await loadLearnerSnapshot(libsql.database, learnerId);
+
+    expect(snapshot.continueWatching.map((record) => record.location)).toEqual([advanced, basic]);
   });
 
   test("a snapshot carries only its own learner's progress", async () => {

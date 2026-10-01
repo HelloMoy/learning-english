@@ -8,8 +8,17 @@ describe("allContentKeys", () => {
 
   test("WHEN the manifests are walked THEN every key-sourced video is included", () => {
     // Not "every video source": one whose source is a URL is served by someone
-    // else and is deliberately absent — see the hosted-lesson test below.
-    expect(keys.some((key) => key.endsWith(".mp4"))).toBe(true);
+    // else and is deliberately absent — see the hosted-lesson test below. No
+    // assertion that key-sourced lessons exist: today every lecture is hosted,
+    // and restoring a local source is the documented rollback.
+    const keySourced = contentCatalog.lessonRows.filter(
+      (row) => row.kind === "video" && !/^https?:/.test(row.source),
+    );
+
+    for (const lesson of keySourced) {
+      if (lesson.kind !== "video") continue;
+      expect(keys).toContain(lesson.source);
+    }
   });
 
   test("WHEN the manifests are walked THEN posters and resources are included", () => {

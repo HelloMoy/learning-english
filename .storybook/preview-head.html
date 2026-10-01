@@ -19,9 +19,54 @@
   href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap"
   rel="stylesheet"
 />
+<!--
+  Put <html> in the default canvas theme (`canvasThemes` in `toolbar.ts`)
+  before the preview renders. `withThemeByClassName` only applies it once a
+  story mounts, so until then — and for the whole of a docs page that has no
+  stories — the body would paint the light tokens under the dark manager. The
+  decorator still swaps the class when the toolbar picks light.
+-->
+<script>
+  document.documentElement.classList.add("dark");
+</script>
 <style>
   :root {
     --font-geist-sans: "Geist", system-ui, sans-serif;
     --font-geist-mono: "Geist Mono", ui-monospace, monospace;
+  }
+</style>
+<!--
+  Storybook's own loading skeleton, shown over the preview while a story or a
+  docs page prepares, is hard-coded white. It paints before `globals.css`
+  loads, so the tokens are not available yet; these are cinema-dark values,
+  and `preview.test.ts` fails if one stops matching a `.dark` token.
+-->
+<style>
+  html .sb-preparing-story,
+  html .sb-preparing-docs {
+    background-color: #08080b;
+  }
+
+  html .sb-previewBlock,
+  html .sb-argstableBlock-body,
+  html .sb-argstableBlock-body td {
+    background: #16171d;
+    border-color: #26262f;
+    box-shadow: none;
+  }
+
+  html .sb-previewBlock_header {
+    box-shadow: #26262f 0 -1px 0 0 inset;
+  }
+
+  html .sb-previewBlock_icon,
+  html .sb-argstableBlock th span,
+  html .sb-argstableBlock td span,
+  html .sb-argstableBlock-body button {
+    background: #26262f;
+  }
+
+  html .sb-argstableBlock-body tr:not(:first-child) {
+    border-top-color: #26262f;
   }
 </style>

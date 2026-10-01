@@ -18,6 +18,7 @@ describe("useOnboardingDestinations", () => {
     expect(result.current).toEqual({
       nameStep: `/start?next=${encodeURIComponent(next)}`,
       avatarStep: `/start/avatar?next=${encodeURIComponent(next)}`,
+      afterAvatarStep: next,
       afterOnboarding: next,
     });
   });
@@ -28,6 +29,7 @@ describe("useOnboardingDestinations", () => {
     expect(result.current).toEqual({
       nameStep: "/start",
       avatarStep: "/start/avatar",
+      afterAvatarStep: "/start/first-course",
       afterOnboarding: "/learning",
     });
   });
@@ -36,5 +38,11 @@ describe("useOnboardingDestinations", () => {
     const { result } = renderWithSearch("");
 
     expect(result.current.afterOnboarding).toBe("/learning");
+  });
+
+  test("WHEN there is no next THEN step 2 continues to the first-course step", () => {
+    const { result } = renderWithSearch("");
+
+    expect(result.current.afterAvatarStep).toBe("/start/first-course");
   });
 });

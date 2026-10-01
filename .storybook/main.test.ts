@@ -44,3 +44,13 @@ describe("the Storybook Vite config", () => {
     );
   });
 });
+
+describe("the Storybook main config", () => {
+  it("turns off the backgrounds picker, whose swatches would paint over the cinema backdrop", () => {
+    expect(main.features?.backgrounds).toBe(false);
+  });
+
+  it("collects the workshop's own docs pages from .storybook/docs", () => {
+    expect(main.stories).toContain("./docs/*.mdx");
+  });
+});

@@ -1,209 +1,197 @@
 "use client";
 
-import type { ContinueWatchingPanel } from "@/app/[locale]/actions";
-import type { ResolveContinueWatching } from "@/app/[locale]/resolve-continue-watching";
-import { CourseProgressList } from "@/components/course-progress-list/course-progress-list";
+import { CatalogCard } from "@/components/catalog-card/catalog-card";
+import { CourseProgressTile } from "@/components/course-progress-tile/course-progress-tile";
+import { EnrolledCourseSummaryCard } from "@/components/enrolled-course-summary-card/enrolled-course-summary-card";
 import { Eyebrow } from "@/components/eyebrow/eyebrow";
-import type { HomeFirstLesson, HomeLevel } from "@/components/home-view/home-view";
 import { LearnerAvatar } from "@/components/learner-avatar/learner-avatar";
-import { LevelsTable } from "@/components/levels-table/levels-table";
-import { ResumePanel } from "@/components/resume-panel/resume-panel";
-import { StartPanel } from "@/components/start-panel/start-panel";
+import { ResumeTile } from "@/components/resume-tile/resume-tile";
 import { Skeleton } from "@/components/ui/skeleton/skeleton";
-import type { LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import {
   learnerFirstName,
   type LearnerProfile,
 } from "@/domain/entities/learner-profile/learner-profile";
-import type { ContinueWatchingRepository } from "@/domain/ports/continue-watching-repository/continue-watching-repository";
 import type { LearnerProfileRepository } from "@/domain/ports/learner-profile-repository/learner-profile-repository";
-import type { PlaybackPositionRepository } from "@/domain/ports/playback-position-repository/playback-position-repository";
-import { useCourseContinueTarget } from "@/hooks/use-course-continue-target/use-course-continue-target";
-import { useCourseWatchProgress } from "@/hooks/use-course-watch-progress/use-course-watch-progress";
+import type { CourseForView } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
+import { useCourseShelf, type CourseShelfReading } from "@/hooks/use-course-shelf/use-course-shelf";
 import { useLearnerProfile } from "@/hooks/use-learner-profile/use-learner-profile";
 import { useLearnerRedirect } from "@/hooks/use-learner-redirect/use-learner-redirect";
-import { usePlaybackPosition } from "@/hooks/use-playback-position/use-playback-position";
-import { useResolvedContinueWatching } from "@/hooks/use-resolved-continue-watching/use-resolved-continue-watching";
-import { courseOverviewPath } from "@/i18n/lesson-routes";
-import { countModuleLessons } from "@/lib/module-lesson-count/module-lesson-count";
-import { watchedFraction } from "@/lib/watch-progress/watch-progress";
+import { courseDetailPath } from "@/i18n/lesson-routes";
+import { Link } from "@/i18n/navigation";
+import type { CourseCardModel } from "@/lib/course-shelf/course-shelf";
 
+import { ArrowRight, LayoutGrid } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 
-/** The learner's lesson being continued, resolved within the catalog. */
-type Continued = {
-  panel: ContinueWatchingPanel;
-  lessonId: LessonId;
-  level: HomeLevel;
+const ONBOARDING_PATH = "/start";
+const FIRST_COURSE_STEP_PATH = "/start/first-course?from=learning";
+
+type ReadShelf = Extract<CourseShelfReading, { status: "read" }>;
+
+/** Props for {@link MyLearningView}. */
+export type MyLearningViewProps = {
+  /** Every catalog course's view, in catalog order. */
+  courses: ReadonlyArray<CourseForView>;
+  /** Overrides the profile storage adapter; tests inject a stub. */
+  profiles?: LearnerProfileRepository;
 };
 
 /**
- * My learning: the learner's own page — a greeting, the way back into their
- * last lesson, their progress lesson by lesson, and every course.
+ * My learning: the learner's own page — a greeting, the way back into the
+ * course they watched last, and every course they are enrolled in.
  *
  * @remarks
- * The page belongs to a learner, so it waits for the profile: until storage
- * has answered it renders a shell, and a device without a profile is sent to
- * the onboarding.
+ * The page belongs to a learner, so it waits for the profile: until storage has
+ * answered it renders a shell, and a device without a profile is sent to the
+ * onboarding. A learner with a profile but no enrolled course has nothing to
+ * resume, so, once their state is read, they are sent to the first-course step
+ * (marked `from=learning`, so it shows no onboarding step).
  *
- * The continue-watching record decides the rest. It names the video opened
- * last; the page continues with that course's continue target instead (see
- * {@link useCourseContinueTarget}), so a finished video hands over to the next
- * one exactly as the course and module overviews do. While either resolves,
- * only the panel is reserved; a resolved target puts Resume in the panel, opens
- * its lesson's row and marks its course in the table. With nothing to
- * continue — or a record whose course is no longer in the catalog — the panel
- * offers the first video and the first course's progress is listed.
+ * Everything else comes from one reading of the catalog (see
+ * {@link useCourseShelf}): the enrolled course watched most recently leads,
+ * with its continue target in a {@link ResumeTile} beside that course's
+ * progress panel, and **Your courses** lists every enrolled course with its
+ * own next video, three to a row on wide screens.
  *
- * @param levels - The catalog, one entry per course, in sequence order
- * @param firstLesson - The first course's first lesson, or `null` for an empty catalog
- * @param profiles - Overrides the profile storage adapter; tests inject a stub
- * @param continueWatching - Overrides the continue-watching adapter; tests inject a fake
- * @param resolve - Overrides the resolver; defaults to the Server Action
- * @param positions - Overrides the playback store; tests inject a fake
+ * The catalog stays in reach in two places: a **See all courses** button
+ * beside the greeting (wide screens only), and a {@link CatalogCard} closing
+ * Your courses that teases the first course, in catalog order, the learner has
+ * not joined.
+ *
+ * @example
+ * ```tsx
+ * <MyLearningView courses={await loadCourseViews()} />
+ * ```
  */
-export function MyLearningView({
-  levels,
-  firstLesson,
-  profiles,
-  continueWatching,
-  resolve,
-  positions,
-}: {
-  levels: ReadonlyArray<HomeLevel>;
-  firstLesson: HomeFirstLesson | null;
-  profiles?: LearnerProfileRepository;
-  continueWatching?: ContinueWatchingRepository;
-  resolve?: ResolveContinueWatching;
-  positions?: PlaybackPositionRepository;
-}) {
+export function MyLearningView({ courses, profiles }: MyLearningViewProps) {
   const learner = useLearnerProfile(profiles);
-  useLearnerRedirect(learner.status, { when: "absent", to: "/start" });
+  useLearnerRedirect(learner.status, { when: "absent", to: ONBOARDING_PATH });
 
-  if (learner.status !== "present") {
-    return <MyLearningShell />;
-  }
-  const firstLevel = levels[0];
-  if (!firstLevel || firstLesson === null) {
-    return <CatalogEmpty />;
-  }
+  if (learner.status !== "present") return <MyLearningShell />;
   return (
     <LearnerPage
       profile={learner.profile}
-      levels={levels}
-      firstLevel={firstLevel}
-      firstLesson={firstLesson}
-      continueWatching={continueWatching}
-      resolve={resolve}
-      positions={positions}
+      courses={courses}
     />
   );
 }
 
 function LearnerPage({
   profile,
-  levels,
-  firstLevel,
-  firstLesson,
-  continueWatching,
-  resolve,
-  positions,
+  courses,
 }: {
   profile: LearnerProfile;
-  levels: ReadonlyArray<HomeLevel>;
-  firstLevel: HomeLevel;
-  firstLesson: HomeFirstLesson;
-  continueWatching?: ContinueWatchingRepository;
-  resolve?: ResolveContinueWatching;
-  positions?: PlaybackPositionRepository;
+  courses: ReadonlyArray<CourseForView>;
 }) {
-  const lastLesson = useResolvedContinueWatching({ continueWatching, resolve });
-  const recordedLevel = levelOf(lastLesson, levels);
-  const target = useCourseContinueTarget({
-    course: recordedLevel ?? firstLevel,
-    lastLesson: recordInCatalog(lastLesson, recordedLevel),
-    resolve,
-  });
-  const continued = findContinued(target, levels);
-  const progressLevel = continued?.level ?? firstLevel;
-  const progress = useCourseWatchProgress(progressLevel.lessonRuntimes);
+  const shelf = useCourseShelf(courses);
+  useLearnerRedirect(enrollmentStatusOf(shelf), { when: "absent", to: FIRST_COURSE_STEP_PATH });
 
   return (
     <>
-      <section className="flex flex-col gap-8">
-        <Greeting profile={profile} />
-        <div className="max-w-2xl">
-          {target.status === "resolving" ? (
-            <ResumePanelSkeleton />
-          ) : continued ? (
-            <ContinuedPanel
-              continued={continued}
-              positions={positions}
-            />
-          ) : (
-            <StartPanel
-              firstLessonHref={firstLesson.href}
-              firstLessonMinutes={firstLesson.minutes}
-              courseTitle={firstLevel.course.title}
-            />
-          )}
+      <section className="grid grid-cols-1 gap-3 lg:grid-cols-12 lg:gap-4">
+        <div className="mb-5 lg:col-span-8 lg:mb-4">
+          <Greeting profile={profile} />
         </div>
+        {shelf.status === "read" && shelf.featured ? (
+          <LeadingCourse model={shelf.featured} />
+        ) : (
+          <div className="lg:col-span-12">
+            <ResumeTile reading={{ status: "pending" }} />
+          </div>
+        )}
+        <AllCoursesButton />
       </section>
-      <CourseProgressList
-        courseSlug={progressLevel.course.slug}
-        courseTitle={progressLevel.course.title}
-        modules={progressLevel.modules}
-        lessonRuntimes={progressLevel.lessonRuntimes}
-        continued={
-          continued
-            ? {
-                moduleId: continued.panel.moduleId,
-                lessonTitle: continued.panel.lessonTitle,
-                lessonHref: continued.panel.lessonHref,
-              }
-            : null
-        }
-      />
-      <CoursesSection
-        levels={levels}
-        continued={
-          continued
-            ? { courseSlug: continued.level.course.slug, completedCount: progress.completedCount }
-            : null
-        }
-      />
+      {shelf.status === "read" && shelf.featured ? (
+        <YourCourses
+          shelf={shelf}
+          courseCount={courses.length}
+        />
+      ) : null}
     </>
   );
 }
 
-const NOTHING_CONTINUED: ReturnType<typeof useResolvedContinueWatching> = { status: "none" };
-
-function findContinued(
-  lastLesson: ReturnType<typeof useResolvedContinueWatching>,
-  levels: ReadonlyArray<HomeLevel>,
-): Continued | null {
-  const level = levelOf(lastLesson, levels);
-  return level && lastLesson.status === "resolved"
-    ? { panel: lastLesson.panel, lessonId: lastLesson.lessonId, level }
-    : null;
+// The redirect rule speaks in profile states: "absent" here means enrolled in
+// nothing, and nothing is decided until the learner's state has been read.
+function enrollmentStatusOf(shelf: CourseShelfReading): "unknown" | "absent" | "present" {
+  if (shelf.status === "pending") return "unknown";
+  return shelf.enrolledCount === 0 ? "absent" : "present";
 }
 
-/** The catalog course a resolved record belongs to, or `null`. */
-function levelOf(
-  lastLesson: ReturnType<typeof useResolvedContinueWatching>,
-  levels: ReadonlyArray<HomeLevel>,
-): HomeLevel | null {
-  if (lastLesson.status !== "resolved") return null;
-  return levels.find((candidate) => candidate.course.slug === lastLesson.panel.courseSlug) ?? null;
+function LeadingCourse({ model }: { model: CourseCardModel }) {
+  const t = useTranslations("CourseCatalog.courseOverview");
+  return (
+    <>
+      <div className="lg:col-span-8 lg:flex lg:flex-col [&>section]:lg:flex-1">
+        <ResumeTile reading={{ status: "read", model }} />
+      </div>
+      <div className="lg:col-span-4 lg:flex lg:flex-col [&>section]:lg:flex-1">
+        <CourseProgressTile
+          course={model.course}
+          reading={{ status: "read", tally: model.tally }}
+          prizes={model.prizes}
+          headingLevel={2}
+          link={{ href: courseDetailPath(model.course), label: t("viewCourseDetails") }}
+        />
+      </div>
+    </>
+  );
 }
 
-/** A resolved record whose course is not in the catalog continues nothing; any other state passes through. */
-function recordInCatalog(
-  lastLesson: ReturnType<typeof useResolvedContinueWatching>,
-  level: HomeLevel | null,
-): ReturnType<typeof useResolvedContinueWatching> {
-  return lastLesson.status === "resolved" && level === null ? NOTHING_CONTINUED : lastLesson;
+function YourCourses({ shelf, courseCount }: { shelf: ReadShelf; courseCount: number }) {
+  const t = useTranslations("MyLearning");
+  const enrolled = [shelf.featured, ...shelf.otherEnrolled].flatMap((model) =>
+    model ? [model] : [],
+  );
+  const inCatalogOrder = [...enrolled].sort((a, b) => a.course.sequence - b.course.sequence);
+
+  return (
+    <section className="flex flex-col gap-5">
+      <div className="flex flex-col gap-2">
+        <Eyebrow>{t("coursesEyebrow")}</Eyebrow>
+        <h2 className="font-sans text-3xl font-black tracking-tight text-foreground sm:text-4xl">
+          {t("coursesHeading", { count: enrolled.length })}
+        </h2>
+      </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {inCatalogOrder.map((model) => (
+          <EnrolledCourseSummaryCard
+            key={model.course.id}
+            model={model}
+            isCurrent={model === shelf.featured}
+          />
+        ))}
+        <CatalogCard
+          courseCount={courseCount}
+          notJoinedCount={shelf.available.length}
+          teaser={shelf.available[0]}
+        />
+      </div>
+    </section>
+  );
+}
+
+// Wide screens only: on a phone the catalog card closing Your courses is the
+// way to the catalog, so the leading block stays the hero and its panel.
+function AllCoursesButton() {
+  const t = useTranslations("MyLearning");
+
+  return (
+    <Link
+      href="/courses"
+      className="hidden min-h-11 items-center gap-2 rounded-[11px] border border-gold/55 bg-[color-mix(in_oklab,var(--glow)_8%,var(--card))] px-4 text-sm font-extrabold text-gold transition-transform hover:-translate-y-px focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none motion-reduce:transition-none lg:col-span-4 lg:col-start-9 lg:row-start-1 lg:mb-4 lg:inline-flex lg:self-center lg:justify-self-end"
+    >
+      <LayoutGrid
+        aria-hidden="true"
+        className="size-4"
+      />
+      {t("allCourses")}
+      <ArrowRight
+        aria-hidden="true"
+        className="size-4"
+      />
+    </Link>
+  );
 }
 
 function Greeting({ profile }: { profile: LearnerProfile }) {
@@ -226,74 +214,6 @@ function Greeting({ profile }: { profile: LearnerProfile }) {
   );
 }
 
-function ContinuedPanel({
-  continued,
-  positions,
-}: {
-  continued: Continued;
-  positions?: PlaybackPositionRepository;
-}) {
-  const { panel, lessonId, level } = continued;
-  const fraction = useWatchedFraction(lessonId, panel.durationSeconds, positions);
-
-  return (
-    <ResumePanel
-      panel={panel}
-      moduleLessonCount={countModuleLessons(level.lessonRuntimes, panel.moduleId as ModuleId)}
-      watchedFraction={fraction}
-      courseHref={courseOverviewPath(level.course)}
-    />
-  );
-}
-
-function CoursesSection({
-  levels,
-  continued,
-}: {
-  levels: ReadonlyArray<HomeLevel>;
-  continued: { courseSlug: string; completedCount: number } | null;
-}) {
-  const t = useTranslations("MyLearning");
-
-  return (
-    <section className="flex flex-col gap-7">
-      <div className="flex flex-col gap-3">
-        <Eyebrow>{t("coursesEyebrow")}</Eyebrow>
-        <h2 className="font-sans text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-          {t("coursesHeading", { count: levels.length })}
-        </h2>
-      </div>
-      <LevelsTable
-        courses={levels.map((level) => level.course)}
-        continued={continued}
-      />
-    </section>
-  );
-}
-
-/** The resume panel's shape, naming no lesson, while the record resolves. */
-function ResumePanelSkeleton() {
-  return (
-    <div data-testid="resume-panel-skeleton">
-      <PanelShape />
-    </div>
-  );
-}
-
-/** The outline shared by the resume and start panels. */
-function PanelShape() {
-  return (
-    <div
-      aria-hidden="true"
-      className="flex flex-col gap-4 rounded-[1.125rem] border border-border bg-card p-5 sm:p-6"
-    >
-      <Skeleton className="h-4 w-3/4" />
-      <Skeleton className="h-8 w-2/3" />
-      <Skeleton className="h-12 w-40 rounded-lg" />
-    </div>
-  );
-}
-
 /** The page's shape while storage has not said who the learner is. */
 function MyLearningShell() {
   return (
@@ -309,52 +229,7 @@ function MyLearningShell() {
           <Skeleton className="h-10 w-full max-w-md sm:h-14" />
         </div>
       </div>
-      <div className="max-w-2xl">
-        <PanelShape />
-      </div>
+      <Skeleton className="h-80 w-full rounded-[22px] lg:h-[380px]" />
     </div>
   );
-}
-
-function CatalogEmpty() {
-  const t = useTranslations("MyLearning");
-
-  return (
-    <p
-      className="text-sm text-muted-foreground"
-      role="status"
-    >
-      {t("catalogEmpty")}
-    </p>
-  );
-}
-
-/**
- * The share of the continued video already watched, or `null` when there is
- * nothing honest to measure — a reading lesson, or a video never played.
- */
-function useWatchedFraction(
-  lessonId: LessonId,
-  durationSeconds: number | null,
-  positions?: PlaybackPositionRepository,
-): number | null {
-  const playback = usePlaybackPosition(lessonId, positions);
-  const [fraction, setFraction] = useState<number | null>(null);
-
-  useEffect(() => {
-    let isCurrent = true;
-    void playback.get().then((positionSeconds) => {
-      if (!isCurrent) return;
-      setFraction(
-        positionSeconds === null || durationSeconds === null
-          ? null
-          : watchedFraction(positionSeconds, durationSeconds),
-      );
-    });
-    return () => {
-      isCurrent = false;
-    };
-  }, [playback, durationSeconds]);
-
-  return fraction;
 }

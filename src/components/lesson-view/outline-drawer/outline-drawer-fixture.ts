@@ -65,6 +65,7 @@ export function makeCourseFixture({
     language: "en",
     lessonCount: lessonsPerModule.reduce((sum, count) => sum + count, 0),
     moduleCount: lessonsPerModule.length,
+    track: "level",
     sequence: 1,
   });
 

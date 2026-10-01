@@ -1,4 +1,12 @@
 import { assertSafeKey } from "@/adapters/persistence/blob-store/blob-key/blob-key";
+import {
+  CourseAudience,
+  CourseHighlights,
+  CourseOutcomes,
+  CourseSounds,
+  CourseTrack,
+  CourseTranslations,
+} from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId, ResourceId } from "@/domain/entities/ids/ids";
 import { ResourceKind } from "@/domain/entities/resource/resource";
 import { Slug } from "@/domain/entities/slug/slug";
@@ -143,6 +151,21 @@ export const CourseManifest = z.object({
    * changes, and the course is served everywhere.
    */
   draft: z.boolean().default(false),
+  /**
+   * A rung of the ladder or reference material. Absent means `level`, so every
+   * manifest written before tracks existed keeps its meaning unedited.
+   */
+  track: CourseTrack.default("level"),
+  /** What the course teaches, for learners deciding whether to join. Absent means none declared. */
+  outcomes: CourseOutcomes.optional(),
+  /** Who the course is for, in one sentence. Absent means none declared. */
+  audience: CourseAudience.optional(),
+  /** What the course teaches, in a few short points. Absent means none declared. */
+  highlights: CourseHighlights.optional(),
+  /** The IPA sounds the course teaches. Absent for courses that are not about single sounds. */
+  sounds: CourseSounds.optional(),
+  /** The course's prose in other languages, keyed by ISO 639-1 code. */
+  translations: CourseTranslations.optional(),
   modules: z.array(ManifestModule).min(1),
 });
 

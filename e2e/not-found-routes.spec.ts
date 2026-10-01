@@ -64,4 +64,54 @@ test.describe("unknown routes", () => {
 
     await expect(page).toHaveURL(/\/pt$/);
   });
+
+  // Only what the learner sees is pinned: under `/courses` a missing page
+  // renders the not-found page with a 200 (the async session layout streams
+  // first), the same as every other unknown path below that segment.
+  test("a course's bare address is a missing page; its progress board lives at /progress", async ({
+    page,
+  }) => {
+    await page.goto("/es/courses/basic-course");
+    await expect(page.getByRole("heading", { name: /página no encontrada/i })).toBeVisible();
+
+    const board = await page.goto("/es/courses/basic-course/progress");
+    expect(board?.status()).toBe(200);
+    await expect(page.getByRole("heading", { name: /página no encontrada/i })).toHaveCount(0);
+  });
+
+  test("the page names the path that was requested", async ({ page }) => {
+    await page.goto("/es/leccion-perdida");
+
+    await expect(page.getByRole("main")).toContainText("No hay nada en /es/leccion-perdida");
+  });
+
+  test("an encoded path is named as it was requested", async ({ page }) => {
+    // Decoded, a crafted link could print a sentence of its sender's choosing
+    // on this page; only a server shows what the router hands the page.
+    await page.goto("/en/call%20this%20number");
+
+    await expect(page.getByRole("main")).toContainText("/en/call%20this%20number");
+    await expect(page.getByRole("main")).not.toContainText("call this number");
+  });
+
+  test("a very long path neither widens the page nor buries the actions", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+
+    await page.goto(`/es/${"una-ruta-que-no-existe-".repeat(30)}`);
+
+    const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    }));
+    expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+    await expect(page.getByRole("main").getByRole("link", { name: "Ver cursos" })).toBeInViewport();
+  });
+
+  test("the course lobby link keeps the learner in their own locale", async ({ page }) => {
+    await page.goto("/es/error");
+
+    await page.getByRole("main").getByRole("link", { name: "Ver cursos" }).click();
+
+    await expect(page).toHaveURL(/\/es\/courses$/);
+  });
 });

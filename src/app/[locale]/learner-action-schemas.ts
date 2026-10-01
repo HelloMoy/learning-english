@@ -19,4 +19,5 @@ export const LEARNER_ACTION_SCHEMAS = {
   learnerProfile: LearnerProfile,
   earnedTickets: z.object({ lessonIds: z.array(LessonId) }),
   prizeClaim: z.object({ moduleSlug: Slug }),
+  courseEnrollment: z.object({ courseSlug: Slug }),
 };

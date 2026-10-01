@@ -22,8 +22,14 @@ export default defineMain({
     name: "@storybook/nextjs-vite",
     options: {},
   },
-  stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
+  stories: ["./docs/*.mdx", "../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
   addons: ["@storybook/addon-docs", "@storybook/addon-a11y", "@storybook/addon-themes"],
+  // The toolbar's light/dark switch decides the canvas colour, and the canvas
+  // is painted with the cinema backdrop. A background swatch could only
+  // contradict both.
+  features: {
+    backgrounds: false,
+  },
   // Storybook 10 ships the Component tests UI in core. The project's
   // `test-storybook` script is a stub ("requires vitest project setup"),
   // and no Vitest project is wired in `vitest.config.ts`, so the test

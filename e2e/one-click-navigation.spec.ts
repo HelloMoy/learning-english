@@ -1,6 +1,5 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
-import { skipOnCi } from "./ci-unavailable";
 import { lessonsOfModule, modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
 
@@ -45,11 +44,6 @@ const lessonUrl = (courseSlug: string, moduleSlug: string, lessonId: string) =>
 const COLD_ROUTE = { timeout: 60_000 };
 
 test.describe("Home and My learning — one click to the course, one to the lesson", () => {
-  // Reaches its courses through `contentCatalog.courses[0]` and `[1]`
-  // rather than by slug, which is why the earlier sweep for the course
-  // slug missed it: one of those two is the Advanced Intermediate
-  // Course, whose video a CI checkout does not have.
-  skipOnCi("self-hosted-content");
   test("WHEN a level row's link is pressed THEN the course overview opens", async ({ page }) => {
     await page.goto("/en");
 
@@ -60,12 +54,13 @@ test.describe("Home and My learning — one click to the course, one to the less
       .getByRole("link")
       .click(COLD_ROUTE);
 
-    await page.waitForURL(`**/en/courses/${FIRST_COURSE.slug}`, COLD_ROUTE);
+    await page.waitForURL(`**/en/courses/${FIRST_COURSE.slug}/progress`, COLD_ROUTE);
     await expect(page.getByTestId("course-overview")).toBeVisible(COLD_ROUTE);
   });
 
   test("WHEN a lesson has been opened THEN My learning's Resume returns to it", async ({
     page,
+    learnerState,
   }) => {
     const lessonPath = lessonUrl(
       SECOND_COURSE.slug,
@@ -79,6 +74,11 @@ test.describe("Home and My learning — one click to the course, one to the less
       COLD_ROUTE,
     );
 
+    // The record is written after mount; My learning leads with the course it names.
+    await expect
+      .poll(() => learnerState.lastOpenedLessonId(), COLD_ROUTE)
+      .toBe(SECOND_COURSE_START.lesson.id);
+
     await page.goto("/en/learning");
 
     await page.getByRole("link", { name: "Resume" }).first().click(COLD_ROUTE);
@@ -86,8 +86,9 @@ test.describe("Home and My learning — one click to the course, one to the less
     await page.waitForURL(new RegExp(`${SECOND_COURSE_START.lesson.id}$`), COLD_ROUTE);
   });
 
-  test("WHEN a lesson has been opened THEN My learning's quieter link still opens the course", async ({
+  test("WHEN a lesson has been opened THEN My learning's View course details opens that course's page", async ({
     page,
+    learnerState,
   }) => {
     await page.goto(
       lessonUrl(SECOND_COURSE.slug, SECOND_COURSE_START.module.slug, SECOND_COURSE_START.lesson.id),
@@ -96,22 +97,27 @@ test.describe("Home and My learning — one click to the course, one to the less
       COLD_ROUTE,
     );
 
+    await expect
+      .poll(() => learnerState.lastOpenedLessonId(), COLD_ROUTE)
+      .toBe(SECOND_COURSE_START.lesson.id);
+
     await page.goto("/en/learning");
 
-    await page.getByRole("link", { name: "View course content" }).first().click(COLD_ROUTE);
+    // Only the leading course's progress panel carries View course details.
+    await page.getByRole("link", { name: "View course details", exact: true }).click(COLD_ROUTE);
 
-    await page.waitForURL(`**/en/courses/${SECOND_COURSE.slug}`, COLD_ROUTE);
-    await expect(page.getByTestId("course-overview")).toBeVisible(COLD_ROUTE);
+    await page.waitForURL(`**/en/courses/${SECOND_COURSE.slug}/about`, COLD_ROUTE);
+    await expect(page.getByRole("heading", { level: 1, name: SECOND_COURSE.title })).toBeVisible(
+      COLD_ROUTE,
+    );
   });
 });
 
 test.describe("Lesson tile — one click from the course overview to the module", () => {
   test("WHEN a lesson tile's body is clicked THEN its module overview opens", async ({ page }) => {
     const modules = modulesOfCourse(FIRST_COURSE.slug);
-    // A one-video lesson's tile opens its video instead, so aim at the first
-    // module that actually has an overview worth opening.
-    const moduleIndex = modules.findIndex((module) => lessonsOfModule(module.id).length > 1);
-    await page.goto(`/en/courses/${FIRST_COURSE.slug}`);
+    const moduleIndex = 0;
+    await page.goto(`/en/courses/${FIRST_COURSE.slug}/progress`);
 
     await page
       .getByRole("link", { name: `Open lesson ${moduleIndex + 1}: ${modules[moduleIndex]!.title}` })
@@ -126,11 +132,6 @@ test.describe("Lesson tile — one click from the course overview to the module"
 });
 
 test.describe("Video row — one click anywhere to the lesson", () => {
-  // Reaches its courses through `contentCatalog.courses[0]` and `[1]`
-  // rather than by slug, which is why the earlier sweep for the course
-  // slug missed it: one of those two is the Advanced Intermediate
-  // Course, whose video a CI checkout does not have.
-  skipOnCi("self-hosted-content");
   test("WHEN the row's body is clicked THEN the lesson page opens", async ({ page }) => {
     const module_ = modulesOfCourse(FIRST_COURSE.slug)[0]!;
     const lesson = lessonsOfModule(module_.id)[0]!;

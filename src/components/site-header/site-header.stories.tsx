@@ -43,6 +43,7 @@ const LEVELS: AchievementLevel[] = [
       language: "en",
       lessonCount: LESSONS.length,
       moduleCount: 1,
+      track: "level",
       sequence: 1,
     }),
     modules: [VOWELS],

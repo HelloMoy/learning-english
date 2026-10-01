@@ -10,8 +10,8 @@ import { isAbsoluteHttpUrl } from "../../src/domain/entities/url-or-path/url-or-
  * `move-content.ts` and `verify:content` walk it, so neither can check a
  * different set from the other.
  *
- * A lesson whose `source` is already a URL is served by someone else — the
- * Basic Course's lectures live on YouTube — so it names no object this store
+ * A lesson whose `source` is already a URL is served by someone else — every
+ * course's lectures live on YouTube — so it names no object this store
  * holds and is left out. Including it would make `verify:content` demand a
  * file that was never meant to exist, and invite `move-content.ts` to try to
  * relocate it. Its poster and resources are still keys and are still walked.

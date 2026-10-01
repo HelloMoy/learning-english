@@ -36,7 +36,7 @@ The locale set and the default locale SHALL be read from the routing configurati
 The shape of the locale prefix SHALL be asserted by a test rather than assumed. `getPathname` from the navigation wrappers cannot serve this purpose: outside a Next request it resolves to its client build and returns `/` for every input, which would make the one function every canonical depends on untestable.
 
 #### Scenario: A course page declares all three locales
-- **WHEN** `/es/courses/basic-course` renders
+- **WHEN** `/es/courses/basic-course/progress` renders
 - **THEN** its canonical is the `es` URL, and it declares alternates for the `en`, `es` and `pt` equivalents of the same course, plus `x-default` pointing at the `en` one
 
 #### Scenario: Alternates follow the routing config
@@ -147,6 +147,8 @@ The image SHALL carry the application's visual identity: the Immersion Cinema gr
 
 All four catalog route kinds SHALL render through one shared card component. Four independent layouts would drift, and no reviewer sees a sharing image unless they deliberately look for it.
 
+A course's card SHALL name its standing: a level course reads its derived "Level N", and a reference course reads **Reference**.
+
 #### Scenario: A course card leads with what the course teaches
 - **WHEN** the sharing image for a course whose description begins `American pronunciation from the ground up: …` is generated
 - **THEN** the headline reads `American pronunciation from the ground up`, and the catalog name `Basic Course` appears only in the supporting line — a catalog name identifies a row, it does not tell a reader what they would learn
@@ -166,6 +168,10 @@ All four catalog route kinds SHALL render through one shared card component. Fou
 #### Scenario: Achievements shares the home card
 - **WHEN** the metadata for `/pt/achievements` is generated
 - **THEN** its Open Graph image is the `pt` home sharing image and no route-specific image file exists for it
+
+#### Scenario: A reference course's card reads Reference
+- **WHEN** the sharing image for the Atlas of American Sounds is generated under `en`
+- **THEN** its kicker reads `Reference` and no level number appears
 
 ### Requirement: A withheld course renders no sharing image
 

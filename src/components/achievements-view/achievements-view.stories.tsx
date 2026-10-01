@@ -20,6 +20,7 @@ const course = Course.parse({
   language: "en",
   lessonCount: 17,
   moduleCount: 1,
+  track: "level",
   sequence: 1,
 });
 
@@ -70,6 +71,7 @@ const learner: LearnerProfileRepository = {
 const nothingStarted: ContinueWatchingRepository = {
   get: async () => null,
   set: async () => {},
+  list: async () => [],
 };
 
 const firstLesson = {
@@ -114,6 +116,7 @@ const continuing: ContinueWatchingRepository = {
       lessonId: continuedLesson.id,
     }),
   set: async () => {},
+  list: async () => [],
 };
 
 const resolveContinued = async (): Promise<ContinueWatchingPanel> => ({

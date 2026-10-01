@@ -1,5 +1,7 @@
 import { execSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 
 import { createDatabase, type Database } from "@/adapters/persistence/turso/database/database";
@@ -40,20 +42,60 @@ export type StartedLibsql = {
 };
 
 /**
- * Starts a fresh libSQL server in a container and applies every migration.
+ * Starts a fresh libSQL server in a container and applies migrations.
  *
+ * @param options.throughMigration - Stop after the migration with this tag
+ *   (e.g. `0002_learner_rewards`), to seed data an older schema held before
+ *   calling {@link applyAllMigrations}. Every migration is applied when omitted.
  * @returns The migrated database and a `stop` that removes the container
  */
-export async function startLibsqlContainer(): Promise<StartedLibsql> {
+export async function startLibsqlContainer(
+  options: { throughMigration?: string } = {},
+): Promise<StartedLibsql> {
   const container = await new GenericContainer(LIBSQL_IMAGE)
     .withExposedPorts(LIBSQL_PORT)
     .withWaitStrategy(Wait.forHttp("/health", LIBSQL_PORT))
     .start();
   const url = urlOf(container);
   const database = createDatabase({ url });
-  await migrate(database, { migrationsFolder: MIGRATIONS_FOLDER });
+  const migrationsFolder = options.throughMigration
+    ? migrationsThrough(options.throughMigration)
+    : MIGRATIONS_FOLDER;
+  await migrate(database, { migrationsFolder });
 
   return { database, url, stop: async () => void (await container.stop()) };
+}
+
+/**
+ * Applies every migration not yet applied — the rest of the history after a
+ * container started with `throughMigration`.
+ *
+ * @param database - A database migrated by {@link startLibsqlContainer}
+ */
+export async function applyAllMigrations(database: Database): Promise<void> {
+  await migrate(database, { migrationsFolder: MIGRATIONS_FOLDER });
+}
+
+type Journal = { entries: Array<{ tag: string }> };
+
+// Drizzle reads the history from `meta/_journal.json`, so a copy whose journal
+// ends at `tag` is a migrations folder that stops there.
+function migrationsThrough(tag: string): string {
+  const journal = JSON.parse(
+    readFileSync(path.join(MIGRATIONS_FOLDER, "meta/_journal.json"), "utf8"),
+  ) as Journal;
+  const last = journal.entries.findIndex((entry) => entry.tag === tag);
+  if (last === -1) throw new Error(`No migration tagged ${tag}`);
+  const entries = journal.entries.slice(0, last + 1);
+
+  const folder = mkdtempSync(path.join(tmpdir(), "migrations-"));
+  mkdirSync(path.join(folder, "meta"));
+  writeFileSync(path.join(folder, "meta/_journal.json"), JSON.stringify({ ...journal, entries }));
+  for (const entry of entries) {
+    const file = `${entry.tag}.sql`;
+    copyFileSync(path.join(MIGRATIONS_FOLDER, file), path.join(folder, file));
+  }
+  return folder;
 }
 
 function urlOf(container: StartedTestContainer): string {

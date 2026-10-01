@@ -25,6 +25,7 @@ const aCourse = (title: string, sequence: number): Course =>
     language: "en",
     lessonCount: 0,
     moduleCount: 0,
+    track: "level",
     sequence,
   });
 

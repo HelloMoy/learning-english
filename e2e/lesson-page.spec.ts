@@ -1,6 +1,5 @@
 import { contentCatalog } from "@/adapters/persistence/content-manifest/content-manifest";
 
-import { skipOnCi } from "./ci-unavailable";
 import { modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
 
@@ -110,7 +109,6 @@ function escapeRegExp(value: string): string {
 }
 
 test.describe("Lesson Page — happy path", () => {
-  skipOnCi("self-hosted-content");
   test("WHEN a valid route is visited THEN all regions render and the title is the lesson's title", async ({
     page,
   }) => {
@@ -185,7 +183,6 @@ test.describe("Lesson Page — happy path", () => {
  * assertion passes both before and after the fix. See design.md §D2.
  */
 test.describe("Lesson Page — resource links resolve", () => {
-  skipOnCi("self-hosted-content");
   const NOTES_KEY_OF_PRIMARY_LESSON = notesKeyOf(PRIMARY_LESSON.id);
   const RAIL_RESOURCES = railResourcesOf(LESSON_WITH_RAIL_RESOURCES.id);
 

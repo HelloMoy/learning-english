@@ -4,7 +4,6 @@ import { finishThresholdSeconds } from "@/lib/watch-progress/watch-progress";
 
 import { type Page } from "@playwright/test";
 
-import { skipOnCi } from "./ci-unavailable";
 import { modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
 import type { LearnerState } from "./learner-state-fixture";
@@ -47,7 +46,7 @@ const PARTLY_WATCHED_LESSON = MODULE_LESSONS[1]!;
 const moduleUrl = (locale: string): string =>
   `/${locale}/courses/${COURSE_SLUG}/modules/${MODULE.slug}`;
 
-const courseUrl = (locale: string): string => `/${locale}/courses/${COURSE_SLUG}`;
+const courseUrl = (locale: string): string => `/${locale}/courses/${COURSE_SLUG}/progress`;
 
 /**
  * Seeds two positions before the first load: one past the finish threshold,
@@ -69,10 +68,9 @@ async function seedPositions(learnerState: LearnerState) {
 const rowFor = (page: Page, title: string) => page.getByRole("listitem").filter({ hasText: title });
 
 test.describe("watch progress", () => {
-  // Deliberately NOT quarantined. The rest of this file's advanced-course
-  // dependence is an environment limit, but "a lesson watched to its end reads
-  // full" fails locally too, with the content present and the schema migrated —
-  // so labelling it as missing content would hide a real failure behind a false
+  // Deliberately NOT quarantined. "A lesson watched to its end reads full"
+  // fails locally too, with the content present and the schema migrated — so
+  // labelling it as missing content would hide a real failure behind a false
   // excuse. It predates this work and appeared in every measurement. The shape
   // of the error, `progressbar` element(s) not found, suggests the expectation
   // may be stale rather than the product broken: a completed lesson may now
@@ -127,7 +125,12 @@ test.describe("watch progress", () => {
     await expect(row.getByRole("progressbar")).toHaveCount(0);
   });
 
-  test("the course overview's lesson tile counts the finished lesson", async ({ page }) => {
+  test("the course overview's lesson tile counts the finished lesson", async ({
+    page,
+    learnerState,
+  }) => {
+    // The progress board is for learners enrolled in the course (`cinema-course-overview`).
+    await learnerState.enrolled([COURSE_SLUG]);
     await page.goto(courseUrl("en"));
 
     // The seeded positions put the learner part-way through the first module,
@@ -140,7 +143,8 @@ test.describe("watch progress", () => {
 });
 
 test.describe("watch progress, for a learner with none", () => {
-  test("a course the learner has not started shows no progress", async ({ page }) => {
+  test("a course the learner has not started shows no progress", async ({ page, learnerState }) => {
+    await learnerState.enrolled([COURSE_SLUG]);
     await page.goto(courseUrl("en"));
     await expect(page.getByTestId("course-overview")).toBeVisible();
 

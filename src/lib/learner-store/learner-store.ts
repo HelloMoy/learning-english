@@ -1,4 +1,4 @@
-import type { ContinueWatchingLocation } from "@/domain/entities/continue-watching-location/continue-watching-location";
+import type { ContinueWatchingRecord } from "@/domain/entities/continue-watching-record/continue-watching-record";
 import type { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
 import type { LearnerSnapshot } from "@/lib/learner-snapshot/learner-snapshot";
 import { reportHandledError } from "@/lib/report-handled-error/report-handled-error";
@@ -21,11 +21,14 @@ export type LearnerState = {
   profile: LearnerProfile | null;
   completed: ReadonlySet<string>;
   positions: ReadonlyMap<string, number>;
-  continueWatching: ContinueWatchingLocation | null;
+  /** One record per course the learner has opened, the most recently watched first. */
+  continueWatching: ReadonlyArray<ContinueWatchingRecord>;
   /** Lessons whose ticket was earned; kept even when the lesson is un-marked. */
   earnedTickets: ReadonlySet<string>;
   /** Modules whose prize was claimed on the counter. */
   claimedPrizes: ReadonlySet<string>;
+  /** Courses the learner has enrolled in. */
+  enrolledCourses: ReadonlySet<string>;
 };
 
 const EMPTY_STATE: LearnerState = {
@@ -33,9 +36,10 @@ const EMPTY_STATE: LearnerState = {
   profile: null,
   completed: new Set(),
   positions: new Map(),
-  continueWatching: null,
+  continueWatching: [],
   earnedTickets: new Set(),
   claimedPrizes: new Set(),
+  enrolledCourses: new Set(),
 };
 
 /**
@@ -128,6 +132,7 @@ function stateOf(snapshot: LearnerSnapshot): LearnerState {
     continueWatching: snapshot.continueWatching,
     earnedTickets: new Set(snapshot.earnedTicketLessonIds),
     claimedPrizes: new Set(snapshot.claimedPrizeModuleSlugs),
+    enrolledCourses: new Set(snapshot.enrolledCourseSlugs),
   };
 }
 

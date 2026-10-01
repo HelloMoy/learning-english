@@ -16,6 +16,7 @@ const course = Course.parse({
   language: "en",
   lessonCount: 8,
   moduleCount: 1,
+  track: "level",
   sequence: 1,
 });
 
@@ -43,6 +44,14 @@ const meta = {
   title: "Components/ProfileCardBand",
   component: ProfileCardBand,
   parameters: { layout: "padded" },
+  // The width of the Profile page's card column on a wide screen.
+  decorators: [
+    (Story) => (
+      <div className="max-w-[22.5rem]">
+        <Story />
+      </div>
+    ),
+  ],
   args: {
     name: "Ana García",
     avatar: { kind: "illustration", id: "wave" },
@@ -73,7 +82,7 @@ export const PartWayThrough: Story = {
   },
 };
 
-/** The level finished: the ring is full and every ticket is earned. */
+/** The level finished: the bar is full and every ticket is earned. */
 export const LevelFinished: Story = {
   beforeEach: () => {
     resetLearnerStore();

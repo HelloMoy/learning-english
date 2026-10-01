@@ -1,6 +1,7 @@
 import { getCoursePlatformDeps } from "@/adapters/persistence/in-memory/use-case-dependencies/use-case-dependencies";
 import type { HomeLevel } from "@/components/home-view/home-view";
 import type { LearnerCardLevel } from "@/components/learner-card/learner-card";
+import { findFirstLevel, FIRST_LEVEL } from "@/domain/entities/course-standing/course-standing";
 import type {
   CourseCatalogEntry,
   LessonProgressSlice,
@@ -28,27 +29,28 @@ export const loadCatalogEntries = cache(async (): Promise<CourseCatalogEntry[]> 
  * @returns One level per course, in the same order
  */
 export function catalogLevels(entries: ReadonlyArray<CourseCatalogEntry>): HomeLevel[] {
-  return entries.map(({ course, modules, lessonRuntimes }) => ({
+  return entries.map(({ course, standing, modules, lessonRuntimes }) => ({
     course,
+    standing,
     modules,
     lessonRuntimes,
   }));
 }
 
 /**
- * The level a learner card names — the first course — and its lessons, which
- * the card's progress line counts.
+ * The level a learner card names — the first level course, never a reference
+ * course — and its lessons, which the card's progress line counts.
  *
  * @param entries - The catalog entries, in sequence order
- * @returns The first level, or `null` for an empty catalog
+ * @returns The first level, or `null` when the catalog holds no level course
  */
 export function firstLearnerLevel(
   entries: ReadonlyArray<CourseCatalogEntry>,
 ): { level: LearnerCardLevel; lessonRuntimes: LessonProgressSlice[] } | null {
-  const first = entries[0];
+  const first = findFirstLevel(entries);
   if (!first) return null;
   return {
-    level: { number: first.course.sequence, courseTitle: first.course.title },
+    level: { number: FIRST_LEVEL, courseTitle: first.course.title },
     lessonRuntimes: first.lessonRuntimes,
   };
 }

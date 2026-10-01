@@ -68,6 +68,8 @@ const completedShare = ({ completed, total }: LearnerCardProgress): number =>
  * @param distinction - The finish earned by completing courses; omitted, the card keeps its plain look
  * @param nameField - Stands where the name goes, for the onboarding step that collects it; omitted,
  *                    the card prints the name as it always has
+ * @param showProgressBar - Draws a bar at the completed share under the footer, for the Profile
+ *                          page where the card is the only place progress is shown
  */
 export function LearnerCard({
   name,
@@ -77,6 +79,7 @@ export function LearnerCard({
   size = "default",
   distinction,
   nameField,
+  showProgressBar = false,
 }: {
   name: string;
   avatar: LearnerAvatarValue;
@@ -85,6 +88,7 @@ export function LearnerCard({
   size?: "default" | "large";
   distinction?: Distinction;
   nameField?: ReactNode;
+  showProgressBar?: boolean;
 }) {
   const t = useTranslations("Components.LearnerCard");
   const trimmedName = name.trim();
@@ -164,7 +168,24 @@ export function LearnerCard({
           </span>
         </ProgressTooltip>
       </div>
+      {showProgressBar ? <ProgressBar share={share} /> : null}
     </div>
+  );
+}
+
+/** The completed share as a bar; decorative, since the footer already says it in words. */
+function ProgressBar({ share }: { share: number }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="-mt-2 block h-1.5 w-full overflow-hidden rounded-full bg-border"
+    >
+      <span
+        data-testid="learner-card-progress-bar"
+        className="block h-full rounded-full bg-gradient-to-r from-bronze to-gold transition-[width] duration-500 motion-reduce:transition-none"
+        style={{ width: `${share * 100}%` }}
+      />
+    </span>
   );
 }
 

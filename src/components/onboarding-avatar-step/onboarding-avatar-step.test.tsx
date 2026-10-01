@@ -68,7 +68,7 @@ describe("OnboardingAvatarStep", () => {
       expect(
         await screen.findByRole("heading", { level: 1, name: "Now pick your avatar" }),
       ).toBeInTheDocument();
-      expect(screen.getByText("Step 2 of 2")).toBeInTheDocument();
+      expect(screen.getByText("Step 2 of 3")).toBeInTheDocument();
       expect(screen.getByRole("textbox", { name: "Your name" })).toHaveValue("Ana García");
       expect(screen.getByRole("radio", { name: "Initials" })).toHaveAttribute(
         "aria-checked",
@@ -101,7 +101,7 @@ describe("OnboardingAvatarStep", () => {
       await user.click(screen.getByRole("radio", { name: "Echo" }));
       await user.click(screen.getByRole("button", { name: "Continue" }));
 
-      await waitFor(() => expect(router.push).toHaveBeenCalledWith("/learning"));
+      await waitFor(() => expect(router.push).toHaveBeenCalledWith("/start/first-course"));
       expect(await profiles.get()).toEqual({
         name: "Ana G.",
         avatar: { kind: "illustration", id: "echo" },
@@ -129,7 +129,7 @@ describe("OnboardingAvatarStep", () => {
       expect(await profiles.get()).toEqual(profile);
     });
 
-    test("WHEN Continue is pressed THEN the chosen avatar is saved and My learning opens", async () => {
+    test("WHEN Continue is pressed THEN the chosen avatar is saved and the first-course step opens", async () => {
       const user = userEvent.setup();
       const profiles = makeStubLearnerProfileRepository({ profile });
       renderStep({ profiles });
@@ -137,7 +137,7 @@ describe("OnboardingAvatarStep", () => {
       await user.click(await screen.findByRole("radio", { name: "Echo" }));
       await user.click(screen.getByRole("button", { name: "Continue" }));
 
-      await waitFor(() => expect(router.push).toHaveBeenCalledWith("/learning"));
+      await waitFor(() => expect(router.push).toHaveBeenCalledWith("/start/first-course"));
       expect(await profiles.get()).toEqual({
         name: "Ana García",
         avatar: { kind: "illustration", id: "echo" },

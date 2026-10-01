@@ -42,12 +42,10 @@ const HELD_PAYLOAD_MS = 4000;
 
 /**
  * Stops the media provider from ever reporting that it can play, by refusing
- * the requests it needs — the YouTube embed for a published lesson, the file
- * itself for a self-hosted one. The placeholder then stays up, which is what
- * makes "it is present" assertable at all.
+ * the YouTube embed every lesson is served from. The placeholder then stays
+ * up, which is what makes "it is present" assertable at all.
  */
-const holdTheProvider = (page: Page) =>
-  page.route(/youtube|ytimg|\.mp4(\?|$)/, (route) => route.abort());
+const holdTheProvider = (page: Page) => page.route(/youtube|ytimg/, (route) => route.abort());
 
 /**
  * Holds the RSC payload of whatever is navigated to next. This is the reported
@@ -81,7 +79,6 @@ const lessonLink = (page: Page) =>
 const FIRST_COMPILE_MS = 20_000;
 
 test.describe("Loading skeletons — the lesson video frame", () => {
-  skipOnCi("self-hosted-content");
   test("WHEN the player cannot boot THEN the frame carries a placeholder rather than a black box", async ({
     page,
   }) => {
@@ -113,6 +110,7 @@ test.describe("Loading skeletons — the lesson video frame", () => {
   });
 
   test("WHEN the player becomes ready THEN the placeholder is retired", async ({ page }) => {
+    skipOnCi("youtube");
     // No hold and no mock: the real provider boots, and the placeholder leaves
     // on its own. This is the assertion the unit tests cannot make.
     await page.goto(LESSON_PATH);
@@ -122,7 +120,14 @@ test.describe("Loading skeletons — the lesson video frame", () => {
 });
 
 test.describe("Loading skeletons — route shells", () => {
-  skipOnCi("self-hosted-content");
+  // CI serves a production build, and there the lesson shell never appears:
+  // the held payload is not what the router waits on once the link has
+  // prefetched, and holding the prefetch too does not bring the shell back.
+  // Against `next dev` both tests pass. Whether production learners see the
+  // shell at all is an open question for its own change, so this stays
+  // visible as `fixme` rather than being skipped as an environment limit.
+  test.fixme(!!process.env.CI, "the lesson shell does not appear against a production build");
+
   test("WHEN a lesson is opened from its module THEN the shell replaces the previous page", async ({
     page,
   }) => {

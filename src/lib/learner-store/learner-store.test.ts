@@ -1,3 +1,4 @@
+import { ContinueWatchingRecord } from "@/domain/entities/continue-watching-record/continue-watching-record";
 import { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
 import { EMPTY_LEARNER_SNAPSHOT } from "@/lib/learner-snapshot/learner-snapshot";
 
@@ -41,6 +42,26 @@ describe("seedLearnerStore", () => {
 
     expect(learnerStore.getState().earnedTickets.has(lessonId)).toBe(true);
     expect(learnerStore.getState().claimedPrizes.has("2-vowels")).toBe(true);
+  });
+
+  test("WHEN the snapshot carries enrollments and places THEN both are held", () => {
+    const record = ContinueWatchingRecord.parse({
+      location: {
+        courseSlug: "basic-course",
+        moduleSlug: "2-vowels",
+        lessonId: faker.string.uuid(),
+      },
+      watchedAt: faker.date.past().getTime(),
+    });
+
+    seedLearnerStore({
+      ...EMPTY_LEARNER_SNAPSHOT,
+      continueWatching: [record],
+      enrolledCourseSlugs: ["basic-course"],
+    });
+
+    expect(learnerStore.getState().enrolledCourses.has("basic-course")).toBe(true);
+    expect(learnerStore.getState().continueWatching).toEqual([record]);
   });
 
   test("WHEN nothing changes THEN readers see the very same collections", () => {

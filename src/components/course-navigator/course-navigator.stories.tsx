@@ -44,6 +44,7 @@ const storyCourse = Course.parse({
   language: "en",
   lessonCount: STORY_LESSON_IDS.length,
   moduleCount: 1,
+  track: "level",
   sequence: 1,
 });
 

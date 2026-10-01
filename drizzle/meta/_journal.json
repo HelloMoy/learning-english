@@ -22,6 +22,20 @@
       "when": 1789805365829,
       "tag": "0002_learner_rewards",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1790404197656,
+      "tag": "0003_course_enrollment",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1790404347337,
+      "tag": "0004_enroll_existing_learners",
+      "breakpoints": true
     }
   ]
 }

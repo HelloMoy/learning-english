@@ -2,7 +2,7 @@ import { Course } from "@/domain/entities/course/course";
 import type { ProgressTally } from "@/lib/course-overview-progress/course-overview-progress";
 
 import { faker } from "@faker-js/faker";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -24,6 +24,7 @@ const course = Course.parse({
   language: "en",
   lessonCount: 48,
   moduleCount: 5,
+  track: "level",
   sequence: 1,
 });
 
@@ -170,6 +171,73 @@ describe("CourseProgressTile", () => {
       expect(tile).toHaveAttribute("data-status", "pending");
       expect(tile).not.toHaveTextContent("percentComplete");
       expect(tile).not.toHaveTextContent("completedOfTotal");
+    });
+  });
+
+  describe("GIVEN a page whose own heading comes first", () => {
+    test("WHEN the tile renders with a level-two heading THEN the course title is an h2", () => {
+      // Act
+      render(
+        <CourseProgressTile
+          course={course}
+          reading={{ status: "pending" }}
+          headingLevel={2}
+        />,
+      );
+
+      // Assert
+      expect(screen.getByRole("heading", { level: 2, name: "Basic Course" })).toBeInTheDocument();
+      expect(screen.queryByRole("heading", { level: 1 })).toBeNull();
+    });
+
+    test("WHEN the tile is given a link THEN it ends with that link under its label", () => {
+      // Arrange
+      const label = faker.lorem.words(3);
+
+      // Act
+      render(
+        <CourseProgressTile
+          course={course}
+          reading={{ status: "pending" }}
+          link={{ href: "/courses/basic-course/about", label }}
+        />,
+      );
+
+      // Assert
+      expect(screen.getByRole("link", { name: label })).toHaveAttribute(
+        "href",
+        "/courses/basic-course/about",
+      );
+    });
+
+    test("WHEN the tile is given a link THEN the title leads there too, outside the tab order", () => {
+      // Act
+      render(
+        <CourseProgressTile
+          course={course}
+          reading={{ status: "pending" }}
+          link={{ href: "/courses/basic-course/about", label: faker.lorem.words(3) }}
+        />,
+      );
+
+      // Assert
+      const heading = screen.getByRole("heading", { level: 1, name: "Basic Course" });
+      const titleLink = within(heading).getByRole("link", { name: "Basic Course" });
+      expect(titleLink).toHaveAttribute("href", "/courses/basic-course/about");
+      expect(titleLink).toHaveAttribute("tabindex", "-1");
+    });
+
+    test("WHEN the tile has no address THEN it offers no link", () => {
+      // Act
+      render(
+        <CourseProgressTile
+          course={course}
+          reading={{ status: "pending" }}
+        />,
+      );
+
+      // Assert
+      expect(screen.queryByRole("link")).toBeNull();
     });
   });
 });

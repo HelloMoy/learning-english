@@ -27,6 +27,7 @@ const fixtures = () => {
     language: "en",
     lessonCount: 1,
     moduleCount: 1,
+    track: "level",
     sequence: 1,
   });
   const courseModule = Module.parse({
@@ -72,7 +73,7 @@ describe("LessonBreadcrumb", () => {
     expect(screen.getByText(lesson.title)).toBeInTheDocument();
     const courseLink = screen.getByRole("link", { name: course.title });
     const moduleLink = screen.getByRole("link", { name: courseModule.title });
-    expect(courseLink).toHaveAttribute("href", "/courses/my-course");
+    expect(courseLink).toHaveAttribute("href", "/courses/my-course/progress");
     expect(moduleLink).toHaveAttribute("href", "/courses/my-course/modules/my-module");
   });
 

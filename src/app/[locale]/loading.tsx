@@ -12,11 +12,13 @@ import { Skeleton } from "@/components/ui/skeleton/skeleton";
  *
  * The shapes trace the new-visitor home, which is what the server renders: the
  * editorial hero on its twelve-column grid with the vowel-length card beside
- * it, the numbered questions, and the levels table. The classes are the page's
- * own, so the arriving content fills positions that are already correct.
+ * it, the numbered questions, the levels table and the reference table. The
+ * classes are the page's own, so the arriving content fills positions that are
+ * already correct.
  *
- * Two level rows, because the catalog ships two courses today; a shell that
- * guessed more would promise rows the table never draws.
+ * Two level rows and one reference row, because the catalog ships two level
+ * courses and one reference course today; a shell that guessed more would
+ * promise rows the tables never draw.
  */
 export default function Loading() {
   return (
@@ -81,6 +83,19 @@ export default function Loading() {
             ))}
           </div>
         </section>
+
+        <section className="flex flex-col gap-7">
+          <div className="flex flex-col gap-3">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="h-9 w-72" />
+          </div>
+          <div
+            data-testid="home-shell-reference"
+            className="flex flex-col border-t-2 border-border"
+          >
+            <LevelRowShape />
+          </div>
+        </section>
       </div>
     </main>
   );
@@ -114,7 +129,7 @@ function CardShape() {
   );
 }
 
-/** One row of the levels table: ordinal, title, description, counts and link. */
+/** One row of the levels or reference table: ordinal, title, description, counts and link. */
 function LevelRowShape() {
   return (
     <div className="grid grid-cols-1 gap-3 border-b border-border py-6 lg:grid-cols-[7.5rem_minmax(0,1.2fr)_minmax(0,1.4fr)_12.5rem_11.25rem] lg:items-center lg:gap-6 lg:py-8">

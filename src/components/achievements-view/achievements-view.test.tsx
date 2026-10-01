@@ -29,6 +29,7 @@ const course = Course.parse({
   language: "en",
   lessonCount: 2,
   moduleCount: 1,
+  track: "level",
   sequence: 1,
 });
 
@@ -108,6 +109,7 @@ const firstLesson = {
 const storing = (stored: ContinueWatchingLocation | null): ContinueWatchingRepository => ({
   get: async () => stored,
   set: async () => {},
+  list: async () => [],
 });
 
 /** A record whose round-trip never answers, so the reserved state can be seen. */

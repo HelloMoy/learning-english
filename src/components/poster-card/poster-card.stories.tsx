@@ -5,7 +5,6 @@ import { PosterCard } from "./poster-card";
 const meta: Meta<typeof PosterCard> = {
   title: "Cinema/PosterCard",
   component: PosterCard,
-  parameters: { backgrounds: { default: "dark" } },
   args: {
     title: "Contractions Reductions",
     number: "03",

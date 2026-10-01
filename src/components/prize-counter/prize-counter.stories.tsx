@@ -27,6 +27,7 @@ const course = (title: string, sequence: number) =>
     language: "en",
     lessonCount: 0,
     moduleCount: 0,
+    track: "level",
     sequence,
   });
 

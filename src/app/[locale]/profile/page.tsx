@@ -44,12 +44,13 @@ export default function ProfilePage({ params }: Props) {
   // account this can be missing is one signed out between the two reads.
   const account = use(currentAccount());
 
-  // The save bar docks to the bottom of the viewport, so the page keeps that
-  // much room under its last section whether or not the bar is up.
+  // Below `lg` the save bar docks to the bottom of the viewport, so the page
+  // keeps that much room under its last section whether or not the bar is up.
+  // From `lg` the bar sits in the card column and needs no room here.
   return (
     <main
       id="main"
-      className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 pt-10 pb-32 sm:px-11 sm:pt-16 sm:pb-36"
+      className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 pt-10 pb-32 sm:px-11 sm:pt-16 sm:pb-36 lg:pb-20"
     >
       <ProfileView
         level={first.level}

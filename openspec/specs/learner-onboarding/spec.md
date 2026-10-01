@@ -5,7 +5,7 @@ TBD - created by archiving change learner-onboarding. Update Purpose after archi
 ## Requirements
 ### Requirement: Step one asks for the learner's name on a live card
 
-The route `/[locale]/start` SHALL render step 1 of 2 of the onboarding: a heading inviting the learner
+The route `/[locale]/start` SHALL render step 1 of 3 of the onboarding: a heading inviting the learner
 to make their learner card, the learner card carrying the name field itself, and a **Continue** action.
 Typing SHALL update the card's name and initials as the learner types. **Continue** SHALL be unavailable
 while the trimmed name is empty.
@@ -59,10 +59,10 @@ and SHALL navigate to `/[locale]/start/avatar`, carrying a valid `next` along un
 
 ### Requirement: Step two picks the avatar on the same card
 
-The route `/[locale]/start/avatar` SHALL render step 2 of 2: the learner card showing the saved name,
+The route `/[locale]/start/avatar` SHALL render step 2 of 3: the learner card showing the saved name,
 the avatar picker with the current avatar checked, and **Continue**. Choosing an option SHALL update
 the card immediately. Pressing **Continue** SHALL save the chosen avatar and navigate to the valid
-`next` path when one is present, and to `/[locale]/learning` otherwise.
+`next` path when one is present, and to `/[locale]/start/first-course` (step 3) otherwise.
 
 The card's name SHALL be editable here in the same way it is on step 1: the name lives in a field
 inside the card, seeded with the saved name, carrying the same accessible name, autocomplete and
@@ -87,9 +87,9 @@ saved name unchanged.
 - **WHEN** the card's name field is emptied
 - **THEN** Continue is disabled and nothing is saved
 
-#### Scenario: Finishing opens My learning
+#### Scenario: Finishing opens the first-course step
 - **WHEN** the learner presses Continue on step 2 without a valid `next`
-- **THEN** the chosen avatar is saved and My learning opens
+- **THEN** the chosen avatar is saved and `/en/start/first-course` opens
 
 #### Scenario: Finishing returns to the requested course route
 - **WHEN** the learner presses Continue on `/en/start/avatar?next=%2Fcourses%2Fc%2Fmodules%2Fm`
@@ -117,7 +117,7 @@ Until storage has been read each step SHALL render a placeholder of its own shap
 ### Requirement: Onboarding copy is localized and marks its progress
 
 Every onboarding string SHALL come from the active locale's messages in `en`, `es` and `pt`, and each
-step SHALL state its position (`Step 1 of 2`, `Step 2 of 2`) in text and as a two-segment indicator.
+step SHALL state its position (`Step 1 of 3`, `Step 2 of 3`, `Step 3 of 3`) in text and as a three-segment indicator.
 Step 2's name field SHALL take its accessible name and placeholder from the same messages step 1 uses.
 
 #### Scenario: Step one in Portuguese
@@ -128,9 +128,13 @@ Step 2's name field SHALL take its accessible name and placeholder from the same
 - **WHEN** `/pt/start/avatar` renders
 - **THEN** the heading, intro, the card's name field label, Continue and step label render from `pt.json`
 
+#### Scenario: Three segments mark the position
+- **WHEN** step 2 renders
+- **THEN** the indicator shows three segments, the first two reached
+
 ### Requirement: Course routes require a learner profile
 
-Every course route SHALL first require a session, as the `learner-account` capability's "Personal routes require a session" defines. A signed-in learner SHALL then, after hydration, be replaced to `/[locale]/start?next=<path>` when the device holds no learner profile. Course routes are `/[locale]/courses/[courseSlug]`,
+Every course route SHALL first require a session, as the `learner-account` capability's "Personal routes require a session" defines. A signed-in learner SHALL then, after hydration, be replaced to `/[locale]/start?next=<path>` when the device holds no learner profile. Course routes are `/[locale]/courses/[courseSlug]/progress`,
 `/[locale]/courses/[courseSlug]/modules/[moduleSlug]` and
 `/[locale]/courses/[courseSlug]/modules/[moduleSlug]/lessons/[lessonId]`. `<path>` is the
 requested route's path without the locale prefix. The redirect SHALL apply however the route was
@@ -161,7 +165,7 @@ SHALL be ignored, and the onboarding SHALL behave as though none was given.
 
 #### Scenario: An external URL is ignored
 - **WHEN** `/en/start?next=https%3A%2F%2Fevil.example` is completed
-- **THEN** finishing step 2 opens `/en/learning`
+- **THEN** finishing step 2 opens `/en/start/first-course`
 
 #### Scenario: A protocol-relative path is ignored
 - **WHEN** `next` is `//evil.example/courses/c`

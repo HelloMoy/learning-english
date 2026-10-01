@@ -12,6 +12,25 @@ import { moduleProgress, type ModuleProgress } from "@/lib/module-progress/modul
 /** One lesson (module) of the course with the summary of its videos, in `sequence` order. */
 export type CourseOverviewEntry = { module: Module; summary: ModuleSummary };
 
+/**
+ * Pairs each module with its summary, in module order; a module without a
+ * summary is left out.
+ *
+ * @param modules - The course's modules, in `sequence` order
+ * @param moduleSummaries - The course's module summaries, in any order
+ * @returns One entry per module that has a summary
+ */
+export function courseOverviewEntries(
+  modules: ReadonlyArray<Module>,
+  moduleSummaries: ReadonlyArray<ModuleSummary>,
+): CourseOverviewEntry[] {
+  const summaryByModule = new Map(moduleSummaries.map((summary) => [summary.moduleId, summary]));
+  return modules.flatMap((module) => {
+    const summary = summaryByModule.get(module.id);
+    return summary ? [{ module, summary }] : [];
+  });
+}
+
 /** The course and the learner's progress on this device. */
 export type CourseOverviewProgressInput = {
   course: Pick<Course, "slug">;

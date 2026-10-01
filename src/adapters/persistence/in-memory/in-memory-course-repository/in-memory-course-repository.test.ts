@@ -18,6 +18,7 @@ const seed = Course.parse({
   language: "en",
   lessonCount: 3,
   moduleCount: 1,
+  track: "level",
   sequence: 1,
 });
 
@@ -114,6 +115,7 @@ describe("InMemoryCourseRepository", () => {
         language: "en",
         lessonCount: 0,
         moduleCount: 4,
+        track: "level",
         sequence: 1,
       });
       const repo = new InMemoryCourseRepository([seed, other]);
@@ -138,6 +140,7 @@ describe("InMemoryCourseRepository", () => {
         language: "en",
         lessonCount: 1,
         moduleCount: 1,
+        track: "level",
         sequence,
       });
 

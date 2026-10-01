@@ -31,6 +31,23 @@ describe("prizeForModule", () => {
     expect(prizeForModule(slug)).toBe(prize);
   });
 
+  test.each([
+    ["1-the-vowel-map", "compass"],
+    ["2-front-vowels", "xylophone"],
+    ["3-central-vowels", "maracas"],
+    ["4-back-vowels", "trumpet"],
+    ["5-diphthongs", "boomerang"],
+    ["6-r-colored-vowels", "skate"],
+    ["7-stop-consonants", "popper"],
+    ["8-fricatives", "pinwheel"],
+    ["9-affricates", "jackbox"],
+    ["10-nasals", "bell"],
+    ["11-liquids", "duck"],
+    ["12-glides", "kite"],
+  ])("WHEN the Atlas module %s is looked up THEN its prize is %s", (slug, prize) => {
+    expect(prizeForModule(slug)).toBe(prize);
+  });
+
   test("WHEN a module the catalog does not know is looked up THEN its prize is the gift box", () => {
     expect(prizeForModule(faker.helpers.slugify(faker.lorem.words(3)).toLowerCase())).toBe("gift");
   });

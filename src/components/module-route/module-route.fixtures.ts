@@ -45,6 +45,7 @@ export const vowelsCourse = Course.parse({
   language: "en",
   lessonCount: VOWEL_LESSONS.length,
   moduleCount: 5,
+  track: "level",
   sequence: 1,
 });
 

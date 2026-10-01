@@ -533,6 +533,463 @@ const PRIZE_SHAPES: Record<PrizeId, (paint: Paint) => ReactNode> = {
       />
     </>
   ),
+  compass: ({ main, detail, light }) => (
+    <>
+      <path
+        d="M32 2 L38 26 L62 32 L38 38 L32 62 L26 38 L2 32 L26 26 Z"
+        fill={main}
+      />
+      <circle
+        cx="32"
+        cy="32"
+        r="16"
+        fill={light}
+      />
+      <path
+        d="M32 18 L37 32 L27 32 Z"
+        fill={detail}
+      />
+      <path
+        d="M32 46 L37 32 L27 32 Z"
+        fill={main}
+      />
+      <circle
+        cx="32"
+        cy="32"
+        r="2.5"
+        fill={detail}
+      />
+    </>
+  ),
+  xylophone: ({ main, detail, light }) => (
+    <>
+      <path
+        d="M6 20 L58 34 M6 46 L58 42"
+        stroke={detail}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      {[
+        { x: 6, top: 10, bottom: 54 },
+        { x: 16, top: 14, bottom: 51 },
+        { x: 26, top: 18, bottom: 49 },
+        { x: 36, top: 22, bottom: 47 },
+        { x: 46, top: 26, bottom: 45 },
+      ].map(({ x, top, bottom }, index) => (
+        <rect
+          key={x}
+          x={x}
+          y={top}
+          width="8"
+          height={bottom - top}
+          rx="2"
+          fill={index % 2 === 0 ? main : light}
+        />
+      ))}
+      <line
+        x1="44"
+        y1="8"
+        x2="60"
+        y2="22"
+        stroke={detail}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <circle
+        cx="42"
+        cy="6"
+        r="5"
+        fill={main}
+      />
+    </>
+  ),
+  maracas: ({ main, detail, light }) => (
+    <>
+      {[-24, 24].map((angle) => (
+        <g
+          key={angle}
+          transform={`rotate(${angle} 32 60)`}
+        >
+          <rect
+            x="29.5"
+            y="30"
+            width="5"
+            height="30"
+            rx="2.5"
+            fill={detail}
+          />
+          <ellipse
+            cx="32"
+            cy="18"
+            rx="10"
+            ry="14"
+            fill={main}
+          />
+          <path
+            d="M23 16 Q32 22 41 16"
+            fill="none"
+            stroke={light}
+            strokeWidth="3.5"
+            strokeLinecap="round"
+          />
+        </g>
+      ))}
+    </>
+  ),
+  trumpet: ({ main, detail, light }) => (
+    <>
+      <path
+        d="M38 28 L58 14 V50 L38 36 Z"
+        fill={main}
+      />
+      <rect
+        x="4"
+        y="28"
+        width="38"
+        height="8"
+        rx="3"
+        fill={main}
+      />
+      <rect
+        x="12"
+        y="34"
+        width="24"
+        height="14"
+        rx="7"
+        fill="none"
+        stroke={main}
+        strokeWidth="4"
+      />
+      {[15, 23, 31].map((x) => (
+        <rect
+          key={x}
+          x={x}
+          y="16"
+          width="5"
+          height="13"
+          rx="2"
+          fill={light}
+        />
+      ))}
+      <rect
+        x="2"
+        y="26"
+        width="5"
+        height="12"
+        rx="2"
+        fill={detail}
+      />
+    </>
+  ),
+  boomerang: ({ main, light }) => (
+    <>
+      <path
+        d="M8 12 Q26 26 34 54 Q42 30 58 14"
+        fill="none"
+        stroke={main}
+        strokeWidth="12"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M11 14 Q27 28 34 48 Q41 30 55 16"
+        fill="none"
+        stroke={light}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </>
+  ),
+  skate: ({ main, detail, light }) => (
+    <>
+      <path
+        d="M12 6 H30 V28 Q46 28 52 34 Q57 39 55 46 H10 V10 Q10 6 12 6 Z"
+        fill={main}
+      />
+      <path
+        d="M18 14 H28 M18 20 H28 M18 26 H28"
+        stroke={detail}
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      <rect
+        x="8"
+        y="44"
+        width="50"
+        height="5"
+        rx="2"
+        fill={light}
+      />
+      {[18, 46].map((cx) => (
+        <circle
+          key={cx}
+          cx={cx}
+          cy="55"
+          r="7"
+          fill={detail}
+        />
+      ))}
+      {[18, 46].map((cx) => (
+        <circle
+          key={`hub-${cx}`}
+          cx={cx}
+          cy="55"
+          r="2.5"
+          fill={light}
+        />
+      ))}
+    </>
+  ),
+  popper: ({ main, detail, light }) => (
+    <>
+      <path
+        d="M6 58 L18 24 L40 46 Z"
+        fill={main}
+      />
+      <path
+        d="M13 38 L27 52 M16 30 L34 48"
+        stroke={light}
+        strokeWidth="3"
+      />
+      <path
+        d="M30 30 Q34 20 28 12 M36 34 Q46 30 50 20 M40 42 Q50 44 58 38"
+        fill="none"
+        stroke={detail}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <rect
+        x="40"
+        y="6"
+        width="6"
+        height="6"
+        rx="1"
+        fill={main}
+        transform="rotate(20 43 9)"
+      />
+      <circle
+        cx="56"
+        cy="26"
+        r="3.5"
+        fill={light}
+      />
+      <circle
+        cx="22"
+        cy="10"
+        r="3"
+        fill={main}
+      />
+      <rect
+        x="50"
+        y="50"
+        width="6"
+        height="6"
+        rx="1"
+        fill={light}
+        transform="rotate(-25 53 53)"
+      />
+    </>
+  ),
+  pinwheel: ({ main, detail, light }) => (
+    <>
+      <rect
+        x="30"
+        y="28"
+        width="4"
+        height="34"
+        rx="2"
+        fill={detail}
+      />
+      {[0, 90, 180, 270].map((angle, index) => (
+        <path
+          key={angle}
+          d="M32 26 L32 3 L48 11 Z"
+          fill={index % 2 === 0 ? main : light}
+          transform={`rotate(${angle} 32 26)`}
+        />
+      ))}
+      <circle
+        cx="32"
+        cy="26"
+        r="3.5"
+        fill={detail}
+      />
+    </>
+  ),
+  jackbox: ({ main, detail, light }) => (
+    <>
+      <polyline
+        points="26,38 20,34 32,30 20,26 32,22"
+        fill="none"
+        stroke={detail}
+        strokeWidth="3"
+        strokeLinejoin="round"
+      />
+      <circle
+        cx="26"
+        cy="13"
+        r="10"
+        fill={main}
+      />
+      <circle
+        cx="23"
+        cy="11"
+        r="2"
+        fill={detail}
+      />
+      <circle
+        cx="30"
+        cy="11"
+        r="2"
+        fill={detail}
+      />
+      <rect
+        x="4"
+        y="26"
+        width="14"
+        height="4"
+        rx="2"
+        fill={light}
+        transform="rotate(-35 11 28)"
+      />
+      <rect
+        x="8"
+        y="36"
+        width="36"
+        height="24"
+        rx="3"
+        fill={main}
+      />
+      <rect
+        x="14"
+        y="42"
+        width="24"
+        height="12"
+        rx="2"
+        fill={light}
+      />
+      <path
+        d="M44 46 H52 V40"
+        fill="none"
+        stroke={detail}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <circle
+        cx="52"
+        cy="38"
+        r="4"
+        fill={detail}
+      />
+    </>
+  ),
+  bell: ({ main, detail, light }) => (
+    <>
+      <circle
+        cx="32"
+        cy="7"
+        r="4"
+        fill="none"
+        stroke={main}
+        strokeWidth="3"
+      />
+      <path
+        d="M32 10 C19 10 16 22 16 34 L10 46 H54 L48 34 C48 22 45 10 32 10 Z"
+        fill={main}
+      />
+      <path
+        d="M22 20 Q20 28 21 36"
+        fill="none"
+        stroke={light}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <rect
+        x="7"
+        y="44"
+        width="50"
+        height="6"
+        rx="3"
+        fill={light}
+      />
+      <circle
+        cx="32"
+        cy="55"
+        r="5"
+        fill={detail}
+      />
+    </>
+  ),
+  duck: ({ main, detail, light }) => (
+    <>
+      <path
+        d="M6 38 Q10 56 34 56 Q58 56 60 38 Q52 44 44 40 Q36 34 26 38 Q16 40 6 38 Z"
+        fill={main}
+      />
+      <circle
+        cx="24"
+        cy="24"
+        r="12"
+        fill={main}
+      />
+      <path
+        d="M13 24 Q4 24 4 30 Q10 32 15 29 Z"
+        fill={detail}
+      />
+      <circle
+        cx="26"
+        cy="21"
+        r="3"
+        fill={light}
+      />
+      <circle
+        cx="26.5"
+        cy="21"
+        r="1.5"
+        fill={detail}
+      />
+      <path
+        d="M34 44 Q44 42 52 46"
+        fill="none"
+        stroke={light}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </>
+  ),
+  kite: ({ main, detail, light }) => (
+    <>
+      <path
+        d="M34 2 L54 22 L34 46 L14 22 Z"
+        fill={main}
+      />
+      <path
+        d="M34 2 L54 22 L34 22 Z"
+        fill={light}
+      />
+      <path
+        d="M34 2 V46 M14 22 H54"
+        stroke={detail}
+        strokeWidth="2"
+      />
+      <path
+        d="M34 46 Q26 52 30 58 Q34 62 26 63"
+        fill="none"
+        stroke={detail}
+        strokeWidth="2"
+      />
+      {[
+        { x: 28, y: 52 },
+        { x: 30, y: 59 },
+      ].map(({ x, y }) => (
+        <path
+          key={y}
+          d={`M${x} ${y} l-6 -3 v6 Z M${x} ${y} l6 -3 v6 Z`}
+          fill={light}
+        />
+      ))}
+    </>
+  ),
   gift: ({ main, detail, light }) => (
     <>
       <rect

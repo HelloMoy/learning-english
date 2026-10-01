@@ -1,23 +1,30 @@
 import type { ContinueWatchingLocation } from "@/domain/entities/continue-watching-location/continue-watching-location";
+import type { ContinueWatchingRecord } from "@/domain/entities/continue-watching-record/continue-watching-record";
 
 /**
- * Port: the single most recent lesson location the learner opened.
+ * Port: where the learner was in each course they have opened.
  *
- * The store holds exactly one entry. That is what makes "the last one"
- * answerable without a timestamp — and therefore without a `Clock` port:
- * `set` replaces whatever was there, so whatever `get` returns is by
- * construction the latest.
+ * The store holds one location per course. `set` replaces the location of
+ * that location's course and makes it the most recent; the other courses keep
+ * theirs. Ordering comes from the time storage wrote each entry, so the domain
+ * still needs no `Clock` port.
  *
  * Independent of `PlaybackPositionRepository` and `ProgressTracker`. *Where
  * the learner was*, *how far into that lesson they got*, and *what they have
  * finished* are three distinct concepts mapping to independent storage, and
  * writing one never touches the others.
  *
- * `get` resolves to `null` when nothing has been recorded, when the stored
- * value cannot be parsed, or when storage is unavailable — an absent record
- * is a supported state, not an error.
+ * An absent record is a supported state, not an error: `get` resolves to
+ * `null` and `list` to an empty array when nothing has been recorded or
+ * storage is unavailable, and an entry that cannot be parsed is left out.
  */
 export interface ContinueWatchingRepository {
+  /** The most recently set location across every course, or `null`. */
   get(): Promise<ContinueWatchingLocation | null>;
+
+  /** Records the learner's place in the location's course; it becomes the latest. */
   set(location: ContinueWatchingLocation): Promise<void>;
+
+  /** One record per course, the most recently watched first. */
+  list(): Promise<ReadonlyArray<ContinueWatchingRecord>>;
 }

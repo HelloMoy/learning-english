@@ -1,3 +1,4 @@
+import type { ContinueWatchingLocation } from "@/domain/entities/continue-watching-location/continue-watching-location";
 import type { Course } from "@/domain/entities/course/course";
 import type { CourseId, LessonId, ModuleId, ResourceId } from "@/domain/entities/ids/ids";
 import type { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
@@ -5,6 +6,8 @@ import type { Lesson } from "@/domain/entities/lesson/lesson";
 import type { Module } from "@/domain/entities/module/module";
 import type { Resource } from "@/domain/entities/resource/resource";
 import type { Slug } from "@/domain/entities/slug/slug";
+import type { ContinueWatchingRepository } from "@/domain/ports/continue-watching-repository/continue-watching-repository";
+import type { CourseEnrollmentRepository } from "@/domain/ports/course-enrollment-repository/course-enrollment-repository";
 import type { CourseRepository } from "@/domain/ports/course-repository/course-repository";
 import type { LearnerProfileRepository } from "@/domain/ports/learner-profile-repository/learner-profile-repository";
 import type { LessonRepository } from "@/domain/ports/lesson-repository/lesson-repository";
@@ -181,5 +184,46 @@ export function makeStubPlaybackPositionRepository(seed?: {
       if (seed?.setPositionRejects) throw new Error("simulated playback-position-repo failure");
       positions.set(lessonId, seconds);
     },
+  };
+}
+
+/**
+ * Test double: an in-memory `CourseEnrollmentRepository`. Used only in unit
+ * tests; production uses the Turso and learner-store adapters.
+ */
+export function makeStubCourseEnrollmentRepository(seed?: {
+  enrolled?: Slug[];
+  enrollRejects?: boolean;
+}): CourseEnrollmentRepository {
+  const enrolled = new Set<Slug>(seed?.enrolled ?? []);
+  return {
+    list: async () => new Set(enrolled),
+    enroll: async (courseSlug: Slug) => {
+      if (seed?.enrollRejects) throw new Error("simulated course-enrollment-repo failure");
+      enrolled.add(courseSlug);
+    },
+  };
+}
+
+/**
+ * Test double: an in-memory `ContinueWatchingRepository` holding one location
+ * per course, ordered by write. `watchedAt` is the write's ordinal, which is
+ * all a unit test needs to reason about "most recent". Used only in unit tests.
+ */
+export function makeStubContinueWatchingRepository(seed?: {
+  setRejects?: boolean;
+}): ContinueWatchingRepository {
+  let latestFirst: ContinueWatchingLocation[] = [];
+  return {
+    get: async () => latestFirst[0] ?? null,
+    set: async (location: ContinueWatchingLocation) => {
+      if (seed?.setRejects) throw new Error("simulated continue-watching-repo failure");
+      latestFirst = [
+        location,
+        ...latestFirst.filter((held) => held.courseSlug !== location.courseSlug),
+      ];
+    },
+    list: async () =>
+      latestFirst.map((location, index) => ({ location, watchedAt: latestFirst.length - index })),
   };
 }

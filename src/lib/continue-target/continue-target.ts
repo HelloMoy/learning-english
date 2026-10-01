@@ -54,9 +54,9 @@ export type ContinueTarget =
  * Completion uses `countsAsComplete` and progress uses `watchedFraction`, the
  * rules every progress indicator shares.
  *
- * Callers: `deriveModuleRoute` (the module overview's featured step),
- * `courseOverviewProgress` (the course overview's continue tile) and
- * `useCourseContinueTarget` (My learning's resume panel and lead lesson card).
+ * Callers: `deriveModuleRoute` (the module overview's featured step) and
+ * `courseOverviewProgress` (the course overview's continue tile, and through
+ * `courseShelf` My learning and Available courses).
  * The lesson page's Up next answers a different question — the video after the
  * one open — and does not use it.
  *

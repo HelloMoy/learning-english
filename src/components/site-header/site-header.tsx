@@ -34,6 +34,7 @@ export function sectionKey(
   path: string,
 ):
   | "sectionHome"
+  | "sectionCourses"
   | "sectionCourse"
   | "sectionModule"
   | "sectionLesson"
@@ -44,6 +45,7 @@ export function sectionKey(
   if (path.includes("/lessons/")) return "sectionLesson";
   if (path.includes("/modules/")) return "sectionModule";
   if (path.includes("/courses/")) return "sectionCourse";
+  if (path === "/courses") return "sectionCourses";
   if (path === "/start" || path.startsWith("/start/")) return "sectionStart";
   if (path === "/learning") return "sectionLearning";
   if (path === "/achievements") return "sectionAchievements";
@@ -311,6 +313,9 @@ function LearnerMenu({
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
           <Link href="/learning">{t("myLearning")}</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/courses">{t("courses")}</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link

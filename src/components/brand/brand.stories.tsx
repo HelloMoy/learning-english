@@ -5,7 +5,6 @@ import { Brand } from "./brand";
 const meta: Meta<typeof Brand> = {
   title: "Cinema/Brand",
   component: Brand,
-  parameters: { backgrounds: { default: "dark" } },
 };
 
 export default meta;

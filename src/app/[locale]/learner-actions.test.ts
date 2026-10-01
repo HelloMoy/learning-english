@@ -17,6 +17,7 @@ import { LEARNER_ACTION_SCHEMAS } from "./learner-action-schemas";
 import {
   claimPrizeAction,
   earnTicketsAction,
+  enrollInCourseAction,
   markLessonCompleteAction,
   recordContinueWatchingAction,
   recordPlaybackPositionAction,
@@ -86,16 +87,48 @@ describe.skipIf(!DOCKER_AVAILABLE)("learner actions (integration)", () => {
     expect((await snapshot()).positions).toEqual({ [LESSON_ID]: 42 });
   });
 
-  test("recording where the learner is replaces the one location", async () => {
+  test("recording where the learner is stores that course's place and enrolls them", async () => {
     const location = {
       courseSlug: "basic-course",
       moduleSlug: "1-introduction",
       lessonId: LESSON_ID,
     };
 
-    await recordContinueWatchingAction(location);
+    expect((await recordContinueWatchingAction(location))?.data).toEqual({ recorded: true });
 
-    expect((await snapshot()).continueWatching).toEqual(location);
+    const { continueWatching, enrolledCourseSlugs } = await snapshot();
+    expect(continueWatching.map((record) => record.location)).toEqual([location]);
+    expect(enrolledCourseSlugs).toEqual(["basic-course"]);
+  });
+
+  test("a location in a course the catalog does not serve is not recorded", async () => {
+    const location = {
+      courseSlug: "hidden-draft-course",
+      moduleSlug: "1-introduction",
+      lessonId: LESSON_ID,
+    };
+
+    expect((await recordContinueWatchingAction(location))?.data).toEqual({ recorded: false });
+
+    const { continueWatching, enrolledCourseSlugs } = await snapshot();
+    expect(continueWatching).toEqual([]);
+    expect(enrolledCourseSlugs).toEqual([]);
+  });
+
+  test("enrolling writes the signed-in learner's enrollment once", async () => {
+    await enrollInCourseAction({ courseSlug: "basic-course" });
+
+    expect((await enrollInCourseAction({ courseSlug: "basic-course" }))?.data).toEqual({
+      enrolled: true,
+    });
+    expect((await snapshot()).enrolledCourseSlugs).toEqual(["basic-course"]);
+  });
+
+  test("enrolling in a course the catalog does not serve changes nothing", async () => {
+    expect((await enrollInCourseAction({ courseSlug: "hidden-draft-course" }))?.data).toEqual({
+      enrolled: false,
+    });
+    expect((await snapshot()).enrolledCourseSlugs).toEqual([]);
   });
 
   test("saving a profile stores it, and an invalid one is refused before anything is written", async () => {

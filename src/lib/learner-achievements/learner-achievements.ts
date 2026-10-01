@@ -134,13 +134,15 @@ export function learnerAchievements({
 
 /**
  * A course with nothing to earn neither counts as complete nor stands in the
- * way of gold, so only courses holding lessons are weighed.
+ * way of gold, so only courses holding lessons are weighed. Any complete
+ * course earns bronze, but gold asks only for the levels: a reference course
+ * joining the catalog never takes gold away from a learner who holds it.
  */
 function distinctionFor(courses: ReadonlyArray<CourseAchievements>): Distinction {
   const weighed = courses.filter((course) => course.modules.length > 0);
-  const completed = weighed.filter(isCourseComplete).length;
-  if (completed === 0) return "student";
-  return completed === weighed.length ? "gold" : "bronze";
+  if (!weighed.some(isCourseComplete)) return "student";
+  const levels = weighed.filter((achievements) => achievements.course.track === "level");
+  return levels.every(isCourseComplete) ? "gold" : "bronze";
 }
 
 /** Complete means every ticket earned — whether or not the prizes were claimed. */

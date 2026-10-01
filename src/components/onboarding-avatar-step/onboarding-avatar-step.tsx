@@ -24,8 +24,8 @@ import { useState } from "react";
  *
  * @remarks
  * Choosing updates the card at once and saves nothing; Continue saves the
- * choice and opens where the onboarding ends: the course route named in
- * `next`, or My learning. The step needs the name from step 1, so a device
+ * choice and opens what follows: the course route named in `next`, or the
+ * first-course step. The step needs the name from step 1, so a device
  * without a profile is sent back there, keeping the same `next`.
  *
  * The name stays editable on the card, with the same field step 1 uses: the
@@ -76,7 +76,7 @@ function AvatarChoice({
 }) {
   const t = useTranslations("Onboarding");
   const router = useRouter();
-  const { afterOnboarding } = useOnboardingDestinations();
+  const { afterAvatarStep } = useOnboardingDestinations();
   const [name, setName] = useState(profile.name);
   const [avatar, setAvatar] = useState(profile.avatar);
   const [isSaving, setIsSaving] = useState(false);
@@ -86,7 +86,7 @@ function AvatarChoice({
   const handleContinue = async () => {
     setIsSaving(true);
     const isSaved = await save({ name, avatar });
-    if (isSaved) router.push(afterOnboarding);
+    if (isSaved) router.push(afterAvatarStep);
     else setIsSaving(false);
   };
 

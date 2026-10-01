@@ -44,18 +44,18 @@ export const recordPlaybackPositionAction = learnerActionClient
     return { recorded: result.isOk() };
   });
 
-/** Records the lesson the signed-in learner opened last. */
+/**
+ * Records the lesson the signed-in learner opened last in its course, enrolling
+ * them in that course; a course the catalog does not serve records nothing.
+ */
 export const recordContinueWatchingAction = learnerActionClient
   .inputSchema(LEARNER_ACTION_SCHEMAS.continueWatching)
   .action(async ({ parsedInput, ctx }) => {
-    await getLearnerDependencies(ctx.learnerId).repositories.continueWatching.set(parsedInput);
-    return { recorded: true };
+    const { useCases } = getLearnerDependencies(ctx.learnerId);
+    const result = await useCases.recordContinueWatching(parsedInput);
+    return { recorded: result.isOk() };
   });
 
-/**
- * Saves the signed-in learner's card. An invalid card is refused by the input
- * schema, so the envelope carries `validationErrors` and nothing is written.
- */
 export const saveLearnerProfileAction = learnerActionClient
   .inputSchema(LEARNER_ACTION_SCHEMAS.learnerProfile)
   .action(async ({ parsedInput, ctx }) => {
@@ -83,4 +83,16 @@ export const claimPrizeAction = learnerActionClient
       parsedInput.moduleSlug,
     );
     return { claimed: true };
+  });
+
+/**
+ * Enrolls the signed-in learner in a course the catalog serves; answers
+ * `{ enrolled: false }` for any other slug.
+ */
+export const enrollInCourseAction = learnerActionClient
+  .inputSchema(LEARNER_ACTION_SCHEMAS.courseEnrollment)
+  .action(async ({ parsedInput, ctx }) => {
+    const { useCases } = getLearnerDependencies(ctx.learnerId);
+    const result = await useCases.enrollInCourse(parsedInput);
+    return { enrolled: result.isOk() };
   });

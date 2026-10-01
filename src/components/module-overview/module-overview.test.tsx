@@ -27,6 +27,7 @@ const course = Course.parse({
   language: "en",
   lessonCount: 3,
   moduleCount: 1,
+  track: "level",
   sequence: 1,
 });
 const mod1 = Module.parse({
@@ -105,7 +106,7 @@ describe("ModuleOverview — header", () => {
 
       expect(screen.getByRole("link", { name: "← Course 1" })).toHaveAttribute(
         "href",
-        "/courses/course-1",
+        "/courses/course-1/progress",
       );
     });
 
@@ -197,7 +198,7 @@ describe("ModuleOverview — the next lesson", () => {
     });
   };
 
-  test("WHEN every ticket is in and a next lesson holds one video THEN the finale starts that video", async () => {
+  test("WHEN every ticket is in and a next lesson holds one video THEN the finale opens that lesson's overview", async () => {
     completeEveryLesson([lessonA, lessonB]);
 
     render(
@@ -212,10 +213,7 @@ describe("ModuleOverview — the next lesson", () => {
     const start = await screen.findByRole("link", {
       name: key("startNextLesson", { number: "04" }),
     });
-    expect(start).toHaveAttribute(
-      "href",
-      `/courses/course-1/modules/mod-2/lessons/${onlyVideo.id}`,
-    );
+    expect(start).toHaveAttribute("href", "/courses/course-1/modules/mod-2");
   });
 
   test("WHEN there is no next lesson THEN the finale offers none", async () => {

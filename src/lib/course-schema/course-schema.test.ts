@@ -22,6 +22,7 @@ const aCourse = () => ({
   language: "en",
   lessonCount: 48,
   moduleCount: 5,
+  track: "level",
 });
 
 describe("courseSchema", () => {
@@ -36,9 +37,22 @@ describe("courseSchema", () => {
       name: course.title,
       description: course.description,
       inLanguage: course.language,
-      url: `${SITE}/en/courses/basic-course`,
+      url: `${SITE}/en/courses/basic-course/progress`,
     });
     expect(schema.provider).toMatchObject({ "@type": "Organization", name: "English Course" });
+  });
+
+  test("WHEN served in a locale the course is translated into THEN the description is that locale's", () => {
+    // Arrange
+    const spanish = faker.lorem.sentence();
+    const course = { ...aCourse(), translations: { es: { description: spanish } } };
+
+    // Act
+    const schema = courseSchema({ course, siteUrl: SITE, locale: "es" });
+
+    // Assert
+    expect(schema.description).toBe(spanish);
+    expect(schema.inLanguage).toBe(course.language);
   });
 
   test("claims no rating, review, offer or price", () => {

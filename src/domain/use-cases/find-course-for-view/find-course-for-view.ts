@@ -1,3 +1,7 @@
+import {
+  standingInCatalog,
+  type CourseStanding,
+} from "@/domain/entities/course-standing/course-standing";
 import type { Course } from "@/domain/entities/course/course";
 import type { LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
@@ -49,6 +53,8 @@ export type ModuleSummary = {
 
 export type CourseForView = {
   course: Course;
+  /** A numbered level, or reference material — never read the level off `course.sequence`. */
+  standing: CourseStanding;
   modules: Module[];
   /** One entry per module, in the same `sequence` order as `modules`. */
   moduleSummaries: ModuleSummary[];
@@ -140,19 +146,22 @@ export const makeFindCourseForView = (deps: {
       .andThen(({ course }) =>
         ResultAsync.fromPromise(
           Promise.all([
+            deps.courses.listAvailable(),
             deps.modules.listByCourse(course.id),
             deps.lessons.listByCourse(course.id),
-          ]).then(([modules, lessons]) => ({ course, modules, lessons })),
+          ]).then(([catalog, modules, lessons]) => ({ course, catalog, modules, lessons })),
           toInternalError,
         ),
       )
-      .andThen(({ course, modules, lessons }): Result<CourseForView, FindCourseForViewErrors> =>
-        ok({
-          course,
-          modules: [...modules].sort(bySequence),
-          moduleSummaries: summarizeModules(modules, lessons),
-          firstLesson: pickFirstLessonInFirstModule(modules, lessons),
-        }),
+      .andThen(
+        ({ course, catalog, modules, lessons }): Result<CourseForView, FindCourseForViewErrors> =>
+          ok({
+            course,
+            standing: standingInCatalog(catalog, course),
+            modules: [...modules].sort(bySequence),
+            moduleSummaries: summarizeModules(modules, lessons),
+            firstLesson: pickFirstLessonInFirstModule(modules, lessons),
+          }),
       );
   return useCase;
 };

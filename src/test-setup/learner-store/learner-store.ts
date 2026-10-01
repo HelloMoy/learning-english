@@ -1,4 +1,5 @@
 import type { ContinueWatchingLocation } from "@/domain/entities/continue-watching-location/continue-watching-location";
+import type { ContinueWatchingRecord } from "@/domain/entities/continue-watching-record/continue-watching-record";
 import type { LearnerProfile } from "@/domain/entities/learner-profile/learner-profile";
 import { learnerStore } from "@/lib/learner-store/learner-store";
 
@@ -50,7 +51,13 @@ export const givenLearner = {
     update(() => ({ profile }));
   },
   continueWatching(location: ContinueWatchingLocation | null): void {
-    update(() => ({ continueWatching: location }));
+    update(() => ({ continueWatching: location ? [{ location, watchedAt: 0 }] : [] }));
+  },
+  continueWatchingByCourse(records: ReadonlyArray<ContinueWatchingRecord>): void {
+    update(() => ({ continueWatching: records }));
+  },
+  enrolledCourses(courseSlugs: ReadonlyArray<string>): void {
+    update((state) => ({ enrolledCourses: new Set([...state.enrolledCourses, ...courseSlugs]) }));
   },
 };
 

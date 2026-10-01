@@ -4,8 +4,8 @@ import path from "node:path";
 import { faker } from "@faker-js/faker";
 import { describe, expect, test } from "vitest";
 
-import advancedCourse from "../../src/content/advanced-intermediate-course.json";
 import basicCourse from "../../src/content/basic-course.json";
+import { courseManifests } from "../../src/content/courses";
 import { mirrorViolations, notesShapeViolations, type NotesEntry } from "./verify-notes-shape";
 
 /** A conformant language section: a `###` sub-heading followed by prose. */
@@ -228,11 +228,9 @@ type CourseManifest = {
  * Every lesson notes file a course manifest declares that is present on this
  * machine.
  *
- * Only the Basic Course's text assets are tracked by git (`.gitignore`:
- * "the multi-GB content root, ignored wholesale by default"), so a fresh clone
- * or CI runner has the Advanced Course's manifest but none of its `readme.md`
- * files. Skipping what is absent is what lets the whole-catalog corpus check
- * degrade to the tracked course instead of failing on a missing file.
+ * Skips what is absent so the shape checks report shape problems only; a
+ * declared file that is missing is reported once, by its own test, through
+ * {@link missingNotesKeys}.
  */
 function notesOf(course: CourseManifest): NotesEntry[] {
   return course.modules
@@ -255,9 +253,22 @@ function declaredNotes(): NotesEntry[] {
   return notesOf(basicCourse);
 }
 
+/** Every declared course, as its manifest reads. */
+const declaredCourses = courseManifests as ReadonlyArray<CourseManifest>;
+
 /** Every lesson notes file every declared course carries. */
 function everyDeclaredNotes(): NotesEntry[] {
-  return [basicCourse, advancedCourse].flatMap(notesOf);
+  return declaredCourses.flatMap(notesOf);
+}
+
+/** Every notes key a declared course names whose file is not on disk. */
+function missingNotesKeys(): string[] {
+  return declaredCourses.flatMap((course) =>
+    course.modules
+      .flatMap((module) => module.lessons)
+      .flatMap((lesson) => (lesson.notesKey === undefined ? [] : [lesson.notesKey]))
+      .filter((notesKey) => !fs.existsSync(path.join(CONTENT_ROOT, notesKey))),
+  );
 }
 
 /** The `##` language heading each locale is marked with in a notes body. */
@@ -383,10 +394,10 @@ describe("the basic-course corpus", () => {
 describe("every declared course's corpus", () => {
   const notes = everyDeclaredNotes();
 
-  test("WHEN both manifests are read THEN at least the tracked course's notes are present", () => {
-    // The Basic Course's 48 notes files are tracked; the Advanced Course's are
-    // not, so this count is a floor, not an equality.
-    expect(notes.length).toBeGreaterThanOrEqual(declaredNotes().length);
+  test("WHEN every manifest is read THEN each notes file it declares is on disk", () => {
+    // Every declared course now tracks its text assets, so a declared notes
+    // key without its file is a lesson whose Notes tab would come up empty.
+    expect(missingNotesKeys()).toEqual([]);
   });
 
   test("WHEN every declared notes body is checked THEN none violates the notes shape", () => {

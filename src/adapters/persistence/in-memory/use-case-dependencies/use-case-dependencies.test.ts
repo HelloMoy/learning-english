@@ -36,29 +36,31 @@ const restore = (name: string, original: string | undefined): void => {
 };
 
 /**
- * A seed video lesson whose `source` is still a content key, and its course.
+ * A video lesson that carries a poster, and its course.
  *
  * @remarks
- * Found in the seed rather than assumed to be the first course's first lesson.
- * A lesson served by YouTube bypasses the BlobStore by design, so it can
- * demonstrate nothing about key→URL resolution — which is the whole subject of
- * the content-locations suite below.
+ * The poster is the subject of the content-locations suite below because it is
+ * still a content key: every lecture's `source` is a YouTube URL, which bypasses
+ * the BlobStore by design and so can demonstrate nothing about key→URL
+ * resolution.
  */
-const keyedVideo = contentCatalog.lessonRows.find(
+const posteredVideo = contentCatalog.lessonRows.find(
   (row): row is Extract<typeof row, { kind: "video" }> =>
-    row.kind === "video" && !/^https?:/.test(row.source),
+    row.kind === "video" && row.poster !== undefined,
 )!;
-const keyedVideoCourse = contentCatalog.courses.find(
-  (course) => course.id === keyedVideo.courseId,
+const posteredVideoCourse = contentCatalog.courses.find(
+  (course) => course.id === posteredVideo.courseId,
 )!;
 
-/** That lesson's source, resolved through the real deps graph. */
-const firstContentVideoSource = async (): Promise<string> => {
+/** That lesson's poster, resolved through the real deps graph. */
+const firstContentPosterUrl = async (): Promise<string> => {
   const deps = getCoursePlatformDeps();
-  const lessons = await deps.lessons.listByCourse(keyedVideoCourse.id);
-  const video = lessons.find((lesson) => lesson.id === keyedVideo.id);
-  if (video?.kind !== "video") throw new Error("content seed has no key-sourced video lesson");
-  return video.source;
+  const lessons = await deps.lessons.listByCourse(posteredVideoCourse.id);
+  const video = lessons.find((lesson) => lesson.id === posteredVideo.id);
+  if (video?.kind !== "video" || !video.poster) {
+    throw new Error("content seed has no video lesson with a poster");
+  }
+  return video.poster;
 };
 
 describe("getCoursePlatformDeps", () => {
@@ -168,10 +170,10 @@ describe("getCoursePlatformDeps", () => {
       // Arrange — the default must be byte-identical to the old baked-in
       // behaviour, or every existing page silently 404s.
       // Act
-      const source = await firstContentVideoSource();
+      const poster = await firstContentPosterUrl();
 
       // Assert
-      expect(source.startsWith("/local-filesystem-lesson/")).toBe(true);
+      expect(poster.startsWith("/local-filesystem-lesson/")).toBe(true);
     });
 
     test("WHEN the manifest points the local store at a CDN THEN URLs carry that prefix", async () => {
@@ -183,11 +185,11 @@ describe("getCoursePlatformDeps", () => {
       });
 
       // Act
-      const source = await firstContentVideoSource();
+      const poster = await firstContentPosterUrl();
 
       // Assert
-      expect(source.startsWith("https://cdn.example.com/course-content/")).toBe(true);
-      expect(source).toMatch(/\.mp4$/);
+      expect(poster.startsWith("https://cdn.example.com/course-content/")).toBe(true);
+      expect(poster).toMatch(/\.(jpe?g|png)$/);
     });
 
     test("WHEN a baseUrl has a trailing slash THEN the resolved URL has no double slash", async () => {
@@ -199,37 +201,34 @@ describe("getCoursePlatformDeps", () => {
       });
 
       // Act
-      const source = await firstContentVideoSource();
+      const poster = await firstContentPosterUrl();
 
       // Assert
-      expect(source.startsWith("https://cdn.example.com/course-content/")).toBe(true);
-      expect(source).not.toContain("course-content//");
+      expect(poster.startsWith("https://cdn.example.com/course-content/")).toBe(true);
+      expect(poster).not.toContain("course-content//");
     });
 
     test("WHEN a route covers one prefix THEN only its keys move and the rest stay local", async () => {
       // Arrange — a partial migration: one course's assets served elsewhere
       // while everything outside that prefix is untouched.
-      const other = contentCatalog.courses.find((course) => course.id !== keyedVideoCourse.id)!;
+      const other = contentCatalog.courses.find((course) => course.id !== posteredVideoCourse.id)!;
       useLocationManifest({
         stores: {
           local: { driver: "local" },
           cdn: { driver: "local", baseUrl: "https://cdn.example.com/migrated" },
         },
         default: "local",
-        routes: [{ prefix: keyedVideoCourse.slug, store: "cdn" }],
+        routes: [{ prefix: posteredVideoCourse.slug, store: "cdn" }],
       });
 
       // Act
-      const source = await firstContentVideoSource();
+      const poster = await firstContentPosterUrl();
       const deps = getCoursePlatformDeps();
       const otherLessons = await deps.lessons.listByCourse(other.id);
       const otherVideo = otherLessons.find((lesson) => lesson.kind === "video");
 
       // Assert
-      expect(source.startsWith("https://cdn.example.com/migrated/")).toBe(true);
-      // Asserted on the poster, not the source: the other course's videos are
-      // served by YouTube and never reach a store at all, while their posters
-      // are still content keys and must stay on the default one.
+      expect(poster.startsWith("https://cdn.example.com/migrated/")).toBe(true);
       expect(otherVideo?.kind === "video" && otherVideo.poster).toMatch(
         /^\/local-filesystem-lesson\//,
       );

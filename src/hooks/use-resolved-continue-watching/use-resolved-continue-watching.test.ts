@@ -29,6 +29,7 @@ const panel: ContinueWatchingPanel = {
 const storing = (stored: ContinueWatchingLocation | null): ContinueWatchingRepository => ({
   get: async () => stored,
   set: async () => {},
+  list: async () => [],
 });
 
 const neverAnswers = () => new Promise<ContinueWatchingPanel | null>(() => {});

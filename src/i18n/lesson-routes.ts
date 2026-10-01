@@ -1,47 +1,43 @@
-import type { Course } from "@/domain/entities/course/course";
 import type { Lesson } from "@/domain/entities/lesson/lesson";
 import type { Module } from "@/domain/entities/module/module";
+
+/** Anything that names a course by its slug, branded or not. */
+type CourseRef = { slug: string };
 
 /**
  * Centralised URL builders for the catalog and lesson pages. Pages and
  * components import these instead of concatenating URL strings, so
  * future routing changes happen in one place.
+ *
+ * @remarks
+ * `/courses/<slug>` itself has no page: every course route names what it
+ * shows (`/progress`, `/about`, `/modules/...`).
  */
-export function courseOverviewPath(course: Pick<Course, "slug">): string {
-  return `/courses/${course.slug}`;
-}
-
-export function moduleOverviewPath(
-  course: Pick<Course, "slug">,
-  module: Pick<Module, "slug">,
-): string {
-  return `/courses/${course.slug}/modules/${module.slug}`;
-}
-
-export function lessonPath(
-  course: Pick<Course, "slug">,
-  module: Pick<Module, "slug">,
-  lesson: Pick<Lesson, "id">,
-): string {
-  return `/courses/${course.slug}/modules/${module.slug}/lessons/${lesson.id}`;
+export function courseOverviewPath(course: CourseRef): string {
+  return `${courseRootOf(course)}/progress`;
 }
 
 /**
- * Where a lesson (module) opens from outside it: straight into its video when
- * it holds exactly one — an overview listing a single video is a detour — and
- * its overview otherwise.
- *
- * @param course - The course the module belongs to
- * @param module - The module to open
- * @param lessons - The module's lessons
- * @returns The locale-less path to open
+ * The course page's own address: it shows the course page to every learner,
+ * enrolled or not, where {@link courseOverviewPath} gives an enrolled learner
+ * the progress board.
  */
-export function moduleEntryPath(
-  course: Pick<Course, "slug">,
+export function courseDetailPath(course: CourseRef): string {
+  return `${courseRootOf(course)}/about`;
+}
+
+export function moduleOverviewPath(course: CourseRef, module: Pick<Module, "slug">): string {
+  return `${courseRootOf(course)}/modules/${module.slug}`;
+}
+
+export function lessonPath(
+  course: CourseRef,
   module: Pick<Module, "slug">,
-  lessons: ReadonlyArray<Pick<Lesson, "id">>,
+  lesson: Pick<Lesson, "id">,
 ): string {
-  const [onlyLesson] = lessons;
-  if (lessons.length === 1 && onlyLesson) return lessonPath(course, module, onlyLesson);
-  return moduleOverviewPath(course, module);
+  return `${moduleOverviewPath(course, module)}/lessons/${lesson.id}`;
+}
+
+function courseRootOf(course: CourseRef): string {
+  return `/courses/${course.slug}`;
 }

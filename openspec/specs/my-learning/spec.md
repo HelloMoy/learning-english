@@ -5,9 +5,7 @@ TBD - created by archiving change learner-onboarding. Update Purpose after archi
 ## Requirements
 ### Requirement: My learning is the learner's own page
 
-The route `/[locale]/learning` SHALL render the learner's page. After hydration it SHALL replace
-itself with `/[locale]/start` when no profile exists. Until storage has been read it SHALL render a
-placeholder of the page's shape.
+The route `/[locale]/learning` SHALL render the learner's page. After hydration it SHALL replace itself with `/[locale]/start` when no profile exists, and with `/[locale]/start/first-course?from=learning` when a profile exists but the learner is enrolled in no course. Until storage has been read it SHALL render a placeholder of the page's shape, and it SHALL decide neither redirect while the profile or the enrollments are unknown.
 
 The page SHALL greet the learner with their avatar and a localized welcome that uses the first word of
 their name.
@@ -20,83 +18,48 @@ their name.
 - **WHEN** a device without a profile opens `/en/learning`
 - **THEN** it lands on `/en/start`
 
+#### Scenario: No enrollment sends the learner to the first-course step
+- **WHEN** a learner with a profile and no enrolled course opens `/en/learning`
+- **THEN** it lands on `/en/start/first-course?from=learning`
+
 ### Requirement: My learning resumes the last lesson or starts the first
 
-When a stored continue-watching location resolves to a live lesson, My learning SHALL show a resume
-panel for the **continue target** of that lesson's course — the video the `continue-target` capability
-picks from the course's videos in learning order, the learner's progress on this device, and the stored
-location as the last opened video. The panel SHALL show the course, the target's module ordinal and
-title, the target's position in its module (`Video 6 of 17`), the target's title, a progress bar when a
-playback position is saved for a video lesson, a primary **Resume** action to the target, and a quieter
-link to the course overview. When every video of that course is finished, the target SHALL be the
-course's first video.
+My learning SHALL lead with the enrolled course the learner watched most recently — the enrolled course whose continue-watching record is the latest, or, when no enrolled course has one, the first enrolled course in `sequence` order. For that course it SHALL show a hero for its **continue target** (as the `continue-target` capability picks it, with that course's own record as the last opened video) beside the course's progress panel. On wide screens the hero SHALL stretch to the height of the progress panel, so the two share one height.
 
-When no location is stored, or it no longer resolves, the page SHALL show a start panel whose primary
-action opens the first lesson of the first catalog course. While a stored location, or the continue target
-derived from it, is resolving, the panel area SHALL show a placeholder naming no lesson.
+The hero SHALL show:
 
-#### Scenario: A resolved record offers Resume
-- **WHEN** the stored location resolves to the sixth video of a seventeen-video module and that video is not finished
-- **THEN** the panel shows `Video 6 of 17` and Resume links to that lesson
+- the target's poster;
+- a mark reading **Pick up where you left off**, or **Start here** when the target is the course's first unwatched video with no progress;
+- the course title with the target's module ordinal and its position in the module (`Video 3 of 10`);
+- the target's title;
+- for a video with a saved position, a progress bar with the elapsed and total time and how long ago the course was last watched;
+- one action, reading **Resume**, **Start** or **Watch again** according to the target's kind, which opens the target.
+
+The progress panel SHALL be the course overview's course panel: the course title as a level-two heading, the ring, the completed and total videos with the time left, the prize icons, and a **View course details** link to the course page (`/[locale]/courses/[courseSlug]/about`).
+
+#### Scenario: The last watched course leads
+- **WHEN** a learner enrolled in Basic and Advanced last opened the third video of Advanced's sixth module, which is unfinished
+- **THEN** the hero shows that video with `Video 3 of 10` and Resume opens it, and the panel beside it is Advanced's
 
 #### Scenario: A finished recorded video resumes the next one
-- **WHEN** the stored location names the sixth video of a seventeen-video module and that video is finished
-- **THEN** the panel shows `Video 7 of 17`, names the seventh video, and Resume links to it
+- **WHEN** the latest record names a finished video
+- **THEN** the hero offers the next unfinished video of that course
 
-#### Scenario: Nothing watched offers the first lesson
-- **WHEN** no location is stored
-- **THEN** the panel's primary action links to the first lesson of the first course
+#### Scenario: A saved position shows elapsed time and recency
+- **WHEN** the target video has a saved position of 365 seconds of 848 and was last watched yesterday
+- **THEN** the hero shows `06:05 / 14:08` and says it was watched yesterday
 
-### Requirement: Lesson progress is listed as lesson cards
+#### Scenario: A course enrolled but never opened starts at the first video
+- **WHEN** the learner's only enrollment is Advanced and no Advanced lesson has been opened
+- **THEN** the hero offers Advanced's first video with Start
 
-My learning SHALL list, for the continued course — or the first catalog course when nothing is
-continued — the course title, its completed and total video counts, and one card per module. Each card
-SHALL show the module's ordinal, title, a progress ring labelled with the module's completed share as a
-whole, locale-formatted percentage, and its completed-of-total video count. The ring SHALL be the same
-progress ring the course overview draws. Counts SHALL use the same completion rule as the course
-overview, and before hydration every ring SHALL read 0%.
+#### Scenario: The hero and the progress panel share one height
+- **WHEN** My learning opens on a 1440 px wide screen
+- **THEN** the hero is as tall as the progress panel beside it
 
-Every card SHALL open its module's overview (`/[locale]/courses/<course>/modules/<module>`).
-
-When a lesson is continued, the card of the module holding the course's **continue target** SHALL come
-first and span the list's width, marked `Current`, naming the continue target's video, and SHALL be the
-only card offering a **Continue** action, which opens that video. The other cards SHALL follow in
-`sequence` order. When nothing is continued, every card SHALL render in `sequence` order and none SHALL
-offer Continue.
-
-#### Scenario: The continued module leads with Continue
-- **WHEN** the continue target is a video of the second module
-- **THEN** the second module's card is first, marked Current, names that video, and its Continue action opens the video; no other card offers Continue
-
-#### Scenario: A finished last video of a module hands the lead to the next module
-- **WHEN** the stored location names the finished last video of the second module and the third module is not finished
-- **THEN** the third module's card leads, names its first unfinished video, and its Continue action opens that video
-
-#### Scenario: Nothing continued offers no Continue
-- **WHEN** no lesson is continued
-- **THEN** the cards follow `sequence` order and no card offers Continue
-
-#### Scenario: A card opens its module overview
-- **WHEN** the learner activates the third module's card
-- **THEN** they land on that module's overview for the active locale
-
-#### Scenario: A finished module reads as complete
-- **WHEN** every video of a module is complete
-- **THEN** its ring reads 100%
-
-#### Scenario: A card's ring fills to the module's share
-- **WHEN** one of a module's three videos is complete
-- **THEN** its card's ring fill covers a third of the circle and its label reads 33%
-
-### Requirement: My learning lists every course with the continued one marked
-
-My learning SHALL render the courses table in `sequence` order. The row for the continued course SHALL
-show an in-progress badge, its completed and total video counts and a `Continue course` link; every other
-row SHALL show its lesson and video counts and a `View course` link.
-
-#### Scenario: Only the continued course is marked
-- **WHEN** the continued lesson belongs to the first course
-- **THEN** the first row shows In progress and Continue course, and the second shows View course
+#### Scenario: A pointer resting on the hero keeps its link
+- **WHEN** the pointer rests on the hero's poster, away from its action
+- **THEN** the hero's link stays under the pointer, so the cursor and the hover style do not flicker
 
 ### Requirement: My learning copy is localized
 
@@ -106,4 +69,71 @@ plurals for counts, and every link SHALL be locale-aware.
 #### Scenario: My learning in Spanish
 - **WHEN** `/es/learning` renders for a learner
 - **THEN** the greeting, panel actions, row labels and table copy render from `es.json`
+
+### Requirement: Your courses lists every enrolled course with its own next video
+
+Below the hero, My learning SHALL show **Your courses**: a heading stating how many courses the learner is enrolled in and one card per enrolled course in `sequence` order, followed by the **catalog card**. The cards SHALL sit in three columns on wide screens, two on tablets and one on phones. Each card SHALL show a ring with the course's completed share, its title, the completed and total videos, a **Next up** row with the course's continue target (thumbnail with its saved progress when there is one, title, module ordinal and title, position and duration), one primary action across the card's width that opens that target — reading **Start** for a course never opened, **Continue** for one under way and **Watch again** for a finished one — and, closing the card, a bar split between a **Progress** link to the course overview (`/[locale]/courses/[courseSlug]/progress`) and a **Details** link to the course page (`/[locale]/courses/[courseSlug]/about`). The card's ring and title SHALL open the course overview too, left out of the tab order so keyboard users meet **Progress** once. The card of the course the hero leads with SHALL be marked visually as the current one.
+
+#### Scenario: Both courses listed with their own places
+- **WHEN** a learner enrolled in Basic and Advanced has records in both
+- **THEN** Your courses shows two cards, and each card's Next up names that course's own continue target
+
+#### Scenario: Progress, Details and the card's header
+- **WHEN** a learner enrolled in Basic uses Basic's card
+- **THEN** its ring and title, and **Progress**, open `/[locale]/courses/basic-course/progress`, and **Details** opens `/[locale]/courses/basic-course/about`
+
+#### Scenario: A course never opened offers Start
+- **WHEN** a learner enrolled in Advanced has never opened one of its videos
+- **THEN** Advanced's card action reads **Start** and opens its first video
+
+#### Scenario: The catalog card closes the grid
+- **WHEN** a learner enrolled in Basic and Advanced opens My learning
+- **THEN** the catalog card follows the two course cards in Your courses
+
+### Requirement: The progress panel's course title opens the course page
+
+The course title in My learning's progress panel SHALL link to the course page
+(`/[locale]/courses/[courseSlug]/about`), the same page as the panel's **View course details** link.
+The title link SHALL be left out of the tab order so keyboard users meet **View course details**
+once, and the heading SHALL keep its level and text.
+
+#### Scenario: Clicking the course title
+- **WHEN** a learner whose hero leads with the Basic Course clicks the panel's `Basic Course` heading
+- **THEN** the course page at `/en/courses/basic-course/about` opens
+
+#### Scenario: One tab stop
+- **WHEN** a keyboard user tabs through the progress panel
+- **THEN** focus lands on **View course details** once and not on the title
+
+### Requirement: My learning keeps the catalog in reach
+
+My learning SHALL show a **See all courses** button that opens `/[locale]/courses`. On wide screens it SHALL sit at the end of the greeting's row; on phones it SHALL be hidden, the catalog card being the way to the catalog there.
+
+The **catalog card** SHALL open `/[locale]/courses` from anywhere on it except its teaser, and SHALL show:
+
+- the eyebrow **Catalog · N courses**, with N the number of courses in the catalog;
+- the heading **All available courses**;
+- how many catalog courses the learner has not joined, or, when they have joined every one, that they are enrolled in all of them;
+- when the learner has not joined every course, a teaser of the first course in `sequence` order they have not joined: its first video's thumbnail, its title, its **Level N** or **Reference** label and its video count. The teaser SHALL open that course's page at `/[locale]/courses/[courseSlug]/about`;
+- a **See all courses** call to action.
+
+#### Scenario: See all courses opens Available courses
+- **WHEN** the learner activates See all courses
+- **THEN** `/[locale]/courses` opens
+
+#### Scenario: See all courses shows on wide screens only
+- **WHEN** My learning opens 1440 px wide and then 390 px wide
+- **THEN** the button sits right of the greeting on the wide screen, and is hidden on the phone while the catalog card stays visible
+
+#### Scenario: The catalog card teases a course not joined
+- **WHEN** a learner enrolled only in Basic, in a catalog of Basic, Advanced (Level 2) and a reference course, opens My learning
+- **THEN** the catalog card reads `Catalog · 3 courses`, says 2 courses are not joined, teases Advanced with `Level 2` and its video count, and opens `/[locale]/courses`
+
+#### Scenario: The teaser opens the teased course's page
+- **WHEN** a learner enrolled only in Basic activates the catalog card's teaser
+- **THEN** `/[locale]/courses/advanced-intermediate-course/about` opens
+
+#### Scenario: A learner in every course sees no teaser
+- **WHEN** a learner enrolled in every catalog course opens My learning
+- **THEN** the catalog card says they are enrolled in all of them and shows no teaser
 

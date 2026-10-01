@@ -21,17 +21,25 @@ The domain SHALL define `ContinueWatchingLocation` under `src/domain/entities/co
 
 ### Requirement: `ContinueWatchingRepository` port exists in the domain
 
-The domain SHALL define a `ContinueWatchingRepository` port under `src/domain/ports/continue-watching-repository/` exposing `get(): Promise<ContinueWatchingLocation | null>` and `set(location: ContinueWatchingLocation): Promise<void>`. The port SHALL hold **exactly one** location — the most recent one — so `set` replaces whatever was there and `get` needs no ordering or timestamp to answer "the last one".
+The domain SHALL define a `ContinueWatchingRepository` port under `src/domain/ports/continue-watching-repository/` exposing `get(): Promise<ContinueWatchingLocation | null>`, `set(location: ContinueWatchingLocation): Promise<void>` and `list(): Promise<ReadonlyArray<ContinueWatchingRecord>>`. The port SHALL hold **one location per course**: `set` replaces the location of that location's course only and makes it the most recent. `get` SHALL resolve to the most recently set location across all courses, so callers that only want "the last one" need no ordering of their own. `list` SHALL resolve to one record per course, most recent first.
 
-Implementations SHALL live under `src/adapters/**`, never under `src/domain/**`.
+Implementations SHALL live under `src/adapters/**`, never under `src/domain/**`. A stored location that no longer satisfies `ContinueWatchingLocation` SHALL be left out of `list` and SHALL NOT be returned by `get`.
 
-#### Scenario: The port holds one location
-- **WHEN** `set(locationA)` is called and then `set(locationB)`
-- **THEN** `get()` resolves to `locationB`
+#### Scenario: Setting twice in one course keeps the latest
+- **WHEN** `set(locationA)` and then `set(locationB)` are called, both in `basic-course`
+- **THEN** `get()` resolves to `locationB` and `list()` holds a single `basic-course` record
+
+#### Scenario: Each course keeps its own location
+- **WHEN** `set(basicLocation)` is called and then `set(advancedLocation)` in another course
+- **THEN** `get()` resolves to `advancedLocation` and `list()` resolves to the advanced record followed by the basic one
+
+#### Scenario: Returning to a course makes it the latest again
+- **WHEN** `set(basicLocation)`, `set(advancedLocation)`, then `set(basicLocation2)` are called
+- **THEN** `get()` resolves to `basicLocation2` and `list()` starts with the `basic-course` record
 
 #### Scenario: An empty store resolves to `null`
 - **WHEN** `get()` is called before any `set`
-- **THEN** it resolves to `null`, never to a partial or fabricated location
+- **THEN** it resolves to `null`, never to a partial or fabricated location, and `list()` resolves to an empty array
 
 ### Requirement: `findContinueWatching` resolves a stored location through the domain
 
@@ -53,15 +61,19 @@ Errors SHALL be a closed discriminated union covering a missing course, a module
 
 ### Requirement: The Lesson Page records where the learner is
 
-The Lesson Page SHALL record the current `ContinueWatchingLocation` through the port when it mounts, for lessons of every `kind` — a reading lesson the learner opened is where they were just as much as a video is. Recording SHALL go through a single client composition root, mirroring how `usePlaybackPosition` is the composition root for playback, and SHALL NOT block or delay rendering the lesson.
+The Lesson Page SHALL record the current `ContinueWatchingLocation` through the port when it mounts, for lessons of every `kind` — a reading lesson the learner opened is where they were just as much as a video is. Recording SHALL go through a single client composition root, mirroring how `usePlaybackPosition` is the composition root for playback, and SHALL NOT block or delay rendering the lesson. Recording SHALL replace only the location of the lesson's course; the locations of other courses SHALL be kept.
 
 #### Scenario: Opening a lesson records its location
 - **WHEN** a learner opens any lesson page
 - **THEN** the location for that course, module and lesson is written through `ContinueWatchingRepository.set`
 
-#### Scenario: Opening a second lesson replaces the record
-- **WHEN** a learner opens lesson A and then lesson B
-- **THEN** the stored location is lesson B's
+#### Scenario: Opening a second lesson of the same course replaces its record
+- **WHEN** a learner opens lesson A and then lesson B of the same course
+- **THEN** that course's stored location is lesson B's
+
+#### Scenario: Opening a lesson of another course keeps the first course's place
+- **WHEN** a learner opens a Basic lesson and then an Advanced lesson
+- **THEN** the Basic location is still stored, and the Advanced one is the most recent
 
 #### Scenario: A failed write does not break the page
 - **WHEN** the underlying storage rejects the write
@@ -92,34 +104,48 @@ lesson count.
 
 ### Requirement: My learning offers to continue the last lesson
 
-My learning SHALL offer to continue when, and only when, a stored location resolves to a live lesson. The
-video it offers SHALL be that lesson's course's **continue target**, as defined by the `continue-target`
-capability with the stored location as the last opened video — never the recorded video when that video is
-already finished. The resume panel's primary action SHALL be its only playback affordance for the offered
-video; no decorative play control SHALL render beside it.
+My learning SHALL offer to continue in the enrolled course the learner watched most recently, using that course's own stored location. The video it offers SHALL be that course's **continue target**, as defined by the `continue-target` capability with that course's stored location as the last opened video — never the recorded video when that video is already finished. The hero's primary action SHALL be its only playback affordance for the offered video; no decorative play control SHALL render beside it.
 
-When the offered video is a video lesson with a saved playback position, the panel SHALL show how far
-through it the learner is; otherwise the indicator SHALL be omitted rather than rendered at zero.
+When the offered video is a video lesson with a saved playback position, the hero SHALL show how far through it the learner is; otherwise the indicator SHALL be omitted rather than rendered at zero.
 
-Resolving a stored location requires a server round-trip, and resolving a continue target that differs from
-the stored location requires one more. During that window the panel area SHALL be reserved with a
-placeholder of the panel's shape when, and only when, the client's read of the stored location returned one;
-without a stored location nothing SHALL be reserved and the start panel SHALL render. When the round-trip
-answers that the record no longer resolves, the start panel SHALL render.
+The offer SHALL be computed on the client from the course data the page was rendered with, the learner's stored locations, completion marks and positions — without a server round-trip. Until the learner store has been seeded, the hero area SHALL render a placeholder of its shape naming no lesson. A stored location that no longer names a video of its course SHALL be treated as absent, and the course's continue target SHALL be chosen from its progress alone.
 
-#### Scenario: A stored record reserves the panel while it resolves
-- **WHEN** My learning has read a stored location and the round-trip has not answered
-- **THEN** the panel area shows a placeholder naming no lesson and showing no progress
+#### Scenario: The store is not seeded yet
+- **WHEN** My learning renders before the learner snapshot is adopted
+- **THEN** the hero area shows a placeholder naming no lesson and showing no progress
 
 #### Scenario: A finished recorded video is not offered again
-- **WHEN** the stored location resolves to a video the learner has finished
-- **THEN** the resume panel offers the next unfinished video of that course instead
+- **WHEN** the latest stored location names a video the learner has finished
+- **THEN** the hero offers the next unfinished video of that course instead
 
 #### Scenario: A reading lesson shows no progress bar
 - **WHEN** the offered lesson is a reading lesson
-- **THEN** the resume panel renders without a progress indicator and still offers Resume
+- **THEN** the hero renders without a progress indicator and still offers Resume
 
-#### Scenario: A dead record falls back to the start panel
-- **WHEN** the stored location no longer resolves
-- **THEN** My learning shows the start panel and no error
+#### Scenario: A dead record falls back to the course's progress
+- **WHEN** the latest stored location no longer names a video of its course
+- **THEN** My learning offers that course's continue target chosen from its progress, and shows no error
+
+### Requirement: `ContinueWatchingRecord` pairs a location with when it was written
+
+The domain SHALL define `ContinueWatchingRecord` under `src/domain/entities/continue-watching-record/` as
+a Zod schema `{ location: ContinueWatchingLocation, watchedAt: number }`. `watchedAt` is a non-negative
+integer of epoch milliseconds that the domain receives as data. No domain code SHALL produce it from a
+clock.
+
+#### Scenario: A valid record parses
+- **WHEN** an object with a valid location and a non-negative integer `watchedAt` is parsed
+- **THEN** parsing succeeds
+
+#### Scenario: A negative time is rejected
+- **WHEN** an object whose `watchedAt` is `-1` is parsed
+- **THEN** parsing fails with a Zod error
+
+### Requirement: The course overview continues from its own course's place
+
+The course overview SHALL choose its continue target with its own course's stored location, read from the per-course records, not the most recent location across courses.
+
+#### Scenario: Watching another course keeps this course's place
+- **WHEN** a learner opened Basic's sixth vowels video and then an Advanced lesson, and opens the Basic overview
+- **THEN** the Basic overview continues from the sixth vowels video
 

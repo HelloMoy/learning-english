@@ -1,14 +1,12 @@
-const COURSE_ROUTE_PREFIX = "/courses/";
-
-/** Personal routes that are a page of their own, with or without sub-pages. */
-const PERSONAL_SECTIONS = ["/learning", "/achievements", "/profile", "/start"] as const;
+/** Personal routes: each is a page of its own, and so is everything under it. */
+const PERSONAL_SECTIONS = ["/courses", "/learning", "/achievements", "/profile", "/start"] as const;
 
 /**
  * Whether a locale-less path belongs to a signed-in learner.
  *
  * @remarks
- * Every course, module and lesson route, plus My learning, Achievements,
- * Profile and the onboarding. The proxy sends a visitor without a session
+ * Every course, module and lesson route, plus Available courses, My learning,
+ * Achievements, Profile and the onboarding. The proxy sends a visitor without a session
  * away from these, and the pages verify the session again on the server.
  *
  * @example
@@ -23,11 +21,7 @@ const PERSONAL_SECTIONS = ["/learning", "/achievements", "/profile", "/start"] a
  * @category Auth
  */
 export function isPersonalPath(path: string): boolean {
-  return isCoursePath(path) || PERSONAL_SECTIONS.some((section) => isWithin(path, section));
-}
-
-function isCoursePath(path: string): boolean {
-  return path.startsWith(COURSE_ROUTE_PREFIX) && path.length > COURSE_ROUTE_PREFIX.length;
+  return PERSONAL_SECTIONS.some((section) => isWithin(path, section));
 }
 
 function isWithin(path: string, section: string): boolean {

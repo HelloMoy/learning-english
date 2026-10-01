@@ -69,7 +69,8 @@ The `baseUrl` and `localRoot` MUST be passed separately to prevent the footgun o
 
 The manifest SHALL support declaring a lesson's `source` as an absolute `http(s)`
 URL rather than a content key, for lessons whose video is served by someone else
-— the Basic Course's lectures stream from YouTube.
+— the lectures of both the Basic Course and the Advanced Intermediate Course
+stream from YouTube.
 
 A value that is neither an absolute `http(s)` URL nor a well-formed content key
 SHALL be rejected.
@@ -93,6 +94,14 @@ not be removed.
 - **THEN** that lesson is served with exactly that `source`, and its `poster` is
   still the content key resolved through `BlobStore`
 
+#### Scenario: An Advanced Intermediate lesson serves its external URL
+
+- **WHEN** the manifest declares lesson
+  `1-advanced-pronunciation-course/1-welcome` with `source`
+  `https://www.youtube.com/embed/QawqoylmKVc`
+- **THEN** that lesson is served with exactly that `source`, and its `poster`,
+  notes and resources still resolve through `BlobStore`
+
 #### Scenario: A lesson keeping a content key is unaffected
 
 - **WHEN** a lesson declares a `source` that is a content key rather than a URL
@@ -100,9 +109,11 @@ not be removed.
 
 #### Scenario: Deleting a hosted lesson's local video changes nothing
 
-- **WHEN** every `.mp4` under the Basic Course is deleted and the app is restarted
-- **THEN** all 48 lessons still serve their YouTube `source`, their declared
-  duration and their locally-stored poster
+- **WHEN** every `.mp4` under the Basic Course and the Advanced Intermediate
+  Course is deleted and the app is restarted
+- **THEN** all 48 Basic Course lessons and all 107 Advanced Intermediate lessons
+  still serve their YouTube `source`, their declared duration and their
+  locally-stored poster
 
 #### Scenario: A value that is neither a URL nor a valid key is rejected
 
@@ -886,6 +897,11 @@ requires and that were previously derived from the filesystem: `id`, `slug`,
 exists. It SHALL likewise declare every resource with its `id`, `lessonId`,
 `title`, `url` and `kind`.
 
+A manifest MAY declare the course's `track` as `level` or `reference`. A manifest
+that declares no `track` SHALL be read as `level`, so every course declared before
+tracks existed keeps its meaning without being edited. Any other value SHALL fail
+the manifest parse, naming the course.
+
 A lesson's `source` and `poster`, and a resource's `url`, SHALL each be either a
 content key resolved through `BlobStore` or an absolute `http(s)` URL used
 verbatim. Which one it is SHALL be decided by the value's own shape, exactly as
@@ -893,10 +909,10 @@ it is today.
 
 Every manifest SHALL be validated against a Zod schema. A manifest that is
 malformed JSON or fails the schema SHALL fail loudly rather than fall back to any
-default. Because `slug` and `sequence` must be unique across the whole ladder,
-that check SHALL run over the full set after each file is parsed. There SHALL NOT
-be a no-manifest fallback: the manifests are required, and an absent one is an
-error.
+default. Because `slug` and `sequence` must be unique across the whole catalog,
+level and reference courses alike, that check SHALL run over the full set after
+each file is parsed. There SHALL NOT be a no-manifest fallback: the manifests are
+required, and an absent one is an error.
 
 #### Scenario: A fresh clone serves the catalog without the content tree
 
@@ -940,6 +956,16 @@ error.
 
 - **WHEN** two manifests declare the same `sequence`, or the same `slug`
 - **THEN** validation fails and names both files
+
+#### Scenario: A manifest without a track is a level
+
+- **WHEN** a manifest declares no `track`
+- **THEN** it parses and its course's track is `level`
+
+#### Scenario: An unknown track fails the parse
+
+- **WHEN** a manifest declares `"track": "elective"`
+- **THEN** `parseCourseManifests` throws `InvalidCourseManifestError` naming that course
 
 ### Requirement: The application reads the catalog without a code-generation step
 
@@ -1048,14 +1074,16 @@ whichever course they belong to. This SHALL hold independently of which parts of
 the content tree are tracked, so that un-ignoring a course's text assets cannot
 pull gigabytes of video into the repository.
 
-The Basic Course's non-video assets — lesson notes, posters and PDFs — SHALL be
+The non-video assets of every course whose lectures stream from YouTube — lesson
+notes, posters, PDFs and the other files its manifest references — SHALL be
 tracked, because they are the part of its content tree that cannot be
-regenerated and are small enough to version.
+regenerated and are small enough to version. Today that is the Basic Course, the
+Advanced Intermediate Course and the Atlas of American Sounds.
 
 #### Scenario: A video file under a tracked course is still ignored
 
-- **WHEN** a `.mp4` sits inside the Basic Course's tracked content folder and a
-  developer runs `git status`
+- **WHEN** a `.mp4` sits inside the Basic Course's or the Advanced Intermediate
+  Course's tracked content folder and a developer runs `git status`
 - **THEN** the video is not listed as addable content
 
 #### Scenario: The Basic Course's text assets are tracked
@@ -1063,6 +1091,18 @@ regenerated and are small enough to version.
 - **WHEN** a developer clones the repository
 - **THEN** the Basic Course's `readme.md`, `thumbnail.jpeg` and PDF files are
   present, and its video files are not
+
+#### Scenario: The Advanced Intermediate Course's text assets are tracked
+
+- **WHEN** a developer clones the repository
+- **THEN** every poster, notes file and resource the Advanced Intermediate
+  Course's manifest references is present, and none of its video files are
+
+#### Scenario: The Atlas's text assets are tracked
+
+- **WHEN** a developer clones the repository
+- **THEN** every `thumbnail.jpeg` and `readme.md` the Atlas of American Sounds'
+  manifest references is present
 
 ### Requirement: Declared assets are checked against the catalog
 
@@ -1108,11 +1148,12 @@ without buying anything back. Should a second content source return, the composi
 change to make then, not machinery to keep unused now.
 
 Catalog order SHALL come from `Course.sequence`, which each course declares in its own
-manifest. The ladder therefore has exactly as many rungs as there are manifests it serves,
-and moving a course between rungs is a one-line manifest edit. Withholding a draft course
-SHALL leave the remaining courses in ascending `sequence` order with no renumbering: the
-ladder's ordinals come from the data, so a gap in `sequence` values is not a gap in the
-rendered ladder.
+manifest. The ladder therefore has exactly as many rungs as there are **level** manifests
+it serves; a reference course is ordered by its `sequence` but is not a rung. Moving a
+course between positions is a one-line manifest edit. Withholding a draft course SHALL
+leave the remaining courses in ascending `sequence` order with no renumbering of the
+manifests: level numbers are derived from the level courses' order, so a gap in
+`sequence` values is not a gap in the rendered ladder.
 
 Booting without the content root SHALL fail visibly through the assets it cannot serve,
 never by silently substituting different courses. A developer who has not obtained the
@@ -1138,6 +1179,11 @@ the content root.
 - **THEN** every served course, module and lesson renders, locally-stored assets 404, and
   lessons served by an external URL still play
 
+#### Scenario: A reference course is not a rung
+
+- **WHEN** the manifests declare two level courses and one reference course
+- **THEN** the catalog serves three courses and the ladder has two rungs
+
 ### Requirement: A video lesson may declare when it was published
 
 A video lesson in a course manifest MAY declare an `uploadDate`. When present it SHALL be a calendar date, and it SHALL be carried through to the served lesson so delivery adapters can describe the video to search engines.
@@ -1151,4 +1197,111 @@ The field is optional by design. Making it required would force a date onto ever
 #### Scenario: A malformed date is refused loudly
 - **WHEN** a video lesson declares an `uploadDate` that is not a calendar date
 - **THEN** the manifest fails validation with a message naming the offending lesson
+
+### Requirement: Every catalog video lesson streams from YouTube
+
+Every lesson of kind `video` declared under `src/content/` SHALL carry a `source`
+of the form `https://www.youtube.com/embed/<videoId>`. No lesson in the catalog
+SHALL depend on a video file under the content root, so a deployment — which
+never carries video bytes — serves every lesson it lists.
+
+A lesson's YouTube video SHALL be unique across the catalog: two lessons SHALL
+NOT declare the same embed URL, which is how a copy-paste slip in the mapping
+would show up.
+
+#### Scenario: A lesson sourcing a content key is caught
+
+- **WHEN** a manifest under `src/content/` declares a video lesson whose `source`
+  is a content key such as `advanced-intermediate-course/3-contractions-reductions/1-intro/video.mp4`
+- **THEN** the catalog test fails, naming that lesson
+
+#### Scenario: Two lessons sharing one video are caught
+
+- **WHEN** two lessons in the catalog declare the same YouTube embed URL
+- **THEN** the catalog test fails, naming both lessons
+
+### Requirement: A manifest may declare what its course teaches
+
+The manifest schema SHALL accept, on a course, an optional `outcomes`, a list of non-empty sentences stating what a learner can do
+after the course, and an optional `sounds`, an object with `vowels` and `consonants`, each a list of non-empty IPA
+symbols. Neither is required. A manifest that declares neither SHALL parse unchanged, and its course
+SHALL carry no outcomes and no sounds. An empty string in either list SHALL fail the parse, naming the
+course.
+
+The `Course` entity SHALL carry both fields as declared, so every surface reads them from the catalog
+rather than from the manifest file.
+
+#### Scenario: Declared outcomes reach the course
+- **WHEN** `basic-course.json` declares five outcomes
+- **THEN** the served `basic-course` course carries those five sentences in the declared order
+
+#### Scenario: A manifest without them still parses
+- **WHEN** a manifest declares neither `outcomes` nor `sounds`
+- **THEN** it parses, and its course carries neither
+
+#### Scenario: An empty outcome fails the parse
+- **WHEN** a manifest declares `"outcomes": [""]`
+- **THEN** `parseCourseManifests` throws `InvalidCourseManifestError` naming that course
+
+### Requirement: A course's description and outcomes are shown in the learner's language
+
+The manifest schema SHALL accept, on a course, an optional `translations` object keyed by ISO 639-1
+language code, each entry declaring an optional `description` (non-empty), optional `outcomes`
+(non-empty sentences), optional `audience` (non-empty) and optional `highlights` (non-empty points).
+The `Course` entity SHALL carry the translations as declared. A translation key that is not two
+lower-case letters, or an empty string in an entry, SHALL fail the parse, naming the course.
+
+`courseCopy(course, locale)` SHALL return the course's description, outcomes, audience and
+highlights in that locale: each field from the locale's translation when it declares that field,
+otherwise the manifest's own. Every surface that shows a course's description, outcomes, audience or
+highlights SHALL read them through it for the active locale: the course page, the home's levels
+table, the onboarding's first-course step, Available courses' posters, the course route's metadata
+description, its share image headline and its schema.org `Course` description. Course, lesson and
+video titles SHALL NOT be translated.
+
+The tracked manifests SHALL translate every course's description, outcomes, audience and highlights
+into every supported locale other than the manifest's own, with as many outcomes and highlights as
+the manifest declares.
+
+#### Scenario: A translated course reads in Spanish
+- **WHEN** the Basic Course's page renders under `/es`
+- **THEN** its description and What you'll learn are the Spanish ones its manifest declares, and its title is unchanged
+
+#### Scenario: A locale without a translation falls back
+- **WHEN** `courseCopy` is asked for a locale the course declares no translation for
+- **THEN** it returns the manifest's own description, outcomes, audience and highlights
+
+#### Scenario: A translation may cover one field
+- **WHEN** a course's `pt` translation declares a description and no outcomes
+- **THEN** `courseCopy(course, "pt")` returns the Portuguese description and the manifest's outcomes
+
+#### Scenario: A course without a brief reads none
+- **WHEN** a course declares no audience and no highlights
+- **THEN** `courseCopy` returns no audience and an empty list of highlights
+
+#### Scenario: Every tracked course is translated
+- **WHEN** the tracked manifests are parsed
+- **THEN** each course declares `es` and `pt` translations with a description, an audience, as many outcomes as its own and as many highlights as its own
+
+#### Scenario: The share surfaces follow the locale
+- **WHEN** `/pt/courses/basic-course/progress` is shared
+- **THEN** the metadata description, the share image headline and the structured data describe the course in Portuguese
+
+### Requirement: A manifest may declare who its course is for and its highlights
+
+The manifest schema SHALL accept, on a course, an optional `audience`, one non-empty sentence naming who the course is for, and an optional `highlights`, a list of non-empty short points summarising what it teaches. Neither is required. A manifest that declares neither SHALL parse unchanged, and its course SHALL carry neither. An empty `audience` or an empty string in `highlights` SHALL fail the parse, naming the course.
+
+The `Course` entity SHALL carry both fields as declared. The tracked manifests SHALL declare an audience and three highlights for every course.
+
+#### Scenario: Declared highlights reach the course
+- **WHEN** `basic-course.json` declares an audience and three highlights
+- **THEN** the served `basic-course` course carries that audience and those three points in the declared order
+
+#### Scenario: A manifest without them still parses
+- **WHEN** a manifest declares neither `audience` nor `highlights`
+- **THEN** it parses, and its course carries neither
+
+#### Scenario: An empty audience fails the parse
+- **WHEN** a manifest declares `"audience": ""`
+- **THEN** `parseCourseManifests` throws `InvalidCourseManifestError` naming that course
 

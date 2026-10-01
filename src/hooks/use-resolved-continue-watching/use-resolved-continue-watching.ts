@@ -47,7 +47,7 @@ export type ResolvedContinueWatching =
  * @example
  * ```tsx
  * const lastLesson = useResolvedContinueWatching();
- * if (lastLesson.status === "resolved") return <ResumePanel panel={lastLesson.panel} />;
+ * if (lastLesson.status === "resolved") return <ContinueLink href={lastLesson.panel.lessonHref} />;
  * ```
  */
 export function useResolvedContinueWatching({
