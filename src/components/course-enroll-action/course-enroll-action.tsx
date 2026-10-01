@@ -1,31 +1,22 @@
 "use client";
 
+import {
+  COURSE_ACTION_CLASSES,
+  CourseStartLink,
+} from "@/components/course-start-link/course-start-link";
+import { EnrollmentWelcomeModal } from "@/components/modals/enrollment-welcome-modal/enrollment-welcome-modal";
 import type { CourseForView } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
-import { useCourseContinueTarget } from "@/hooks/use-course-continue-target/use-course-continue-target";
 import {
   enrollInCourse,
   useEnrolledCourses,
 } from "@/hooks/use-enrolled-courses/use-enrolled-courses";
-import { lessonPath } from "@/i18n/lesson-routes";
-import { Link } from "@/i18n/navigation";
-import type { TargetVideo } from "@/lib/course-shelf/course-shelf";
+import { fireCinemaConfetti } from "@/lib/cinema-confetti/cinema-confetti";
 import { cn } from "@/lib/utils/utils";
 
-import { Play, Plus } from "lucide-react";
+import NiceModal from "@ebay/nice-modal-react";
+import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
-
-const ACTION_CLASSES =
-  "inline-flex min-h-13 cursor-pointer items-center justify-center gap-2.5 rounded-[14px] bg-primary px-5.5 text-base font-extrabold whitespace-nowrap text-primary-foreground shadow-[0_12px_40px_-8px_color-mix(in_oklab,var(--primary)_60%,transparent)] transition-[filter,transform] hover:-translate-y-px hover:brightness-105 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none motion-reduce:transition-none";
-
-/** The label for each reason to open a video, as the board's continue tile words it. */
-const LABEL_KEY: Record<
-  TargetVideo["kind"],
-  "startCourse" | "continueWhereLeftOff" | "watchAgain"
-> = {
-  start: "startCourse",
-  continue: "continueWhereLeftOff",
-  rewatch: "watchAgain",
-};
+import { useRef } from "react";
 
 /** Props for {@link CourseEnrollAction}. */
 export type CourseEnrollActionProps = {
@@ -43,12 +34,14 @@ export type CourseEnrollActionProps = {
  * @remarks
  * **Enroll** enrolls through the learner store at once (capability
  * `course-enrollment`), so every instance on the page flips to **Start
- * course** before the server answers, and back if it refuses.
+ * course** before the server answers, and back if it refuses. It also
+ * welcomes the learner (capability `enrollment-welcome`): the confetti burst
+ * and {@link EnrollmentWelcomeModal}, which needs `NiceModal.Provider` above
+ * this component, as `global-providers.tsx` mounts it.
  *
- * Once joined, the action opens the video the progress board's continue tile
- * would open, read with `useCourseContinueTarget`, and words it the same way.
- * A course without videos offers nothing to open, so the action renders
- * nothing once joined.
+ * Once joined, the action is {@link CourseStartLink}: the video the progress
+ * board's continue tile would open, worded the same way. A course without
+ * videos offers nothing to open, so the action renders nothing once joined.
  *
  * Each instance reads the enrollment and the progress itself, which is what
  * keeps the hero, the enroll card and the phone bar in agreement.
@@ -61,35 +54,42 @@ export type CourseEnrollActionProps = {
 export function CourseEnrollAction({ view, className }: CourseEnrollActionProps) {
   const t = useTranslations("Components.CourseEnrollAction");
   const isEnrolled = useEnrolledCourses().has(view.course.slug);
-  const target = useCourseContinueTarget(view);
+  // Enrolling swaps the button for the link, so "the action" is whichever
+  // of the two is mounted when the welcome hands focus back.
+  const action = useRef<HTMLElement | null>(null);
+  const holdAction = (element: HTMLElement | null) => {
+    action.current = element;
+  };
 
-  if (!isEnrolled) {
+  const enrollAndWelcome = () => {
+    enrollInCourse(view.course.slug);
+    void fireCinemaConfetti();
+    void NiceModal.show(EnrollmentWelcomeModal, {
+      view,
+      focusOnClose: () => action.current?.focus(),
+    });
+  };
+
+  if (isEnrolled)
     return (
-      <button
-        type="button"
-        onClick={() => enrollInCourse(view.course.slug)}
-        className={cn(ACTION_CLASSES, className)}
-      >
-        <Plus
-          aria-hidden="true"
-          className="size-4 shrink-0"
-        />
-        {t("enroll")}
-      </button>
+      <CourseStartLink
+        ref={holdAction}
+        view={view}
+        className={className}
+      />
     );
-  }
-  if (!target) return null;
   return (
-    <Link
-      href={lessonPath(view.course, target.module, target.lesson) as never}
-      className={cn(ACTION_CLASSES, className)}
+    <button
+      ref={holdAction}
+      type="button"
+      onClick={enrollAndWelcome}
+      className={cn(COURSE_ACTION_CLASSES, className)}
     >
-      <Play
+      <Plus
         aria-hidden="true"
         className="size-4 shrink-0"
-        fill="currentColor"
       />
-      {t(LABEL_KEY[target.kind])}
-    </Link>
+      {t("enroll")}
+    </button>
   );
 }

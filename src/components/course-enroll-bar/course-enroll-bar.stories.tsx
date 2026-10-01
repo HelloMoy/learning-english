@@ -1,6 +1,7 @@
 import { resetLearnerStore } from "@/lib/learner-store/learner-store";
 import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
+import NiceModal from "@ebay/nice-modal-react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { BASIC_COURSE_VIEW } from "../../../.storybook/fixtures/course-views";
@@ -13,9 +14,11 @@ const meta = {
   globals: { viewport: { value: "mobile2" } },
   decorators: [
     (Story) => (
-      <div className="flex min-h-[60vh] flex-col justify-end px-4">
-        <Story />
-      </div>
+      <NiceModal.Provider>
+        <div className="flex min-h-[60vh] flex-col justify-end px-4">
+          <Story />
+        </div>
+      </NiceModal.Provider>
     ),
   ],
   args: { view: BASIC_COURSE_VIEW },

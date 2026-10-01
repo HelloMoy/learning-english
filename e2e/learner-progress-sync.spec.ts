@@ -149,6 +149,8 @@ test.describe("Opening a lesson enrolls the learner", () => {
       .poll(() => learnerState.enrolledCourseSlugs(), COLD_ROUTE)
       .toEqual([WATCHED_COURSE_SLUG]);
     expect(await learnerState.openedCourseSlugs()).toEqual([WATCHED_COURSE_SLUG, BASIC.slug]);
+    // The welcome is for enrolling from the course page; a lesson enrolls in silence.
+    await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 });
 

@@ -1,21 +1,38 @@
 import { enrollInCourseAction } from "@/app/[locale]/learner-actions";
 import { ContinueWatchingLocation } from "@/domain/entities/continue-watching-location/continue-watching-location";
+import type { CourseForView } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
+import { fireCinemaConfetti } from "@/lib/cinema-confetti/cinema-confetti";
 import { learnerStore } from "@/lib/learner-store/learner-store";
 import { givenLearner } from "@/test-setup/learner-store/learner-store";
-import { renderInLocale } from "@/test-setup/render-in-locale";
+import { renderInLocale, type TestLocale } from "@/test-setup/render-in-locale";
 import { aCourseView, everyVideoOf, lessonOf } from "@/test-setup/stubs/course-views";
 
-import { act, screen } from "@testing-library/react";
+import NiceModal from "@ebay/nice-modal-react";
+import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { CourseEnrollAction } from "./course-enroll-action";
 
+vi.mock("@/lib/cinema-confetti/cinema-confetti", () => ({
+  fireCinemaConfetti: vi.fn().mockResolvedValue(undefined),
+}));
+
 const advanced = aCourseView("advanced-intermediate-course", 2, [3, 2]);
 const firstVideoPath = `/courses/advanced-intermediate-course/modules/module-1/lessons/${lessonOf(advanced, 0, 0).id}`;
 
+/** The action as the app mounts it: under the provider its welcome dialog opens through. */
+const renderAction = (view: CourseForView = advanced, locale?: TestLocale) =>
+  renderInLocale(
+    <NiceModal.Provider>
+      <CourseEnrollAction view={view} />
+    </NiceModal.Provider>,
+    locale,
+  );
+
 beforeEach(() => {
   vi.mocked(enrollInCourseAction).mockClear();
+  vi.mocked(fireCinemaConfetti).mockClear();
   givenLearner.enrolledCourses([]);
 });
 
@@ -33,35 +50,62 @@ describe("CourseEnrollAction", () => {
       expect(screen.queryByRole("link", { name: "Start course" })).not.toBeInTheDocument();
     });
 
-    test("WHEN Enroll is activated THEN Start course opens the first video at once AND the enrollment is saved", async () => {
+    test("WHEN Enroll is activated THEN the action becomes Start course at once AND the enrollment is saved", async () => {
       // Arrange
       const user = userEvent.setup();
-      renderInLocale(<CourseEnrollAction view={advanced} />);
+      renderAction();
 
       // Act
       await user.click(screen.getByRole("button", { name: "Enroll" }));
 
-      // Assert
-      expect(screen.getByRole("link", { name: "Start course" })).toHaveAttribute(
-        "href",
-        firstVideoPath,
-      );
+      // Assert — the page's action and the welcome's, the page's hidden behind the dialog.
+      const startLinks = screen.getAllByRole("link", { name: "Start course", hidden: true });
+      expect(startLinks).toHaveLength(2);
+      for (const link of startLinks) expect(link).toHaveAttribute("href", firstVideoPath);
       expect(enrollInCourseAction).toHaveBeenCalledWith({
         courseSlug: "advanced-intermediate-course",
       });
     });
 
-    test("WHEN the server refuses the enrollment THEN Enroll is offered again", async () => {
+    test("WHEN Enroll is activated THEN the welcome opens AND the confetti is fired once", async () => {
       // Arrange
       const user = userEvent.setup();
-      vi.mocked(enrollInCourseAction).mockResolvedValueOnce({ serverError: "refused" });
-      renderInLocale(<CourseEnrollAction view={advanced} />);
+      renderAction();
 
       // Act
       await user.click(screen.getByRole("button", { name: "Enroll" }));
 
       // Assert
-      expect(await screen.findByRole("button", { name: "Enroll" })).toBeInTheDocument();
+      expect(await screen.findByRole("dialog", { name: "You’re in!" })).toBeInTheDocument();
+      expect(fireCinemaConfetti).toHaveBeenCalledTimes(1);
+    });
+
+    test("WHEN the welcome is closed THEN focus lands on the action, now Start course", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      renderAction();
+      await user.click(screen.getByRole("button", { name: "Enroll" }));
+
+      // Act
+      await user.click(await screen.findByRole("button", { name: "Keep exploring" }));
+
+      // Assert
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+      expect(screen.getByRole("link", { name: "Start course" })).toHaveFocus();
+    });
+
+    test("WHEN the server refuses the enrollment THEN the welcome closes AND Enroll is offered again", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      vi.mocked(enrollInCourseAction).mockResolvedValueOnce({ serverError: "refused" });
+      renderAction();
+
+      // Act
+      await user.click(screen.getByRole("button", { name: "Enroll" }));
+
+      // Assert
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+      expect(screen.getByRole("button", { name: "Enroll" })).toHaveFocus();
       expect(learnerStore.getState().enrolledCourses.has("advanced-intermediate-course")).toBe(
         false,
       );
@@ -80,6 +124,18 @@ describe("CourseEnrollAction", () => {
   });
 
   describe("GIVEN a learner enrolled in the course", () => {
+    test("WHEN it renders THEN no welcome opens AND no confetti is fired", () => {
+      // Arrange
+      act(() => givenLearner.enrolledCourses(["advanced-intermediate-course"]));
+
+      // Act
+      renderAction();
+
+      // Assert
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(fireCinemaConfetti).not.toHaveBeenCalled();
+    });
+
     test("WHEN it renders THEN Start course opens the first video", () => {
       // Arrange
       act(() => givenLearner.enrolledCourses(["advanced-intermediate-course"]));

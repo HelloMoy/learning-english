@@ -1,6 +1,7 @@
 import { resetLearnerStore } from "@/lib/learner-store/learner-store";
 import { givenLearner } from "@/test-setup/learner-store/learner-store";
 
+import NiceModal from "@ebay/nice-modal-react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import {
@@ -14,6 +15,13 @@ const meta = {
   title: "Components/CourseDetailView",
   component: CourseDetailView,
   parameters: { layout: "fullscreen" },
+  decorators: [
+    (Story) => (
+      <NiceModal.Provider>
+        <Story />
+      </NiceModal.Provider>
+    ),
+  ],
   args: { view: BASIC_COURSE_VIEW },
   beforeEach: () => {
     resetLearnerStore();
