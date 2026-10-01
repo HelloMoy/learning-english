@@ -4,7 +4,6 @@ import { CourseBrief } from "@/components/course-brief/course-brief";
 import { ProgressRing } from "@/components/progress-ring/progress-ring";
 import type { CourseStanding } from "@/domain/entities/course-standing/course-standing";
 import type { CourseForView } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
-import { enrollInCourse } from "@/hooks/use-enrolled-courses/use-enrolled-courses";
 import { useRuntimeLabel } from "@/hooks/use-runtime-label/use-runtime-label";
 import { courseDetailPath, courseOverviewPath, lessonPath } from "@/i18n/lesson-routes";
 import { Link } from "@/i18n/navigation";
@@ -56,8 +55,9 @@ const SECONDARY_ACTION = `inline-flex min-h-11 flex-1 items-center justify-cente
  *   / **Start course** / **Watch again** and **View progress**, which opens
  *   the course overview, and a progress edge along the bottom.
  * - **Joinable** — the first video's artwork, the course's size, the prizes it
- *   awards, **Enroll** (optimistic, through the learner store) and **View
- *   details**, which opens the course page without enrolling.
+ *   awards, and **Enroll** and **View details**, which both open the course
+ *   page. Neither enrolls: the learner joins from the course page's own
+ *   action.
  *
  * The frame is at least 3:4 from `lg` up and at least 22 rem tall below, and
  * always keeps a band of artwork above the copy; a longer brief grows the
@@ -158,9 +158,8 @@ function JoinablePoster({ view }: { view: CourseForView }) {
         </span>
       ) : null}
       <PosterActions>
-        <button
-          type="button"
-          onClick={() => enrollInCourse(course.slug)}
+        <Link
+          href={courseDetailPath(course) as never}
           className={PRIMARY_ACTION}
         >
           <Plus
@@ -168,7 +167,7 @@ function JoinablePoster({ view }: { view: CourseForView }) {
             className="size-4"
           />
           {t("enroll")}
-        </button>
+        </Link>
         <Link
           href={courseDetailPath(course) as never}
           className={SECONDARY_ACTION}

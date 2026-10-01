@@ -32,10 +32,11 @@ const LOBBY_GRID = "grid grid-cols-1 gap-4 lg:grid-cols-3";
  * learner's other courses, then every course they have not joined in catalog
  * order (see {@link courseLobby}); each is a {@link CoursePoster}. A learner
  * enrolled in nothing also sees a {@link NextUpBar} above the heading for the
- * first level course; it leaves as soon as they join any course.
+ * first level course.
  *
  * The heading renders on the server; the bar and the posters wait for the
- * learner's state, and **Enroll** turns a poster at once.
+ * learner's state. Nothing on the page enrolls: a poster's **Enroll** opens
+ * the course page, where the learner joins.
  *
  * @example
  * ```tsx
