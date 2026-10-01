@@ -2,7 +2,7 @@ import { Course } from "@/domain/entities/course/course";
 import type { ProgressTally } from "@/lib/course-overview-progress/course-overview-progress";
 
 import { faker } from "@faker-js/faker";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -190,21 +190,41 @@ describe("CourseProgressTile", () => {
       expect(screen.queryByRole("heading", { level: 1 })).toBeNull();
     });
 
-    test("WHEN the tile is given the course's address THEN it offers View course there", () => {
+    test("WHEN the tile is given a link THEN it ends with that link under its label", () => {
+      // Arrange
+      const label = faker.lorem.words(3);
+
       // Act
       render(
         <CourseProgressTile
           course={course}
           reading={{ status: "pending" }}
-          href="/courses/basic-course"
+          link={{ href: "/courses/basic-course/about", label }}
         />,
       );
 
       // Assert
-      expect(screen.getByRole("link", { name: "viewCourse" })).toHaveAttribute(
+      expect(screen.getByRole("link", { name: label })).toHaveAttribute(
         "href",
-        "/courses/basic-course",
+        "/courses/basic-course/about",
       );
+    });
+
+    test("WHEN the tile is given a link THEN the title leads there too, outside the tab order", () => {
+      // Act
+      render(
+        <CourseProgressTile
+          course={course}
+          reading={{ status: "pending" }}
+          link={{ href: "/courses/basic-course/about", label: faker.lorem.words(3) }}
+        />,
+      );
+
+      // Assert
+      const heading = screen.getByRole("heading", { level: 1, name: "Basic Course" });
+      const titleLink = within(heading).getByRole("link", { name: "Basic Course" });
+      expect(titleLink).toHaveAttribute("href", "/courses/basic-course/about");
+      expect(titleLink).toHaveAttribute("tabindex", "-1");
     });
 
     test("WHEN the tile has no address THEN it offers no link", () => {

@@ -29,6 +29,14 @@ const PRIZE_SCRIM =
 /** One of the course's prizes, and whether the learner has claimed it. */
 export type CoursePrize = { prize: PrizeId; isClaimed: boolean };
 
+/** Where the tile leads, and the words its closing link reads. */
+export type CourseTileLink = {
+  /** A locale-less app path, such as `/courses/basic-course/about`. */
+  href: string;
+  /** The closing link's text, already translated by the caller. */
+  label: string;
+};
+
 /** Props for {@link CourseProgressTile}. */
 export type CourseProgressTileProps = {
   course: Course;
@@ -40,8 +48,11 @@ export type CourseProgressTileProps = {
    * the title is the page heading; `2` where the page has its own.
    */
   headingLevel?: 1 | 2;
-  /** The course overview's address; when given, the tile ends with a View course link. */
-  href?: string;
+  /**
+   * Where the tile leads; when given, the tile ends with a link reading its
+   * label, and the course title links there too.
+   */
+  link?: CourseTileLink;
 };
 
 /**
@@ -53,12 +64,19 @@ export type CourseProgressTileProps = {
  * title always renders — on the server too — while the ring stays empty and the
  * figures stay hidden until this device's progress has been read.
  *
- * My learning reuses the tile beside its resume hero, with a level-two title and
- * a View course link to the overview.
+ * Given a `link`, the tile ends with it and the title leads to the same page.
+ * The title's link stays out of the tab order, so keyboard users meet one stop.
+ * The board links to the course page (**View course details**); My learning
+ * reuses the tile beside its resume hero, with a level-two title and a **View
+ * course** link to the overview.
  *
  * @example
  * ```tsx
- * <CourseProgressTile course={course} reading={{ status: "read", tally }} />
+ * <CourseProgressTile
+ *   course={course}
+ *   reading={{ status: "read", tally }}
+ *   link={{ href: courseDetailPath(course), label: t("viewCourseDetails") }}
+ * />
  * ```
  */
 export function CourseProgressTile({
@@ -66,7 +84,7 @@ export function CourseProgressTile({
   reading,
   prizes = [],
   headingLevel = 1,
-  href,
+  link,
 }: CourseProgressTileProps) {
   const tally = reading.status === "read" ? reading.tally : null;
   const Heading = headingLevel === 1 ? "h1" : "h2";
@@ -91,7 +109,7 @@ export function CourseProgressTile({
       </span>
       <div className="flex min-w-0 flex-col gap-1.5 lg:contents">
         <Heading className="font-sans text-[1.625rem] leading-none font-black tracking-[-0.03em] text-balance text-foreground lg:order-1 lg:text-3xl">
-          {course.title}
+          {link ? <TitleLink href={link.href}>{course.title}</TitleLink> : course.title}
         </Heading>
         <span className="lg:order-3">
           <CourseFigures tally={tally} />
@@ -103,9 +121,9 @@ export function CourseProgressTile({
             <CoursePrizes prizes={prizes} />
           </span>
         ) : null}
-        {href ? (
+        {link ? (
           <span className="lg:order-5">
-            <ViewCourseLink href={href} />
+            <ClosingLink link={link} />
           </span>
         ) : null}
       </div>
@@ -113,14 +131,25 @@ export function CourseProgressTile({
   );
 }
 
-function ViewCourseLink({ href }: { href: string }) {
-  const t = useTranslations("CourseCatalog.courseOverview");
+function TitleLink({ href, children }: { href: string; children: string }) {
   return (
     <Link
       href={href as never}
+      tabIndex={-1}
+      className="decoration-gold/60 underline-offset-4 hover:underline"
+    >
+      {children}
+    </Link>
+  );
+}
+
+function ClosingLink({ link }: { link: CourseTileLink }) {
+  return (
+    <Link
+      href={link.href as never}
       className="mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md text-sm font-bold text-gold hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
     >
-      {t("viewCourse")}
+      {link.label}
       <ArrowRight
         aria-hidden="true"
         className="size-4"

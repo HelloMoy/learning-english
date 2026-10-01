@@ -548,7 +548,9 @@
     },
     "CourseEnrollAction": {
       "enroll": "Enroll",
-      "startCourse": "Start course"
+      "startCourse": "Start course",
+      "continueWhereLeftOff": "Continue where you left off",
+      "watchAgain": "Watch again"
     },
     "CourseOutcomes": {
       "eyebrow": "What you’ll learn",
@@ -573,6 +575,7 @@
       "joinBody": "It goes to My learning, and you can start right away.",
       "enrolledTitle": "You’re enrolled",
       "enrolledBody": "It’s in My learning. Start whenever you like.",
+      "goToProgress": "Go to my progress",
       "statsLabel": "Course size",
       "videos": "{count, plural, one {video} other {videos}}",
       "runtime": "of video",
@@ -631,7 +634,8 @@
       "allWatchedShort": "All watched",
       "openLessonTile": "Open lesson {number}: {title}",
       "videoPosition": "Lesson {module} · Video {number} of {total}",
-      "viewCourse": "View course"
+      "viewCourse": "View course",
+      "viewCourseDetails": "View course details"
     },
     "moduleOverview": {
       "title": "{title}",

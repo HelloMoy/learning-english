@@ -31,6 +31,27 @@ export const Enrolled: Story = {
   },
 };
 
+/** Joined with the first video finished: Continue where you left off opens the next one. */
+export const EnrolledWithProgress: Story = {
+  beforeEach: () => {
+    const [firstLesson] = ADVANCED_COURSE_VIEW.moduleSummaries[0]!.lessons;
+    givenLearner.enrolledCourses([ADVANCED_COURSE_VIEW.course.slug]);
+    givenLearner.completed([firstLesson!.id]);
+  },
+};
+
+/** Joined with every video finished: Watch again opens the first video. */
+export const EnrolledAndFinished: Story = {
+  beforeEach: () => {
+    givenLearner.enrolledCourses([ADVANCED_COURSE_VIEW.course.slug]);
+    givenLearner.completed(
+      ADVANCED_COURSE_VIEW.moduleSummaries.flatMap((summary) =>
+        summary.lessons.map((lesson) => lesson.id),
+      ),
+    );
+  },
+};
+
 /** Stretched to fill a card or bar. */
 export const FullWidth: Story = {
   args: { className: "w-80" },

@@ -39,15 +39,20 @@ export function CourseEnrollBar({ view }: CourseEnrollBarProps) {
       aria-label={t("label")}
       className="sticky bottom-0 z-20 -mx-4 flex items-center justify-between gap-3 border-t border-border bg-background/90 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-md sm:-mx-11 sm:px-11 lg:hidden"
     >
-      <span className="flex min-w-0 flex-col">
+      <span className="flex min-w-[8.5rem] flex-col">
         <span className="truncate text-[0.9375rem] font-black text-foreground">
           {view.course.title}
         </span>
-        <span className="font-mono text-xs text-muted-foreground tabular-nums">
+        <span className="truncate font-mono text-xs text-muted-foreground tabular-nums">
           {t("facts", { videos: facts.videoCount, runtime: runtimeLabel(facts.runtimeSeconds) })}
         </span>
       </span>
-      <CourseEnrollAction view={view} />
+      {/* Continue where you left off is too long for one line beside the
+          title on a phone, so here the label may wrap instead. */}
+      <CourseEnrollAction
+        view={view}
+        className="min-w-0 text-center leading-tight whitespace-normal"
+      />
     </aside>
   );
 }

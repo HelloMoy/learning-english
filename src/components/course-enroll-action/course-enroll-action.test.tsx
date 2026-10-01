@@ -1,8 +1,9 @@
 import { enrollInCourseAction } from "@/app/[locale]/learner-actions";
+import { ContinueWatchingLocation } from "@/domain/entities/continue-watching-location/continue-watching-location";
 import { learnerStore } from "@/lib/learner-store/learner-store";
 import { givenLearner } from "@/test-setup/learner-store/learner-store";
 import { renderInLocale } from "@/test-setup/render-in-locale";
-import { aCourseView, lessonOf } from "@/test-setup/stubs/course-views";
+import { aCourseView, everyVideoOf, lessonOf } from "@/test-setup/stubs/course-views";
 
 import { act, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -91,6 +92,63 @@ describe("CourseEnrollAction", () => {
         "href",
         firstVideoPath,
       );
+    });
+
+    test("WHEN they have finished the recorded video THEN Continue where you left off opens the next one", () => {
+      // Arrange
+      const finished = lessonOf(advanced, 0, 0);
+      act(() => {
+        givenLearner.enrolledCourses(["advanced-intermediate-course"]);
+        givenLearner.completed([finished.id]);
+        givenLearner.continueWatching(
+          ContinueWatchingLocation.parse({
+            courseSlug: "advanced-intermediate-course",
+            moduleSlug: "module-1",
+            lessonId: finished.id,
+          }),
+        );
+      });
+
+      // Act
+      renderInLocale(<CourseEnrollAction view={advanced} />);
+
+      // Assert
+      expect(screen.getByRole("link", { name: "Continue where you left off" })).toHaveAttribute(
+        "href",
+        `/courses/advanced-intermediate-course/modules/module-1/lessons/${lessonOf(advanced, 0, 1).id}`,
+      );
+      expect(screen.queryByRole("link", { name: "Start course" })).not.toBeInTheDocument();
+    });
+
+    test("WHEN they have watched everything THEN Watch again opens the first video", () => {
+      // Arrange
+      act(() => {
+        givenLearner.enrolledCourses(["advanced-intermediate-course"]);
+        givenLearner.completed(everyVideoOf(advanced));
+      });
+
+      // Act
+      renderInLocale(<CourseEnrollAction view={advanced} />);
+
+      // Assert
+      expect(screen.getByRole("link", { name: "Watch again" })).toHaveAttribute(
+        "href",
+        firstVideoPath,
+      );
+    });
+
+    test("WHEN rendered in es with progress THEN it reads Continuar donde lo dejaste", () => {
+      // Arrange
+      act(() => {
+        givenLearner.enrolledCourses(["advanced-intermediate-course"]);
+        givenLearner.completed([lessonOf(advanced, 0, 0).id]);
+      });
+
+      // Act
+      renderInLocale(<CourseEnrollAction view={advanced} />, "es");
+
+      // Assert
+      expect(screen.getByRole("link", { name: "Continuar donde lo dejaste" })).toBeInTheDocument();
     });
 
     test("WHEN the course holds no video THEN nothing renders", () => {

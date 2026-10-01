@@ -4,10 +4,12 @@ import { CourseEnrollAction } from "@/components/course-enroll-action/course-enr
 import type { CourseForView } from "@/domain/use-cases/find-course-for-view/find-course-for-view";
 import { useEnrolledCourses } from "@/hooks/use-enrolled-courses/use-enrolled-courses";
 import { useRuntimeLabel } from "@/hooks/use-runtime-label/use-runtime-label";
+import { courseOverviewPath } from "@/i18n/lesson-routes";
+import { Link } from "@/i18n/navigation";
 import { courseFacts, coursePrizes } from "@/lib/course-shelf/course-shelf";
 import { studyPace } from "@/lib/study-pace/study-pace";
 
-import { CircleCheck } from "lucide-react";
+import { ArrowRight, CircleCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useId, useState } from "react";
 
@@ -27,7 +29,8 @@ export type CourseEnrollCardProps = {
  *
  * @remarks
  * The card invites the learner to join until they enroll, then says they are
- * enrolled; the action itself is {@link CourseEnrollAction}. The pace picker
+ * enrolled and offers **Go to my progress**, the way back to the course's
+ * progress board; the action itself is {@link CourseEnrollAction}. The pace picker
  * offers 10, 20, 30 and 45 minutes a day, starts on 20, and turns the course's
  * runtime into weeks with `studyPace`. The choice is local to the page: it is
  * an estimate, not a setting.
@@ -68,9 +71,26 @@ export function CourseEnrollCard({ view }: CourseEnrollCardProps) {
         view={view}
         className="w-full"
       />
+      {isEnrolled ? <ProgressLink course={view.course} /> : null}
       <CourseStats view={view} />
       <PacePicker runtimeSeconds={courseFacts(view).runtimeSeconds} />
     </section>
+  );
+}
+
+function ProgressLink({ course }: { course: CourseForView["course"] }) {
+  const t = useTranslations("Components.CourseEnrollCard");
+  return (
+    <Link
+      href={courseOverviewPath(course) as never}
+      className="-mt-1 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md text-sm font-bold text-gold hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+    >
+      {t("goToProgress")}
+      <ArrowRight
+        aria-hidden="true"
+        className="size-4"
+      />
+    </Link>
   );
 }
 

@@ -115,6 +115,17 @@ describe("MyLearningView", () => {
       );
     });
 
+    test("WHEN the page renders THEN the panel's course title leads to the course overview too", async () => {
+      renderPage();
+
+      const panel = await screen.findByTestId("course-progress-tile");
+      const heading = within(panel).getByRole("heading", { level: 2, name: advanced.course.title });
+      expect(within(heading).getByRole("link")).toHaveAttribute(
+        "href",
+        "/courses/advanced-intermediate-course",
+      );
+    });
+
     test("WHEN the page renders THEN Your courses lists both, Advanced as current", async () => {
       renderPage();
 
