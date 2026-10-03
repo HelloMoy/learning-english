@@ -1,0 +1,63 @@
+# Names every release. A push to main — the merge of a `release: …` pull
+# request — gets the next SemVer version from git-cliff (cliff.toml holds the
+# rules), a tag, and a GitHub Release with that version's notes.
+#
+# The tag goes on the released develop commit (the merge's second parent), not
+# on the merge: release merges never reach develop, and the docs portal builds
+# its changelog from develop. A tag pushed with this workflow's token starts no
+# other workflow, so the portal is dispatched explicitly to pick it up.
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Version, tag and publish the release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # git-cliff is called through node_modules/.bin: `pnpm exec` can print
+      # its dependency check to stdout, which would end up in $version.
+      - name: Version, tag and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          released="$(git rev-parse HEAD^2 2>/dev/null || git rev-parse HEAD)"
+
+          if [ -n "$(git tag --points-at "$released" --list 'v[0-9]*')" ]; then
+            echo "$released is already a release; nothing to do."
+            exit 0
+          fi
+
+          version="$(node_modules/.bin/git-cliff --bumped-version)"
+          if [ "$version" = "$(git describe --tags --abbrev=0)" ]; then
+            echo "No new changes since $version; nothing to release."
+            exit 0
+          fi
+
+          notes="$(node_modules/.bin/git-cliff --unreleased --tag "$version" --strip header)"
+          git tag "$version" "$released"
+          git push origin "$version"
+          gh release create "$version" --title "$version" --notes "$notes" --latest --verify-tag
+          gh workflow run docs-portal.yml --ref develop

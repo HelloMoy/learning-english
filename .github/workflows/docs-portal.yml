@@ -2,16 +2,18 @@
 # site, with Storybook at /storybook/ and the TypeDoc reference at /api/.
 #
 # Every pull request builds the whole site, so a broken story or TypeDoc error
-# fails before merge. Only a push to develop deploys it: a Pages site is
-# replaced as a whole on each deploy, which is why all three parts are built
-# and shipped together. The custom domain is a Pages setting, not a CNAME file —
-# GitHub ignores that file in Actions deployments.
+# fails before merge. Only develop deploys it: on a push, or when the release
+# workflow dispatches it after tagging a release. A Pages site is replaced as a
+# whole on each deploy, which is why all its parts are built and shipped
+# together. The custom domain is a Pages setting, not a CNAME file — GitHub
+# ignores that file in Actions deployments.
 name: Docs portal
 
 on:
   pull_request:
   push:
     branches: [develop]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -24,7 +26,10 @@ jobs:
       group: docs-portal-${{ github.ref }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     steps:
+      # Full history with tags: the changelog page is written from it.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: 11
@@ -42,14 +47,14 @@ jobs:
       - run: pnpm portal:build
       - run: test -f docs-portal/dist/index.html -a -f docs-portal/dist/storybook/index.html -a -f docs-portal/dist/api/index.html
       - uses: actions/upload-pages-artifact@v5
-        if: github.event_name == 'push'
+        if: github.ref == 'refs/heads/develop' && github.event_name != 'pull_request'
         with:
           path: docs-portal/dist
 
   deploy:
     name: Deploy to GitHub Pages
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/develop' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

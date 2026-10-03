@@ -35,6 +35,35 @@
   --sl-font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
+/* Email gallery: each email in a frame tall enough for an account email. */
+.email-frame {
+  display: block;
+  width: 100%;
+  height: 46rem;
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 0.625rem;
+  background: #ffffff;
+}
+
+.email-subject {
+  color: var(--sl-color-gray-3);
+}
+
+/* Architecture graph: framed like the email previews, opened full size on click. */
+.architecture-graph {
+  display: block;
+  padding: 1rem;
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 0.625rem;
+  background: var(--sl-color-gray-6);
+}
+
+.architecture-graph img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 /* Starlight draws a divider after the social icons to set off the theme
    selector. The portal has neither, so the divider would stand alone. */
 header .social-icons:empty::after {

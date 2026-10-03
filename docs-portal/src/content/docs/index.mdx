@@ -1,10 +1,10 @@
 ---
 title: Home
-description: The design system and the API reference of English Course, in one place.
+description: How English Course is built — its design system, API, emails, architecture and releases — in one place.
 template: splash
 hero:
   title: English Course Docs
-  tagline: The design system and the API reference of English Course, in one place.
+  tagline: How English Course is built — its design system, API, emails, architecture and releases — in one place.
 ---
 
 import { CardGrid, LinkCard } from "@astrojs/starlight/components";
@@ -23,6 +23,21 @@ its contributors work from.
     title="API reference"
     description="The TypeDoc reference of the codebase, starting from the hexagon: use cases, ports, entities, adapters, hooks and components."
     href="/api/"
+  />
+  <LinkCard
+    title="Emails"
+    description="Every account email the app sends, in English, Spanish and Portuguese, exactly as a learner receives it."
+    href="/emails/"
+  />
+  <LinkCard
+    title="Architecture"
+    description="The layers of the hexagon and which depends on which, drawn from the code on every build."
+    href="/architecture/"
+  />
+  <LinkCard
+    title="Changelog"
+    description="Every release, and what is waiting in develop."
+    href="/changelog/"
   />
 </CardGrid>
 

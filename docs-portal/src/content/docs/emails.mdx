@@ -1,0 +1,33 @@
+---
+title: Emails
+description: Every account email English Course sends, in every language, exactly as a learner receives it.
+tableOfContents: false
+---
+
+import { TabItem, Tabs } from "@astrojs/starlight/components";
+
+import gallery from "../../email-gallery.json";
+
+export const LANGUAGE_NAMES = { en: "English", es: "Español", pt: "Português" };
+
+Every account email the app sends, rendered by the same `composeAccountEmail`
+that production uses, in each language a learner can choose. The links point
+at a sample address, and the change-email notice names `ana.g@example.com` as
+the new one. Choosing a language on one email switches every email to it.
+
+{gallery.map(({ kind, renders }) => (
+
+  <section class="email">
+    <h2 id={kind}>{renders[0].subject}</h2>
+    <Tabs syncKey="email-language">
+      {renders.map(({ locale, subject, path }) => (
+        <TabItem label={LANGUAGE_NAMES[locale] ?? locale}>
+          <p class="email-subject">
+            <strong>Subject:</strong> {subject}
+          </p>
+          <iframe class="email-frame" src={path} title={subject} loading="lazy"></iframe>
+        </TabItem>
+      ))}
+    </Tabs>
+  </section>
+))}

@@ -1,0 +1,62 @@
+# git-cliff: release versions and the docs portal's changelog.
+#
+# Used by the release workflow (`--bumped-version`, release notes), by
+# `pnpm portal:changelog`, and by `src/deployment/cliff.test.ts`, which pins
+# these rules against a throwaway repository.
+
+[changelog]
+# The header is the docs portal page's front matter; release notes are
+# generated with `--strip header`, so it never reaches them.
+header = """
+---
+title: Changelog
+description: Every release of English Course, and what is waiting in develop.
+---
+"""
+body = """
+{% if version %}\
+## {{ version }} — {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}\
+## Unreleased
+{% endif %}\
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | striptags | trim }}
+{% for commit in commits %}
+- {% if commit.scope %}**{{ commit.scope }}:** {% endif %}\
+{{ commit.message | split(pat="\n") | first | trim }} \
+([{{ commit.id | truncate(length=7, end="") }}](https://github.com/HelloMoy/learning-english/commit/{{ commit.id }}))\
+{% endfor %}
+{% endfor %}\n
+"""
+trim = true
+
+[git]
+conventional_commits = true
+# Pull-request merges are not Conventional Commits, so they drop out here.
+filter_unconventional = true
+tag_pattern = "v[0-9].*"
+sort_commits = "newest"
+# commitlint requires a gitmoji code after the type and scope
+# (`feat(x): :sparkles: summary`); the changelog shows the summary alone.
+commit_preprocessors = [
+  { pattern = '^(\w+(?:\([^)]*\))?!?: ):[a-z0-9_+-]+: ', replace = "${1}" },
+]
+# The HTML comments fix the groups' order; the template strips them.
+commit_parsers = [
+  { message = '^docs\(openspec\)', skip = true },
+  { message = "^feat", group = "<!-- 0 -->Features" },
+  { message = "^fix", group = "<!-- 1 -->Fixes" },
+  { message = "^perf", group = "<!-- 2 -->Performance" },
+  { message = "^refactor", group = "<!-- 3 -->Refactoring" },
+  { message = "^docs", group = "<!-- 4 -->Documentation" },
+  { message = "^test", group = "<!-- 5 -->Tests" },
+  { message = "^build", group = "<!-- 6 -->Build" },
+  { message = "^ci", group = "<!-- 7 -->CI" },
+  { message = "^(chore|style)", group = "<!-- 8 -->Chores" },
+]
+
+[bump]
+# Still in 0.x: a feature bumps the minor, anything else the patch, and a
+# breaking change bumps the minor rather than jumping to 1.0.0.
+features_always_bump_minor = true
+breaking_always_bump_major = false
