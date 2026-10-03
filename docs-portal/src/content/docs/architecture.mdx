@@ -1,0 +1,32 @@
+---
+title: Architecture
+description: The layers of English Course and which of them depends on which, drawn from the code on every build.
+tableOfContents: false
+---
+
+English Course is built as a hexagon. The **domain** — entities, the ports it
+needs from the outside world, and the use cases that act on them — sits at the
+centre and depends on nothing else. **Adapters** implement the ports
+(persistence, email), and the delivery layers — `app`, `components`, `hooks`,
+`lib` — drive the use cases.
+
+Each box below is a folder of `src/`; an arrow means at least one module in
+the first imports from the second, type-only imports included. The domain
+layers are outlined in gold. The graph is drawn from the code with
+dependency-cruiser on every build, so it is never out of date.
+
+<a
+  href="/architecture/layers.svg"
+  class="architecture-graph"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <img
+    src="/architecture/layers.svg"
+    alt="Graph of the dependencies between the layers of src. The domain layers — entities, ports, use cases and result — depend only on one another; the delivery layers and the adapters depend on them."
+  />
+</a>
+
+The graph only shows the boundaries. ESLint enforces them: `pnpm lint:domain`
+fails when the domain imports anything but `zod` and `neverthrow`, and the
+rules live in `openspec/specs/architecture-boundaries`.

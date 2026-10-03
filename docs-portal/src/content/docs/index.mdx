@@ -1,0 +1,141 @@
+---
+title: Home
+description: How English Course is built — its design system, API, emails, architecture and releases — in one place.
+template: splash
+hero:
+  title: How English Course <span class="accent">is built.</span>
+  tagline: Components, code, emails, architecture and releases — five references, one search.
+---
+
+import ReferenceCard from "../../components/home/ReferenceCard.astro";
+import ReleaseStrip from "../../components/home/ReleaseStrip.astro";
+import gallery from "../../email-gallery.json";
+
+export const emailLanguages = gallery[0].renders.map(({ locale }) => locale).join(" · ");
+
+<div class="home-references not-content">
+  <div class="home-features">
+    <ReferenceCard
+      size="feature"
+      href="/storybook/"
+      eyebrow="STORYBOOK"
+      title="Design system"
+      description="Every component, its states and accessibility checks, in English, Spanish and Portuguese."
+    >
+      <div
+        slot="preview"
+        class="preview-tiles"
+      >
+        <span class="tile">
+          <span class="bar"></span>
+        </span>
+        <span class="tile centred">
+          <span class="ring"></span>
+        </span>
+        <span class="tile lines">
+          <span class="line"></span>
+          <span class="line short"></span>
+        </span>
+      </div>
+    </ReferenceCard>
+    <ReferenceCard
+      size="feature"
+      href="/api/"
+      eyebrow="TYPEDOC"
+      title="API reference"
+      description="Every documented module, starting from the hexagon: use cases, ports, entities, adapters, hooks and components."
+    >
+      <div
+        slot="preview"
+        class="preview-folders"
+      >
+        <span class="folder">src/domain/use-cases</span>
+        <span class="folder">src/domain/ports</span>
+        <span class="folder">src/domain/entities</span>
+        <span class="rest">src/adapters · src/hooks · src/components</span>
+      </div>
+    </ReferenceCard>
+  </div>
+  <div class="home-compact">
+    <ReferenceCard
+      href="/emails/"
+      title="Emails"
+      description={`${gallery.length} account emails × ${emailLanguages}, as learners receive them.`}
+    >
+      <svg
+        slot="icon"
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect
+          x="3"
+          y="5"
+          width="18"
+          height="14"
+          rx="2"
+        ></rect>
+        <path d="m3 7 9 6 9-6"></path>
+      </svg>
+    </ReferenceCard>
+    <ReferenceCard
+      href="/architecture/"
+      title="Architecture"
+      description="The layers of the hexagon and which depends on which, drawn from the code."
+    >
+      <svg
+        slot="icon"
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M12 2 21 7v10l-9 5-9-5V7z"></path>
+        <circle
+          cx="12"
+          cy="12"
+          r="3"
+        ></circle>
+      </svg>
+    </ReferenceCard>
+    <ReferenceCard
+      href="/changelog/"
+      title="Changelog"
+      description="Every release, and what is waiting in develop."
+    >
+      <svg
+        slot="icon"
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M12 8v4l3 2"></path>
+        <circle
+          cx="12"
+          cy="12"
+          r="9"
+        ></circle>
+      </svg>
+    </ReferenceCard>
+  </div>
+</div>
+
+<ReleaseStrip />
+
+<p class="home-note">
+  Rebuilt from <code>develop</code> on every merge, so it may be ahead of production.
+</p>

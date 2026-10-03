@@ -36,7 +36,9 @@ export default defineConfig({
     // repo. Without this, vitest collects their copies of every test file
     // and fails on imports that only resolved at the commit they branched
     // from. `.prettierignore` and the ESLint config skip the same folder.
-    exclude: ["node_modules/**", "e2e/**", ".next/**", ".claude/**"],
+    // `docs-portal/**` is a standalone Astro project with its own
+    // node_modules; its contracts are tested from `src/deployment`.
+    exclude: ["node_modules/**", "e2e/**", ".next/**", ".claude/**", "docs-portal/**"],
     css: true,
     // Vitest reports an unhandled rejection as "Unknown Error: <message>" with
     // no stack, which is unactionable when it only happens on CI's slower,
