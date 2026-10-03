@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 832 352" width="832" height="352" role="img" aria-labelledby="banner-title">
+  <title id="banner-title">English Course. From the first sound to real English: learn American English one sound at a time.</title>
+  <defs>
+    <radialGradient id="glow" cx="732" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(732 0) scale(580 440) translate(-732 0)">
+      <stop offset="0" stop-color="#e7b64c" stop-opacity="0.26"/>
+      <stop offset="0.7" stop-color="#e7b64c" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="0.5" y="0.5" width="831" height="351" rx="12" fill="#08080b"/>
+  <rect x="0.5" y="0.5" width="831" height="351" rx="12" fill="url(#glow)" stroke="#26262f"/>
+
+  <g font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" fill="#f4f1ea">
+    <text x="44" y="58" font-size="13" font-weight="700" letter-spacing="4.2">ENGLISH<tspan fill="#e7b64c">·</tspan>COURSE</text>
+    <text x="44" y="150" font-size="11" font-weight="600" letter-spacing="3.3" fill="#e7b64c">FROM THE FIRST SOUND TO REAL ENGLISH</text>
+    <g font-size="44" font-weight="800" letter-spacing="-0.9">
+      <text x="44" y="204">Learn American</text>
+      <text x="44" y="250">English one</text>
+      <text x="44" y="296">sound at a time.</text>
+    </g>
+  </g>
+
+  <rect x="556.5" y="119.5" width="231" height="193" rx="14" fill="#16171d" stroke="#26262f"/>
+  <path d="M578 216.5h188" stroke="#26262f"/>
+
+  <g font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+    <g font-size="38" font-weight="800" letter-spacing="-0.8" fill="#f4f1ea">
+      <text x="578" y="174">sh<tspan fill="#e7b64c">i</tspan>p</text>
+      <text x="578" y="265">sh<tspan fill="#e7b64c">ee</tspan>p</text>
+    </g>
+    <g font-size="12" fill="#9b968c">
+      <text x="578" y="197">Short · relaxed</text>
+      <text x="578" y="288">Longer · tense, lips spread</text>
+    </g>
+  </g>
+
+  <g font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="15" fill="#e7b64c" text-anchor="end">
+    <text x="766" y="174">/ʃɪp/</text>
+    <text x="766" y="265">/ʃip/</text>
+  </g>
+</svg>
