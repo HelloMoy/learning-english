@@ -204,6 +204,8 @@ const eslintConfig = defineConfig([
     "openspec/**",
     // typedoc — generated static site, never linted
     "docs/**",
+    // Starlight portal — a standalone Astro project with its own toolchain
+    "docs-portal/**",
   ]),
 ]);
 

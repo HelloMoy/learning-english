@@ -1,0 +1,42 @@
+/*
+ * Immersion Cinema dark for Starlight.
+ *
+ * Every literal colour below is the value of a `.dark` token in the app's
+ * `src/app/globals.css`; `src/deployment/docs-portal.test.ts` fails when one
+ * drifts. The portal is always dark (see `ThemeProvider.astro`), so only the
+ * `:root` palette is defined.
+ */
+:root {
+  --sl-color-black: #08080b;
+  --sl-color-white: #f4f1ea;
+  --sl-color-gray-1: #f4f1ea;
+  --sl-color-gray-2: #f4f1ea;
+  --sl-color-gray-3: #9b968c;
+  --sl-color-gray-4: color-mix(in oklab, var(--sl-color-gray-3) 55%, var(--sl-color-gray-5));
+  --sl-color-gray-5: #26262f;
+  --sl-color-gray-6: #16171d;
+
+  --sl-color-accent-low: color-mix(in oklab, var(--sl-color-accent) 18%, var(--sl-color-black));
+  --sl-color-accent: #e7b64c;
+  --sl-color-accent-high: #f0c869;
+
+  --sl-color-bg: #08080b;
+  --sl-color-bg-nav: #0d0e12;
+  --sl-color-bg-sidebar: #0d0e12;
+  --sl-color-bg-inline-code: #16171d;
+  --sl-color-text: #f4f1ea;
+  --sl-color-text-accent: #e7b64c;
+  --sl-color-text-invert: #1a1200;
+  --sl-color-hairline: #26262f;
+  --sl-color-hairline-light: #26262f;
+
+  --sl-font:
+    "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --sl-font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* Starlight draws a divider after the social icons to set off the theme
+   selector. The portal has neither, so the divider would stand alone. */
+header .social-icons:empty::after {
+  display: none;
+}

@@ -1,0 +1,30 @@
+---
+title: Home
+description: The design system and the API reference of English Course, in one place.
+template: splash
+hero:
+  title: English Course Docs
+  tagline: The design system and the API reference of English Course, in one place.
+---
+
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+English Course is a video course platform for Spanish speakers learning English,
+built with Next.js on a hexagonal architecture. This site gathers the references
+its contributors work from.
+
+<CardGrid>
+  <LinkCard
+    title="Design system"
+    description="Every component in Storybook, in the app's Immersion Cinema theme, with its states and accessibility checks."
+    href="/storybook/"
+  />
+  <LinkCard
+    title="API reference"
+    description="The TypeDoc reference of the codebase, starting from the hexagon: use cases, ports, entities, adapters, hooks and components."
+    href="/api/"
+  />
+</CardGrid>
+
+This site is rebuilt from the `develop` branch on every merge, so it shows what
+has been integrated, which may be ahead of production.
