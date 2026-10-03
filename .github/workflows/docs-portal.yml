@@ -1,0 +1,66 @@
+# The documentation portal at https://docs.english-course.online: the Starlight
+# site, with Storybook at /storybook/ and the TypeDoc reference at /api/.
+#
+# Every pull request builds the whole site, so a broken story or TypeDoc error
+# fails before merge. Only a push to develop deploys it: a Pages site is
+# replaced as a whole on each deploy, which is why all three parts are built
+# and shipped together. The custom domain is a Pages setting, not a CNAME file —
+# GitHub ignores that file in Actions deployments.
+name: Docs portal
+
+on:
+  pull_request:
+  push:
+    branches: [develop]
+
+jobs:
+  build:
+    name: Build portal, Storybook and TypeDoc
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    concurrency:
+      group: docs-portal-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            docs-portal/pnpm-lock.yaml
+      # Storybook and TypeDoc read the app's sources and dependencies; the
+      # portal has its own lockfile, installed apart from the app.
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm portal:install --frozen-lockfile
+      - run: pnpm portal:build
+      - run: test -f docs-portal/dist/index.html -a -f docs-portal/dist/storybook/index.html -a -f docs-portal/dist/api/index.html
+      - uses: actions/upload-pages-artifact@v5
+        if: github.event_name == 'push'
+        with:
+          path: docs-portal/dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

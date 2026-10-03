@@ -1,0 +1,10 @@
+---
+/**
+ * Replaces Starlight's theme provider with nothing, so the portal stays dark.
+ *
+ * Starlight renders `<html data-theme="dark">` on the server; its own provider
+ * is the inline script that switches that to the stored or OS preference.
+ * Without it, the portal wears Immersion Cinema dark for every reader, as the
+ * API reference and Storybook do.
+ */
+---
