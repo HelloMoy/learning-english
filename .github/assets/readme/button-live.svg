@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 60" width="260" height="60" role="img" aria-labelledby="button-title">
+  <title id="button-title">Live app: www.english-course.online</title>
+  <rect x="0.5" y="0.5" width="259" height="59" rx="10" fill="#e7b64c" stroke="#e7b64c"/>
+  <g fill="#1a1200">
+    <text x="16" y="25" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="2">LIVE APP</text>
+    <text x="16" y="45" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" font-weight="500">www.english-course.online</text>
+  </g>
+  <path d="M236 24l8-8m-6 0h6v6" fill="none" stroke="#1a1200" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

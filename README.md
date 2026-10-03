@@ -1,74 +1,72 @@
-# learning-english
+<p align="center">
+  <img src=".github/assets/readme/banner.svg" width="100%" alt="English Course. From the first sound to real English: learn American English one sound at a time.">
+</p>
 
-A [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<p align="center">
+  <a href="https://www.english-course.online"><img src=".github/assets/readme/button-live.svg" width="260" alt="Live app: www.english-course.online"></a>
+  <a href="https://develop.english-course.online"><img src=".github/assets/readme/button-develop.svg" width="260" alt="Develop preview: develop.english-course.online"></a>
+  <a href="https://docs.english-course.online"><img src=".github/assets/readme/button-docs.svg" width="260" alt="Docs portal: docs.english-course.online"></a>
+</p>
 
-## Getting Started
+<p align="center">
+  <a href="https://github.com/HelloMoy/learning-english/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/HelloMoy/learning-english/ci.yml?branch=develop&amp;label=CI&amp;labelColor=26262f&amp;color=e7b64c" alt="CI status on develop"></a>
+  <a href="https://github.com/HelloMoy/learning-english/actions/workflows/docs-portal.yml"><img src="https://img.shields.io/github/actions/workflow/status/HelloMoy/learning-english/docs-portal.yml?branch=develop&amp;label=docs%20portal&amp;labelColor=26262f&amp;color=e7b64c" alt="Docs portal build status on develop"></a>
+  <a href="https://github.com/HelloMoy/learning-english/releases"><img src="https://img.shields.io/github/v/release/HelloMoy/learning-english?label=release&amp;labelColor=26262f&amp;color=e7b64c" alt="Latest release"></a>
+  <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-16-e7b64c?labelColor=26262f" alt="Next.js 16"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-22%2B-e7b64c?labelColor=26262f" alt="Node 22 or newer"></a>
+</p>
 
-> **First-time setup:** before running anything, install the AI agent skills this repo declares in `skills-lock.json`:
->
-> ```bash
-> npx skills install
-> ```
->
-> This populates `.agents/skills/` with the skills the project relies on (shadcn, vercel-react-best-practices, frontend-design, storybook-story-writing, etc.) and is required for AI assistants to follow the conventions documented in `AGENTS.md` and the per-skill `SKILL.md` files.
+## What this is
 
-First, run the development server:
+English Course is a video course platform for Spanish speakers learning English. Courses run in order — each level assumes the sounds from the one before it — and every lesson pairs a short video with notes in Spanish and English. The interface ships in English, Spanish and Portuguese, and installs to a phone's home screen like an app.
+
+## Environments
+
+| Environment    | URL                                                                    | Branch    | Notes                                                                      |
+| -------------- | ---------------------------------------------------------------------- | --------- | -------------------------------------------------------------------------- |
+| **Production** | [www.english-course.online](https://www.english-course.online)         | `main`    | On Vercel.<br>Every push is versioned and released.                        |
+| **Develop**    | [develop.english-course.online](https://develop.english-course.online) | `develop` | Vercel preview with its own database.<br>Behind Vercel sign-in, team only. |
+| **Docs**       | [docs.english-course.online](https://docs.english-course.online)       | `develop` | GitHub Pages, rebuilt on every push.                                       |
+
+The docs portal holds the [design system](https://docs.english-course.online/storybook/), the [API reference](https://docs.english-course.online/api/), the [emails](https://docs.english-course.online/emails/), the [architecture](https://docs.english-course.online/architecture/) and the [changelog](https://docs.english-course.online/changelog/).
+
+Feature branches do not deploy: only `main` and `develop` build, and pull requests run CI.
+
+## Stack
+
+| Layer              | Tools                                           |
+| ------------------ | ----------------------------------------------- |
+| App                | Next.js 16 (App Router) · React 19 · TypeScript |
+| Interface          | Tailwind 4 · shadcn/ui · Storybook              |
+| Data               | Drizzle · Turso (libSQL)                        |
+| Accounts and email | Better Auth · React Email                       |
+| Languages          | next-intl — English, Spanish, Portuguese        |
+| Tests              | Vitest · Testing Library · Playwright           |
+
+The domain follows a hexagonal architecture: `src/domain` imports only `zod` and `neverthrow`, and everything else reaches it through a port.
+
+## Run it locally
+
+Needs Node 22+, pnpm and Docker.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.example .env.local
+docker compose up -d        # libSQL database and Mailpit inbox
+pnpm db:migrate
+pnpm db:seed                # a local learner to sign in with
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app runs at <http://localhost:3000> and the mail inbox at <http://localhost:8025>.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`pnpm verify` runs the type check, format check, lint and unit tests. `pnpm storybook` and `pnpm portal:dev` serve the design system and the docs portal locally.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## How we work
 
-## Component development — Storybook
+- [AGENTS.md](AGENTS.md) — spec first with OpenSpec, then a failing test, then code.
+- [COMMIT_CONVENTIONS.md](COMMIT_CONVENTIONS.md) — Conventional Commits with gitmoji.
+- [GLOSSARY.md](GLOSSARY.md) — the shared vocabulary of the course platform.
+- [DEPLOYMENT.md](DEPLOYMENT.md) — the production runbook.
 
-Storybook runs an isolated dev server for developing and reviewing components in isolation, with a locale switcher (🌐) for testing translations and a theme switcher for light/dark mode.
-
-```bash
-pnpm storybook
-```
-
-Opens at [http://localhost:6006](http://localhost:6006).
-
-```bash
-pnpm build-storybook   # produce a static build (./storybook-static/) for Chromatic or static hosting
-```
-
-Storybook conventions and rules for writing stories live in `AGENTS.md § Component development — Storybook`.
-
-## API documentation — TypeDoc
-
-The project's API reference is generated from JSDoc comments using [TypeDoc](https://typedoc.org/). Output is a static site that documents every exported, JSDoc-commented symbol in `src/`.
-
-```bash
-pnpm run docs      # generate the static site in ./docs/ (plain `pnpm docs` is a pnpm built-in)
-pnpm docs:watch    # regenerate on file changes
-pnpm docs:serve    # serve ./docs/ at http://localhost:8080
-```
-
-The generated `./docs/` directory is gitignored — regenerate locally or in CI, never commit. When to add JSDoc and which tags TypeDoc supports are documented in `AGENTS.md § API documentation — TypeDoc`.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+AI assistants working in this repository need the skills declared in `skills-lock.json`; install them once with `npx skills install`.
