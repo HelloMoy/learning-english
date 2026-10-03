@@ -1,8 +1,27 @@
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
+import rehypeExternalLinks from "rehype-external-links";
+
+import { SIDEBAR } from "./src/navigation.mjs";
+import { NEW_TAB, opensOutsideStarlight } from "./src/outbound-links.mjs";
 
 export default defineConfig({
   site: "https://docs.english-course.online",
+  markdown: {
+    // Markdown links that leave Starlight (the changelog's commit links, any
+    // link to Storybook or the API) open in a new tab. HTML written inside MDX
+    // is not Markdown: it carries the attributes itself, and a test checks it.
+    rehypePlugins: [
+      [
+        rehypeExternalLinks,
+        {
+          test: (element) => opensOutsideStarlight(String(element.properties.href)),
+          target: NEW_TAB.target,
+          rel: NEW_TAB.rel.split(" "),
+        },
+      ],
+    ],
+  },
   integrations: [
     starlight({
       title: "English Course Docs",
@@ -11,6 +30,7 @@ export default defineConfig({
         ThemeProvider: "./src/components/ThemeProvider.astro",
         ThemeSelect: "./src/components/ThemeSelect.astro",
         SiteTitle: "./src/components/SiteTitle.astro",
+        Hero: "./src/components/home/HomeHero.astro",
       },
       head: [
         { tag: "link", attrs: { rel: "preconnect", href: "https://fonts.googleapis.com" } },
@@ -26,13 +46,8 @@ export default defineConfig({
           },
         },
       ],
-      sidebar: [
-        { label: "Design system", link: "/storybook/" },
-        { label: "API reference", link: "/api/" },
-        { label: "Emails", link: "/emails/" },
-        { label: "Architecture", link: "/architecture/" },
-        { label: "Changelog", link: "/changelog/" },
-      ],
+      sidebar: SIDEBAR,
+      routeMiddleware: "./src/route-data.ts",
     }),
   ],
 });

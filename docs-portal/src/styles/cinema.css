@@ -64,6 +64,105 @@
   height: auto;
 }
 
+/* Portal home: two feature cards above three compact ones. */
+.home-references {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.home-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr));
+  gap: 1.25rem;
+}
+
+.home-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 1.25rem;
+}
+
+/* Feature-card preview drawings: decorative, hidden from assistive technology. */
+.preview-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.625rem;
+  height: 100%;
+}
+
+.preview-tiles .tile {
+  display: flex;
+  align-items: flex-end;
+  padding: 0.625rem;
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 0.625rem;
+  background: var(--sl-color-gray-5);
+}
+
+.preview-tiles .centred {
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-tiles .lines {
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  gap: 0.375rem;
+}
+
+.preview-tiles .bar {
+  width: 60%;
+  height: 0.5rem;
+  border-radius: 0.25rem;
+  background: var(--sl-color-accent);
+}
+
+.preview-tiles .ring {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 3px solid var(--sl-color-accent);
+  border-radius: 50%;
+}
+
+.preview-tiles .line {
+  height: 0.375rem;
+  border-radius: 0.1875rem;
+  background: #3a3a46;
+}
+
+.preview-tiles .short {
+  width: 70%;
+}
+
+.preview-folders {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  font-family: var(--sl-font-mono);
+  font-size: 0.8125rem;
+  color: var(--sl-color-accent);
+}
+
+.preview-folders .rest {
+  color: #6f6b63;
+}
+
+.home-note {
+  margin-top: 2.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--sl-color-gray-3);
+}
+
+/* Sidebar links that open in a new tab carry an outward arrow. */
+.sidebar-content a[target="_blank"]::after {
+  content: "↗";
+  margin-inline-start: 0.4em;
+  color: var(--sl-color-gray-3);
+}
+
 /* Starlight draws a divider after the social icons to set off the theme
    selector. The portal has neither, so the divider would stand alone. */
 header .social-icons:empty::after {

@@ -1,0 +1,145 @@
+---
+/**
+ * A card on the portal home that leads to one reference. A `feature` card
+ * shows a preview drawing (its `preview` slot), a `compact` card an icon (its
+ * `icon` slot). A card whose link leaves Starlight opens it in a new tab and
+ * says so, as the portal's outbound-link rule requires.
+ */
+import { NEW_TAB, opensOutsideStarlight } from "../../outbound-links.mjs";
+
+interface Props {
+  href: string;
+  title: string;
+  description: string;
+  /** The tool behind the reference, shown above the title on feature cards. */
+  eyebrow?: string;
+  size?: "feature" | "compact";
+}
+
+const { href, title, description, eyebrow, size = "compact" } = Astro.props;
+const opensNewTab = opensOutsideStarlight(href);
+---
+
+<a href={href} class:list={["reference-card", size]} {...opensNewTab ? NEW_TAB : {}}>
+  {
+    size === "feature" ? (
+      <div class="preview" aria-hidden="true">
+        <slot name="preview" />
+      </div>
+    ) : (
+      <span class="icon" aria-hidden="true">
+        <slot name="icon" />
+      </span>
+    )
+  }
+  <span class="body">
+    {eyebrow && <span class="eyebrow">{eyebrow}</span>}
+    <span class="title">
+      {title}
+      {
+        opensNewTab && (
+          <svg
+            class="outward"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M7 17 17 7" />
+            <path d="M8 7h9v9" />
+          </svg>
+        )
+      }
+    </span>
+    <span class="description">{description}</span>
+    {opensNewTab && <span class="sr-only">(opens in a new tab)</span>}
+  </span>
+</a>
+
+<style>
+  .reference-card {
+    display: flex;
+    border: 1px solid var(--sl-color-hairline);
+    border-radius: 1rem;
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-white);
+    text-decoration: none;
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+  }
+
+  .reference-card:hover,
+  .reference-card:focus-visible {
+    border-color: rgb(231 182 76 / 0.55);
+  }
+
+  .feature {
+    flex-direction: column;
+  }
+
+  .compact {
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1.375rem;
+  }
+
+  .preview {
+    height: 12.5rem;
+    padding: 1.375rem;
+    box-sizing: border-box;
+    background:
+      radial-gradient(110% 100% at 85% 0%, rgb(240 200 105 / 0.2), rgb(8 8 11 / 0) 60%),
+      #0c0c10;
+  }
+
+  .icon {
+    flex: none;
+    margin-top: 0.125rem;
+    color: var(--sl-color-accent);
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .feature .body {
+    padding: 1.375rem 1.5rem 1.625rem;
+  }
+
+  .eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    color: var(--sl-color-accent);
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 700;
+    font-size: 1.125rem;
+  }
+
+  .feature .title {
+    font-size: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .outward {
+    color: var(--sl-color-gray-3);
+  }
+
+  .description {
+    color: var(--sl-color-gray-3);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+</style>
