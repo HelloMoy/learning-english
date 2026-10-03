@@ -6,7 +6,7 @@ import pt from "@/messages/pt.json";
 import { faker } from "@faker-js/faker";
 import { describe, expect, test } from "vitest";
 
-import { composeAccountEmail, localeFromActionUrl } from "./account-emails";
+import { ACCOUNT_EMAIL_KINDS, composeAccountEmail, localeFromActionUrl } from "./account-emails";
 
 /**
  * Guards the `transactional-email` capability's "Emails are sent in the locale
@@ -119,5 +119,23 @@ describe("composeAccountEmail", () => {
 
     expect(email.subject).toBe(pt.Emails.DeleteAccount.subject);
     expect(email.text).toContain(pt.Emails.DeleteAccount.ignore);
+  });
+});
+
+describe("ACCOUNT_EMAIL_KINDS", () => {
+  test("lists every account email", () => {
+    expect(ACCOUNT_EMAIL_KINDS).toEqual([
+      "verify-email",
+      "reset-password",
+      "delete-account",
+      "change-email",
+      "password-changed",
+    ]);
+  });
+
+  test.each(ACCOUNT_EMAIL_KINDS)("composes %s", async (kind) => {
+    const email = await composeAccountEmail(kind, "https://english-course.online/en/learning");
+
+    expect(email.subject).not.toBe("");
   });
 });

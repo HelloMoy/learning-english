@@ -14,6 +14,7 @@ import { readCinemaTokens } from "../../.storybook/cinema-tokens";
 
 const ROOT = path.resolve(__dirname, "../..");
 const read = (file: string) => readFileSync(path.join(ROOT, file), "utf8");
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 type PackageJson = {
   scripts: Record<string, string>;
@@ -35,18 +36,54 @@ describe("the root package.json", () => {
     expect(read("docs-portal/pnpm-workspace.yaml")).toMatch(/^allowBuilds:/m);
   });
 
-  test("assembles the site: the portal first, then Storybook and TypeDoc into it", () => {
+  test("assembles the site: the generated pages, the portal, then Storybook and TypeDoc into it", () => {
     const steps = rootPackage.scripts["portal:build"].split(" && ");
 
     expect(steps).toEqual([
+      "pnpm portal:emails",
+      "pnpm portal:changelog",
+      "pnpm portal:architecture",
       "pnpm --dir docs-portal run build",
       "storybook build -o docs-portal/dist/storybook",
       "pnpm run docs --out docs-portal/dist/api",
     ]);
   });
 
-  test.each(["dev", "preview"])("runs the portal's Astro %s", (command) => {
-    expect(rootPackage.scripts[`portal:${command}`]).toBe(`pnpm --dir docs-portal run ${command}`);
+  test("renders the email gallery with its script", () => {
+    expect(rootPackage.scripts["portal:emails"]).toBe("tsx scripts/email-gallery/email-gallery.ts");
+  });
+
+  test("writes the changelog page from history with git-cliff", () => {
+    expect(rootPackage.scripts["portal:changelog"]).toBe(
+      "git-cliff --output docs-portal/src/content/docs/changelog.md",
+    );
+  });
+
+  test("draws the architecture graph with its script", () => {
+    expect(rootPackage.scripts["portal:architecture"]).toBe(
+      "tsx scripts/architecture-graph/architecture-graph.mts",
+    );
+  });
+
+  test("generates its pages before starting the portal's dev server", () => {
+    expect(rootPackage.scripts["portal:dev"]).toBe(
+      "pnpm portal:emails && pnpm portal:changelog && pnpm portal:architecture && pnpm --dir docs-portal run dev",
+    );
+  });
+
+  test("runs the portal's Astro preview", () => {
+    expect(rootPackage.scripts["portal:preview"]).toBe("pnpm --dir docs-portal run preview");
+  });
+});
+
+describe("the repository's ignores", () => {
+  test.each([
+    "/docs-portal/public/emails/",
+    "/docs-portal/src/email-gallery.json",
+    "/docs-portal/src/content/docs/changelog.md",
+    "/docs-portal/public/architecture/",
+  ])("keep the generated %s out of git", (generated) => {
+    expect(read(".gitignore").split("\n")).toContain(generated);
   });
 });
 
@@ -58,9 +95,12 @@ describe("the portal's Astro config", () => {
     expect(astroConfig).not.toMatch(/\bbase:/);
   });
 
-  test.each(["/storybook/", "/api/"])("links %s from the sidebar", (reference) => {
-    expect(astroConfig).toContain(`link: "${reference}"`);
-  });
+  test.each(["/storybook/", "/api/", "/emails/", "/changelog/", "/architecture/"])(
+    "links %s from the sidebar",
+    (reference) => {
+      expect(astroConfig).toContain(`link: "${reference}"`);
+    },
+  );
 
   test.each(["ThemeProvider", "ThemeSelect", "SiteTitle"])(
     "replaces Starlight's %s with the portal's own",
@@ -73,9 +113,17 @@ describe("the portal's Astro config", () => {
 describe("the docs-portal workflow", () => {
   const workflow = read(".github/workflows/docs-portal.yml");
   const deployJob = workflow.slice(workflow.indexOf("\n  deploy:"));
+  const ON_DEVELOP_OUTSIDE_PULL_REQUESTS =
+    "github.ref == 'refs/heads/develop' && github.event_name != 'pull_request'";
 
-  test("runs on every pull request and on every push to develop", () => {
-    expect(workflow).toMatch(/^on:\n {2}pull_request:\n {2}push:\n {4}branches: \[develop\]$/m);
+  test("runs on every pull request, every push to develop, and when a release dispatches it", () => {
+    expect(workflow).toMatch(
+      /^on:\n {2}pull_request:\n {2}push:\n {4}branches: \[develop\]\n {2}workflow_dispatch:$/m,
+    );
+  });
+
+  test("reads the whole history, so the changelog sees every tag", () => {
+    expect(workflow).toMatch(/uses: actions\/checkout@v\d+\n\s+with:\n\s+fetch-depth: 0/);
   });
 
   test("builds the whole site and checks each part landed", () => {
@@ -85,16 +133,16 @@ describe("the docs-portal workflow", () => {
     );
   });
 
-  test("uploads the assembled site, and only for a push", () => {
+  test("uploads the assembled site only on develop, never for a pull request", () => {
     expect(workflow).toMatch(
-      /uses: actions\/upload-pages-artifact@v\d+\n\s+if: github\.event_name == 'push'\n\s+with:\n\s+path: docs-portal\/dist/,
+      new RegExp(
+        `uses: actions/upload-pages-artifact@v\\d+\\n\\s+if: ${escapeRegExp(ON_DEVELOP_OUTSIDE_PULL_REQUESTS)}\\n\\s+with:\\n\\s+path: docs-portal/dist`,
+      ),
     );
   });
 
-  test("deploys only on a push to develop, through the github-pages environment", () => {
-    expect(deployJob).toContain(
-      "if: github.event_name == 'push' && github.ref == 'refs/heads/develop'",
-    );
+  test("deploys only on develop, never for a pull request, through the github-pages environment", () => {
+    expect(deployJob).toContain(`if: ${ON_DEVELOP_OUTSIDE_PULL_REQUESTS}`);
     expect(deployJob).toContain("name: github-pages");
     expect(deployJob).toMatch(/uses: actions\/deploy-pages@v\d+/);
   });

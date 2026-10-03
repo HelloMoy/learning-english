@@ -59,3 +59,7 @@ openspec/
 # Starlight portal — assembled site and Astro's generated types
 /docs-portal/dist/
 /docs-portal/.astro/
+/docs-portal/public/emails/
+/docs-portal/src/email-gallery.json
+/docs-portal/src/content/docs/changelog.md
+/docs-portal/public/architecture/

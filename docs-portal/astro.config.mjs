@@ -29,6 +29,9 @@ export default defineConfig({
       sidebar: [
         { label: "Design system", link: "/storybook/" },
         { label: "API reference", link: "/api/" },
+        { label: "Emails", link: "/emails/" },
+        { label: "Architecture", link: "/architecture/" },
+        { label: "Changelog", link: "/changelog/" },
       ],
     }),
   ],

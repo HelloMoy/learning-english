@@ -13,13 +13,26 @@ import { createTranslator, hasLocale } from "next-intl";
 import { render, toPlainText } from "react-email";
 
 /**
+ * Every account email the app can send, in the order the email gallery shows
+ * them.
+ *
+ * @category Email
+ */
+export const ACCOUNT_EMAIL_KINDS = [
+  "verify-email",
+  "reset-password",
+  "delete-account",
+  "change-email",
+  "password-changed",
+] as const;
+
+/**
  * Which account email to write. Each kind has a template and an
  * `Emails.<Template>` message namespace.
  *
  * @category Email
  */
-export type AccountEmailKind =
-  "verify-email" | "reset-password" | "delete-account" | "change-email" | "password-changed";
+export type AccountEmailKind = (typeof ACCOUNT_EMAIL_KINDS)[number];
 
 /**
  * The values an email's copy interpolates, such as the address a change-email
@@ -46,7 +59,7 @@ const TEMPLATES = {
   "delete-account": { template: DeleteAccount, namespace: "Emails.DeleteAccount" },
   "change-email": { template: ChangeEmail, namespace: "Emails.ChangeEmail" },
   "password-changed": { template: PasswordChanged, namespace: "Emails.PasswordChanged" },
-} as const;
+} as const satisfies Record<AccountEmailKind, unknown>;
 
 const COPY_KEYS = ["preview", "heading", "body", "button", "linkIntro", "ignore"] as const;
 
