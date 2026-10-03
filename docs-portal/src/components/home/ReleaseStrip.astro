@@ -1,0 +1,73 @@
+---
+/**
+ * The home's release strip: the version in production, the date it was
+ * tagged, and how many changes wait in develop — read from git when the portal
+ * is built, so it never goes stale. Before the first release it renders
+ * nothing.
+ */
+import { execFileSync } from "node:child_process";
+
+import { readReleaseSummary } from "../../release-summary.mjs";
+
+const git = (...args: string[]) =>
+  execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+
+const release = readReleaseSummary(git);
+const waitingLabel =
+  release?.waiting === 0
+    ? "Nothing waiting in develop"
+    : `${release?.waiting} ${release?.waiting === 1 ? "change" : "changes"} waiting in develop`;
+---
+
+{
+  release && (
+    <a href="/changelog/" class="release-strip not-content">
+      <span class="version">{release.version}</span>
+      <span class="since">In production since {release.date}.</span>
+      <span class="waiting">{waitingLabel} →</span>
+    </a>
+  )
+}
+
+<style>
+  .release-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    margin-top: 2.5rem;
+    padding: 1.125rem 1.375rem;
+    border: 1px solid rgb(231 182 76 / 0.4);
+    border-radius: 0.875rem;
+    background: rgb(231 182 76 / 0.06);
+    color: var(--sl-color-white);
+    text-decoration: none;
+  }
+
+  .release-strip:hover,
+  .release-strip:focus-visible {
+    border-color: var(--sl-color-accent);
+  }
+
+  .version {
+    padding: 0.25rem 0.625rem;
+    border-radius: 999px;
+    background: var(--sl-color-accent);
+    color: var(--sl-color-text-invert);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .since {
+    flex: 1 1 18rem;
+    color: #c9c4b9;
+    font-size: 0.9375rem;
+  }
+
+  .waiting {
+    font-family: var(--sl-font-mono);
+    font-size: 0.8125rem;
+    color: var(--sl-color-accent);
+  }
+</style>

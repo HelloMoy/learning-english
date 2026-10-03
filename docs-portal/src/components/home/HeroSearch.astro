@@ -1,0 +1,88 @@
+---
+/**
+ * A search field under the home headline. It is a button drawn as a field:
+ * activating it opens Starlight's own search dialog, the one the header's
+ * search and the keyboard shortcut open.
+ */
+---
+
+<button type="button" class="hero-search" data-hero-search aria-label="Search the docs">
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    aria-hidden="true"
+  >
+    <circle cx="11" cy="11" r="7"></circle>
+    <path d="m20 20-3.5-3.5"></path>
+  </svg>
+  <span class="placeholder">Search components, modules, emails, releases…</span>
+  <kbd data-shortcut>Ctrl K</kbd>
+</button>
+
+<script>
+  const openStarlightSearch = (event: Event) => {
+    // Starlight closes its dialog on any click outside it; this click would
+    // reach the window right after opening it and close it again.
+    event.stopPropagation();
+    document.querySelector<HTMLButtonElement>("site-search button[data-open-modal]")?.click();
+  };
+
+  for (const field of document.querySelectorAll("[data-hero-search]")) {
+    field.addEventListener("click", openStarlightSearch);
+  }
+
+  if (/Mac|iPhone|iPad/.test(navigator.userAgent)) {
+    for (const shortcut of document.querySelectorAll("[data-shortcut]")) {
+      shortcut.textContent = "⌘K";
+    }
+  }
+</script>
+
+<style>
+  .hero-search {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 38.75rem;
+    min-height: 3.5rem;
+    margin-top: 2.25rem;
+    padding: 0 1.125rem;
+    border: 1px solid #3a3a46;
+    border-radius: 0.875rem;
+    background: var(--sl-color-bg-nav);
+    box-shadow: 0 0 0 6px rgb(231 182 76 / 0.06);
+    color: var(--sl-color-gray-3);
+    font: inherit;
+    font-size: 1rem;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .hero-search:hover,
+  .hero-search:focus-visible {
+    border-color: var(--sl-color-accent);
+    outline: none;
+  }
+
+  .placeholder {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  kbd {
+    padding: 0.2rem 0.45rem;
+    border: 1px solid var(--sl-color-hairline);
+    border-radius: 0.375rem;
+    font-family: var(--sl-font-mono);
+    font-size: 0.75rem;
+  }
+</style>

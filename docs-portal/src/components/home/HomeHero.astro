@@ -1,0 +1,78 @@
+---
+/**
+ * The portal home's hero, in place of Starlight's: a cinema marquee eyebrow,
+ * the headline and lede from the page's `hero` front matter, and a search
+ * field. The home is the only page with `hero` front matter, so it is the only
+ * page this renders on.
+ */
+import HeroSearch from "./HeroSearch.astro";
+
+const { data } = Astro.locals.starlightRoute.entry;
+const { title = data.title, tagline } = data.hero ?? {};
+---
+
+<section class="home-hero not-content">
+  <p class="eyebrow">NOW SHOWING · ENGLISH COURSE DOCS</p>
+  {/* `_top` is Starlight's page-title id: its skip link and "Overview" point at it. */}
+  <h1 id="_top" data-page-title set:html={title} />
+  {tagline && <p class="lede" set:html={tagline} />}
+  <HeroSearch />
+</section>
+
+<style>
+  .home-hero {
+    position: relative;
+    /* The glow is wider than a phone. Clip it sideways only: unlike
+       `hidden`, `clip` leaves the other axis visible, so the glow still
+       rises behind the header. */
+    overflow-x: clip;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4.5rem 0 2.5rem;
+    text-align: center;
+  }
+
+  .home-hero::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: -18rem;
+    left: 50%;
+    width: min(68rem, 140vw);
+    height: 45rem;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(240 200 105 / 0.18), rgb(240 200 105 / 0));
+    pointer-events: none;
+  }
+
+  .eyebrow {
+    margin: 0 0 1.1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    color: var(--sl-color-accent);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2.6rem, 6.4vw, 5rem);
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--sl-color-white);
+  }
+
+  h1 :global(.accent) {
+    color: var(--sl-color-accent);
+  }
+
+  .lede {
+    max-width: 40rem;
+    margin: 1.4rem 0 0;
+    font-size: 1.1875rem;
+    line-height: 1.55;
+    color: #c9c4b9;
+  }
+</style>

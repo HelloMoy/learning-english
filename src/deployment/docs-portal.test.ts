@@ -95,12 +95,10 @@ describe("the portal's Astro config", () => {
     expect(astroConfig).not.toMatch(/\bbase:/);
   });
 
-  test.each(["/storybook/", "/api/", "/emails/", "/changelog/", "/architecture/"])(
-    "links %s from the sidebar",
-    (reference) => {
-      expect(astroConfig).toContain(`link: "${reference}"`);
-    },
-  );
+  test("takes its sidebar from navigation.mjs", () => {
+    expect(astroConfig).toMatch(/import \{ SIDEBAR \} from "\.\/src\/navigation\.mjs";/);
+    expect(astroConfig).toMatch(/sidebar: SIDEBAR,/);
+  });
 
   test.each(["ThemeProvider", "ThemeSelect", "SiteTitle"])(
     "replaces Starlight's %s with the portal's own",
