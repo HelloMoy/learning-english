@@ -47,7 +47,7 @@ The reference's `index.html` SHALL be a home page generated from the project
 model, containing, in order:
 
 1. A marquee with a gold eyebrow naming the project, a headline, a one-line
-   lede, and badges for the package version and the number of documented
+   lede, and badges for the release version and the number of documented
    modules.
 2. One poster per hexagonal layer — use cases (`domain/use-cases`), ports
    (`domain/ports`), entities (`domain/entities`), adapters (`adapters`),
@@ -66,6 +66,11 @@ model, containing, in order:
    summarised by what it does rather than by a helper type it declares first.
 
 The counts SHALL be computed at generation time, never written by hand.
+
+The release version SHALL be what `git describe --tags` reports for the
+documented checkout — the latest version tag, followed by the number of
+commits since it and the commit when the checkout is ahead of it — and SHALL
+fall back to the `package.json` version when no tag can be read.
 
 #### Scenario: Layer counts follow the code
 - **WHEN** the project documents 13 modules under `domain/use-cases/`
@@ -94,6 +99,14 @@ The counts SHALL be computed at generation time, never written by hand.
 #### Scenario: Group order
 - **WHEN** the index is rendered
 - **THEN** the `domain/use-cases`, `domain/ports`, `domain/entities`, `adapters`, `hooks` and `components` groups appear before every other group, in that order
+
+#### Scenario: The badge names the release
+- **WHEN** the reference is generated on a checkout 12 commits after `v0.5.0`
+- **THEN** the version badge reads `v0.5.0-12-g<short hash>`, not the `package.json` version
+
+#### Scenario: No tags to read
+- **WHEN** the reference is generated where git has no version tag
+- **THEN** the badge shows `v` followed by the `package.json` version
 
 ### Requirement: Declaration pages carry cinema chrome
 
