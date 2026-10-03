@@ -46,7 +46,14 @@ describe("the root package.json", () => {
       "pnpm --dir docs-portal run build",
       "storybook build -o docs-portal/dist/storybook",
       "pnpm run docs --out docs-portal/dist/api",
+      "pnpm portal:story-assets",
     ]);
+  });
+
+  test("mirrors the story media folders to the site root with its script", () => {
+    expect(rootPackage.scripts["portal:story-assets"]).toBe(
+      "tsx scripts/mirror-story-assets/mirror-story-assets.ts",
+    );
   });
 
   test("renders the email gallery with its script", () => {
