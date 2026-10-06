@@ -131,6 +131,14 @@ describe("SiteHeader", () => {
       // Assert
       expect(screen.getByRole("banner", { name: "navLabel" })).toBeInTheDocument();
     });
+
+    test("WHEN rendered THEN it is named for route transitions, so it can be held still", () => {
+      // Act
+      render(<SiteHeader />);
+
+      // Assert
+      expect(screen.getByRole("banner")).toHaveClass("[view-transition-name:site-header]");
+    });
   });
 
   describe("GIVEN the active route is a lesson page", () => {
