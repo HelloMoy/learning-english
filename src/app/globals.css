@@ -924,3 +924,326 @@
     animation: none;
   }
 }
+
+/*
+ * Route transitions — how a page leaves and the next one arrives.
+ *
+ * Every in-app navigation carries one transition type, `route-<motion>`, chosen
+ * from the route it starts on and the route it lands on (`src/lib/route-motion`).
+ * `RouteTransition`, in the locale layout, hands that same string to the browser
+ * as the view-transition class of the page, and the rules below are the seven
+ * motions. A navigation with no type — browser back, a server redirect, content
+ * replacing a loading skeleton — matches none of them and stays a hard cut.
+ *
+ * Only the page moves. The header is snapshotted on its own and pinned, because
+ * a page scrolled beneath a sticky header would otherwise be painted over it for
+ * the length of the transition.
+ *
+ * The three curves are the ones the keyframes above already use: `enter` for
+ * something arriving, `exit` for something leaving, `move` for one thing
+ * travelling the whole way.
+ */
+:root {
+  --motion-ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-ease-exit: cubic-bezier(0.55, 0, 0.35, 1);
+  --motion-ease-move: cubic-bezier(0.65, 0, 0.35, 1);
+  --route-slide: 36px;
+}
+
+::view-transition-group(site-header) {
+  z-index: 100;
+  animation: none;
+}
+
+::view-transition-old(site-header) {
+  display: none;
+}
+
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+@keyframes route-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes route-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* One pair of keyframes for every offset and scale: each rule says where its
+   snapshot starts or ends by setting the properties these read. */
+@keyframes route-arrive {
+  from {
+    transform: translate(var(--route-from-x, 0), var(--route-from-y, 0))
+      scale(var(--route-from-scale, 1));
+  }
+}
+
+@keyframes route-leave {
+  to {
+    transform: translate(var(--route-to-x, 0), var(--route-to-y, 0)) scale(var(--route-to-scale, 1));
+  }
+}
+
+@keyframes route-dim {
+  to {
+    filter: brightness(0.6);
+  }
+}
+
+@keyframes route-undim {
+  from {
+    filter: brightness(0.6);
+  }
+}
+
+/*
+ * The browser's default blends old and new with `plus-lighter`, which is right
+ * for a crossfade and wrong the moment one opaque page slides over another.
+ * The scale origin sits near the middle of the first screenful rather than the
+ * middle of the snapshot, which on a long page is far below the fold.
+ */
+::view-transition-old(.route-slide-forward),
+::view-transition-old(.route-slide-back),
+::view-transition-old(.route-depth-in),
+::view-transition-old(.route-depth-out),
+::view-transition-old(.route-rise),
+::view-transition-old(.route-sink),
+::view-transition-old(.route-fade),
+::view-transition-new(.route-slide-forward),
+::view-transition-new(.route-slide-back),
+::view-transition-new(.route-depth-in),
+::view-transition-new(.route-depth-out),
+::view-transition-new(.route-rise),
+::view-transition-new(.route-sink),
+::view-transition-new(.route-fade) {
+  mix-blend-mode: normal;
+  transform-origin: 50% 40vh;
+}
+
+/* Sideways: sections, sibling views, onboarding steps, account forms. */
+::view-transition-old(.route-slide-forward) {
+  --route-to-x: calc(var(--route-slide) * -1);
+  animation:
+    150ms var(--motion-ease-exit) both route-fade-out,
+    150ms var(--motion-ease-exit) both route-leave;
+}
+
+::view-transition-new(.route-slide-forward) {
+  --route-from-x: var(--route-slide);
+  animation:
+    300ms var(--motion-ease-enter) 110ms both route-fade-in,
+    300ms var(--motion-ease-enter) 110ms both route-arrive;
+}
+
+::view-transition-old(.route-slide-back) {
+  --route-to-x: var(--route-slide);
+  animation:
+    150ms var(--motion-ease-exit) both route-fade-out,
+    150ms var(--motion-ease-exit) both route-leave;
+}
+
+::view-transition-new(.route-slide-back) {
+  --route-from-x: calc(var(--route-slide) * -1);
+  animation:
+    300ms var(--motion-ease-enter) 110ms both route-fade-in,
+    300ms var(--motion-ease-enter) 110ms both route-arrive;
+}
+
+/* Deeper into the course tree: the new page comes towards the learner. */
+::view-transition-old(.route-depth-in) {
+  --route-to-scale: 1.04;
+  animation:
+    170ms var(--motion-ease-exit) both route-fade-out,
+    170ms var(--motion-ease-exit) both route-leave;
+}
+
+::view-transition-new(.route-depth-in) {
+  --route-from-scale: 0.96;
+  animation:
+    340ms var(--motion-ease-enter) 100ms both route-fade-in,
+    340ms var(--motion-ease-enter) 100ms both route-arrive;
+}
+
+/* Back out: the same move, reversed. */
+::view-transition-old(.route-depth-out) {
+  --route-to-scale: 0.96;
+  animation:
+    150ms var(--motion-ease-exit) both route-fade-out,
+    150ms var(--motion-ease-exit) both route-leave;
+}
+
+::view-transition-new(.route-depth-out) {
+  --route-from-scale: 1.04;
+  animation:
+    300ms var(--motion-ease-enter) 90ms both route-fade-in,
+    300ms var(--motion-ease-enter) 90ms both route-arrive;
+}
+
+/* Into an account page from the app. */
+::view-transition-old(.route-rise) {
+  animation: 140ms linear both route-fade-out;
+}
+
+::view-transition-new(.route-rise) {
+  --route-from-y: 36px;
+  animation:
+    360ms var(--motion-ease-enter) 80ms both route-fade-in,
+    360ms var(--motion-ease-enter) 80ms both route-arrive;
+}
+
+/* Out of the account or onboarding flow: it drops away, on top of the app. */
+::view-transition-old(.route-sink) {
+  --route-to-y: 36px;
+  z-index: 1;
+  animation:
+    220ms var(--motion-ease-exit) both route-fade-out,
+    220ms var(--motion-ease-exit) both route-leave;
+}
+
+::view-transition-new(.route-sink) {
+  animation: 240ms linear 60ms both route-fade-in;
+}
+
+/* Routes with no place in the app's map: legal pages, unknown paths. */
+::view-transition-old(.route-fade) {
+  animation: 120ms linear both route-fade-out;
+}
+
+::view-transition-new(.route-fade) {
+  animation: 200ms linear 80ms both route-fade-in;
+}
+
+/*
+ * On a phone, depth is a push and the account pages are a sheet: whole pages
+ * travelling edge to edge, the way the platform's own navigation does.
+ *
+ * A page snapshot is transparent wherever the page is — the backdrop is fixed
+ * and belongs to neither page — so one page cannot simply cover another. The
+ * page underneath is clipped along the edge of the one on top instead. The 72%
+ * is what is left of the width once the lower page has shifted its own 28%;
+ * both run on one curve and one duration, which keeps the cut on that edge.
+ */
+@keyframes route-covered-from-right {
+  to {
+    clip-path: inset(0 72% 0 0);
+  }
+}
+
+@keyframes route-uncovered-to-right {
+  from {
+    clip-path: inset(0 72% 0 0);
+  }
+}
+
+@keyframes route-covered-from-below {
+  from {
+    clip-path: inset(0 0 calc(100% - 100vh) 0);
+  }
+
+  to {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+
+@keyframes route-uncovered-to-below {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  to {
+    clip-path: inset(0 0 calc(100% - 100vh) 0);
+  }
+}
+
+@media (max-width: 639px) {
+  :root {
+    --route-slide: 64px;
+  }
+
+  ::view-transition-old(.route-depth-in) {
+    --route-to-x: -28%;
+    --route-to-scale: 1;
+    animation:
+      380ms var(--motion-ease-enter) both route-leave,
+      380ms var(--motion-ease-enter) both route-dim,
+      380ms var(--motion-ease-enter) both route-covered-from-right;
+  }
+
+  ::view-transition-new(.route-depth-in) {
+    --route-from-x: 100%;
+    --route-from-scale: 1;
+    animation: 380ms var(--motion-ease-enter) both route-arrive;
+  }
+
+  ::view-transition-old(.route-depth-out) {
+    --route-to-x: 100%;
+    --route-to-scale: 1;
+    z-index: 1;
+    animation: 340ms var(--motion-ease-enter) both route-leave;
+  }
+
+  ::view-transition-new(.route-depth-out) {
+    --route-from-x: -28%;
+    --route-from-scale: 1;
+    animation:
+      340ms var(--motion-ease-enter) both route-arrive,
+      340ms var(--motion-ease-enter) both route-undim,
+      340ms var(--motion-ease-enter) both route-uncovered-to-right;
+  }
+
+  ::view-transition-old(.route-rise) {
+    animation:
+      420ms var(--motion-ease-enter) both route-dim,
+      420ms var(--motion-ease-enter) both route-covered-from-below;
+  }
+
+  ::view-transition-new(.route-rise) {
+    --route-from-y: 100vh;
+    animation: 420ms var(--motion-ease-enter) both route-arrive;
+  }
+
+  ::view-transition-old(.route-sink) {
+    --route-to-y: 100vh;
+    animation: 380ms var(--motion-ease-exit) both route-leave;
+  }
+
+  ::view-transition-new(.route-sink) {
+    animation:
+      380ms var(--motion-ease-exit) both route-undim,
+      380ms var(--motion-ease-exit) both route-uncovered-to-below;
+  }
+}
+
+/*
+ * Reduced motion keeps the handoff and drops the travel: every route change is
+ * the same short crossfade. Declared here, and last, because the page-wide rule
+ * near the top of this file selects elements, and these are pseudo-elements of
+ * the document that `*` never matches.
+ */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(.route-slide-forward),
+  ::view-transition-old(.route-slide-back),
+  ::view-transition-old(.route-depth-in),
+  ::view-transition-old(.route-depth-out),
+  ::view-transition-old(.route-rise),
+  ::view-transition-old(.route-sink),
+  ::view-transition-old(.route-fade) {
+    animation: 120ms linear both route-fade-out;
+  }
+
+  ::view-transition-new(.route-slide-forward),
+  ::view-transition-new(.route-slide-back),
+  ::view-transition-new(.route-depth-in),
+  ::view-transition-new(.route-depth-out),
+  ::view-transition-new(.route-rise),
+  ::view-transition-new(.route-sink),
+  ::view-transition-new(.route-fade) {
+    animation: 120ms linear both route-fade-in;
+  }
+}
