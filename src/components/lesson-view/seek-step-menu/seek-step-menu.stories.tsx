@@ -8,7 +8,7 @@ import { defaultLayoutIcons, DefaultVideoLayout } from "@vidstack/react/player/l
 import { SeekStepMenu } from "./seek-step-menu";
 
 /**
- * The entry the player's settings menu grows for the double-tap seek.
+ * The entry the player's settings menu grows for the seek step.
  *
  * Every story stands up a real `DefaultVideoLayout` and mounts the component
  * in the slot the app uses, rather than faking the layout's context around it.

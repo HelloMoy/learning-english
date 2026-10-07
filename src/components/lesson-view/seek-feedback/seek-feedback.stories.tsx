@@ -8,7 +8,8 @@ import { SeekFeedback } from "./seek-feedback";
  * The indicator is absolutely positioned against the player box, so every
  * story stands one in: a dark 16:9 frame like the player in the lesson page.
  * In the app it exists only while a seek run is active — from a double tap
- * on an edge until the taps stop — and the count grows with every tap.
+ * on an edge, or a press of an arrow key, until the taps and presses stop —
+ * and the count grows with every one of them.
  *
  * The chevrons pulse in sequence for as long as the story is mounted, and
  * the half-disc's entrance runs once per mount; switch stories or toggle a

@@ -1,5 +1,5 @@
 /**
- * How far one double-tap seek may move the video, in seconds — the closed set
+ * How far one seek step may move the video, in seconds — the closed set
  * the learner chooses from, in the order the menu lists them.
  *
  * @remarks
@@ -77,7 +77,7 @@ export function parseSeekStepSeconds(stored: string | null): SeekStepSeconds {
 export type SeekDirection = "backward" | "forward";
 
 /**
- * A run of edge taps that seek in one direction.
+ * A run of edge taps, or of seek-key presses, that seek in one direction.
  *
  * @remarks
  * `anchorTime` is where the video was when the run started, and every target
@@ -100,7 +100,8 @@ export type SeekRun = {
 /**
  * Starts a one-step run from where the video is.
  *
- * @param direction - The side that was double-tapped
+ * @param direction - The side that was double-tapped, or the way the seek
+ *                    key that was pressed points
  * @param anchorTime - The playback position at that moment, in seconds
  * @param stepSeconds - The learner's step, which this run keeps for its life
  * @returns A run of one step anchored there

@@ -12,8 +12,9 @@ import { useTranslations } from "next-intl";
  * The seek-step setting, as an entry in the player's own settings menu.
  *
  * @remarks
- * How far a double tap on an edge of the video skips — five, ten or twenty
- * seconds — chosen where a learner already looks for playback settings, beside
+ * How far one seek step reaches — a double tap on an edge of the video, or a
+ * press of an arrow key — chosen from the intervals `seek-run` offers, where a
+ * learner already looks for playback settings, beside
  * Speed and Accessibility. It renders nothing on its own; it is meant for a
  * `DefaultVideoLayout` slot, and `LessonVideoPlayer` mounts it in
  * `settingsMenuItemsEnd`.
