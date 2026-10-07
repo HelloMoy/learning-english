@@ -10,7 +10,7 @@ import { devices, type Locator, type Page } from "@playwright/test";
 import { skipOnCi } from "./ci-unavailable";
 import { modulesOfCourse } from "./content-seed-fixtures";
 import { expect, test } from "./learner-profile-fixture";
-import { currentTimeOf, playbackRateOf } from "./media-player-state";
+import { currentTimeOf, lastLibraryShortcutOf, playbackRateOf } from "./media-player-state";
 
 /**
  * iPhone emulation minus `defaultBrowserType`, which Playwright refuses inside
@@ -261,8 +261,27 @@ async function doubleTap(page: Page, spot: { x: number; y: number }) {
   await page.touchscreen.tap(spot.x, spot.y);
 }
 
+/**
+ * The Player's own status region: the seek indicator or the speed one.
+ *
+ * Scoped to the player because the page has a status region of its own — the
+ * ticket toast's, mounted for every signed-in learner and empty until a
+ * ticket is earned — so a page-wide query for the role answers with two
+ * elements and the first is never the indicator.
+ */
+function playerStatus(page: Page): Locator {
+  return page.locator("[data-media-player]").getByRole("status");
+}
+
 /** Matches a label that counts this many seconds — the indicator's, or an option's. */
 const countOf = (seconds: number) => new RegExp(`\\b${seconds}\\b`);
+
+/**
+ * How far the Default Layout's own keyboard seek moves the video: its
+ * `seekStep`, which this Player never sets. It is the step a seek key had
+ * before the learner's one governed it.
+ */
+const LAYOUT_SEEK_STEP_SECONDS = 10;
 
 const SETTINGS = messages.Components.VideoPlayer.settings;
 
@@ -456,11 +475,89 @@ test.describe("GIVEN a browser that can take the player fullscreen", () => {
       .locator("[data-media-provider]")
       .dblclick({ position: { x: box.width * 0.9, y: box.height * 0.3 } });
 
-    await expect(page.getByRole("status")).toHaveAttribute("data-direction", "forward");
-    await expect(page.getByRole("status")).toHaveText(countOf(DEFAULT_SEEK_STEP_SECONDS));
+    await expect(playerStatus(page)).toHaveAttribute("data-direction", "forward");
+    await expect(playerStatus(page)).toHaveText(countOf(DEFAULT_SEEK_STEP_SECONDS));
     await expect
       .poll(() => currentTimeOf(player))
       .toBeGreaterThanOrEqual(before + DEFAULT_SEEK_STEP_SECONDS - 0.5);
+  });
+
+  test("WHEN the right arrow is pressed THEN the video seeks one step and says so", async ({
+    page,
+  }) => {
+    const { player } = await openLesson(page);
+    await startPlayback(page, player);
+    await focusThePlayer(player);
+    const before = await currentTimeOf(player);
+
+    await page.keyboard.press("ArrowRight");
+
+    await expect(playerStatus(page)).toHaveAttribute("data-direction", "forward");
+    await expect(playerStatus(page)).toHaveText(countOf(DEFAULT_SEEK_STEP_SECONDS));
+    await expect
+      .poll(() => currentTimeOf(player))
+      .toBeGreaterThanOrEqual(before + DEFAULT_SEEK_STEP_SECONDS - 0.5);
+    // One step, not the layout's own: left to the library the key lands
+    // LAYOUT_SEEK_STEP_SECONDS on, whatever the learner chose.
+    expect(await currentTimeOf(player)).toBeLessThan(before + LAYOUT_SEEK_STEP_SECONDS - 0.5);
+  });
+
+  test("WHEN a longer step is chosen THEN the arrow seeks by that step", async ({ page }) => {
+    const CHOSEN = 10;
+    const { player } = await openLesson(page);
+    await startPlayback(page, player);
+    await chooseSeekStep(page, CHOSEN);
+    await focusThePlayer(player);
+    const before = await currentTimeOf(player);
+
+    await page.keyboard.press("ArrowRight");
+
+    await expect(playerStatus(page)).toHaveText(countOf(CHOSEN));
+    await expect.poll(() => currentTimeOf(player)).toBeGreaterThanOrEqual(before + CHOSEN - 0.5);
+  });
+
+  test("WHEN the arrow follows a click on the timeline THEN it still seeks one step", async ({
+    page,
+  }) => {
+    // The click leaves keyboard focus on the time slider, whose own arrows
+    // move by the layout's step and draw nothing.
+    const { player } = await openLesson(page);
+    await startPlayback(page, player);
+    const timeline = page.locator("[data-media-time-slider]");
+    await timeline.click();
+    await expect(timeline).toBeFocused();
+
+    await page.keyboard.press("ArrowLeft");
+
+    await expect(playerStatus(page)).toHaveAttribute("data-direction", "backward");
+    await expect(playerStatus(page)).toHaveText(countOf(DEFAULT_SEEK_STEP_SECONDS));
+  });
+
+  test("WHEN the mute key is pressed THEN the library answers it with its own display", async ({
+    page,
+  }) => {
+    // The control for the test below: a shortcut this Player leaves to the
+    // library is still the library's, display included.
+    const { player } = await openLesson(page);
+    await startPlayback(page, player);
+    await focusThePlayer(player);
+
+    await page.keyboard.press("m");
+
+    await expect.poll(() => lastLibraryShortcutOf(player)).toBe("toggleMuted");
+  });
+
+  test("WHEN an arrow is pressed THEN the library's own display has nothing to draw", async ({
+    page,
+  }) => {
+    const { player } = await openLesson(page);
+    await startPlayback(page, player);
+    await focusThePlayer(player);
+
+    await page.keyboard.press("ArrowRight");
+
+    await expect(playerStatus(page)).toHaveText(countOf(DEFAULT_SEEK_STEP_SECONDS));
+    expect(await lastLibraryShortcutOf(player)).toBeNull();
   });
 
   test("WHEN the video is pressed and held THEN it runs at double speed", async ({ page }) => {
@@ -469,7 +566,7 @@ test.describe("GIVEN a browser that can take the player fullscreen", () => {
 
     await pressAndHoldTheVideo(page, player);
 
-    await expect(page.getByRole("status")).toHaveText(RATE_LABEL);
+    await expect(playerStatus(page)).toHaveText(RATE_LABEL);
     await expect.poll(() => playbackRateOf(player)).toBe(HOLD_PLAYBACK_RATE);
   });
 
@@ -479,11 +576,11 @@ test.describe("GIVEN a browser that can take the player fullscreen", () => {
     const { player } = await openLesson(page);
     await startPlayback(page, player);
     await pressAndHoldTheVideo(page, player);
-    await expect(page.getByRole("status")).toBeVisible();
+    await expect(playerStatus(page)).toBeVisible();
 
     await page.mouse.up();
 
-    await expect(page.getByRole("status")).toHaveCount(0);
+    await expect(playerStatus(page)).toHaveCount(0);
     await expect.poll(() => playbackRateOf(player)).toBe(NORMAL_PLAYBACK_RATE);
     await expect(player).toHaveAttribute("data-playing", "");
   });
@@ -502,7 +599,7 @@ test.describe("GIVEN a browser that can take the player fullscreen", () => {
     await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.3 - 80, { steps: 10 });
     await page.waitForTimeout(2 * HOLD_ARM_DELAY_MS);
 
-    await expect(page.getByRole("status")).toHaveCount(0);
+    await expect(playerStatus(page)).toHaveCount(0);
     expect(await playbackRateOf(player)).toBe(NORMAL_PLAYBACK_RATE);
     await page.mouse.up();
   });
@@ -514,7 +611,7 @@ test.describe("GIVEN a browser that can take the player fullscreen", () => {
 
     await page.keyboard.down(" ");
 
-    await expect(page.getByRole("status")).toHaveText(RATE_LABEL);
+    await expect(playerStatus(page)).toHaveText(RATE_LABEL);
     await expect.poll(() => playbackRateOf(player)).toBe(HOLD_PLAYBACK_RATE);
   });
 
@@ -525,11 +622,11 @@ test.describe("GIVEN a browser that can take the player fullscreen", () => {
     await startPlayback(page, player);
     await focusThePlayer(player);
     await page.keyboard.down(" ");
-    await expect(page.getByRole("status")).toBeVisible();
+    await expect(playerStatus(page)).toBeVisible();
 
     await page.keyboard.up(" ");
 
-    await expect(page.getByRole("status")).toHaveCount(0);
+    await expect(playerStatus(page)).toHaveCount(0);
     await expect.poll(() => playbackRateOf(player)).toBe(NORMAL_PLAYBACK_RATE);
     await expect(player).toHaveAttribute("data-playing", "");
   });
@@ -587,7 +684,7 @@ test.describe("GIVEN a browser that can take the player fullscreen", () => {
       .locator("[data-media-provider]")
       .dblclick({ position: { x: box.width * 0.9, y: box.height * 0.3 } });
 
-    await expect(page.getByRole("status")).toHaveText(countOf(CHOSEN));
+    await expect(playerStatus(page)).toHaveText(countOf(CHOSEN));
     await expect.poll(() => currentTimeOf(player)).toBeGreaterThanOrEqual(before + CHOSEN - 0.5);
   });
 
@@ -925,8 +1022,8 @@ test.describe("GIVEN Safari on an iPhone", () => {
 
     await doubleTap(page, forwardEdge);
 
-    await expect(page.getByRole("status")).toHaveAttribute("data-direction", "forward");
-    await expect(page.getByRole("status")).toHaveText(countOf(DEFAULT_SEEK_STEP_SECONDS));
+    await expect(playerStatus(page)).toHaveAttribute("data-direction", "forward");
+    await expect(playerStatus(page)).toHaveText(countOf(DEFAULT_SEEK_STEP_SECONDS));
     await expect
       .poll(() => currentTimeOf(player))
       .toBeGreaterThanOrEqual(before + DEFAULT_SEEK_STEP_SECONDS - 0.5);
@@ -941,11 +1038,11 @@ test.describe("GIVEN Safari on an iPhone", () => {
     const before = await currentTimeOf(player);
     const { forwardEdge } = await touchSpotsOn(player);
     await doubleTap(page, forwardEdge);
-    await expect(page.getByRole("status")).toHaveText(countOf(DEFAULT_SEEK_STEP_SECONDS));
+    await expect(playerStatus(page)).toHaveText(countOf(DEFAULT_SEEK_STEP_SECONDS));
 
     await page.touchscreen.tap(forwardEdge.x, forwardEdge.y);
 
-    await expect(page.getByRole("status")).toHaveText(countOf(2 * DEFAULT_SEEK_STEP_SECONDS));
+    await expect(playerStatus(page)).toHaveText(countOf(2 * DEFAULT_SEEK_STEP_SECONDS));
     await expect
       .poll(() => currentTimeOf(player))
       .toBeGreaterThanOrEqual(before + 2 * DEFAULT_SEEK_STEP_SECONDS - 0.5);
@@ -961,12 +1058,12 @@ test.describe("GIVEN Safari on an iPhone", () => {
 
     await pressAndHoldTheVideo(page, player);
 
-    await expect(page.getByRole("status")).toHaveText(RATE_LABEL);
+    await expect(playerStatus(page)).toHaveText(RATE_LABEL);
     await expect.poll(() => playbackRateOf(player)).toBe(HOLD_PLAYBACK_RATE);
 
     await page.mouse.up();
 
-    await expect(page.getByRole("status")).toHaveCount(0);
+    await expect(playerStatus(page)).toHaveCount(0);
     await expect.poll(() => playbackRateOf(player)).toBe(NORMAL_PLAYBACK_RATE);
     await expect(player).toHaveAttribute("data-playing", "");
   });
@@ -995,7 +1092,7 @@ test.describe("GIVEN Safari on an iPhone", () => {
 
     await doubleTap(page, forwardEdge);
 
-    await expect(page.getByRole("status")).toHaveText(countOf(CHOSEN));
+    await expect(playerStatus(page)).toHaveText(countOf(CHOSEN));
     await expect.poll(() => currentTimeOf(player)).toBeGreaterThanOrEqual(before + CHOSEN - 0.5);
   });
 
@@ -1005,13 +1102,13 @@ test.describe("GIVEN Safari on an iPhone", () => {
     await startPlayback(page, player);
     const { forwardEdge, middle } = await touchSpotsOn(player);
     await doubleTap(page, forwardEdge);
-    await expect(page.getByRole("status")).toBeVisible();
+    await expect(playerStatus(page)).toBeVisible();
 
     await page.touchscreen.tap(middle.x, middle.y);
 
     // The run lapsing is the deterministic point after which a pause, had the
     // tap caused one, would already show on the player.
-    await expect(page.getByRole("status")).toHaveCount(0);
+    await expect(playerStatus(page)).toHaveCount(0);
     await expect(player).toHaveAttribute("data-playing", "");
   });
 
@@ -1021,8 +1118,8 @@ test.describe("GIVEN Safari on an iPhone", () => {
     await startPlayback(page, player);
     const { forwardEdge, middle } = await touchSpotsOn(player);
     await doubleTap(page, forwardEdge);
-    await expect(page.getByRole("status")).toBeVisible();
-    await expect(page.getByRole("status")).toHaveCount(0);
+    await expect(playerStatus(page)).toBeVisible();
+    await expect(playerStatus(page)).toHaveCount(0);
     await waitForTheControlsToHide(page);
 
     await page.touchscreen.tap(middle.x, middle.y);
@@ -1051,11 +1148,11 @@ test.describe("GIVEN an iPhone held in landscape with Safari's toolbar on screen
   test("WHEN the video is enlarged THEN the learner is asked for the gesture", async ({ page }) => {
     await openLesson(page);
     await revealControls(page);
-    await expect(page.getByRole("status")).toHaveCount(0);
+    await expect(playerStatus(page)).toHaveCount(0);
 
     await page.getByRole("button", { name: ENTER_FULLSCREEN }).click();
 
-    await expect(page.getByRole("status")).toContainText(GESTURE_HINT);
+    await expect(playerStatus(page)).toContainText(GESTURE_HINT);
   });
 
   test("WHEN the viewport reaches the screen's short side THEN the hint leaves on its own", async ({
@@ -1066,21 +1163,21 @@ test.describe("GIVEN an iPhone held in landscape with Safari's toolbar on screen
     await openLesson(page);
     await revealControls(page);
     await page.getByRole("button", { name: ENTER_FULLSCREEN }).click();
-    await expect(page.getByRole("status")).toContainText(GESTURE_HINT);
+    await expect(playerStatus(page)).toContainText(GESTURE_HINT);
 
     await page.setViewportSize({ width: 874, height: 402 });
 
-    await expect(page.getByRole("status")).toHaveCount(0);
+    await expect(playerStatus(page)).toHaveCount(0);
   });
 
   test("WHEN the hint is dismissed THEN it stays away", async ({ page }) => {
     await openLesson(page);
     await revealControls(page);
     await page.getByRole("button", { name: ENTER_FULLSCREEN }).click();
-    await expect(page.getByRole("status")).toContainText(GESTURE_HINT);
+    await expect(playerStatus(page)).toContainText(GESTURE_HINT);
 
     await page.getByRole("button", { name: DISMISS_HINT }).click();
 
-    await expect(page.getByRole("status")).toHaveCount(0);
+    await expect(playerStatus(page)).toHaveCount(0);
   });
 });
