@@ -77,7 +77,9 @@ export function SiteHeader({
 
   return (
     <header
-      className="sticky top-0 z-30 backdrop-blur-sm"
+      // Named so a route transition snapshots the header apart from the page
+      // and `globals.css` can hold it still, above the content moving under it.
+      className="sticky top-0 z-30 backdrop-blur-sm [view-transition-name:site-header]"
       aria-label={t("navLabel")}
     >
       {/* The gaps are minimums under `justify-between`: they only bind once the

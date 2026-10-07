@@ -33,6 +33,12 @@ function imageRemotePatterns(): NonNullable<NextConfig["images"]>["remotePattern
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  experimental: {
+    // Route navigations run through React's `<ViewTransition>`, which is what
+    // lets `RouteTransition` animate between pages. Experimental in Next 16.2:
+    // turning it off leaves every navigation a hard cut and nothing else.
+    viewTransition: true,
+  },
   images: {
     remotePatterns: imageRemotePatterns(),
   },
