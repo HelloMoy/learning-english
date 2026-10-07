@@ -130,6 +130,20 @@ describe("the tracked manifests' video sources", () => {
 
       expect(shared).toEqual([]);
     });
+
+    test("WHEN the /ð/ and /ŋ/ lessons are read THEN each plays its own lecture", () => {
+      const sourceByLessonPath = new Map(
+        declaredVideos().map((video) => [video.lessonPath, video.source]),
+      );
+
+      expect({
+        voicedTh: sourceByLessonPath.get("basic-course/3-consonants/13-th-voiced"),
+        ng: sourceByLessonPath.get("basic-course/3-consonants/21-ng"),
+      }).toEqual({
+        voicedTh: "https://www.youtube.com/embed/q_rv_7mopKU",
+        ng: "https://www.youtube.com/embed/jOF2i5teTfs",
+      });
+    });
   });
 });
 
