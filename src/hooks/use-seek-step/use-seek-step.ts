@@ -84,7 +84,8 @@ function defaultStep(): SeekStepSeconds {
  * Client hook: the seek step the learner chose, and the way to change it.
  *
  * @remarks
- * How far a double tap on the video skips is a **preference of the player's
+ * How far one seek step reaches — a double tap on an edge of the video, or a
+ * press of an arrow key — is a **preference of the player's
  * chrome**, not learner data. That is why it is stored here rather than behind
  * a domain port the way playback position, continue-watching and completion
  * are: no use case reasons about it, and the domain would gain an interface
