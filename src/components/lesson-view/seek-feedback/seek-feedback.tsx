@@ -13,9 +13,10 @@ import { useTranslations } from "next-intl";
 const CHEVRON_DELAYS_MS = [0, 120, 240];
 
 /**
- * The indicator drawn over the tapped half of the video while a seek run is
- * active: a translucent half-disc, three chevrons pointing the way the video
- * moved, and the seconds the run has seeked so far.
+ * The indicator drawn over one half of the video while a seek run is active —
+ * the half that was tapped, or the one a seek key points at: a translucent
+ * half-disc, three chevrons pointing the way the video moved, and the seconds
+ * the run has seeked so far.
  *
  * @remarks
  * It is an ordinary child of the player box, absolutely positioned against

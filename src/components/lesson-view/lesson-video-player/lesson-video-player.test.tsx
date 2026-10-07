@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 
+import { SEEK_KEYS } from "@/hooks/use-seek-keys/use-seek-keys";
 import { SEEK_STEP_STORAGE_KEY } from "@/hooks/use-seek-step/use-seek-step";
 import {
   HOLD_ARM_DELAY_MS,
@@ -99,6 +100,13 @@ const PAUSED_PLAYER: Record<string, unknown> = {
  * gesture reads is stubbed here rather than played into existence.
  */
 const PLAYING_PLAYER: Record<string, unknown> = { ...PAUSED_PLAYER, paused: false };
+
+/**
+ * A player whose video can be seeked, which jsdom never reports on its own —
+ * it takes a known duration. The seek keys ask before they seek; the taps do
+ * not, which is why the tap tests get by without it.
+ */
+const SEEKABLE_PLAYER: Record<string, unknown> = { ...PAUSED_PLAYER, canSeek: true };
 
 describe("LessonVideoPlayer", () => {
   beforeEach(() => {
@@ -742,6 +750,24 @@ describe("LessonVideoPlayer", () => {
       expect(rateChangesDuringARun).not.toHaveBeenCalled();
     });
 
+    test("WHEN a seek key started the run THEN a tap on that edge extends it", async () => {
+      // One run with two ways in: the keyboard's steps and the thumb's are
+      // counted together.
+      mockUseMediaState.mockImplementation(((prop: string) => SEEKABLE_PLAYER[prop]) as never);
+      const { player, provider } = renderPlayerWithSeekZones();
+      player.focus();
+      act(() => {
+        fireEvent.keyDown(player, { key: "ArrowRight" });
+      });
+
+      tapAt(provider, IN_FORWARD_ZONE);
+
+      expect(seek()).toHaveBeenLastCalledWith(2 * DEFAULT_SEEK_STEP_SECONDS, expect.anything());
+      expect(screen.getByRole("status")).toHaveTextContent(
+        `seconds:${2 * DEFAULT_SEEK_STEP_SECONDS}`,
+      );
+    });
+
     test("WHEN the run has ended THEN a single tap requests playback again", async () => {
       const { provider, playRequests } = renderPlayerWithSeekZones();
       await doubleTapAt(provider, IN_FORWARD_ZONE);
@@ -1053,6 +1079,229 @@ describe("LessonVideoPlayer", () => {
 
       expect(rateChanges).not.toHaveBeenCalled();
     });
+  });
+
+  describe("GIVEN a learner who presses a seek key", () => {
+    /*
+     * The keys are taken on the document before the library hears them, and
+     * handed to the same run a double tap starts. So what is observable here
+     * is what that run asks the remote for and the indicator it draws — and,
+     * for the library, that the key never became its "last keyboard action",
+     * which is the state its own display paints from.
+     */
+    const FORWARD_ARROW = "ArrowRight";
+    const BACKWARD_ARROW = "ArrowLeft";
+    /** A shortcut this Player leaves to the library, as the control. */
+    const MUTE_KEY = String(MEDIA_KEY_SHORTCUTS.toggleMuted);
+
+    let seekRequests: ReturnType<typeof vi.fn>;
+    let rateChanges: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      vi.useFakeTimers({
+        toFake: ["setTimeout", "clearTimeout", "requestAnimationFrame", "cancelAnimationFrame"],
+      });
+      mockUseTranslations.mockReturnValue(((key: string, values?: Record<string, number>) =>
+        values === undefined ? key : `${key}:${Object.values(values)[0]}`) as never);
+      seekRequests = vi.fn();
+      rateChanges = vi.fn();
+      mockUseMediaRemote.mockReturnValue({
+        seek: seekRequests,
+        changePlaybackRate: rateChanges,
+      } as never);
+      playerReports(SEEKABLE_PLAYER);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    function playerReports(state: Record<string, unknown>) {
+      mockUseMediaState.mockImplementation(((prop: string) => state[prop]) as never);
+    }
+
+    /** The player with keyboard focus on itself, where a click on the video leaves it. */
+    async function renderFocusedPlayer(
+      props: Partial<React.ComponentProps<typeof LessonVideoPlayer>> = {},
+    ) {
+      const ref = createRef<MediaPlayerInstance>();
+      renderPlayer(props, ref);
+      const player = screen.getByRole("region");
+      // Vidstack connects its components on a zero-delay timeout, and attaches
+      // its own key listener a microtask after the player takes focus — the
+      // control below is only a control once that listener is really there.
+      act(() => {
+        vi.runOnlyPendingTimers();
+      });
+      await act(async () => {
+        player.focus();
+        await Promise.resolve();
+      });
+      return { player, ref };
+    }
+
+    function press(key: string) {
+      act(() => {
+        fireEvent.keyDown(document.activeElement ?? document.body, { key });
+      });
+    }
+
+    const lastKeyboardActionOf = (ref: React.RefObject<MediaPlayerInstance | null>) =>
+      ref.current?.state.lastKeyboardAction;
+
+    test("WHEN the right arrow is pressed THEN the video is asked for one step forward", async () => {
+      await renderFocusedPlayer();
+
+      press(FORWARD_ARROW);
+
+      expect(seekRequests).toHaveBeenCalledTimes(1);
+      expect(seekRequests).toHaveBeenCalledWith(DEFAULT_SEEK_STEP_SECONDS, expect.anything());
+    });
+
+    test("WHEN the right arrow is pressed THEN the indicator shows one step forward", async () => {
+      await renderFocusedPlayer();
+
+      press(FORWARD_ARROW);
+
+      expect(screen.getByRole("status")).toHaveAttribute("data-direction", "forward");
+      expect(screen.getByRole("status")).toHaveTextContent(`seconds:${DEFAULT_SEEK_STEP_SECONDS}`);
+    });
+
+    test("WHEN the left arrow is pressed THEN the video is asked for one step back", async () => {
+      await renderFocusedPlayer();
+
+      press(BACKWARD_ARROW);
+
+      expect(seekRequests).toHaveBeenCalledWith(-DEFAULT_SEEK_STEP_SECONDS, expect.anything());
+      expect(screen.getByRole("status")).toHaveAttribute("data-direction", "backward");
+    });
+
+    test("WHEN the same arrow is pressed again THEN another step is added from the anchor", async () => {
+      await renderFocusedPlayer();
+      press(FORWARD_ARROW);
+
+      press(FORWARD_ARROW);
+
+      expect(seekRequests).toHaveBeenLastCalledWith(
+        2 * DEFAULT_SEEK_STEP_SECONDS,
+        expect.anything(),
+      );
+      expect(screen.getByRole("status")).toHaveTextContent(
+        `seconds:${2 * DEFAULT_SEEK_STEP_SECONDS}`,
+      );
+    });
+
+    test("WHEN the other arrow is pressed THEN the run turns around from where it was heading", async () => {
+      await renderFocusedPlayer();
+      press(FORWARD_ARROW);
+      press(FORWARD_ARROW);
+
+      press(BACKWARD_ARROW);
+
+      expect(seekRequests).toHaveBeenLastCalledWith(DEFAULT_SEEK_STEP_SECONDS, expect.anything());
+      expect(screen.getByRole("status")).toHaveAttribute("data-direction", "backward");
+      expect(screen.getByRole("status")).toHaveTextContent(`seconds:${DEFAULT_SEEK_STEP_SECONDS}`);
+    });
+
+    test("WHEN a longer step was chosen THEN the arrow seeks and counts in that step", async () => {
+      const CHOSEN_STEP = 10;
+      window.localStorage.setItem(SEEK_STEP_STORAGE_KEY, String(CHOSEN_STEP));
+      await renderFocusedPlayer();
+
+      press(FORWARD_ARROW);
+
+      expect(seekRequests).toHaveBeenCalledWith(CHOSEN_STEP, expect.anything());
+      expect(screen.getByRole("status")).toHaveTextContent(`seconds:${CHOSEN_STEP}`);
+    });
+
+    test("WHEN the presses stop THEN the indicator leaves after the window", async () => {
+      await renderFocusedPlayer();
+      press(FORWARD_ARROW);
+
+      act(() => {
+        vi.advanceTimersByTime(SEEK_RUN_WINDOW_MS);
+      });
+
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    test("WHEN the video cannot be seeked THEN nothing is asked and nothing is drawn", async () => {
+      playerReports({ ...SEEKABLE_PLAYER, canSeek: false });
+      await renderFocusedPlayer();
+
+      press(FORWARD_ARROW);
+
+      expect(seekRequests).not.toHaveBeenCalled();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    test("WHEN the player's shortcuts are suppressed THEN nothing is asked and nothing is drawn", async () => {
+      // The resume offer owns the keyboard while it is open.
+      await renderFocusedPlayer({ keyDisabled: true });
+
+      press(FORWARD_ARROW);
+
+      expect(seekRequests).not.toHaveBeenCalled();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    test("WHEN a hold is running THEN the arrow neither seeks nor ends it", async () => {
+      // A run would take the taps from the hold mid-press, and the release
+      // that followed would be read as one of the run's own.
+      playerReports({ ...SEEKABLE_PLAYER, paused: false });
+      const { player } = await renderFocusedPlayer();
+      const provider = player.querySelector("[data-media-provider]") as HTMLElement;
+      fireEvent.pointerDown(provider, { button: 0, clientX: 500, clientY: 50 });
+      act(() => {
+        vi.advanceTimersByTime(HOLD_ARM_DELAY_MS);
+      });
+
+      press(FORWARD_ARROW);
+
+      expect(seekRequests).not.toHaveBeenCalled();
+      expect(rateChanges).toHaveBeenCalledTimes(1);
+      expect(rateChanges).toHaveBeenCalledWith(HOLD_PLAYBACK_RATE);
+    });
+
+    test("WHEN the mute key is pressed THEN the library records it as its own", async () => {
+      // The control for the two assertions below: the library's display
+      // paints from this state, and a key it handles does set it.
+      const { ref } = await renderFocusedPlayer();
+
+      press(MUTE_KEY);
+
+      expect(lastKeyboardActionOf(ref)).toMatchObject({ action: "toggleMuted" });
+    });
+
+    test("WHEN an arrow is pressed THEN the library never records a key of its own", async () => {
+      const { ref } = await renderFocusedPlayer();
+
+      press(FORWARD_ARROW);
+
+      expect(lastKeyboardActionOf(ref)).toBeNull();
+    });
+
+    test("WHEN an arrow cannot seek THEN the library still never records it", async () => {
+      // Left to the library it would not seek either, but it would paint.
+      playerReports({ ...SEEKABLE_PLAYER, canSeek: false });
+      const { ref } = await renderFocusedPlayer();
+
+      press(FORWARD_ARROW);
+
+      expect(lastKeyboardActionOf(ref)).toBeNull();
+    });
+
+    test.each([
+      ["backward", MEDIA_KEY_SHORTCUTS.seekBackward],
+      ["forward", MEDIA_KEY_SHORTCUTS.seekForward],
+    ] as const)(
+      "WHEN the gesture names its %s keys THEN they are the player's own",
+      (direction, playerKeys) => {
+        // The hook spells them so it need not import the library; this is
+        // what keeps the two from drifting apart.
+        expect([...SEEK_KEYS[direction]].sort()).toEqual(String(playerKeys).split(" ").sort());
+      },
+    );
   });
 
   describe("GIVEN the player's chrome must be localized", () => {

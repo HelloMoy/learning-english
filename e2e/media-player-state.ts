@@ -42,6 +42,35 @@ async function playerReports<Key extends keyof ReportedState>(
   return value as ReportedState[Key];
 }
 
+/**
+ * The shortcut the library last handled itself, by the name of its action.
+ *
+ * @remarks
+ * This is the state the layout's keyboard display paints from, and it is read
+ * here rather than off that display because the display is on screen for half
+ * a second — a poll can miss it, and a miss reads as "never shown". The state
+ * stays set. It is unwrapped inside the page: the value also carries the DOM
+ * event, which does not survive the trip back.
+ *
+ * @param player - The `[data-media-player]` element, or any element inside it
+ * @returns The action's name, or `null` while the library has handled no key
+ */
+export async function lastLibraryShortcutOf(player: Locator): Promise<string | null> {
+  return player.evaluate((element) => {
+    let action: string | null = null;
+    element.dispatchEvent(
+      new CustomEvent("find-media-player", {
+        detail: (found: { state: { lastKeyboardAction: { action: string } | null } }) => {
+          action = found.state.lastKeyboardAction?.action ?? null;
+        },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+    return action;
+  });
+}
+
 /** Where the video really is, in seconds. */
 export const currentTimeOf = (player: Locator) => playerReports(player, "currentTime");
 
