@@ -128,6 +128,13 @@ import { buildVideoPlayerTranslations } from "./video-player-translations";
  * already placed, keyboard-navigable and touch-sized in both layouts and
  * inside the pinned player; the component's own JSDoc has the rest.
  *
+ * **The arrow keys seek by that same step, and say so the same way.** The
+ * library would move the video by the layout's own ten seconds and answer
+ * with its keyboard display; `PlaybackGestures` takes the seek keys instead
+ * and runs them through the double tap's seek run, so a key and a thumb move
+ * the lesson by one amount and draw one indicator. The library's display
+ * still answers the shortcuts this Player leaves to it.
+ *
  * The element is never portalled. Moving the player in the tree would remount
  * the provider `<iframe>`, reloading the embed and resetting `currentTime`
  * under the resume overlay and the position writes; a class costs none of that.
@@ -243,7 +250,7 @@ export function LessonVideoPlayer({
             alt=""
           />
         </MediaProvider>
-        <PlaybackGestures />
+        <PlaybackGestures keyDisabled={keyDisabled} />
         <DefaultVideoLayout
           icons={defaultLayoutIcons}
           translations={buildVideoPlayerTranslations(t)}

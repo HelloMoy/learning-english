@@ -1,5 +1,6 @@
 "use client";
 
+import { useSeekKeys } from "@/hooks/use-seek-keys/use-seek-keys";
 import { useSeekRun } from "@/hooks/use-seek-run/use-seek-run";
 import { useSeekStep } from "@/hooks/use-seek-step/use-seek-step";
 import { HOLD_PLAYBACK_RATE, useSpeedHold } from "@/hooks/use-speed-hold/use-speed-hold";
@@ -98,8 +99,21 @@ export const SEEK_ZONE_CLASS = "lesson-video-player__seek-zone";
  * release that ends it is never counted as a tap and never toggles playback
  * or the control bar — the same mechanism, and the same reason, as during a
  * run.
+ *
+ * **The seek keys are a second way into the same run.** The arrows, and the
+ * letter pair the library binds to the same two actions, are taken by
+ * `useSeekKeys` before the library hears them and handed to the `seekOneStep`
+ * a tap uses. So a key moves the video by the learner's step rather than the
+ * layout's, is answered by the run's indicator rather than the layout's
+ * keyboard display, and starts a run a tap can extend. A key is declined
+ * while the video cannot be seeked, and while a hold is armed: a run would
+ * take the taps from the hold mid-press, and the release that followed would
+ * be read as one of the run's own.
+ *
+ * @param keyDisabled - Whether the player's keyboard shortcuts are suppressed;
+ *                      the seek keys are left alone with the rest of them
  */
-export function PlaybackGestures() {
+export function PlaybackGestures({ keyDisabled = false }: { keyDisabled?: boolean }) {
   const player = useMediaPlayer();
   const remote = useMediaRemote();
   const { run, tap } = useSeekRun();
@@ -109,6 +123,7 @@ export function PlaybackGestures() {
   const isRunActive = run !== null;
   const isPaused = useMediaState("paused");
   const pointer = useMediaState("pointer");
+  const canSeek = useMediaState("canSeek");
   const canSetPlaybackRate = useMediaState("canSetPlaybackRate");
   const isHolding = useSpeedHold({
     player,
@@ -146,6 +161,14 @@ export function PlaybackGestures() {
     backwardZone,
     forwardZone,
     seekOneStep,
+  });
+
+  useSeekKeys({
+    player,
+    enabled: !keyDisabled,
+    onSeek: (direction, trigger) => {
+      if (canSeek && !isHolding) seekOneStep(direction, trigger);
+    },
   });
 
   return (
