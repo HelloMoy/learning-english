@@ -28,6 +28,7 @@ describe.skipIf(!DOCKER_AVAILABLE)("seedLearner (integration)", () => {
     const auth = createAuth({
       database: libsql.database,
       emailSender: { send: () => okAsync(undefined) },
+      afterResponse: (work) => void work(),
       secret: "x".repeat(32),
       baseURL: "http://localhost:3000",
       google: { clientId: "id", clientSecret: "secret" },

@@ -18,8 +18,17 @@ import { createAuthMiddleware, isAPIError } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { captcha } from "better-auth/plugins";
 import { hasLocale } from "next-intl";
+import { after } from "next/server";
 
 const PASSWORD_LENGTH = { min: 8, max: 128 } as const;
+
+/**
+ * Work that runs once the response is out. It settles either way: whatever
+ * can fail inside it is caught and reported there.
+ *
+ * @category Auth
+ */
+export type AfterResponseWork = () => Promise<void>;
 
 /**
  * Everything the auth configuration depends on, injected so a test can hand
@@ -30,6 +39,13 @@ const PASSWORD_LENGTH = { min: 8, max: 128 } as const;
 export type AuthDependencies = {
   database: Database;
   emailSender: EmailSender;
+  /**
+   * Runs work once the response is out and keeps the invocation alive until
+   * it settles. A bare unawaited promise is not a substitute: a serverless
+   * platform suspends the function when the response is sent, and the work
+   * is cut off mid-connection.
+   */
+  afterResponse: (work: AfterResponseWork) => void;
   secret: string;
   baseURL: string;
   google: { clientId: string; clientSecret: string };
@@ -52,7 +68,9 @@ export type AuthDependencies = {
  * changed: `onPasswordReset` covers the emailed reset link, and an `after`
  * hook covers the Profile form, which Better Auth offers no callback for. A
  * refused attempt notifies nobody — after hooks run for those too, so the
- * outcome is read rather than assumed.
+ * outcome is read rather than assumed. The notice is deferred, not abandoned:
+ * it goes to `afterResponse`, because a send left running as a bare promise
+ * is cut off when a serverless invocation is suspended behind its response.
  *
  * An email change takes two links, because `sendChangeEmailConfirmation` is
  * set and the learner's address is verified: an approval goes to the address
@@ -68,16 +86,20 @@ export function createAuth(dependencies: AuthDependencies) {
 
   /**
    * Tells an address that its password was replaced, without waiting for the
-   * mail server and without ever failing the change that caused it.
+   * mail server and without ever failing the change that caused it. The send
+   * is handed to the platform rather than left running, so it outlives the
+   * response instead of being suspended with it.
    *
    * The link is the forgot-password page and carries no token: the one reader
    * this notice exists for is the one who should not be handed a key.
    */
   const notifyPasswordChanged = (to: string, locale: string): void => {
     const recovery = `${dependencies.baseURL}/${locale}/forgot-password`;
-    void sendAccountEmail("password-changed", to, recovery).catch((cause: unknown) => {
-      console.error("Could not send the password-changed notice", cause);
-    });
+    dependencies.afterResponse(() =>
+      sendAccountEmail("password-changed", to, recovery).catch((cause: unknown) => {
+        console.error("Could not send the password-changed notice", cause);
+      }),
+    );
   };
 
   return betterAuth({
@@ -158,14 +180,22 @@ let processAuth: Auth | undefined;
  * @returns The process-wide auth instance
  */
 export function getAuth(): Auth {
-  processAuth ??= createAuth(dependenciesFromEnv());
+  processAuth ??= createAuth(authDependenciesFromEnv());
   return processAuth;
 }
 
-function dependenciesFromEnv(): AuthDependencies {
+/**
+ * What the auth instance runs on in a deployed process, read from the
+ * validated environment.
+ *
+ * @internal Exported for its test; the application reaches it through `getAuth`.
+ * @returns The production dependencies
+ */
+export function authDependenciesFromEnv(): AuthDependencies {
   const env = serverEnv();
   return {
     database: getDatabase(),
+    afterResponse: after,
     emailSender: new SmtpEmailSender({
       host: env.SMTP_HOST,
       port: env.SMTP_PORT,
