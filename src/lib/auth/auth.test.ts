@@ -2,6 +2,7 @@
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 
+import type { EmailSender } from "@/adapters/email/email-sender";
 import { SmtpEmailSender } from "@/adapters/email/smtp-email-sender/smtp-email-sender";
 import {
   account,
@@ -33,9 +34,18 @@ import {
 import { faker } from "@faker-js/faker";
 import { eq } from "drizzle-orm";
 import type { SQLiteTable } from "drizzle-orm/sqlite-core";
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { errAsync } from "neverthrow";
+import { after } from "next/server";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 
-import { createAuth, type Auth } from "./auth";
+import { resetServerEnvForTests } from "../server-env/server-env";
+import {
+  authDependenciesFromEnv,
+  createAuth,
+  type AfterResponseWork,
+  type Auth,
+  type AuthDependencies,
+} from "./auth";
 
 /**
  * Drives Better Auth through its real HTTP handler, against a real libSQL
@@ -83,15 +93,30 @@ describe.skipIf(!DOCKER_AVAILABLE)(
       siteverify?.close();
     });
 
-    function buildAuth({ rateLimited }: { rateLimited: boolean }): Auth {
+    /** A long-lived server's behaviour: the work starts as soon as it is handed over. */
+    const runAtOnce: AuthDependencies["afterResponse"] = (work) => void work();
+
+    function mailpitSender(): EmailSender {
+      return new SmtpEmailSender({
+        host: mailpit.smtpHost,
+        port: mailpit.smtpPort,
+        secure: false,
+        from: "English Course <no-reply@english-course.online>",
+      });
+    }
+
+    function buildAuth({
+      rateLimited,
+      afterResponse = runAtOnce,
+      emailSender = mailpitSender(),
+    }: {
+      rateLimited: boolean;
+      afterResponse?: AuthDependencies["afterResponse"];
+      emailSender?: EmailSender;
+    }): Auth {
       return createAuth({
         database: libsql.database,
-        emailSender: new SmtpEmailSender({
-          host: mailpit.smtpHost,
-          port: mailpit.smtpPort,
-          secure: false,
-          from: "English Course <no-reply@english-course.online>",
-        }),
+        emailSender,
         secret: "x".repeat(32),
         baseURL: BASE_URL,
         google: { clientId: "google-client-id", clientSecret: "google-client-secret" },
@@ -100,19 +125,47 @@ describe.skipIf(!DOCKER_AVAILABLE)(
           siteVerifyUrl: `http://127.0.0.1:${(siteverify.address() as AddressInfo).port}`,
         },
         rateLimited,
+        afterResponse,
       });
+    }
+
+    /** An auth whose after-response work is kept for the test to run, as a platform would. */
+    function authHoldingAfterResponseWork(emailSender?: EmailSender) {
+      const held: AfterResponseWork[] = [];
+      const holding = buildAuth({
+        rateLimited: false,
+        afterResponse: (work) => held.push(work),
+        emailSender,
+      });
+      return { holding, held };
+    }
+
+    function changePassword(
+      learner: Learner & { cookie: string },
+      currentPassword: string,
+      via: Auth,
+    ) {
+      return post(
+        "/change-password",
+        {
+          currentPassword,
+          newPassword: faker.internet.password({ length: 14 }),
+          revokeOtherSessions: true,
+        },
+        { cookie: learner.cookie, token: null, locale: "es", via },
+      );
     }
 
     function post(
       path: string,
       body: unknown,
-      init: { cookie?: string; token?: string | null; locale?: string } = {},
+      init: { cookie?: string; token?: string | null; locale?: string; via?: Auth } = {},
     ) {
       const headers = new Headers({ "content-type": "application/json", origin: BASE_URL });
       if (init.token !== null) headers.set("x-captcha-response", init.token ?? PASSING_TOKEN);
       if (init.cookie) headers.set("cookie", init.cookie);
       if (init.locale) headers.set("x-app-locale", init.locale);
-      return auth.handler(
+      return (init.via ?? auth).handler(
         new Request(`${BASE_URL}/api/auth${path}`, {
           method: "POST",
           headers,
@@ -490,6 +543,98 @@ describe.skipIf(!DOCKER_AVAILABLE)(
         .toBe(pt.Emails.PasswordChanged.subject);
     });
 
+    test("a completed reset hands the notice to the after-response runner instead of sending it", async () => {
+      const { holding, held } = authHoldingAfterResponseWork();
+      const learner = await verifiedLearner();
+      await post("/request-password-reset", {
+        email: learner.email,
+        redirectTo: "/pt/reset-password",
+      });
+      const token = new URL(await linkFromLatestEmail(learner.email)).pathname.split("/").at(-1);
+      const beforeTheReset = await latestSubjectTo(learner.email);
+
+      const reset = await post(
+        "/reset-password",
+        { newPassword: faker.internet.password({ length: 14 }), token },
+        { locale: "pt", via: holding },
+      );
+
+      expect(reset.status).toBe(200);
+      expect(held).toHaveLength(1);
+      await expect(latestSubjectTo(learner.email)).resolves.toBe(beforeTheReset);
+
+      await held[0]();
+
+      await expect(latestSubjectTo(learner.email)).resolves.toBe(pt.Emails.PasswordChanged.subject);
+    });
+
+    test("a completed change from the Profile form hands the notice to the after-response runner too", async () => {
+      const { holding, held } = authHoldingAfterResponseWork();
+      const learner = await signedInLearner();
+      const beforeTheChange = await latestSubjectTo(learner.email);
+
+      const changed = await changePassword(learner, learner.password, holding);
+
+      expect(changed.status).toBe(200);
+      expect(held).toHaveLength(1);
+      await expect(latestSubjectTo(learner.email)).resolves.toBe(beforeTheChange);
+
+      await held[0]();
+
+      await expect(latestSubjectTo(learner.email)).resolves.toBe(es.Emails.PasswordChanged.subject);
+    });
+
+    test("a change refused for the wrong current password registers no after-response work", async () => {
+      const { holding, held } = authHoldingAfterResponseWork();
+      const learner = await signedInLearner();
+
+      const refused = await changePassword(learner, "not-the-password", holding);
+
+      expect(refused.status).toBe(400);
+      expect(held).toHaveLength(0);
+    });
+
+    test("replaying a spent reset token registers no second piece of after-response work", async () => {
+      const { holding, held } = authHoldingAfterResponseWork();
+      const learner = await verifiedLearner();
+      await post("/request-password-reset", {
+        email: learner.email,
+        redirectTo: "/en/reset-password",
+      });
+      const token = new URL(await linkFromLatestEmail(learner.email)).pathname.split("/").at(-1);
+      await post("/reset-password", { newPassword: "first-new-password", token }, { via: holding });
+
+      const replay = await post(
+        "/reset-password",
+        { newPassword: "second-new-password", token },
+        { via: holding },
+      );
+
+      expect(replay.status).toBe(400);
+      expect(held).toHaveLength(1);
+    });
+
+    test("after-response work whose send fails settles instead of rejecting", async () => {
+      // A rejection here would reach the platform as an unhandled one.
+      const mailServerDown: EmailSender = {
+        send: () =>
+          errAsync({ kind: "email-delivery-failed", cause: new Error("mail server down") }),
+      };
+      const { holding, held } = authHoldingAfterResponseWork(mailServerDown);
+      const learner = await signedInLearner();
+      const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const changed = await changePassword(learner, learner.password, holding);
+
+      expect(changed.status).toBe(200);
+      await expect(held[0]()).resolves.toBeUndefined();
+      expect(logged).toHaveBeenCalledWith(
+        "Could not send the password-changed notice",
+        expect.any(Error),
+      );
+      logged.mockRestore();
+    });
+
     test("replaying a spent reset token notifies nobody a second time", async () => {
       const learner = await verifiedLearner();
       await post("/request-password-reset", {
@@ -560,6 +705,36 @@ function learnerRowFor(table: SQLiteTable, userId: string): LearnerRow {
   if (!row) throw new Error("A learner table has no seed row in this suite");
   return row(userId);
 }
+
+describe("authDependenciesFromEnv", () => {
+  const DEPLOYED_ENVIRONMENT = {
+    TURSO_DATABASE_URL: "http://127.0.0.1:8081",
+    BETTER_AUTH_SECRET: faker.string.alphanumeric(32),
+    BETTER_AUTH_URL: BASE_URL,
+    GOOGLE_CLIENT_ID: faker.string.alphanumeric(12),
+    GOOGLE_CLIENT_SECRET: faker.string.alphanumeric(24),
+    TURNSTILE_SECRET_KEY: faker.string.alphanumeric(35),
+    SMTP_HOST: "127.0.0.1",
+    SMTP_PORT: "1025",
+    SMTP_SECURE: "false",
+    EMAIL_FROM: "English Course <no-reply@english-course.online>",
+  };
+
+  beforeEach(() => {
+    for (const [name, value] of Object.entries(DEPLOYED_ENVIRONMENT)) vi.stubEnv(name, value);
+    resetServerEnvForTests();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    resetServerEnvForTests();
+  });
+
+  test("a deployed process hands after-response work to Next's after(), which keeps the invocation alive", () => {
+    // Any function satisfies the type, including one that drops the work.
+    expect(authDependenciesFromEnv().afterResponse).toBe(after);
+  });
+});
 
 function startSiteverifyStub(): Promise<Server> {
   const server = createServer((request, response) => {
