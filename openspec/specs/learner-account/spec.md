@@ -342,6 +342,12 @@ explicit rather than implied.
 The notice SHALL NOT block the response: a learner who changed their password waits for the change,
 not for the mail server.
 
+The notice SHALL outlive the response. Not waiting for it is not the same as abandoning it: on a
+serverless platform an invocation is suspended once its response is out, and a send that nobody
+registered is cut off mid-connection. The send SHALL therefore be handed to the platform's
+after-response mechanism, which keeps the invocation alive until the mail server has answered. It
+SHALL NOT be started as a bare unawaited promise.
+
 #### Scenario: Changing the password from the Profile page notifies the learner
 - **WHEN** a signed-in learner completes the change-password form on `/es/profile`
 - **THEN** Mailpit holds one Spanish notice for their address, saying the password changed and the other devices were signed out
@@ -358,7 +364,11 @@ not for the mail server.
 - **WHEN** a reset link is opened and submitted a second time
 - **THEN** the request is refused and no second notice is sent
 
-#### Scenario: The notice cannot be used to take the account over
-- **WHEN** the notice is rendered
-- **THEN** it holds no reset token and its only link opens the forgot-password page
+#### Scenario: The notice is handed to the platform rather than left running
+- **WHEN** a password is replaced, by either route
+- **THEN** the response is returned without the notice having been sent, and exactly one piece of after-response work is registered, which sends the notice when the platform runs it
+
+#### Scenario: A refused attempt registers no work
+- **WHEN** a password change or a reset is refused
+- **THEN** no after-response work is registered
 
