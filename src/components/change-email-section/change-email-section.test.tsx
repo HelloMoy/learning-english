@@ -106,4 +106,22 @@ describe("ChangeEmailSection", () => {
     expect(screen.getByLabelText(portuguese.newLabel)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: portuguese.submit })).toBeInTheDocument();
   });
+
+  test("WHEN it renders THEN the sentence naming the address on file is kept out of usage data", () => {
+    renderSection();
+
+    // PostHog blanks an element with this class in recordings and captures no
+    // click from it. See `NOT_CAPTURED_CLASS`.
+    expect(screen.getByText(copy.description.replace("{email}", CURRENT))).toHaveClass(
+      "ph-no-capture",
+    );
+  });
+
+  test("WHEN the request is accepted THEN the confirmation naming the address is kept out of usage data", async () => {
+    renderSection();
+
+    await submitAddress("ana.g@example.com");
+
+    expect(await screen.findByRole("status")).toHaveClass("ph-no-capture");
+  });
 });

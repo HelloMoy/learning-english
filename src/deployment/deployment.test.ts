@@ -38,4 +38,26 @@ describe("DEPLOYMENT.md", () => {
   test.each([...SERVER_ENV_VARIABLES])("documents %s", (name) => {
     expect(read("DEPLOYMENT.md")).toContain(name);
   });
+
+  /**
+   * The PostHog step, alone: from its heading to the next one. These are the
+   * settings the code silently depends on — none of them is a variable, so
+   * the test above cannot see them.
+   */
+  const postHogStep = () =>
+    read("DEPLOYMENT.md").match(/^## \d+\. PostHog[\s\S]*?(?=^## )/m)?.[0] ?? "";
+
+  test.each([
+    ["the US region, which cannot be changed afterwards", /US region/],
+    [
+      "cookieless tracking, without which a declining visitor's events are discarded",
+      /Cookieless tracking/,
+    ],
+    ["session replay", /[Ss]ession replay/],
+    ["two-factor authentication, because recordings show learners", /[Tt]wo-factor/],
+    ["that the personal API key is a secret and never public", /never .*`NEXT_PUBLIC_/],
+    ["how to sign the CLI in", /posthog-cli login/],
+  ])("its PostHog step names %s", (_what, pattern) => {
+    expect(postHogStep()).toMatch(pattern);
+  });
 });

@@ -1,6 +1,7 @@
 import { claimPrizeAction } from "@/app/[locale]/learner-actions";
 import { learnerStore } from "@/lib/learner-store/learner-store";
 import { givenLearner } from "@/test-setup/learner-store/learner-store";
+import { givenProductAnalytics } from "@/test-setup/product-analytics/product-analytics";
 
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -75,5 +76,29 @@ describe("useClaimedPrizes", () => {
   test("WHEN rendering on the server THEN the snapshot is empty and stable", () => {
     expect(claimedPrizesServerSnapshot().size).toBe(0);
     expect(claimedPrizesServerSnapshot()).toBe(claimedPrizesServerSnapshot());
+  });
+});
+
+describe("claimPrize — reporting", () => {
+  test("WHEN the claim is saved THEN it is reported for that module", async () => {
+    const client = givenProductAnalytics("granted");
+
+    act(() => claimPrize("2-vowels"));
+
+    await waitFor(() =>
+      expect(client.capture).toHaveBeenCalledExactlyOnceWith("prize_claimed", {
+        moduleSlug: "2-vowels",
+      }),
+    );
+  });
+
+  test("WHEN the server refuses THEN nothing is reported, because nothing was claimed", async () => {
+    const client = givenProductAnalytics("granted");
+    vi.mocked(claimPrizeAction).mockResolvedValue({ serverError: "x" } as never);
+
+    act(() => claimPrize("2-vowels"));
+
+    await waitFor(() => expect(learnerStore.getState().claimedPrizes.has("2-vowels")).toBe(false));
+    expect(client.capture).not.toHaveBeenCalled();
   });
 });

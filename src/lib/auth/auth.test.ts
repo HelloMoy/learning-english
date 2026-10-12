@@ -2,6 +2,8 @@
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 
+import { PostHogUsageDataEraser } from "@/adapters/analytics/posthog-usage-data-eraser/posthog-usage-data-eraser";
+import type { UsageDataEraser } from "@/adapters/analytics/usage-data-eraser";
 import type { EmailSender } from "@/adapters/email/email-sender";
 import { SmtpEmailSender } from "@/adapters/email/smtp-email-sender/smtp-email-sender";
 import {
@@ -34,7 +36,7 @@ import {
 import { faker } from "@faker-js/faker";
 import { eq } from "drizzle-orm";
 import type { SQLiteTable } from "drizzle-orm/sqlite-core";
-import { errAsync } from "neverthrow";
+import { errAsync, okAsync } from "neverthrow";
 import { after } from "next/server";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -109,10 +111,12 @@ describe.skipIf(!DOCKER_AVAILABLE)(
       rateLimited,
       afterResponse = runAtOnce,
       emailSender = mailpitSender(),
+      usageDataEraser,
     }: {
       rateLimited: boolean;
       afterResponse?: AuthDependencies["afterResponse"];
       emailSender?: EmailSender;
+      usageDataEraser?: UsageDataEraser;
     }): Auth {
       return createAuth({
         database: libsql.database,
@@ -126,7 +130,19 @@ describe.skipIf(!DOCKER_AVAILABLE)(
         },
         rateLimited,
         afterResponse,
+        usageDataEraser,
       });
+    }
+
+    /** Follows the emailed deletion link in the learner's own session, against a given auth. */
+    async function deleteAccountThrough(
+      deleting: Auth,
+      learner: { email: string; cookie: string },
+    ) {
+      await requestDeletion(learner.cookie);
+      const link = await linkFromLatestEmail(learner.email);
+      const headers = { origin: BASE_URL, cookie: learner.cookie };
+      return deleting.handler(new Request(link, { headers, redirect: "manual" }));
     }
 
     /** An auth whose after-response work is kept for the test to run, as a platform would. */
@@ -385,6 +401,49 @@ describe.skipIf(!DOCKER_AVAILABLE)(
       expect(response.headers.get("location")).toBe("/en/account-deleted");
       expect(await rowsOwnedBy(learner.id)).toBe(0);
       expect((await signIn(learner)).status).toBe(401);
+    });
+
+    test("deleting the account erases its usage data, named by account ID alone", async () => {
+      const learner = await signedInLearner();
+      const erase = vi.fn<UsageDataEraser["erase"]>(() => okAsync(undefined));
+      const erasing = buildAuth({ rateLimited: false, usageDataEraser: { erase } });
+
+      const response = await deleteAccountThrough(erasing, learner);
+
+      expect(response.status).toBe(302);
+      expect(erase).toHaveBeenCalledExactlyOnceWith(learner.id);
+    });
+
+    test("when the usage data cannot be erased, the account is deleted all the same", async () => {
+      const learner = await signedInLearner();
+      await seedEveryLearnerTable(learner.id);
+      const failing: UsageDataEraser = {
+        erase: () => errAsync({ kind: "usage-data-erasure-failed", cause: new Error("down") }),
+      };
+      const erasing = buildAuth({ rateLimited: false, usageDataEraser: failing });
+
+      const response = await deleteAccountThrough(erasing, learner);
+
+      expect(response.status).toBe(302);
+      expect(await rowsOwnedBy(learner.id)).toBe(0);
+    });
+
+    test("the erasure is handed to the after-response runner, so deletion does not wait on PostHog", async () => {
+      const learner = await signedInLearner();
+      const erase = vi.fn<UsageDataEraser["erase"]>(() => okAsync(undefined));
+      const held: AfterResponseWork[] = [];
+      const holding = buildAuth({
+        rateLimited: false,
+        afterResponse: (work) => held.push(work),
+        usageDataEraser: { erase },
+      });
+
+      await deleteAccountThrough(holding, learner);
+      const erasedBeforeTheResponse = erase.mock.calls.length;
+      await Promise.all(held.map((work) => work()));
+
+      expect(erasedBeforeTheResponse).toBe(0);
+      expect(erase).toHaveBeenCalledExactlyOnceWith(learner.id);
     });
 
     test("changing the password keeps this session, revokes the others and replaces the password", async () => {
@@ -728,6 +787,19 @@ describe("authDependenciesFromEnv", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
     resetServerEnvForTests();
+  });
+
+  test("a deployment that collects no usage data has nothing to erase", () => {
+    expect(authDependenciesFromEnv().usageDataEraser).toBeUndefined();
+  });
+
+  test("a deployment that collects usage data erases it from PostHog", () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN", `phc_${faker.string.alphanumeric(40)}`);
+    vi.stubEnv("POSTHOG_PROJECT_ID", String(faker.number.int({ min: 1000, max: 99999 })));
+    vi.stubEnv("POSTHOG_PERSONAL_API_KEY", `phx_${faker.string.alphanumeric(40)}`);
+    resetServerEnvForTests();
+
+    expect(authDependenciesFromEnv().usageDataEraser).toBeInstanceOf(PostHogUsageDataEraser);
   });
 
   test("a deployed process hands after-response work to Next's after(), which keeps the invocation alive", () => {

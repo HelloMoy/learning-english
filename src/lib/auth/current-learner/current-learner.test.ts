@@ -5,7 +5,7 @@ import { EMPTY_LEARNER_SNAPSHOT } from "@/lib/learner-snapshot/learner-snapshot"
 
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import { currentLearnerSnapshot } from "./current-learner-snapshot";
+import { currentLearner } from "./current-learner";
 
 vi.mock("next/headers", () => ({ headers: vi.fn(async () => new Headers()) }));
 vi.mock("@/lib/auth/auth", () => ({ getAuth: vi.fn() }));
@@ -23,19 +23,22 @@ beforeEach(() => {
   vi.mocked(loadLearnerSnapshot).mockReset();
 });
 
-describe("currentLearnerSnapshot", () => {
-  test("WHEN the request is signed in THEN that learner's snapshot is loaded", async () => {
+describe("currentLearner", () => {
+  test("WHEN the request is signed in THEN that learner's account ID and snapshot are returned", async () => {
     getSession.mockResolvedValue({ user: { id: "learner-1" } });
     vi.mocked(loadLearnerSnapshot).mockResolvedValue(EMPTY_LEARNER_SNAPSHOT);
 
-    await expect(currentLearnerSnapshot()).resolves.toBe(EMPTY_LEARNER_SNAPSHOT);
+    await expect(currentLearner()).resolves.toEqual({
+      accountId: "learner-1",
+      snapshot: EMPTY_LEARNER_SNAPSHOT,
+    });
     expect(loadLearnerSnapshot).toHaveBeenCalledWith(getDatabase(), "learner-1");
   });
 
-  test("WHEN it is not THEN there is no snapshot and nothing is read", async () => {
+  test("WHEN it is not THEN there is no learner and nothing is read", async () => {
     getSession.mockResolvedValue(null);
 
-    await expect(currentLearnerSnapshot()).resolves.toBeNull();
+    await expect(currentLearner()).resolves.toBeNull();
     expect(loadLearnerSnapshot).not.toHaveBeenCalled();
   });
 });

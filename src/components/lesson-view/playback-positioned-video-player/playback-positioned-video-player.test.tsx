@@ -3,6 +3,7 @@ import "@testing-library/jest-dom/vitest";
 import { LessonId } from "@/domain/entities/ids/ids";
 import { learnerStore } from "@/lib/learner-store/learner-store";
 import { givenLearner } from "@/test-setup/learner-store/learner-store";
+import { givenProductAnalytics } from "@/test-setup/product-analytics/product-analytics";
 import { emitPlayerEvent } from "@/test-setup/stubs/vidstack-player";
 
 import { faker } from "@faker-js/faker";
@@ -505,5 +506,28 @@ describe("PlaybackPositionedVideoPlayer", () => {
       expect(placeholder()).not.toBeInTheDocument();
       expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
+  });
+
+  describe("GIVEN usage data is collected", () => {
+    test.each([
+      ["play", "video_played"],
+      ["pause", "video_paused"],
+      ["rate-change", "video_speed_changed"],
+      ["ended", "video_ended"],
+    ])(
+      "WHEN the player emits %s THEN %s is reported for this lesson",
+      async (emitted, reported) => {
+        const client = givenProductAnalytics("granted");
+        const { playerRef, lessonId } = renderPlayer();
+        await settle();
+
+        emit(playerRef.current, emitted);
+
+        expect(client.capture).toHaveBeenCalledWith(
+          reported,
+          expect.objectContaining({ lessonId }),
+        );
+      },
+    );
   });
 });
