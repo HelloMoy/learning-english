@@ -24,17 +24,37 @@ const serverEnvShape = z.object({
   SENTRY_ORG: z.string().min(1).optional(),
   SENTRY_PROJECT: z.string().min(1).optional(),
   SENTRY_AUTH_TOKEN: z.string().min(1).optional(),
+  NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: z.string().min(1).optional(),
+  POSTHOG_PROJECT_ID: z.string().min(1).optional(),
+  POSTHOG_PERSONAL_API_KEY: z.string().min(1).optional(),
 });
 
-const serverEnvSchema = serverEnvShape.refine(
-  (env) =>
-    new URL(env.TURSO_DATABASE_URL).protocol !== REMOTE_LIBSQL_SCHEME ||
-    env.TURSO_AUTH_TOKEN !== undefined,
-  {
-    path: ["TURSO_AUTH_TOKEN"],
-    message: "is required when TURSO_DATABASE_URL is a remote libsql:// URL",
-  },
-);
+// The project token is what turns usage data on. The other two are what let a
+// deleted account's data be erased from PostHog; a deployment that could
+// collect but not erase must not start.
+const ERASURE_VARIABLES = ["POSTHOG_PROJECT_ID", "POSTHOG_PERSONAL_API_KEY"] as const;
+
+const serverEnvSchema = serverEnvShape
+  .refine(
+    (env) =>
+      new URL(env.TURSO_DATABASE_URL).protocol !== REMOTE_LIBSQL_SCHEME ||
+      env.TURSO_AUTH_TOKEN !== undefined,
+    {
+      path: ["TURSO_AUTH_TOKEN"],
+      message: "is required when TURSO_DATABASE_URL is a remote libsql:// URL",
+    },
+  )
+  .superRefine((env, context) => {
+    if (env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN === undefined) return;
+    for (const name of ERASURE_VARIABLES) {
+      if (env[name] !== undefined) continue;
+      context.addIssue({
+        code: "custom",
+        path: [name],
+        message: "is required when NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN is set",
+      });
+    }
+  });
 
 /**
  * Every server-side environment variable the application reads, validated.

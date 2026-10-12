@@ -3,6 +3,7 @@
 import type { LessonId } from "@/domain/entities/ids/ids";
 import { markLessonComplete } from "@/hooks/use-lesson-completion/use-lesson-completion";
 import { celebrateLessonCompletion } from "@/lib/celebrate-completion/celebrate-completion";
+import { captureProductEvent } from "@/lib/product-analytics/product-analytics";
 import { hasFinishedWatching } from "@/lib/watch-progress/watch-progress";
 
 import { useCallback, useEffect, useRef } from "react";
@@ -96,9 +97,15 @@ export function useCompleteWhenWatched({
     const runtime = durationSeconds > 0 ? durationSeconds : playerRef.current.duration;
     if (!hasFinishedWatching(playerRef.current.currentTime, runtime)) return;
     hasMarkedRef.current = true;
-    void markLessonComplete(lessonId);
+    void completeByPlayback(lessonId);
     void celebrateLessonCompletion();
   }, [durationSeconds, lessonId]);
 
   return { handlePlaybackStarted, handleProgress };
+}
+
+/** Marks the lesson complete, and reports it as playback's doing once it is saved. */
+async function completeByPlayback(lessonId: LessonId): Promise<void> {
+  const saved = await markLessonComplete(lessonId);
+  if (saved) captureProductEvent("lesson_completed", { lessonId, by: "playback" });
 }

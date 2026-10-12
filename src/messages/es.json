@@ -461,6 +461,16 @@
       "privacy": "Privacidad",
       "terms": "Términos"
     },
+    "ConsentBanner": {
+      "regionLabel": "Opciones de privacidad",
+      "body": "Nos gustaría usar cookies para entender cómo se usa el sitio: las páginas que visitas, dónde haces clic y una grabación de tu sesión, vinculada a tu cuenta. Si lo rechazas, tu visita se cuenta igualmente, de forma anónima, y no se guarda nada en tu navegador.",
+      "policyLink": "Política de privacidad",
+      "accept": "Aceptar",
+      "decline": "Rechazar"
+    },
+    "PrivacyChoicesButton": {
+      "label": "Opciones de privacidad"
+    },
     "ResumeTile": {
       "pickUp": "Sigue donde te quedaste",
       "startHere": "Empieza aquí",
@@ -970,13 +980,17 @@
           "heading": "Informes de error",
           "body": "Cuando algo falla enviamos un informe de error a Sentry para poder arreglarlo. Los informes llevan errores y nada más — sin trazas de rendimiento ni grabación de sesión — y el SDK está configurado para no adjuntar datos personales. Antes de que un error controlado salga del servidor, el cuerpo de los mensajes se descarta por completo y cualquier dirección de correo del contexto se sustituye por el texto literal [email]."
         },
+        "usageData": {
+          "heading": "Datos de uso",
+          "body": "Para entender cómo se usa el sitio, enviamos datos de uso a PostHog, que los guarda en Estados Unidos. Antes te preguntamos. Si aceptas, PostHog pone una cookie y usa el almacenamiento de tu navegador para reconocerte entre visitas, vincula lo que haces a tu cuenta por su identificador —nunca por tu nombre ni por tu correo— y graba tus sesiones: lo que mostraba la página y dónde hiciste clic y te desplazaste. Una grabación muestra la página tal como la viste, incluido tu nombre donde la página lo imprime; tu correo aparece tapado. Si rechazas, tu visita se cuenta igualmente, de forma anónima: no se guarda nada en tu navegador, nada se vincula a tu cuenta y nada se graba. En ambos casos recogemos las páginas que visitas, dónde haces clic y el texto de lo que pulsaste, acciones como reproducir un vídeo, y el tipo de navegador y de dispositivo que usas. Nunca recogemos lo que escribes en un formulario, tu correo, nada de lo que va después del signo de interrogación en la dirección de una página, ni grabaciones de las páginas de inicio de sesión, de registro y de contraseña. Tus peticiones llegan a PostHog a través de la dirección de este mismo sitio, que transmite tu dirección IP y los datos de tu navegador, y nunca tu sesión iniciada. Puedes cambiar tu respuesta cuando quieras desde el enlace Opciones de privacidad al pie de cada página."
+        },
         "cookies": {
           "heading": "Cookies",
-          "body": "Ponemos dos cookies y ninguna más. Una recuerda el idioma que elegiste, para que el sitio abra en él la próxima vez. La otra es tu sesión, que es lo que te mantiene dentro. No hay cookies de analítica, ni de publicidad, ni rastreadores de terceros en este sitio."
+          "body": "Siempre ponemos dos cookies. Una recuerda el idioma que elegiste, para que el sitio abra en él la próxima vez. La otra es tu sesión, que es lo que te mantiene dentro. Si aceptas los datos de uso, PostHog añade una cookie propia y guarda algunos datos en el almacenamiento de tu navegador; si rechazas, no añade ninguna de las dos cosas. Tu respuesta se recuerda en tu navegador, para no volver a preguntarte. No hay cookies de publicidad."
         },
         "yourChoices": {
           "heading": "Tus opciones",
-          "body": "Desde tu perfil puedes cambiar el nombre de tu tarjeta de aprendiz, cambiar tu dirección de correo — que se confirma primero en la dirección registrada y después en la nueva — y cambiar tu contraseña. Puedes eliminar tu cuenta desde el mismo sitio cuando quieras, sin dar explicaciones; la eliminación se confirma con un enlace enviado por correo que solo funciona en tu propia sesión."
+          "body": "Desde tu perfil puedes cambiar el nombre de tu tarjeta de aprendiz, cambiar tu dirección de correo — que se confirma primero en la dirección registrada y después en la nueva — y cambiar tu contraseña. Puedes eliminar tu cuenta desde el mismo sitio cuando quieras, sin dar explicaciones; la eliminación se confirma con un enlace enviado por correo que solo funciona en tu propia sesión. Eliminar tu cuenta borra también los datos de uso y las grabaciones de sesión que PostHog guarda de ella. Puedes cambiar tu respuesta sobre los datos de uso cuando quieras desde el enlace Opciones de privacidad al pie de cada página."
         },
         "contact": {
           "heading": "Cómo contactarnos",

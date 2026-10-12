@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button/button";
+import { NOT_CAPTURED_CLASS } from "@/lib/product-analytics-options/product-analytics-options";
+import { cn } from "@/lib/utils/utils";
 
 import { useTranslations } from "next-intl";
 import { useId, useState, type ReactNode } from "react";
@@ -13,6 +15,8 @@ export type AccountRowProps = {
   label: string;
   /** The current value, as text: the address, or a masked password. */
   value: string;
+  /** The value identifies the learner — their address — so it is kept out of usage data. */
+  personal?: boolean;
   /** What opens under the row to change the value; omitted, the row is plain text. */
   children?: ReactNode;
 };
@@ -40,7 +44,7 @@ export type AccountRowProps = {
  *
  * @category Components
  */
-export function AccountRow({ label, value, children }: AccountRowProps) {
+export function AccountRow({ label, value, personal = false, children }: AccountRowProps) {
   const t = useTranslations("Components.AccountRow");
   const regionId = useId();
   const [isOpen, setIsOpen] = useState(false);
@@ -50,7 +54,12 @@ export function AccountRow({ label, value, children }: AccountRowProps) {
     <div className="border-b border-border/60 last:border-b-0">
       <div className="flex min-h-14 flex-wrap items-center gap-x-4 gap-y-1 py-2">
         <span className="text-[0.9375rem] font-semibold text-foreground">{label}</span>
-        <span className="min-w-0 flex-1 text-right text-[0.9375rem] [overflow-wrap:anywhere] text-muted-foreground">
+        <span
+          className={cn(
+            "min-w-0 flex-1 text-right text-[0.9375rem] [overflow-wrap:anywhere] text-muted-foreground",
+            personal && NOT_CAPTURED_CLASS,
+          )}
+        >
           {value}
         </span>
         {canChange ? (

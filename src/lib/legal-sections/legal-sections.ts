@@ -1,4 +1,29 @@
 /**
+ * When the privacy policy's wording last changed.
+ *
+ * @remarks
+ * A constant rather than `new Date()`: the right value is the day the wording
+ * was edited, which is editorial and belongs in the source. Reading the clock
+ * would also break static rendering, which the project forbids in Server
+ * Components. Edit the prose, edit this.
+ *
+ * One date per document, so editing the privacy policy does not tell a reader
+ * that the terms changed too.
+ *
+ * @category Legal
+ */
+export const PRIVACY_LAST_UPDATED = new Date("2026-10-10T00:00:00Z");
+
+/**
+ * When the terms' wording last changed.
+ *
+ * @see PRIVACY_LAST_UPDATED for why this is a constant, and why there are two.
+ *
+ * @category Legal
+ */
+export const TERMS_LAST_UPDATED = new Date("2026-09-22T00:00:00Z");
+
+/**
  * The passages of the privacy policy, in reading order.
  *
  * @remarks
@@ -17,6 +42,7 @@ export const PRIVACY_SECTION_KEYS = [
   "email",
   "botProtection",
   "errorReports",
+  "usageData",
   "cookies",
   "yourChoices",
   "contact",

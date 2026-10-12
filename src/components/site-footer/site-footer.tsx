@@ -1,9 +1,11 @@
+import { PrivacyChoicesButton } from "@/components/privacy-choices-button/privacy-choices-button";
 import { Link } from "@/i18n/navigation";
 
 import { useTranslations } from "next-intl";
 
 /**
- * The site's footer: the two legal documents, and nothing else.
+ * The site's footer: the two legal documents, and the control that reopens
+ * the privacy choice they describe.
  *
  * @remarks
  * Mounted once in the locale layout, outside `main`, so it is the page's
@@ -14,6 +16,9 @@ import { useTranslations } from "next-intl";
  * The links come from `@/i18n/navigation`, never `next/link`: those wrappers
  * are what keep the active locale in the URL, and ESLint cannot catch the
  * difference.
+ *
+ * {@link PrivacyChoicesButton} renders nothing unless usage data is being
+ * collected, so a build without a PostHog token shows the two links alone.
  *
  * @returns The footer landmark
  *
@@ -40,6 +45,7 @@ export function SiteFooter() {
         >
           {t("terms")}
         </Link>
+        <PrivacyChoicesButton className="underline-offset-4 hover:text-foreground hover:underline" />
       </nav>
     </footer>
   );

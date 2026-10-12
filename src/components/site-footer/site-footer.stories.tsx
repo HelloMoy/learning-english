@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
+import { withConsent } from "../../../.storybook/fixtures/product-analytics";
 import { SiteFooter } from "./site-footer";
 
 /**
@@ -31,15 +32,25 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** As every page renders it. */
+/** As every page renders it when no usage data is collected: the two documents alone. */
 export const Default: Story = {};
+
+/**
+ * With usage data collected, the footer also offers to reopen the privacy
+ * choice. Check that the control reads as one of the links beside it.
+ */
+export const WithPrivacyChoices: Story = {
+  beforeEach: withConsent("granted"),
+};
 
 /** Locked to Spanish, for checking the label lengths side by side. */
 export const InSpanish: Story = {
   parameters: { locale: "es" },
+  beforeEach: withConsent("granted"),
 };
 
 /** Locked to Portuguese. */
 export const InPortuguese: Story = {
   parameters: { locale: "pt" },
+  beforeEach: withConsent("granted"),
 };

@@ -1,6 +1,10 @@
-import { LEGAL_LAST_UPDATED, LegalDocument } from "@/components/legal-document/legal-document";
+import { LegalDocument } from "@/components/legal-document/legal-document";
 import { requireSupportedLocale } from "@/i18n/require-supported-locale/require-supported-locale";
-import { legalSections, PRIVACY_SECTION_KEYS } from "@/lib/legal-sections/legal-sections";
+import {
+  legalSections,
+  PRIVACY_LAST_UPDATED,
+  PRIVACY_SECTION_KEYS,
+} from "@/lib/legal-sections/legal-sections";
 
 import type { Metadata } from "next";
 import { useTranslations } from "next-intl";
@@ -31,7 +35,7 @@ export default function PrivacyPage({ params }: Props) {
       title={t("title")}
       intro={t("intro")}
       sections={legalSections(t, PRIVACY_SECTION_KEYS)}
-      lastUpdated={LEGAL_LAST_UPDATED}
+      lastUpdated={PRIVACY_LAST_UPDATED}
     />
   );
 }
