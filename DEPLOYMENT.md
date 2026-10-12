@@ -85,7 +85,7 @@ bounces. ImprovMX's free plan forwards it to a real inbox.
 4. Fill in the OAuth consent screen: add `english-course.online` as an authorized domain, and
    give the privacy policy and terms URLs (`https://<your-domain>/en/privacy` and
    `https://<your-domain>/en/terms`). Don't publish it yet. Google fetches the privacy URL
-   before it publishes, and that page only goes live in step 6.
+   before it publishes, and that page only goes live in step 7.
 
 ## 4. Cloudflare Turnstile: bot protection
 
@@ -116,34 +116,91 @@ Only errors are reported: there is no tracing and no session replay. Handled fai
 an email that could not be sent or a learner write the server refused, are reported with
 email addresses and message bodies stripped.
 
-## 6. Vercel: the app
+## 6. PostHog: usage data (optional)
+
+PostHog stays off until a project token is set. Without one, nothing is sent and no consent
+banner is shown.
+
+1. Create a PostHog Cloud account in the **US region** (`us.posthog.com`). The region is chosen
+   at sign-up and cannot be changed afterwards. The privacy policy says the data is stored in
+   the United States, and the code only ever talks to PostHog's US hosts. That is where the
+   database (step 1) and the functions (step 0) already are.
+2. Enable **two-factor authentication** on that account. Session recordings show learners using
+   the site, and anyone who can sign in to PostHog can watch them.
+3. Do **not** add a card. On the free plan, reaching an allowance pauses ingestion until the
+   month resets; with a card it bills instead.
+4. In the project's settings:
+   - **Web analytics → Cookieless tracking: on.** A visitor who declines the consent banner is
+     counted without cookies. With this off PostHog discards every one of those events, while
+     Activity → Live events still shows them arriving.
+   - **Session replay: on.** The code starts a recording only for a visitor who accepted, and
+     never on the sign-in, sign-up or password pages.
+   - **Console log capture and network capture: off.** The code disables both as well.
+5. Copy the project token and the numeric project ID.
+   → `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN`, `POSTHOG_PROJECT_ID`
+6. Create a personal API key scoped to **persons** (read and write) and **session recordings**
+   (write). The server uses it for one thing: erasing a learner's data from PostHog when they
+   delete their account.
+   → `POSTHOG_PERSONAL_API_KEY`
+   It is a secret. Store it as one, and never give it a `NEXT_PUBLIC_` name. A deployment that
+   has the token without the key and the project ID refuses to start, because it could collect
+   data it cannot erase.
+
+The token is inlined into the browser bundle at build time, so it takes effect on the next
+build, not on save. Set all three before the deploy that should start collecting.
+
+Only production collects usage data. The `develop` preview is given the same three variables,
+scoped to Preview (`develop`), only for as long as it takes to check a change to this
+integration — the banner, what a recording leaves out, the erasure — and they are removed
+again afterwards (`vercel env rm <name> preview develop`). While they are set, the preview's
+events land in the same project and are told apart by their host.
+
+**Managing PostHog from a terminal.** Install the CLI on your own machine and sign in. It
+defaults to the US host, which is this project's.
+
+```bash
+npm install -g @posthog/cli
+posthog-cli login
+posthog-cli api search dashboard   # find a tool
+posthog-cli api info <tool>        # see what it takes
+```
+
+**If an erasure fails.** Deleting an account never waits on PostHog. A failed erasure is
+reported to Sentry from `posthog-usage-data-eraser`, with the account ID. Finish it by hand:
+find the person by that ID with `posthog-cli api`, and delete it together with its events and
+recordings.
+
+## 7. Vercel: the app
 
 1. Import the repository into Vercel as a Next.js project. Leave the build command at its
    default: Vercel runs `vercel-build` automatically.
 2. **Settings → Functions → Function Region**: the region chosen in step 0.
 3. **Settings → Environment Variables**, scope **Production**:
 
-   | Variable                         | Value                                                           |
-   | -------------------------------- | --------------------------------------------------------------- |
-   | `TURSO_DATABASE_URL`             | step 1                                                          |
-   | `TURSO_AUTH_TOKEN`               | step 1                                                          |
-   | `BETTER_AUTH_SECRET`             | `openssl rand -base64 32` (at least 32 characters, never reuse) |
-   | `BETTER_AUTH_URL`                | `https://<your-domain>`                                         |
-   | `GOOGLE_CLIENT_ID`               | step 3                                                          |
-   | `GOOGLE_CLIENT_SECRET`           | step 3                                                          |
-   | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | step 4                                                          |
-   | `TURNSTILE_SECRET_KEY`           | step 4                                                          |
-   | `SMTP_HOST`                      | step 2                                                          |
-   | `SMTP_PORT`                      | step 2                                                          |
-   | `SMTP_SECURE`                    | step 2                                                          |
-   | `SMTP_USER`                      | step 2                                                          |
-   | `SMTP_PASSWORD`                  | step 2                                                          |
-   | `EMAIL_FROM`                     | step 2                                                          |
-   | `SENTRY_DSN`                     | step 5 (optional)                                               |
-   | `NEXT_PUBLIC_SENTRY_DSN`         | step 5 (optional)                                               |
-   | `SENTRY_ORG`                     | step 5 (optional)                                               |
-   | `SENTRY_PROJECT`                 | step 5 (optional)                                               |
-   | `SENTRY_AUTH_TOKEN`              | step 5 (optional)                                               |
+   | Variable                            | Value                                                           |
+   | ----------------------------------- | --------------------------------------------------------------- |
+   | `TURSO_DATABASE_URL`                | step 1                                                          |
+   | `TURSO_AUTH_TOKEN`                  | step 1                                                          |
+   | `BETTER_AUTH_SECRET`                | `openssl rand -base64 32` (at least 32 characters, never reuse) |
+   | `BETTER_AUTH_URL`                   | `https://<your-domain>`                                         |
+   | `GOOGLE_CLIENT_ID`                  | step 3                                                          |
+   | `GOOGLE_CLIENT_SECRET`              | step 3                                                          |
+   | `NEXT_PUBLIC_TURNSTILE_SITE_KEY`    | step 4                                                          |
+   | `TURNSTILE_SECRET_KEY`              | step 4                                                          |
+   | `SMTP_HOST`                         | step 2                                                          |
+   | `SMTP_PORT`                         | step 2                                                          |
+   | `SMTP_SECURE`                       | step 2                                                          |
+   | `SMTP_USER`                         | step 2                                                          |
+   | `SMTP_PASSWORD`                     | step 2                                                          |
+   | `EMAIL_FROM`                        | step 2                                                          |
+   | `SENTRY_DSN`                        | step 5 (optional)                                               |
+   | `NEXT_PUBLIC_SENTRY_DSN`            | step 5 (optional)                                               |
+   | `SENTRY_ORG`                        | step 5 (optional)                                               |
+   | `SENTRY_PROJECT`                    | step 5 (optional)                                               |
+   | `SENTRY_AUTH_TOKEN`                 | step 5 (optional)                                               |
+   | `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN` | step 6 (optional)                                               |
+   | `POSTHOG_PROJECT_ID`                | step 6 (required with the token)                                |
+   | `POSTHOG_PERSONAL_API_KEY`          | step 6 (required with the token)                                |
 
    If you load them with the CLI instead, two things differ from the dashboard.
    `vercel env add` refuses a `NEXT_PUBLIC_*` name unless you pass
