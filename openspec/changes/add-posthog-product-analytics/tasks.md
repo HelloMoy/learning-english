@@ -7,7 +7,7 @@
   - [x] Project token and project ID loaded into Vercel, Preview (`develop`) — done 2026-10-11, and read back. Temporary: there for the verification only, removed in 14.6.
   - [ ] Enable two-factor authentication on the account. Web UI only.
   - [ ] Create a personal API key scoped to persons (read, write) and session recordings (write), and load it into Vercel as `POSTHOG_PERSONAL_API_KEY`, Preview (`develop`). **Before the PR is merged:** with the token set and the key missing, the server environment refuses to start.
-  - [ ] Confirm no card is on file, and check the free allowances on PostHog's pricing page.
+  - [x] No card on file, and the free allowances — confirmed 2026-10-11 through `posthog-cli api` (`billing-overview-get`): plan `free`, no subscription, no billing customer; 1,000,000 events and 5,000 recordings a month.
 - [x] 1.2 Branch from `develop`: `feat/posthog-product-analytics`.
 - [x] 1.3 Add `posthog-js` with `pnpm add posthog-js`. This changes `package.json` and the lockfile; approving this proposal is the approval for it. Check nothing else was added.
 
