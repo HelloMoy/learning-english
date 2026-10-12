@@ -1,13 +1,15 @@
 import {
   legalSections,
+  PRIVACY_LAST_UPDATED,
   PRIVACY_SECTION_KEYS,
+  TERMS_LAST_UPDATED,
   TERMS_SECTION_KEYS,
 } from "@/lib/legal-sections/legal-sections";
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useTranslations } from "next-intl";
 
-import { LEGAL_LAST_UPDATED, LegalDocument } from "./legal-document";
+import { LegalDocument } from "./legal-document";
 
 /**
  * Stories for `<LegalDocument />`, the shell the privacy policy and the terms
@@ -37,7 +39,7 @@ function PrivacyPolicy() {
       title={t("title")}
       intro={t("intro")}
       sections={legalSections(t, PRIVACY_SECTION_KEYS)}
-      lastUpdated={LEGAL_LAST_UPDATED}
+      lastUpdated={PRIVACY_LAST_UPDATED}
     />
   );
 }
@@ -49,7 +51,7 @@ function TermsOfService() {
       title={t("title")}
       intro={t("intro")}
       sections={legalSections(t, TERMS_SECTION_KEYS)}
-      lastUpdated={LEGAL_LAST_UPDATED}
+      lastUpdated={TERMS_LAST_UPDATED}
     />
   );
 }

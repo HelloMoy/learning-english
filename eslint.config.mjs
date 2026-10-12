@@ -31,12 +31,17 @@ const forbiddenImports = [
   "next-themes",
   "zustand",
   "nuqs",
+  "posthog-js",
   "server-only",
   "@/i18n",
   "@/adapters",
   "@/components",
   "@/app",
 ];
+
+const analyticsDoorMessage =
+  "Only src/lib/product-analytics talks to PostHog. " +
+  "Send events with captureProductEvent(), and add new ones to its ProductEvents catalogue.";
 
 /**
  * Local rule enforcing AGENTS.md "Conventions → Folder structure".
@@ -128,6 +133,30 @@ const eslintConfig = defineConfig([
     plugins: { "local-structure": folderStructurePlugin },
     rules: {
       "local-structure/folder-per-entity": "error",
+    },
+  },
+  // One door to PostHog (openspec/specs/product-analytics/spec.md). The typed
+  // event catalogue, the consent guard on identification and recording, and
+  // the URL scrubbing all live behind `@/lib/product-analytics`; a second
+  // import of the SDK would be a way around every one of them. `src/domain`
+  // is left to its own block below, which forbids the package too — two
+  // blocks setting this rule for the same file would not merge, the later
+  // one would replace the earlier.
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: [
+      "src/lib/product-analytics/**",
+      "src/lib/product-analytics-options/**",
+      "src/domain/**",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [{ name: "posthog-js", message: analyticsDoorMessage }],
+          patterns: [{ group: ["posthog-js/*"], message: analyticsDoorMessage }],
+        },
+      ],
     },
   },
   // Architectural boundary for the domain.

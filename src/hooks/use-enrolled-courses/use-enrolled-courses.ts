@@ -2,6 +2,7 @@
 
 import { enrollInCourseAction } from "@/app/[locale]/learner-actions";
 import { learnerStore, writeThrough } from "@/lib/learner-store/learner-store";
+import { captureProductEvent } from "@/lib/product-analytics/product-analytics";
 
 import { useSyncExternalStore } from "react";
 
@@ -62,6 +63,13 @@ export function enrollInCourse(courseSlug: string): void {
   if (enrolledCourses().has(courseSlug)) return;
   void writeThrough(
     (state) => ({ enrolledCourses: new Set(state.enrolledCourses).add(courseSlug) }),
-    async () => (await enrollInCourseAction({ courseSlug }))?.data?.enrolled === true,
+    () => saveEnrollment(courseSlug),
   );
+}
+
+/** Asks the server to enroll, and reports the enrollment once it really exists. */
+async function saveEnrollment(courseSlug: string): Promise<boolean> {
+  const isEnrolled = (await enrollInCourseAction({ courseSlug }))?.data?.enrolled === true;
+  if (isEnrolled) captureProductEvent("course_enrolled", { courseSlug });
+  return isEnrolled;
 }

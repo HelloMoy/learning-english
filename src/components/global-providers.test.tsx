@@ -6,6 +6,7 @@ import type { LessonProgressSlice } from "@/domain/use-cases/find-course-catalog
 import { refreshPendingPrizeAnnouncement } from "@/hooks/use-pending-prize-announcement/use-pending-prize-announcement";
 import type { AchievementLevel } from "@/lib/learner-achievements/learner-achievements";
 import { givenLearner } from "@/test-setup/learner-store/learner-store";
+import { givenProductAnalytics } from "@/test-setup/product-analytics/product-analytics";
 import { renderInLocale } from "@/test-setup/render-in-locale";
 
 import NiceModal from "@ebay/nice-modal-react";
@@ -68,7 +69,10 @@ beforeEach(() => {
 describe("GlobalProviders", () => {
   test("WHEN a page renders THEN its content is shown", () => {
     renderInLocale(
-      <GlobalProviders levels={levels}>
+      <GlobalProviders
+        levels={levels}
+        learnerAccountId={null}
+      >
         <p>A lesson</p>
       </GlobalProviders>,
     );
@@ -83,7 +87,10 @@ describe("GlobalProviders", () => {
     announceStorageChange();
 
     renderInLocale(
-      <GlobalProviders levels={levels}>
+      <GlobalProviders
+        levels={levels}
+        learnerAccountId={null}
+      >
         <p>Another lesson</p>
       </GlobalProviders>,
     );
@@ -103,7 +110,10 @@ describe("GlobalProviders", () => {
     vi.stubGlobal("navigator", { ...navigator, serviceWorker: { register } });
 
     renderInLocale(
-      <GlobalProviders levels={levels}>
+      <GlobalProviders
+        levels={levels}
+        learnerAccountId={null}
+      >
         <p>A lesson</p>
       </GlobalProviders>,
     );
@@ -114,12 +124,46 @@ describe("GlobalProviders", () => {
 
   test("WHEN nothing is waiting THEN no dialog interrupts the page", async () => {
     renderInLocale(
-      <GlobalProviders levels={levels}>
+      <GlobalProviders
+        levels={levels}
+        learnerAccountId={null}
+      >
         <p>Another lesson</p>
       </GlobalProviders>,
     );
 
     await act(() => Promise.resolve());
     expect(NiceModal.show).not.toHaveBeenCalled();
+  });
+
+  test("WHEN a consenting learner is signed in THEN their activity is attributed to their account ID", () => {
+    const client = givenProductAnalytics("granted");
+    const accountId = faker.string.uuid();
+
+    renderInLocale(
+      <GlobalProviders
+        levels={levels}
+        learnerAccountId={accountId}
+      >
+        <p>A lesson</p>
+      </GlobalProviders>,
+    );
+
+    expect(client.identify).toHaveBeenCalledExactlyOnceWith(accountId);
+  });
+
+  test("WHEN a consenting visitor is on an ordinary page THEN their session is recorded", () => {
+    const client = givenProductAnalytics("granted");
+
+    renderInLocale(
+      <GlobalProviders
+        levels={levels}
+        learnerAccountId={null}
+      >
+        <p>A lesson</p>
+      </GlobalProviders>,
+    );
+
+    expect(client.startSessionRecording).toHaveBeenCalledOnce();
   });
 });

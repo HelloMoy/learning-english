@@ -1,6 +1,10 @@
-import { LEGAL_LAST_UPDATED, LegalDocument } from "@/components/legal-document/legal-document";
+import { LegalDocument } from "@/components/legal-document/legal-document";
 import { requireSupportedLocale } from "@/i18n/require-supported-locale/require-supported-locale";
-import { legalSections, TERMS_SECTION_KEYS } from "@/lib/legal-sections/legal-sections";
+import {
+  legalSections,
+  TERMS_LAST_UPDATED,
+  TERMS_SECTION_KEYS,
+} from "@/lib/legal-sections/legal-sections";
 
 import type { Metadata } from "next";
 import { useTranslations } from "next-intl";
@@ -30,7 +34,7 @@ export default function TermsPage({ params }: Props) {
       title={t("title")}
       intro={t("intro")}
       sections={legalSections(t, TERMS_SECTION_KEYS)}
-      lastUpdated={LEGAL_LAST_UPDATED}
+      lastUpdated={TERMS_LAST_UPDATED}
     />
   );
 }

@@ -2,6 +2,7 @@
 
 import { claimPrizeAction } from "@/app/[locale]/learner-actions";
 import { learnerStore, writeThrough } from "@/lib/learner-store/learner-store";
+import { captureProductEvent } from "@/lib/product-analytics/product-analytics";
 
 import { useSyncExternalStore } from "react";
 
@@ -61,6 +62,13 @@ export function claimPrize(moduleSlug: string): void {
   if (claimedPrizes().has(moduleSlug)) return;
   void writeThrough(
     (state) => ({ claimedPrizes: new Set(state.claimedPrizes).add(moduleSlug) }),
-    async () => (await claimPrizeAction({ moduleSlug }))?.data?.claimed === true,
+    () => saveClaim(moduleSlug),
   );
+}
+
+/** Asks the server to record the claim, and reports it once it really exists. */
+async function saveClaim(moduleSlug: string): Promise<boolean> {
+  const isClaimed = (await claimPrizeAction({ moduleSlug }))?.data?.claimed === true;
+  if (isClaimed) captureProductEvent("prize_claimed", { moduleSlug });
+  return isClaimed;
 }

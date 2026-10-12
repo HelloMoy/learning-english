@@ -282,6 +282,22 @@ describe("message catalogues", () => {
     expect(unwritten).toEqual([]);
   });
 
+  /**
+   * The relay forwards usage data to PostHog's US cloud and nowhere else
+   * (`analytics-relay`). The policy has to name the same place in every
+   * language, or it describes storage the code does not use.
+   */
+  it.each([
+    ["en", "United States"],
+    ["es", "Estados Unidos"],
+    ["pt", "Estados Unidos"],
+  ] as const)("%s says usage data is stored in the %s", (locale, country) => {
+    const passage = CATALOGUES[locale].Legal.privacy.sections.usageData.body;
+
+    expect(passage).toContain(country);
+    expect(passage).not.toMatch(/European Union|Unión Europea|União Europeia/);
+  });
+
   it.each(Object.entries(CATALOGUES))("%s exposes the course vocabulary keys", (_locale, m) => {
     const overview = (m as typeof en).CourseCatalog.courseOverview;
     expect(Object.keys(overview)).toEqual(

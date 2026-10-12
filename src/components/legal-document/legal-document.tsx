@@ -3,19 +3,6 @@ import type { LegalSection } from "@/lib/legal-sections/legal-sections";
 import { useFormatter, useTranslations } from "next-intl";
 
 /**
- * When the legal text last changed.
- *
- * @remarks
- * A constant rather than `new Date()`: the right value is the day the wording
- * was edited, which is editorial and belongs in the source. Reading the clock
- * here would also break static rendering, which the project forbids in Server
- * Components. Edit the prose, edit this.
- *
- * @category Legal
- */
-export const LEGAL_LAST_UPDATED = new Date("2026-09-22T00:00:00Z");
-
-/**
  * Everything {@link LegalDocument} renders.
  *
  * @category Legal
@@ -48,7 +35,7 @@ export type LegalDocumentProps = {
  *   title={t("privacy.title")}
  *   intro={t("privacy.intro")}
  *   sections={sections}
- *   lastUpdated={LEGAL_LAST_UPDATED}
+ *   lastUpdated={PRIVACY_LAST_UPDATED}
  * />
  * ```
  *

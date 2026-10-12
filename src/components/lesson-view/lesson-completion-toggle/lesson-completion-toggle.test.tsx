@@ -2,10 +2,11 @@ import { LessonCompletionMark } from "@/components/lesson-completion-mark/lesson
 import { LessonId } from "@/domain/entities/ids/ids";
 import { EMPTY_LEARNER_SNAPSHOT } from "@/lib/learner-snapshot/learner-snapshot";
 import { learnerStore, seedLearnerStore } from "@/lib/learner-store/learner-store";
+import { givenProductAnalytics } from "@/test-setup/product-analytics/product-analytics";
 
 import NiceModal from "@ebay/nice-modal-react";
 import { faker } from "@faker-js/faker";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -440,5 +441,39 @@ describe("LessonCompletionToggle — celebrating the finish", () => {
       expect(screen.queryByTestId("lesson-completion-toggle-skeleton")).toBeNull();
       expect(screen.getByRole("button")).toBeInTheDocument();
     });
+  });
+});
+
+describe("LessonCompletionToggle — reporting", () => {
+  beforeEach(() => {
+    mockUseTranslations.mockReturnValue(((key: string) => key) as never);
+  });
+
+  test("WHEN the learner marks the lesson complete THEN it is reported as their doing", async () => {
+    const client = givenProductAnalytics("granted");
+    const lessonId = LessonId.parse(faker.string.uuid());
+    actions.mark.mockResolvedValue({ data: { completed: true } });
+    const user = userEvent.setup();
+    render(<LessonCompletionToggle lessonId={lessonId} />);
+
+    await user.click(screen.getByRole("button"));
+
+    await screen.findByText("completed");
+    expect(client.capture).toHaveBeenCalledExactlyOnceWith("lesson_completed", {
+      lessonId,
+      by: "learner",
+    });
+  });
+
+  test("WHEN the mark is refused THEN nothing is reported, because nothing was completed", async () => {
+    const client = givenProductAnalytics("granted");
+    actions.mark.mockResolvedValue({ validationErrors: {} });
+    const user = userEvent.setup();
+    render(<LessonCompletionToggle lessonId={LessonId.parse(faker.string.uuid())} />);
+
+    await user.click(screen.getByRole("button"));
+
+    await waitFor(() => expect(actions.mark).toHaveBeenCalled());
+    expect(client.capture).not.toHaveBeenCalled();
   });
 });

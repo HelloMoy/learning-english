@@ -96,4 +96,24 @@ describe("AccountRow", () => {
 
     expect(screen.getByRole("button", { name: `Cambiar ${label}` })).toBeInTheDocument();
   });
+
+  test("WHEN the value identifies the learner THEN it is kept out of usage data", () => {
+    renderInLocale(
+      <AccountRow
+        label={label}
+        value={value}
+        personal
+      />,
+    );
+
+    // PostHog blanks an element with this class in recordings and captures no
+    // click from it. See `NOT_CAPTURED_CLASS`.
+    expect(screen.getByText(value)).toHaveClass("ph-no-capture");
+  });
+
+  test("WHEN the value says nothing about the learner THEN it is captured like any other text", () => {
+    renderRow();
+
+    expect(screen.getByText(value)).not.toHaveClass("ph-no-capture");
+  });
 });

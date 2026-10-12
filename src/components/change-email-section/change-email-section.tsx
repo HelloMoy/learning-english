@@ -7,6 +7,8 @@ import { useAccountSubmission } from "@/hooks/use-account-submission/use-account
 import { getPathname } from "@/i18n/navigation";
 import { changeEmailSchema } from "@/lib/account-form-schemas/account-form-schemas";
 import { authClient } from "@/lib/auth-client/auth-client";
+import { NOT_CAPTURED_CLASS } from "@/lib/product-analytics-options/product-analytics-options";
+import { cn } from "@/lib/utils/utils";
 
 import { useLocale, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
@@ -62,7 +64,7 @@ export function ChangeEmailSection({ currentEmail }: ChangeEmailSectionProps) {
         <ChangeEmailHeading />
         <p
           role="status"
-          className="text-sm text-foreground"
+          className={cn("text-sm text-foreground", NOT_CAPTURED_CLASS)}
         >
           {t("sent", { email: currentEmail })}
         </p>
@@ -89,7 +91,9 @@ export function ChangeEmailSection({ currentEmail }: ChangeEmailSectionProps) {
     >
       <div className="flex flex-col gap-1">
         <ChangeEmailHeading />
-        <p className="text-sm text-muted-foreground">{t("description", { email: currentEmail })}</p>
+        <p className={cn("text-sm text-muted-foreground", NOT_CAPTURED_CLASS)}>
+          {t("description", { email: currentEmail })}
+        </p>
       </div>
       <AccountField
         {...form.field("newEmail")}
