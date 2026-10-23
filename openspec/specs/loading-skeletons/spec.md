@@ -9,7 +9,6 @@ It exists because the app had no vocabulary for "loading". Without a route shell
 Nothing here makes anything faster. It makes the wait legible.
 
 The shared shimmer comes from `ui-skeleton-primitive`. The ubiquitous language is `GLOSSARY.md`.
-
 ## Requirements
 ### Requirement: A placeholder traces the shape of what replaces it
 
@@ -55,9 +54,22 @@ Each shell SHALL reproduce the landmarks of its page:
 - **Lesson** — the outline row, the breadcrumb, the 16:9 video frame, the lesson title, the
   notes tab row, and the closing card, in the page's own responsive grid.
 
+In a production build the shell reaches the browser through the link's prefetch, which
+Next issues for every link in view and which carries the route's `loading.tsx`. The shell
+SHALL therefore be on screen while a slow navigation is still pending, without waiting for
+any part of the navigation's own response. Verification of this requirement SHALL run
+against a production build: `next dev` does not prefetch, so a test that passes there
+proves nothing about what learners see.
+
 #### Scenario: Starting a navigation replaces the previous route immediately
 - **WHEN** the learner navigates to a route whose payload has not arrived
 - **THEN** that route's shell renders in place of the previous page, rather than the previous page remaining on screen
+
+#### Scenario: A prefetched lesson shows its shell while the navigation is slow
+- **WHEN**, in a production build, the learner opens a lesson from its module overview after
+  the lesson link's prefetch has landed, and the navigation's own payload is delayed
+- **THEN** the lesson shell renders in place of the module overview before that payload
+  arrives
 
 #### Scenario: The lesson shell reserves the video frame
 - **WHEN** the lesson shell renders
@@ -130,3 +142,4 @@ shown.
 #### Scenario: A player that never becomes ready keeps its placeholder
 - **WHEN** the player never reports it can play, because its source is unreachable
 - **THEN** the placeholder remains, rather than being replaced by an empty black frame on a timer
+

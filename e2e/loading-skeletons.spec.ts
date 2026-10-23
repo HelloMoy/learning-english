@@ -48,17 +48,64 @@ const HELD_PAYLOAD_MS = 4000;
 const holdTheProvider = (page: Page) => page.route(/youtube|ytimg/, (route) => route.abort());
 
 /**
- * Holds the RSC payload of whatever is navigated to next. This is the reported
- * bug in one line: without a shell, the learner sits on the page they came
- * from for exactly this long and reads it as the page they asked for.
+ * Whether the suite drives a production build — `E2E_SERVER_COMMAND` is how CI
+ * serves one (see `playwright.config.ts`). Only a production build prefetches
+ * links, and the link's prefetch is what carries a route's shell to the
+ * browser, so the route-shell tests mean nothing against `next dev`.
  */
-const holdTheNextPayload = (page: Page) =>
+const servesProductionBuild = process.env.E2E_SERVER_COMMAND === "pnpm start";
+
+/**
+ * Holds the navigation's own payload: a slow page. This is the reported bug in
+ * one line: without a shell, the learner sits on the page they came from for
+ * exactly this long and reads it as the page they asked for.
+ *
+ * Prefetches pass untouched. Holding them too would model a browser that
+ * never prefetches, where the shell cannot arrive before the payload at all.
+ */
+const holdTheNavigation = (page: Page) =>
   page.route("**/*", async (route) => {
-    if (route.request().headers()["rsc"] !== undefined) {
+    const headers = route.request().headers();
+    if (headers["rsc"] !== undefined && headers["next-router-prefetch"] === undefined) {
       await new Promise((resolve) => setTimeout(resolve, HELD_PAYLOAD_MS));
     }
     await route.continue();
   });
+
+/**
+ * Opens the module overview and waits until every prefetch of the lesson has
+ * fully arrived — the state a learner is in when they read the list and tap a
+ * lesson. Waiting on the response alone is not enough: it resolves on the
+ * headers, and the shell is in the body. Playwright does not report when such a
+ * body finishes, so completion is read from the browser's own Resource Timing,
+ * which records an entry only once a response has been received in full.
+ */
+async function openModuleWithLessonPrefetched(page: Page) {
+  let prefetchesStarted = 0;
+  page.on("request", (request) => {
+    const isLessonPrefetch =
+      request.headers()["next-router-prefetch"] !== undefined &&
+      new URL(request.url()).pathname === LESSON_PATH;
+    if (isLessonPrefetch) prefetchesStarted += 1;
+  });
+
+  await page.goto(MODULE_PATH);
+  await expect(lessonLink(page)).toBeVisible();
+  await expect.poll(() => prefetchesStarted).toBeGreaterThan(0);
+  await expect
+    .poll(async () => (await lessonPrefetchesReceived(page)) >= prefetchesStarted)
+    .toBe(true);
+}
+
+/** How many fetches of the lesson's path the browser has received in full. */
+const lessonPrefetchesReceived = (page: Page) =>
+  page.evaluate(
+    (lessonPath) =>
+      performance
+        .getEntriesByType("resource")
+        .filter((entry) => new URL(entry.name).pathname === lessonPath).length,
+    LESSON_PATH,
+  );
 
 /**
  * The lesson's own link.
@@ -120,21 +167,19 @@ test.describe("Loading skeletons — the lesson video frame", () => {
 });
 
 test.describe("Loading skeletons — route shells", () => {
-  // CI serves a production build, and there the lesson shell never appears:
-  // the held payload is not what the router waits on once the link has
-  // prefetched, and holding the prefetch too does not bring the shell back.
-  // Against `next dev` both tests pass. Whether production learners see the
-  // shell at all is an open question for its own change, so this stays
-  // visible as `fixme` rather than being skipped as an environment limit.
-  test.fixme(!!process.env.CI, "the lesson shell does not appear against a production build");
+  test.skip(!servesProductionBuild, "only a production build prefetches the shell");
+  // The app's service worker claims the page moments after it loads, and
+  // Playwright does not route requests that pass through one, so the hold
+  // would depend on whether it had claimed the page yet. Its fetch handler
+  // does nothing, so blocking it changes nothing about the shell.
+  test.use({ serviceWorkers: "block" });
 
   test("WHEN a lesson is opened from its module THEN the shell replaces the previous page", async ({
     page,
   }) => {
-    await page.goto(MODULE_PATH);
-    await expect(lessonLink(page)).toBeVisible();
+    await openModuleWithLessonPrefetched(page);
 
-    await holdTheNextPayload(page);
+    await holdTheNavigation(page);
     await lessonLink(page).click();
 
     await expect(page.getByTestId("lesson-shell-shapes")).toBeVisible();
@@ -142,10 +187,9 @@ test.describe("Loading skeletons — route shells", () => {
   });
 
   test("WHEN a shell renders THEN it announces loading exactly once", async ({ page }) => {
-    await page.goto(MODULE_PATH);
-    await expect(lessonLink(page)).toBeVisible();
+    await openModuleWithLessonPrefetched(page);
 
-    await holdTheNextPayload(page);
+    await holdTheNavigation(page);
     await lessonLink(page).click();
 
     await expect(page.getByTestId("lesson-shell-shapes")).toBeVisible();
