@@ -98,6 +98,9 @@ const threeModuleMap = new Map<string, Lesson[]>([
 const meta = {
   title: "LessonView/ModuleList",
   component: ModuleList,
+  // No reading: what every row shows before hydration, and for a learner who
+  // has watched nothing — the video count beside an empty ring.
+  args: { progressByModuleId: new Map() },
 } satisfies Meta<typeof ModuleList>;
 
 export default meta;
@@ -133,5 +136,24 @@ export const CollapsedModules: Story = {
     modules: [modA, modB, modC],
     lessonsByModuleId: threeModuleMap,
     currentLessonId: lessonA1.id,
+  },
+};
+
+/**
+ * The three readings side by side: a finished lesson (gold disc and
+ * "Lesson completed"), one half watched (ring and "1 / 2 videos · 50%"), and
+ * one untouched (empty ring and its video count).
+ */
+export const WithProgress: Story = {
+  args: {
+    course,
+    modules: [modA, modB, modC],
+    lessonsByModuleId: threeModuleMap,
+    currentLessonId: lessonA1.id,
+    progressByModuleId: new Map([
+      [modA.id, { completedCount: 2, lessonCount: 2 }],
+      [modB.id, { completedCount: 1, lessonCount: 2 }],
+      [modC.id, { completedCount: 0, lessonCount: 2 }],
+    ]),
   },
 };

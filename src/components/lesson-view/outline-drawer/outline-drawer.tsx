@@ -14,6 +14,7 @@ import { ChevronDown, List } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState, type CSSProperties } from "react";
 
+import { CompletionRing } from "../completion-ring/completion-ring";
 import { Outline } from "../outline/outline";
 
 /**
@@ -25,6 +26,9 @@ const HEADER_CLEARANCE: CSSProperties = { "--outline-inset": "6rem" } as CSSProp
 
 /** The reading is a percentage, so its axis runs to 100 rather than to a count. */
 const PERCENT_MAX = 100;
+
+/** The mobile row's ring, in pixels: the size of the tile it replaced. */
+const TILE_RING_SIZE = 44;
 
 /** What both branches hand to the `Outline`, and what the row derives from. */
 type OutlineDrawerProps = {
@@ -102,21 +106,23 @@ export function OutlineDrawer({
  * @remarks
  * A single row rather than a card, because on a phone the space above the
  * breadcrumb is space taken from the player. It still has to answer *where am
- * I?* before the learner opens anything, which is what the subtitle and the
- * edge meter are for.
+ * I?* and *how far am I?* before the learner opens anything, which is what the
+ * subtitle and the completion ring are for. The ring took the place of the
+ * list-icon tile and of a thin edge meter that carried the same share with no
+ * number on it (`outline-module-progress`).
  *
  * The whole row is the `<summary>`, so the tile and the chevron are not
  * separately focusable and a thumb aimed anywhere along the card hits the
  * control. The chevron is decorative: it turns, but the state it indicates
  * travels by `aria-expanded`, never by the icon alone.
  *
- * The meter's track renders on the server and its fill does not. Completion
- * lives in `localStorage`, so a bar drawn at zero in the first frame would
- * assert the learner has watched nothing, which may be false; drawing the track
- * alone keeps the row's height stable without making that claim. The same
+ * The ring's track renders on the server and its fill does not. Completion
+ * lives in `localStorage`, so a ring drawn at zero in the first frame would
+ * assert the learner has watched nothing, which may be false; until there is a
+ * reading the track holds the list icon instead of a percentage. The same
  * reasoning retires the `progressbar` role until there is a reading —
  * "progressbar, 0%" is that false claim spoken to assistive technology — and
- * silences the meter for a learner who has genuinely completed nothing, which
+ * silences the ring for a learner who has genuinely completed nothing, which
  * is the rule `ModuleWatchProgress` already applies to its own.
  *
  * @param course - The course the outline belongs to
@@ -144,7 +150,7 @@ function MobileOutlineDrawer({
   const readableFraction = hasReading ? completedFraction : 0;
   const percent = format.number(readableFraction, { style: "percent" });
 
-  const meterSemantics = hasReading
+  const ringSemantics = hasReading
     ? {
         role: "progressbar" as const,
         "aria-label": t("completionAriaLabel", { percent }),
@@ -162,13 +168,31 @@ function MobileOutlineDrawer({
       <summary
         aria-expanded={isOpen}
         data-testid="outline-drawer-row"
-        className="relative flex cursor-pointer list-none items-center gap-3 p-3"
+        className="flex cursor-pointer list-none items-center gap-3 p-3"
       >
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold">
-          <List
-            aria-hidden="true"
-            className="size-5"
-          />
+        <span
+          className="shrink-0"
+          {...ringSemantics}
+        >
+          <CompletionRing
+            size={TILE_RING_SIZE}
+            fraction={readableFraction}
+          >
+            {hasReading ? (
+              <span
+                data-testid="outline-ring-percent"
+                className="font-mono text-[11px] font-semibold text-foreground"
+              >
+                {percent}
+              </span>
+            ) : (
+              <List
+                aria-hidden="true"
+                data-testid="outline-ring-icon"
+                className="size-5 text-gold"
+              />
+            )}
+          </CompletionRing>
         </span>
 
         <span className="min-w-0 flex-1">
@@ -191,19 +215,6 @@ function MobileOutlineDrawer({
             isOpen ? "rotate-180" : ""
           }`}
         />
-
-        {/* The meter is the card's bottom edge, so it is drawn as one, flush
-            with the border rather than padded away from it. */}
-        <span
-          className="absolute inset-x-0 bottom-0 block h-1 bg-foreground/10"
-          {...meterSemantics}
-        >
-          <span
-            data-testid="outline-meter-fill"
-            className="block h-full rounded-r-full bg-gold transition-[width] duration-300"
-            style={{ width: `${readableFraction * PERCENT_MAX}%` }}
-          />
-        </span>
       </summary>
 
       <div

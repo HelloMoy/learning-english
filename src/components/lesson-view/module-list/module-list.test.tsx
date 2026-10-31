@@ -2,24 +2,35 @@ import { Course } from "@/domain/entities/course/course";
 import { CourseId, LessonId, ModuleId } from "@/domain/entities/ids/ids";
 import { Lesson } from "@/domain/entities/lesson/lesson";
 import { Module } from "@/domain/entities/module/module";
+import type { WatchTally } from "@/hooks/use-course-watch-progress/use-course-watch-progress";
 
 import { faker } from "@faker-js/faker";
-import { render, screen } from "@testing-library/react";
+import { render as renderUnwrapped, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useTranslations } from "next-intl";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { NextIntlClientProvider } from "next-intl";
+import type { ReactElement } from "react";
+import { describe, expect, test } from "vitest";
 
+import messages from "../../../messages/en.json";
 import { ModuleList } from "./module-list";
 
-vi.mock("next-intl", () => ({
-  // The outline's watch-progress bar formats its percentage through next-intl
-  // rather than concatenating a string, so the mock has to answer for the
-  // formatter too.
-  useFormatter: () => ({ number: (value: number) => `${Math.round(value * 100)}%` }),
-  useTranslations: vi.fn(),
-}));
+/**
+ * The real messages, not a mock that echoes keys: each row states an ICU
+ * reading with interpolated counts, and asserting on a key would prove only
+ * that it reached the formatter.
+ */
+const render = (ui: ReactElement) =>
+  renderUnwrapped(
+    <NextIntlClientProvider
+      locale="en"
+      messages={messages}
+    >
+      {ui}
+    </NextIntlClientProvider>,
+  );
 
-const mockUseTranslations = vi.mocked(useTranslations);
+/** No reading yet — the frame before hydration, and a learner with none. */
+const noProgress: ReadonlyMap<string, WatchTally> = new Map();
 
 const courseId = CourseId.parse(faker.string.uuid());
 const course = Course.parse({
@@ -78,23 +89,24 @@ const threeModuleLessons = new Map<string, Lesson[]>([
   [modC.id, [lessonC]],
 ]);
 
-/** Renders the three-module fixture with the current lesson in module A. */
-function renderThreeModules() {
+/**
+ * Renders the three-module fixture with the current lesson in module A.
+ *
+ * @param progressByModuleId - The per-module tallies the outline would hand down
+ */
+function renderThreeModules(progressByModuleId: ReadonlyMap<string, WatchTally> = noProgress) {
   return render(
     <ModuleList
       course={course}
       modules={threeModules}
       lessonsByModuleId={threeModuleLessons}
       currentLessonId={lessonA.id}
+      progressByModuleId={progressByModuleId}
     />,
   );
 }
 
 describe("ModuleList", () => {
-  beforeEach(() => {
-    mockUseTranslations.mockReturnValue(((key: string) => key) as never);
-  });
-
   test("WHEN rendered with one module THEN it shows the module heading and its lesson", () => {
     // Arrange
     const map = new Map<string, Lesson[]>([[modA.id, [lessonA]]]);
@@ -106,6 +118,7 @@ describe("ModuleList", () => {
         modules={[modA]}
         lessonsByModuleId={map}
         currentLessonId={lessonA.id}
+        progressByModuleId={noProgress}
       />,
     );
 
@@ -125,6 +138,7 @@ describe("ModuleList", () => {
         modules={[modA]}
         lessonsByModuleId={map}
         currentLessonId={lessonA.id}
+        progressByModuleId={noProgress}
       />,
     );
 
@@ -204,16 +218,17 @@ describe("ModuleList", () => {
     );
   });
 
-  test("WHEN a module renders THEN its chevron is decorative and stays out of the accessible name", () => {
+  test("WHEN a module renders THEN its ring and chevron are decorative and stay out of the accessible name", () => {
     // Act
-    const { container } = renderThreeModules();
+    renderThreeModules();
 
-    // Assert — the icon is hidden from assistive tech, so the button's
+    // Assert — the drawings are hidden from assistive tech, so the button's
     // accessible name is exactly the module title.
     const toggle = screen.getByRole("button", { name: "Module A" });
     expect(toggle).toHaveAccessibleName("Module A");
-    expect(toggle.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
-    expect(container.querySelectorAll("svg")).toHaveLength(threeModules.length);
+    for (const icon of toggle.querySelectorAll("svg")) {
+      expect(icon).toHaveAttribute("aria-hidden", "true");
+    }
   });
 
   test("WHEN a module's lessons are scrolled THEN its title stays pinned below the outline heading", () => {
@@ -249,5 +264,49 @@ describe("ModuleList", () => {
     // ...and Space expands it again.
     await user.keyboard(" ");
     expect(screen.getByText("Lesson A")).toBeInTheDocument();
+  });
+
+  describe("GIVEN the per-module progress", () => {
+    test("WHEN part of a module is done THEN its row states the share and its ring is filled", () => {
+      // Act
+      renderThreeModules(new Map([[modA.id, { completedCount: 4, lessonCount: 6 }]]));
+
+      // Assert
+      const toggle = screen.getByRole("button", { name: "Module A" });
+      expect(toggle).toHaveAccessibleDescription("4 / 6 videos · 67%");
+      expect(within(toggle).getByTestId("completion-ring-fill")).toBeInTheDocument();
+    });
+
+    test("WHEN every video of a module is done THEN its row says the lesson is completed", () => {
+      // Act
+      renderThreeModules(new Map([[modB.id, { completedCount: 6, lessonCount: 6 }]]));
+
+      // Assert — the finished state is a disc with a check, not a full ring.
+      const toggle = screen.getByRole("button", { name: "Module B" });
+      expect(toggle).toHaveAccessibleDescription("Lesson completed");
+      expect(within(toggle).getByTestId("module-completed-mark")).toBeInTheDocument();
+      expect(within(toggle).queryByTestId("completion-ring-track")).toBeNull();
+    });
+
+    test("WHEN nothing in a module is done THEN its row states its size and its ring is empty", () => {
+      // Act
+      renderThreeModules(new Map([[modC.id, { completedCount: 0, lessonCount: 6 }]]));
+
+      // Assert
+      const toggle = screen.getByRole("button", { name: "Module C" });
+      expect(toggle).toHaveAccessibleDescription("6 videos");
+      expect(within(toggle).getByTestId("completion-ring-track")).toBeInTheDocument();
+      expect(within(toggle).queryByTestId("completion-ring-fill")).toBeNull();
+    });
+
+    test("WHEN there is no reading for a module THEN its row counts the videos it holds", () => {
+      // Act — the frame before hydration hands down no tallies at all.
+      renderThreeModules();
+
+      // Assert — the count comes from the course structure, never from storage.
+      const toggle = screen.getByRole("button", { name: "Module A" });
+      expect(toggle).toHaveAccessibleDescription("1 video");
+      expect(within(toggle).queryByTestId("completion-ring-fill")).toBeNull();
+    });
   });
 });
