@@ -158,4 +158,16 @@ describe("SignUpForm", () => {
     expect(screen.getByLabelText("Email")).toHaveValue(email);
     expect(screen.queryByTestId("account-wait-beam")).not.toBeInTheDocument();
   });
+
+  test("WHEN the check-your-inbox message names the address THEN it is kept out of usage data", async () => {
+    renderInLocale(<SignUpForm returnPath="/learning" />);
+    await fillIn({ name: "Ana", email: faker.internet.email(), password: "long-enough-1" });
+    await userEvent.click(screen.getByRole("button", { name: "pass challenge" }));
+
+    await userEvent.click(screen.getByRole("button", { name: "Create account" }));
+
+    // PostHog blanks an element with this class in recordings and captures no
+    // click from it. See `NOT_CAPTURED_CLASS`.
+    expect(await screen.findByRole("status")).toHaveClass("ph-no-capture");
+  });
 });

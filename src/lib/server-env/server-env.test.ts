@@ -35,6 +35,12 @@ const SENTRY = [
   "SENTRY_AUTH_TOKEN",
 ] as const;
 
+const POSTHOG = {
+  NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: "phc_projecttoken",
+  POSTHOG_PROJECT_ID: "12345",
+  POSTHOG_PERSONAL_API_KEY: "phx_personalapikey",
+} as const;
+
 const OWNED = [
   ...Object.keys(VALID),
   "TURSO_AUTH_TOKEN",
@@ -42,6 +48,7 @@ const OWNED = [
   "SMTP_PASSWORD",
   "AUTH_RATE_LIMIT",
   ...SENTRY,
+  ...Object.keys(POSTHOG),
 ];
 
 let saved: Record<string, string | undefined> = {};
@@ -83,6 +90,28 @@ describe("serverEnv", () => {
 
     expect(() => serverEnv()).toThrow(/SENTRY_DSN/);
   });
+
+  test("needs no PostHog variable: usage data is off until configured", () => {
+    const env = serverEnv();
+
+    for (const name of Object.keys(POSTHOG)) expect(env).not.toHaveProperty(name);
+  });
+
+  test("accepts PostHog fully configured: collecting, and able to erase", () => {
+    Object.assign(process.env, POSTHOG);
+
+    expect(serverEnv()).toMatchObject(POSTHOG);
+  });
+
+  test.each(["POSTHOG_PROJECT_ID", "POSTHOG_PERSONAL_API_KEY"] as const)(
+    "refuses to collect usage data without %s, because it could not be erased",
+    (missing) => {
+      Object.assign(process.env, POSTHOG);
+      delete process.env[missing];
+
+      expect(() => serverEnv()).toThrow(new RegExp(missing));
+    },
+  );
 
   test("lists every variable it reads, for the deployment runbook", () => {
     expect(SERVER_ENV_VARIABLES).toEqual(expect.arrayContaining([...OWNED]));

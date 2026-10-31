@@ -1,6 +1,7 @@
 import { enrollInCourseAction } from "@/app/[locale]/learner-actions";
 import { learnerStore } from "@/lib/learner-store/learner-store";
 import { givenLearner } from "@/test-setup/learner-store/learner-store";
+import { givenProductAnalytics } from "@/test-setup/product-analytics/product-analytics";
 
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -78,5 +79,31 @@ describe("useEnrolledCourses", () => {
   test("WHEN rendering on the server THEN the snapshot is empty and stable", () => {
     expect(enrolledCoursesServerSnapshot().size).toBe(0);
     expect(enrolledCoursesServerSnapshot()).toBe(enrolledCoursesServerSnapshot());
+  });
+});
+
+describe("enrollInCourse — reporting", () => {
+  test("WHEN the enrollment is saved THEN it is reported for that course", async () => {
+    const client = givenProductAnalytics("granted");
+
+    act(() => enrollInCourse("basic-course"));
+
+    await waitFor(() =>
+      expect(client.capture).toHaveBeenCalledExactlyOnceWith("course_enrolled", {
+        courseSlug: "basic-course",
+      }),
+    );
+  });
+
+  test("WHEN the server refuses THEN nothing is reported, because nobody enrolled", async () => {
+    const client = givenProductAnalytics("granted");
+    vi.mocked(enrollInCourseAction).mockResolvedValue({ serverError: "x" } as never);
+
+    act(() => enrollInCourse("basic-course"));
+
+    await waitFor(() =>
+      expect(learnerStore.getState().enrolledCourses.has("basic-course")).toBe(false),
+    );
+    expect(client.capture).not.toHaveBeenCalled();
   });
 });

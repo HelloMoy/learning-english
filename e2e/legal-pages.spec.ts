@@ -51,9 +51,19 @@ test.describe("legal pages", () => {
     await page.goto("/en/privacy");
 
     const main = page.getByRole("main");
-    for (const processor of ["Turso", "Resend", "Cloudflare Turnstile", "Sentry"]) {
+    for (const processor of ["Turso", "Resend", "Cloudflare Turnstile", "Sentry", "PostHog"]) {
       await expect(main).toContainText(processor);
     }
+  });
+
+  test("each document shows the day its own wording last changed", async ({ page }) => {
+    // The two pages used to share one date. Usage data changed the privacy
+    // policy alone, and a reader of the terms must not be told they moved too.
+    await page.goto("/en/privacy");
+    await expect(page.getByRole("main")).toContainText("Last updated October 10, 2026");
+
+    await page.goto("/en/terms");
+    await expect(page.getByRole("main")).toContainText("Last updated September 22, 2026");
   });
 
   test("the footer reaches the privacy policy and keeps the locale", async ({ page }) => {

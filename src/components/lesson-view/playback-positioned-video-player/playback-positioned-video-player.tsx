@@ -4,6 +4,7 @@ import type { LessonId } from "@/domain/entities/ids/ids";
 import { useCompleteWhenWatched } from "@/hooks/use-complete-when-watched/use-complete-when-watched";
 import { usePersistPlaybackPosition } from "@/hooks/use-persist-playback-position/use-persist-playback-position";
 import { usePlaybackPosition } from "@/hooks/use-playback-position/use-playback-position";
+import { useReportPlayback } from "@/hooks/use-report-playback/use-report-playback";
 import { useResumeOnFirstPlay } from "@/hooks/use-resume-on-first-play/use-resume-on-first-play";
 
 import { useMediaState, type MediaPlayerInstance } from "@vidstack/react";
@@ -119,6 +120,9 @@ export function PlaybackPositionedVideoPlayer({
       get duration() {
         return playerRef.current?.duration ?? 0;
       },
+      get playbackRate() {
+        return playerRef.current?.playbackRate ?? 1;
+      },
       pause: () => fireAndForget(playerRef.current?.pause()),
       play: () => fireAndForget(playerRef.current?.play()),
       seekTo: (seconds: number) => {
@@ -131,6 +135,7 @@ export function PlaybackPositionedVideoPlayer({
   const persistence = usePersistPlaybackPosition({ lessonId, player });
   const resume = useResumeOnFirstPlay({ savedPositionSeconds, durationSeconds, player });
   const completion = useCompleteWhenWatched({ lessonId, durationSeconds, player });
+  const report = useReportPlayback({ lessonId, player });
 
   const isOfferOpen = resume.offeredSeconds !== null;
 
@@ -146,18 +151,28 @@ export function PlaybackPositionedVideoPlayer({
         onPlay={() => {
           persistence.openWriteGate();
           completion.handlePlaybackStarted();
+          report.handlePlay();
           onPlaybackStart?.();
         }}
         onPlaying={resume.handlePlaybackStarted}
-        onPause={persistence.handleImmediateWrite}
-        onSeeking={persistence.handleImmediateWrite}
+        onPause={() => {
+          persistence.handleImmediateWrite();
+          report.handlePause();
+        }}
+        onSeeking={() => {
+          persistence.handleImmediateWrite();
+          report.handleSeeking();
+        }}
+        onRateChange={report.handleRateChange}
         onEnded={() => {
           persistence.handleImmediateWrite();
           completion.handleProgress();
+          report.handleEnded();
         }}
         onTimeUpdate={() => {
           persistence.handleTimeUpdate();
           completion.handleProgress();
+          report.handleTimeUpdate();
         }}
       >
         {resume.offeredSeconds !== null ? (

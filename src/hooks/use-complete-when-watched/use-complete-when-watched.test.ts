@@ -1,5 +1,6 @@
 import { LessonId } from "@/domain/entities/ids/ids";
 import { finishThresholdSeconds } from "@/lib/watch-progress/watch-progress";
+import { givenProductAnalytics } from "@/test-setup/product-analytics/product-analytics";
 
 import { faker } from "@faker-js/faker";
 import { act, renderHook } from "@testing-library/react";
@@ -223,5 +224,42 @@ describe("useCompleteWhenWatched — celebrating the finish", () => {
 
     // Assert
     expect(celebrate).not.toHaveBeenCalled();
+  });
+});
+
+describe("useCompleteWhenWatched — reporting", () => {
+  test("WHEN watching completes the lesson THEN it is reported as playback's doing", async () => {
+    const client = givenProductAnalytics("granted");
+    vi.mocked(markLessonComplete).mockResolvedValueOnce(true);
+    const player = makePlayer(0);
+    const { result, lessonId } = renderAutoCompletion({ player });
+
+    act(() => {
+      result.current.handlePlaybackStarted();
+      player.currentTime = finishThresholdSeconds(LESSON_DURATION_SECONDS);
+      result.current.handleProgress();
+    });
+    await flushWrites();
+
+    expect(client.capture).toHaveBeenCalledExactlyOnceWith("lesson_completed", {
+      lessonId,
+      by: "playback",
+    });
+  });
+
+  test("WHEN the write is refused THEN nothing is reported", async () => {
+    const client = givenProductAnalytics("granted");
+    vi.mocked(markLessonComplete).mockResolvedValueOnce(false);
+    const player = makePlayer(0);
+    const { result } = renderAutoCompletion({ player });
+
+    act(() => {
+      result.current.handlePlaybackStarted();
+      player.currentTime = finishThresholdSeconds(LESSON_DURATION_SECONDS);
+      result.current.handleProgress();
+    });
+    await flushWrites();
+
+    expect(client.capture).not.toHaveBeenCalled();
   });
 });

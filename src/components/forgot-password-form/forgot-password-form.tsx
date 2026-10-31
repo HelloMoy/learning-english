@@ -40,6 +40,7 @@ export function ForgotPasswordForm() {
       <AccountConfirmation
         title={t("forgotPassword.sentTitle")}
         message={t("forgotPassword.sentBody", { email: sentTo })}
+        personal
       />
     );
   }

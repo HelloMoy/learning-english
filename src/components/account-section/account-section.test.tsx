@@ -110,4 +110,15 @@ describe("AccountSection", () => {
     expect(screen.queryByRole("heading", { level: 2 })).not.toBeInTheDocument();
     expect(screen.queryByText(copy.account.heading)).not.toBeInTheDocument();
   });
+
+  test.each([["password"], ["google"]] as const)(
+    "WHEN the learner signs in with %s THEN their address is kept out of usage data",
+    (method) => {
+      renderSection(anAccount([method]));
+
+      // PostHog blanks an element with this class in recordings and captures no
+      // click from it. See `NOT_CAPTURED_CLASS`.
+      expect(screen.getByText("ana@example.com")).toHaveClass("ph-no-capture");
+    },
+  );
 });

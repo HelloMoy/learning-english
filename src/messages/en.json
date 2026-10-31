@@ -466,6 +466,16 @@
       "privacy": "Privacy",
       "terms": "Terms"
     },
+    "ConsentBanner": {
+      "regionLabel": "Privacy choices",
+      "body": "We would like to use cookies to understand how the site is used: the pages you visit, what you click, and a recording of your session, linked to your account. If you decline, your visit is still counted, anonymously, and nothing is stored in your browser.",
+      "policyLink": "Privacy policy",
+      "accept": "Accept",
+      "decline": "Decline"
+    },
+    "PrivacyChoicesButton": {
+      "label": "Privacy choices"
+    },
     "ResumeTile": {
       "pickUp": "Pick up where you left off",
       "startHere": "Start here",
@@ -975,13 +985,17 @@
           "heading": "Error reports",
           "body": "When something fails we send an error report to Sentry so that it can be fixed. The reports carry errors only — no performance tracing and no session recording — and the SDK is configured not to attach personal data. Before a handled error leaves the server, message bodies are dropped entirely and any email address in the surrounding context is replaced with the literal text [email]."
         },
+        "usageData": {
+          "heading": "Usage data",
+          "body": "To understand how the site is used, we send usage data to PostHog, which stores it in the United States. We ask you first. If you accept, PostHog sets a cookie and uses your browser’s storage to recognise you between visits, links what you do to your account by its ID — never by your name or email address — and records your sessions: what the page showed and where you clicked and scrolled. A recording shows the page as you saw it, including your name where the page prints it; your email address is blanked out. If you decline, your visit is still counted, anonymously: nothing is stored in your browser, nothing is linked to your account, and nothing is recorded. Either way we collect the pages you visit, what you click and the text of what you clicked, actions such as playing a video, and the kind of browser and device you use. We never collect what you type into a form, your email address, anything after the question mark in a page address, or recordings of the sign-in, sign-up and password pages. Your requests reach PostHog through this site’s own address, which passes on your IP address and your browser’s details, and never your sign-in session. You can change your answer at any time from the Privacy choices link at the bottom of every page."
+        },
         "cookies": {
           "heading": "Cookies",
-          "body": "We set two cookies and no others. One remembers the language you chose, so the site opens in it next time. The other is your session, which is what keeps you signed in. There are no analytics cookies, no advertising cookies and no third-party trackers on this site."
+          "body": "Two cookies are always set. One remembers the language you chose, so the site opens in it next time. The other is your session, which is what keeps you signed in. If you accept usage data, PostHog adds one cookie of its own and keeps some data in your browser’s storage; if you decline, it adds neither. Your answer itself is remembered in your browser, so you are not asked again. There are no advertising cookies."
         },
         "yourChoices": {
           "heading": "Your choices",
-          "body": "From your profile you can change the name on your learner card, change your email address — which is confirmed first at the address on file and then at the new one — and change your password. You can delete your account from the same place at any time, without giving a reason; deletion is confirmed by an emailed link that works only in your own session."
+          "body": "From your profile you can change the name on your learner card, change your email address — which is confirmed first at the address on file and then at the new one — and change your password. You can delete your account from the same place at any time, without giving a reason; deletion is confirmed by an emailed link that works only in your own session. Deleting your account also erases the usage data and session recordings PostHog holds for it. You can change your answer about usage data at any time from the Privacy choices link at the bottom of every page."
         },
         "contact": {
           "heading": "Getting in touch",

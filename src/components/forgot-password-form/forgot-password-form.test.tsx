@@ -107,4 +107,16 @@ describe("ForgotPasswordForm", () => {
 
     expect(submit.compareDocumentPosition(challenge)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
+
+  test("WHEN the confirmation names the address THEN it is kept out of usage data", async () => {
+    renderInLocale(<ForgotPasswordForm />);
+    await userEvent.type(screen.getByLabelText("Email"), faker.internet.email());
+    await userEvent.click(screen.getByRole("button", { name: "pass challenge" }));
+
+    await userEvent.click(screen.getByRole("button", { name: "Send reset link" }));
+
+    // PostHog blanks an element with this class in recordings and captures no
+    // click from it. See `NOT_CAPTURED_CLASS`.
+    expect(await screen.findByRole("status")).toHaveClass("ph-no-capture");
+  });
 });

@@ -1,6 +1,7 @@
+import { givenProductAnalytics } from "@/test-setup/product-analytics/product-analytics";
 import { renderInLocale } from "@/test-setup/render-in-locale";
 
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 
 import { SiteFooter } from "./site-footer";
@@ -57,6 +58,34 @@ describe("SiteFooter", () => {
       // Assert
       expect(screen.getByRole("link", { name: "Privacidade" })).toBeInTheDocument();
       expect(screen.getByRole("link", { name: "Termos" })).toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN usage data is collected", () => {
+    test("WHEN rendered THEN the footer offers to reopen the privacy choice", () => {
+      // Arrange
+      givenProductAnalytics("granted");
+
+      // Act
+      renderInLocale(<SiteFooter />);
+
+      // Assert — inside the footer's own navigation, beside the documents
+      // that explain the choice.
+      expect(
+        within(screen.getByRole("navigation", { name: "Legal" })).getByRole("button", {
+          name: "Privacy choices",
+        }),
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe("GIVEN usage data is not collected", () => {
+    test("WHEN rendered THEN the footer offers no choice, because there is none to make", () => {
+      // Act
+      renderInLocale(<SiteFooter />);
+
+      // Assert
+      expect(screen.queryByRole("button", { name: "Privacy choices" })).not.toBeInTheDocument();
     });
   });
 });

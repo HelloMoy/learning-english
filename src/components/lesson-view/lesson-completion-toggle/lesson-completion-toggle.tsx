@@ -10,6 +10,7 @@ import {
   useLessonCompletion,
 } from "@/hooks/use-lesson-completion/use-lesson-completion";
 import { celebrateLessonCompletion } from "@/lib/celebrate-completion/celebrate-completion";
+import { captureProductEvent } from "@/lib/product-analytics/product-analytics";
 
 import NiceModal from "@ebay/nice-modal-react";
 import { useTranslations } from "next-intl";
@@ -76,7 +77,9 @@ export function LessonCompletionToggle({ lessonId }: { lessonId: LessonId }) {
   const onMark = () => {
     startTransition(async () => {
       const saved = await markLessonComplete(lessonId);
-      if (saved) void celebrateLessonCompletion();
+      if (!saved) return;
+      captureProductEvent("lesson_completed", { lessonId, by: "learner" });
+      void celebrateLessonCompletion();
     });
   };
 

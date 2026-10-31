@@ -1,5 +1,7 @@
 import "server-only";
 
+import { PostHogUsageDataEraser } from "@/adapters/analytics/posthog-usage-data-eraser/posthog-usage-data-eraser";
+import type { UsageDataEraser } from "@/adapters/analytics/usage-data-eraser";
 import type { EmailSender } from "@/adapters/email/email-sender";
 import { SmtpEmailSender } from "@/adapters/email/smtp-email-sender/smtp-email-sender";
 import { getDatabase, type Database } from "@/adapters/persistence/turso/database/database";
@@ -10,7 +12,7 @@ import {
   type AccountEmailKind,
   type AccountEmailValues,
 } from "@/lib/account-emails/account-emails";
-import { isAuthRateLimited, serverEnv } from "@/lib/server-env/server-env";
+import { isAuthRateLimited, serverEnv, type ServerEnv } from "@/lib/server-env/server-env";
 
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -46,6 +48,11 @@ export type AuthDependencies = {
    * is cut off mid-connection.
    */
   afterResponse: (work: AfterResponseWork) => void;
+  /**
+   * Erases what the analytics service holds for a deleted account. Absent in a
+   * deployment that collects no usage data: there is nothing to erase.
+   */
+  usageDataEraser?: UsageDataEraser;
   secret: string;
   baseURL: string;
   google: { clientId: string; clientSecret: string };
@@ -78,6 +85,10 @@ export type AuthDependencies = {
  * one. The address moves when that second link is opened, so neither a
  * hijacked session nor a mistyped address can move an account on its own.
  *
+ * A deleted account's usage data is erased from the analytics service too,
+ * after the response and without the deletion depending on it — see
+ * `usageDataEraser`.
+ *
  * @param dependencies - The database, the email sender and the secrets
  * @returns The configured auth instance
  */
@@ -93,6 +104,21 @@ export function createAuth(dependencies: AuthDependencies) {
    * The link is the forgot-password page and carries no token: the one reader
    * this notice exists for is the one who should not be handed a key.
    */
+  /**
+   * Asks the analytics service to forget a deleted account, without making the
+   * deletion wait for it and without ever failing it. The account is already
+   * gone when this runs; the eraser reports its own failures, so an outage
+   * there leaves a Sentry event to act on rather than an account that could
+   * not be deleted.
+   */
+  const eraseUsageDataOf = (accountId: string): void => {
+    const eraser = dependencies.usageDataEraser;
+    if (!eraser) return;
+    dependencies.afterResponse(async () => {
+      await eraser.erase(accountId);
+    });
+  };
+
   const notifyPasswordChanged = (to: string, locale: string): void => {
     const recovery = `${dependencies.baseURL}/${locale}/forgot-password`;
     dependencies.afterResponse(() =>
@@ -131,6 +157,7 @@ export function createAuth(dependencies: AuthDependencies) {
         enabled: true,
         sendDeleteAccountVerification: ({ user, url }) =>
           sendAccountEmail("delete-account", user.email, url),
+        afterDelete: async ({ id }) => eraseUsageDataOf(id),
       },
     },
     socialProviders: { google: dependencies.google },
@@ -209,7 +236,15 @@ export function authDependenciesFromEnv(): AuthDependencies {
     google: { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET },
     captcha: { secretKey: env.TURNSTILE_SECRET_KEY },
     rateLimited: isAuthRateLimited(env),
+    usageDataEraser: usageDataEraserFrom(env),
   };
+}
+
+/** `serverEnv` guarantees both PostHog credentials whenever the project token is set. */
+function usageDataEraserFrom(env: ServerEnv): UsageDataEraser | undefined {
+  const { POSTHOG_PROJECT_ID: projectId, POSTHOG_PERSONAL_API_KEY: personalApiKey } = env;
+  if (!projectId || !personalApiKey) return undefined;
+  return new PostHogUsageDataEraser({ projectId, personalApiKey });
 }
 
 /** The header every account form sets, naming the locale the learner is in. */

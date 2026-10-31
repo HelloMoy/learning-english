@@ -466,6 +466,16 @@
       "privacy": "Privacidade",
       "terms": "Termos"
     },
+    "ConsentBanner": {
+      "regionLabel": "Opções de privacidade",
+      "body": "Gostaríamos de usar cookies para perceber como o site é utilizado: as páginas que visita, onde clica e uma gravação da sua sessão, associada à sua conta. Se recusar, a sua visita é contada na mesma, de forma anónima, e nada é guardado no seu navegador.",
+      "policyLink": "Política de privacidade",
+      "accept": "Aceitar",
+      "decline": "Recusar"
+    },
+    "PrivacyChoicesButton": {
+      "label": "Opções de privacidade"
+    },
     "ResumeTile": {
       "pickUp": "Continue de onde parou",
       "startHere": "Comece aqui",
@@ -975,13 +985,17 @@
           "heading": "Relatórios de erro",
           "body": "Quando algo falha enviamos um relatório de erro para o Sentry para que possa ser corrigido. Os relatórios levam erros e mais nada — sem rastreio de desempenho e sem gravação de sessão — e o SDK está configurado para não anexar dados pessoais. Antes de um erro tratado sair do servidor, o corpo das mensagens é descartado por completo e qualquer endereço de e-mail no contexto é substituído pelo texto literal [email]."
         },
+        "usageData": {
+          "heading": "Dados de utilização",
+          "body": "Para perceber como o site é utilizado, enviamos dados de utilização para a PostHog, que os guarda nos Estados Unidos. Perguntamos-lhe primeiro. Se aceitar, a PostHog define um cookie e usa o armazenamento do seu navegador para o reconhecer entre visitas, associa o que faz à sua conta pelo respetivo identificador — nunca pelo seu nome nem pelo seu e-mail — e grava as suas sessões: o que a página mostrava e onde clicou e se deslocou. Uma gravação mostra a página tal como a viu, incluindo o seu nome onde a página o apresenta; o seu endereço de e-mail aparece tapado. Se recusar, a sua visita é contada na mesma, de forma anónima: nada é guardado no seu navegador, nada é associado à sua conta e nada é gravado. Em ambos os casos recolhemos as páginas que visita, onde clica e o texto daquilo em que clicou, ações como reproduzir um vídeo, e o tipo de navegador e de dispositivo que utiliza. Nunca recolhemos o que escreve num formulário, o seu endereço de e-mail, nada do que vem depois do ponto de interrogação no endereço de uma página, nem gravações das páginas de início de sessão, de registo e de palavra-passe. Os seus pedidos chegam à PostHog através do endereço deste próprio site, que transmite o seu endereço IP e os dados do seu navegador, e nunca a sua sessão iniciada. Pode alterar a sua resposta em qualquer altura através da ligação Opções de privacidade no fundo de cada página."
+        },
         "cookies": {
           "heading": "Cookies",
-          "body": "Usamos dois cookies e mais nenhum. Um recorda o idioma que escolheu, para que o site abra nele da próxima vez. O outro é a sua sessão, que é o que o mantém com sessão iniciada. Não há cookies de análise, nem de publicidade, nem rastreadores de terceiros neste site."
+          "body": "Há dois cookies que usamos sempre. Um recorda o idioma que escolheu, para que o site abra nele da próxima vez. O outro é a sua sessão, que é o que o mantém com sessão iniciada. Se aceitar os dados de utilização, a PostHog acrescenta um cookie próprio e guarda alguns dados no armazenamento do seu navegador; se recusar, não acrescenta nenhum dos dois. A sua resposta fica guardada no seu navegador, para não voltarmos a perguntar. Não há cookies de publicidade."
         },
         "yourChoices": {
           "heading": "As suas opções",
-          "body": "A partir do seu perfil pode mudar o nome do seu cartão de aluno, mudar o seu endereço de e-mail — que é confirmado primeiro no endereço registado e depois no novo — e mudar a sua palavra-passe. Pode eliminar a sua conta no mesmo sítio quando quiser, sem dar explicações; a eliminação é confirmada por um link enviado por e-mail que só funciona na sua própria sessão."
+          "body": "A partir do seu perfil pode mudar o nome do seu cartão de aluno, mudar o seu endereço de e-mail — que é confirmado primeiro no endereço registado e depois no novo — e mudar a sua palavra-passe. Pode eliminar a sua conta no mesmo sítio quando quiser, sem dar explicações; a eliminação é confirmada por um link enviado por e-mail que só funciona na sua própria sessão. Eliminar a sua conta apaga também os dados de utilização e as gravações de sessão que a PostHog guarda sobre ela. Pode alterar a sua resposta sobre os dados de utilização em qualquer altura através da ligação Opções de privacidade no fundo de cada página."
         },
         "contact": {
           "heading": "Como falar connosco",

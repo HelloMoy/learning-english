@@ -1,6 +1,6 @@
 import { StructuredData } from "@/components/structured-data/structured-data";
 import { requireSupportedLocale } from "@/i18n/require-supported-locale/require-supported-locale";
-import { currentLearnerSnapshot } from "@/lib/auth/current-learner-snapshot/current-learner-snapshot";
+import { currentLearner } from "@/lib/auth/current-learner/current-learner";
 import { websiteSchema } from "@/lib/course-schema/course-schema";
 import { siteUrl } from "@/lib/site-url/site-url";
 
@@ -14,6 +14,7 @@ import { notFound } from "next/navigation";
 import "../globals.css";
 
 import { CinemaBackground } from "@/components/cinema-background/cinema-background";
+import { ConsentBanner } from "@/components/consent-banner/consent-banner";
 import { GlobalProviders } from "@/components/global-providers";
 import { LearnerStateSeed } from "@/components/learner-state-seed/learner-state-seed";
 import { RouteTransition } from "@/components/route-transition/route-transition";
@@ -103,7 +104,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   // Resolved once per request and shared by both: the header counts the prizes
   // waiting to be claimed, and the providers decide where a won prize stands.
   const levels = catalogLevels(await loadCatalogEntries());
-  const learnerSnapshot = await currentLearnerSnapshot();
+  const learner = await currentLearner();
 
   return (
     // `suppressHydrationWarning` is required on <html> when using next-themes:
@@ -131,19 +132,26 @@ export default async function LocaleLayout({ children, params }: Props) {
             disableTransitionOnChange
           >
             <StructuredData data={websiteSchema({ siteUrl: siteUrl(), locale })} />
-            <LearnerStateSeed snapshot={learnerSnapshot} />
+            <LearnerStateSeed snapshot={learner?.snapshot ?? null} />
             <SkipLink />
             <CinemaBackground />
             <SiteHeader
               levels={levels}
-              signedIn={learnerSnapshot !== null}
+              signedIn={learner !== null}
             />
             <RouteTransition>
-              <GlobalProviders levels={levels}>
+              <GlobalProviders
+                levels={levels}
+                learnerAccountId={learner?.accountId ?? null}
+              >
                 <div className="flex-1">{children}</div>
               </GlobalProviders>
               <SiteFooter />
             </RouteTransition>
+            {/* Outside the route transition on purpose: the banner is fixed to
+                the viewport and must neither travel with the outgoing page nor
+                be re-asked by the incoming one. */}
+            <ConsentBanner />
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

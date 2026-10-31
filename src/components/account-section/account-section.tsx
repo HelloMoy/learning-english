@@ -65,6 +65,7 @@ export function AccountSection({ account }: AccountSectionProps) {
             <AccountRow
               label={t("emailLabel")}
               value={account.email}
+              personal
             >
               <ChangeEmailSection currentEmail={account.email} />
             </AccountRow>
@@ -79,6 +80,7 @@ export function AccountSection({ account }: AccountSectionProps) {
           <AccountRow
             label={t("emailLabel")}
             value={account.email}
+            personal
           />
         )}
         <SignInMethods methods={account.signInMethods} />

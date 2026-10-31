@@ -51,6 +51,7 @@ export function SignUpForm({ returnPath }: SignUpFormProps) {
       <AccountConfirmation
         title={t("signUp.checkInboxTitle")}
         message={t("signUp.checkInboxBody", { email: sentTo })}
+        personal
       />
     );
   }
