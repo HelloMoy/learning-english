@@ -200,7 +200,12 @@
     "Outline": {
       "title": "Conteúdo do curso",
       "positionLabel": "{module} · Lição {position} de {total}",
-      "completionAriaLabel": "{percent} do curso concluído"
+      "completionAriaLabel": "{percent} do curso concluído",
+      "moduleVideoCount": "{total, plural, one {# vídeo} other {# vídeos}}",
+      "moduleProgress": "{completed} / {total} vídeos · {percent}",
+      "moduleCompleted": "Lição concluída",
+      "courseSummary": "{completed} de {total} vídeos · {completedLessons} de {lessonCount} lições concluídas",
+      "courseSize": "{total, plural, one {# vídeo} other {# vídeos}} · {lessonCount, plural, one {# lição} other {# lições}}"
     },
     "LessonVideoPlayer": {
       "playbackRate": "Velocidade de reprodução",
