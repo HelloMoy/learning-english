@@ -74,12 +74,21 @@ export const LongCourseDesktop: Story = {
   ],
 };
 
+/**
+ * The sidebar part of the way through: the course summary under the heading,
+ * finished lessons as gold discs, and every other lesson's share beside its ring.
+ */
+export const DesktopPartWayThrough: Story = {
+  ...LongCourseDesktop,
+  decorators: [...(LongCourseDesktop.decorators as Decorator[]), withCompletedLessons(45)],
+};
+
 export const LongCourseMobile: Story = {
   args: longCourse.props,
   parameters: { viewport: { defaultViewport: "mobile1" } },
 };
 
-/** Part of the way through — the edge meter carries the whole reading. */
+/** Part of the way through — the ring states the course share. */
 export const MobilePartWayThrough: Story = {
   args: longCourse.props,
   parameters: { viewport: { defaultViewport: "mobile1" } },
@@ -97,8 +106,8 @@ export const MobileExpanded: Story = {
 };
 
 /**
- * A learner who has completed nothing: the edge track draws, but the row makes
- * no claim about progress.
+ * A learner who has completed nothing: the ring's track draws around the list
+ * icon, but the row makes no claim about progress.
  */
 export const MobileNoProgress: Story = {
   args: longCourse.props,
@@ -106,7 +115,7 @@ export const MobileNoProgress: Story = {
   decorators: [withCompletedLessons(0)],
 };
 
-/** A finished course, where the edge meter runs the card's full width. */
+/** A finished course, where the ring closes and reads 100%. */
 export const MobileCourseComplete: Story = {
   args: longCourse.props,
   parameters: { viewport: { defaultViewport: "mobile1" } },
