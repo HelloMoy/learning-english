@@ -174,30 +174,42 @@ describe("OutlineDrawer", () => {
     });
   });
 
-  describe("GIVEN the edge meter tracks the course", () => {
-    test("WHEN the learner is part way through THEN the meter is filled to that share", () => {
+  describe("GIVEN the ring tracks the course", () => {
+    test("WHEN the learner is part way through THEN the ring is filled and states the share", () => {
       const fixture = makeCourseFixture({ lessonsPerModule: [4, 6] });
       for (const lesson of fixture.lessons.slice(0, 5)) markCompleteInStorage(lesson.id);
       announceStorageChange();
 
       renderDrawer(fixture);
 
-      const meter = within(screen.getByTestId("outline-drawer-row")).getByRole("progressbar");
-      expect(meter).toHaveAccessibleName("50% of the course completed");
-      expect(screen.getByTestId("outline-meter-fill")).toHaveStyle({ width: "50%" });
+      const row = within(screen.getByTestId("outline-drawer-row"));
+      expect(row.getByRole("progressbar")).toHaveAccessibleName("50% of the course completed");
+      expect(row.getByTestId("outline-ring-percent")).toHaveTextContent("50%");
+      expect(row.getByTestId("completion-ring-fill")).toBeInTheDocument();
+      expect(row.queryByTestId("outline-ring-icon")).toBeNull();
     });
 
-    test("WHEN nothing is complete THEN the track draws and no reading is claimed", () => {
+    test("WHEN the row renders THEN the ring takes the tile's place and no edge meter remains", () => {
       renderDrawer(makeCourseFixture({ lessonsPerModule: [4, 6] }));
 
-      const row = screen.getByTestId("outline-drawer-row");
-      expect(screen.getByTestId("outline-meter-fill")).toHaveStyle({ width: "0%" });
-      expect(within(row).queryByRole("progressbar")).toBeNull();
+      const row = within(screen.getByTestId("outline-drawer-row"));
+      expect(row.getByTestId("completion-ring-track")).toBeInTheDocument();
+      expect(screen.queryByTestId("outline-meter-fill")).toBeNull();
     });
 
-    test("WHEN the row is expanded THEN the meter agrees with the marks it opens onto", async () => {
-      // The meter and the marks must never disagree: both count through
-      // `countsAsComplete`. Nothing but this test crosses the two, so a meter
+    test("WHEN nothing is complete THEN the track draws around the list icon and no reading is claimed", () => {
+      renderDrawer(makeCourseFixture({ lessonsPerModule: [4, 6] }));
+
+      const row = within(screen.getByTestId("outline-drawer-row"));
+      expect(row.getByTestId("outline-ring-icon")).toBeInTheDocument();
+      expect(row.queryByTestId("completion-ring-fill")).toBeNull();
+      expect(row.queryByTestId("outline-ring-percent")).toBeNull();
+      expect(row.queryByRole("progressbar")).toBeNull();
+    });
+
+    test("WHEN the row is expanded THEN the ring agrees with the marks it opens onto", async () => {
+      // The ring and the marks must never disagree: both count through
+      // `countsAsComplete`. Nothing but this test crosses the two, so a ring
       // that grew its own arithmetic would otherwise pass unnoticed.
       const user = userEvent.setup();
       const fixture = makeCourseFixture({ lessonsPerModule: [6, 4] });
@@ -218,7 +230,26 @@ describe("OutlineDrawer", () => {
       );
     });
 
-    test("WHEN the row renders before hydration THEN the fill is empty", () => {
+    test("WHEN a lesson is expanded THEN its row's reading agrees with the marks inside it", async () => {
+      const user = userEvent.setup();
+      const fixture = makeCourseFixture({ lessonsPerModule: [6, 4] });
+      const completedInFirstModule = fixture.lessons.slice(0, 4);
+      for (const lesson of completedInFirstModule) markCompleteInStorage(lesson.id);
+      announceStorageChange();
+      const { container } = renderDrawer(fixture);
+
+      await user.click(screen.getByTestId("outline-drawer-row"));
+
+      // The current lesson's module starts expanded, so its video rows are
+      // already on screen beside the reading.
+      const drawer = within(container.querySelector("details")!);
+      expect(drawer.getByRole("button", { name: "Consonants" })).toHaveAccessibleDescription(
+        "4 / 6 videos · 67%",
+      );
+      expect(drawer.getAllByTestId("lesson-completion-mark")).toHaveLength(4);
+    });
+
+    test("WHEN the row renders before hydration THEN the ring is empty", () => {
       isHydrated = false;
       const fixture = makeCourseFixture({ lessonsPerModule: [4, 6] });
       for (const lesson of fixture.lessons.slice(0, 5)) markCompleteInStorage(lesson.id);
@@ -226,10 +257,10 @@ describe("OutlineDrawer", () => {
 
       renderDrawer(fixture);
 
-      expect(screen.getByTestId("outline-meter-fill")).toHaveStyle({ width: "0%" });
-      expect(
-        within(screen.getByTestId("outline-drawer-row")).queryByRole("progressbar"),
-      ).toBeNull();
+      const row = within(screen.getByTestId("outline-drawer-row"));
+      expect(row.queryByTestId("completion-ring-fill")).toBeNull();
+      expect(row.getByTestId("outline-ring-icon")).toBeInTheDocument();
+      expect(row.queryByRole("progressbar")).toBeNull();
     });
   });
 
